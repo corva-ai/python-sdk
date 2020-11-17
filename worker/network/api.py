@@ -64,7 +64,7 @@ class Api:
         if path.startswith(self.api_url) or path.startswith(self.data_api_url):
             return path
 
-        if bool(re.search(r'v\d+/(data|message_producer)', path)):
+        if bool(re.search(r'api/v\d+/(data|message_producer)', path)):
             base_url = self.data_api_url
         else:
             base_url = self.api_url
