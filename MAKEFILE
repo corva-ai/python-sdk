@@ -1,11 +1,10 @@
 .PHONY: test flake8 clean_venv
 
-
 PYTHON = venv/bin/python3
-
+PROJECT = python-worker-public
 
 test: venv
-	${PYTHON} -m pytest tests
+	CACHE_URL=redis://localhost:6379 ${PYTHON} -m pytest tests
 
 flake8: venv
 	${PYTHON} -m flake8
@@ -19,3 +18,9 @@ venv/touchfile: requirements.txt
 
 clean_venv:
 	rm -rf venv
+
+run_redis:
+	docker run -p 6379:6379 --rm --name ${PROJECT}-redis -d redis:6.0.9-alpine
+
+rm_redis:
+	docker stop ${PROJECT}-redis
