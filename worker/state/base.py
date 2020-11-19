@@ -1,8 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import List
+from logging import Logger, LoggerAdapter
+from typing import List, Union
+
+from worker.logger import LOGGER
 
 
 class BaseState(ABC):
+    def __init__(self, logger: Union[Logger, LoggerAdapter] = LOGGER):
+        self.logger = logger
+
     @abstractmethod
     def load(self, state_key: str) -> dict:
         ...
