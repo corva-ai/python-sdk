@@ -42,11 +42,10 @@ class LogAdapter(LoggerAdapter):
 
     def process(self, msg, kwargs):
         message_parts = [
-            f'{field}:{self.extra[field]}     '
+            f'[{field}:{self.extra[field]}]'
             for field in self.extra_fields
             if field in self.extra
         ]
-        message_parts[-1] = f'{message_parts[-1].strip()}:     '
         message_parts.append(str(msg))
         message = ' '.join(message_parts)
         return message, kwargs
