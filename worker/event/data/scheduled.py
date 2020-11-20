@@ -10,8 +10,9 @@ class ScheduledEventData(BaseEventData):
     environment: str
     app: int
     app_key: str
-    app_version: Optional[str]
+    app_version: Optional[int]
     app_connection: int
+    app_stream: int
     source_type: str
     company: int
     provider: str
@@ -25,5 +26,6 @@ class ScheduledEventData(BaseEventData):
     asset_name: str
     asset_type: str
     timezone: str
+    log_type: Optional[str] = None
     log_identifier: Optional[str] = None
     day_shift_start: Optional[str] = None
