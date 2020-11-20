@@ -1,8 +1,7 @@
 from unittest.mock import patch
 
 from pytest import fixture
-from requests import HTTPError
-from requests import Response
+from requests import HTTPError, Response
 
 from worker.network.api import Api
 
