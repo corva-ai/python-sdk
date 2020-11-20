@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import pytest
 from pytest import fixture
 from requests import HTTPError, Response
 
@@ -24,10 +25,9 @@ def test_custom_request_exceptions(api):
     ]:
         response.status_code = status_code
         with patch.object(api.session, 'request', return_value=response):
-            try:
-                api.get('', n_retries=1, asset_id=asset_id)
-            except HTTPError as e:
-                assert str(e) == error_msg
+            with pytest.raises(HTTPError) as exc:
+                api.get('', max_retries=1, asset_id=asset_id)
+            assert str(exc.value) == error_msg
 
 
 def test_get_url(api):
