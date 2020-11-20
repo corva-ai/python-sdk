@@ -2,17 +2,12 @@ import os
 import re
 from dataclasses import dataclass, field
 
-from requests import Session, HTTPError
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from worker.exceptions import ApiError
-from worker.settings import (
-    API_ROOT_URL,
-    DATA_API_ROOT_URL,
-    API_KEY,
-    APP_NAME
-)
+from worker.settings import API_KEY, APP_NAME, API_ROOT_URL, DATA_API_ROOT_URL
 
 
 @dataclass(eq=False)
