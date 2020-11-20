@@ -4,8 +4,8 @@ from worker.event.data.base import BaseEventData
 
 
 class ScheduledEventData(BaseEventData):
-    type: str
-    collection: str
+    type: Optional[str] = None
+    collection: Optional[str] = None
     cron_string: str
     environment: str
     app: int
@@ -16,8 +16,8 @@ class ScheduledEventData(BaseEventData):
     source_type: str
     company: int
     provider: str
-    api_url: str
-    api_key: str
+    api_url: Optional[str] = None
+    api_key: Optional[str] = None
     schedule: int
     interval: int
     schedule_start: int

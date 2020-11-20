@@ -9,4 +9,4 @@ def test_load():
     with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
         event_str = scheduled_event.read()
     event = ScheduledEvent.load(event=event_str)
-    assert len(event) == 2
+    assert len(event) == 3
