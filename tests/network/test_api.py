@@ -1,10 +1,10 @@
 from unittest.mock import patch
 
+import pytest
 from pytest import fixture
-from requests import HTTPError
-from requests import Response
+from requests import HTTPError, Response
 
-from worker.network.api import Api
+from corva.network.api import Api
 
 
 @fixture
@@ -25,10 +25,9 @@ def test_custom_request_exceptions(api):
     ]:
         response.status_code = status_code
         with patch.object(api.session, 'request', return_value=response):
-            try:
-                api.get('', n_retries=1, asset_id=asset_id)
-            except HTTPError as e:
-                assert str(e) == error_msg
+            with pytest.raises(HTTPError) as exc:
+                api.get('', max_retries=1, asset_id=asset_id)
+            assert str(exc.value) == error_msg
 
 
 def test_get_url(api):
@@ -49,3 +48,10 @@ def test_get_url(api):
 
     path = 'api/v10/path'
     assert api._get_url(path=path) == f'{api.api_url}/{path}'
+
+
+def test_request_invalid_method(api):
+    method = 'random'
+    with pytest.raises(ValueError) as exc:
+        api._request(method=method, path='random')
+    assert str(exc.value) == f'Invalid HTTP method {method}.'
