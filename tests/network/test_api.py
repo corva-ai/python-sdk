@@ -4,7 +4,7 @@ import pytest
 from pytest import fixture
 from requests import HTTPError, Response
 
-from worker.network.api import Api
+from corva.network.api import Api
 
 
 @fixture

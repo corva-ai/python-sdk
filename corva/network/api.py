@@ -6,7 +6,7 @@ from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from worker.settings import API_KEY, APP_NAME, API_ROOT_URL, DATA_API_ROOT_URL
+from corva.settings import API_KEY, APP_NAME, API_ROOT_URL, DATA_API_ROOT_URL
 
 
 @dataclass(eq=False)
