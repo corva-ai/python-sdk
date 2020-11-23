@@ -1,4 +1,4 @@
-from worker.event.scheduled import ScheduledEvent
+from corva.event.scheduled import ScheduledEvent
 
 SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 

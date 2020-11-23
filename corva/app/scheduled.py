@@ -1,7 +1,7 @@
-from worker.app.base import BaseApp, ProcessResult
-from worker.event.base import BaseEvent
-from worker.event.data.scheduled import ScheduledEventData
-from worker.event.scheduled import ScheduledEvent
+from corva.app.base import BaseApp, ProcessResult
+from corva.event.base import BaseEvent
+from corva.event.data.scheduled import ScheduledEventData
+from corva.event.scheduled import ScheduledEvent
 
 
 class ScheduledApp(BaseApp):

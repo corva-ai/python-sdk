@@ -3,9 +3,9 @@ from __future__ import annotations
 from itertools import chain
 from typing import List
 
-from worker.constants import RAW_EVENT_TYPE
-from worker.event.base import BaseEvent
-from worker.event.data.scheduled import ScheduledEventData
+from corva.constants import RAW_EVENT_TYPE
+from corva.event.base import BaseEvent
+from corva.event.data.scheduled import ScheduledEventData
 
 
 class ScheduledEvent(BaseEvent):

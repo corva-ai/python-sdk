@@ -2,11 +2,11 @@ from types import SimpleNamespace
 from unittest.mock import call
 from unittest.mock import patch
 
-from worker.app.base import BaseApp
-from worker.app.base import ProcessResult
-from worker.app.scheduled import ScheduledApp
-from worker.event.data.base import BaseEventData
-from worker.event.scheduled import ScheduledEvent
+from corva.app.base import BaseApp
+from corva.app.base import ProcessResult
+from corva.app.scheduled import ScheduledApp
+from corva.event.data.base import BaseEventData
+from corva.event.scheduled import ScheduledEvent
 
 
 def test_post_process():

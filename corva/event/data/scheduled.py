@@ -1,6 +1,6 @@
 from typing import Optional
 
-from worker.event.data.base import BaseEventData
+from corva.event.data.base import BaseEventData
 
 
 class ScheduledEventData(BaseEventData):
