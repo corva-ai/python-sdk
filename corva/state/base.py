@@ -8,7 +8,7 @@ class BaseState(ABC):
         ...
 
     @abstractmethod
-    def save(self, state: dict, state_key: str) -> None:
+    def save(self, state: dict, state_key: str) -> bool:
         ...
 
     @abstractmethod
