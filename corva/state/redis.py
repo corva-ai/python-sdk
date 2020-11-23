@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from redis import Redis, ConnectionError
 
-from worker.settings import CACHE_URL
-from worker.state.base import BaseState
+from corva.settings import CACHE_URL
+from corva.state.base import BaseState
 
 
 class RedisState(BaseState):

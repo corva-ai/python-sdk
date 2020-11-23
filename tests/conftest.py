@@ -4,7 +4,7 @@ from unittest.mock import patch
 import fakeredis
 import pytest
 
-from worker.state.redis import RedisState
+from corva.state.redis import RedisState
 
 
 @pytest.fixture(scope='function')

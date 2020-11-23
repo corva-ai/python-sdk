@@ -6,7 +6,7 @@ import pytest
 from freezegun import freeze_time
 from redis import ConnectionError
 
-from worker.state.redis import RedisState
+from corva.state.redis import RedisState
 
 
 def test_connect(redis):
@@ -46,7 +46,7 @@ def test_save_expire(redis):
 
 def test_save_json_dumps_exc(redis):
     state = {}
-    with patch('worker.state.redis.json.dumps', side_effect=ValueError('')):
+    with patch('corva.state.redis.json.dumps', side_effect=ValueError('')):
         with pytest.raises(ValueError) as exc:
             redis.save(state={}, state_key='key')
         assert str(exc.value) == f'Could not cast state to json: {state}.'
