@@ -5,8 +5,8 @@ from abc import abstractmethod, ABC
 from collections import UserList
 from typing import List
 
-from worker.constants import RAW_EVENT_TYPE, EVENT_TYPE
-from worker.event.data.base import BaseEventData
+from corva.constants import RAW_EVENT_TYPE, EVENT_TYPE
+from corva.event.data.base import BaseEventData
 
 
 class BaseEvent(ABC, UserList):

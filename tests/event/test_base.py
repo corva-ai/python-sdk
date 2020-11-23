@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
-from worker.event.base import BaseEvent
-from worker.event.data.base import BaseEventData
+from corva.event.base import BaseEvent
+from corva.event.data.base import BaseEventData
 
 
 def test_load_empty_event():
@@ -23,7 +23,7 @@ def test_load_wrong_event_type():
 
 def test_load_invalid_json():
     event = '{}'
-    with patch('worker.event.base.json.loads', side_effect=json.JSONDecodeError('a', 'b', 0)):
+    with patch('corva.event.base.json.loads', side_effect=json.JSONDecodeError('a', 'b', 0)):
         with pytest.raises(ValueError) as exc:
             BaseEvent._load(event=event)
     assert str(exc.value) == 'Invalid event JSON'

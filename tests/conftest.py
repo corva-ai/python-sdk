@@ -8,7 +8,7 @@ from corva.event.base import BaseEvent
 from corva.state.redis import RedisState
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function', autouse=True)
 def mock_redis():
     server = fakeredis.FakeServer()
     redis = fakeredis.FakeRedis(server=server)
@@ -19,6 +19,7 @@ def mock_redis():
 @pytest.fixture(scope='function')
 def redis(mock_redis):
     return RedisState()
+
 
 @pytest.fixture(scope='function')
 def patch_base_event():

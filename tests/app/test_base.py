@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 import pytest
 
-from worker.app.base import BaseApp
-from worker.app.base import ProcessResult
-from worker.event.base import BaseEvent
-from worker.event.data.base import BaseEventData
+from corva.app.base import BaseApp
+from corva.app.base import ProcessResult
+from corva.event.base import BaseEvent
+from corva.event.data.base import BaseEventData
 
 
 class CustomException(Exception):

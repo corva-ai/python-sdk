@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from logging import Logger, LoggerAdapter
 from typing import List, Union
 
-from worker.logger import LOGGER
+from corva.logger import LOGGER
 
 
 class BaseState(ABC):
