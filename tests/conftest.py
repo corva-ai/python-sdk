@@ -10,6 +10,5 @@ def redis():
 
 @pytest.fixture(scope='function', autouse=True)
 def flush_redis(redis):
-    redis.redis.flushall()
     yield
     redis.redis.flushall()

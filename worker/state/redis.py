@@ -17,18 +17,23 @@ class RedisState(BaseState):
         redis = Redis.from_url(cache_url)
         try:
             redis.ping()
-        except ConnectionError as err:
-            raise ValueError(f'Could not connect to Redis with URL: {cache_url}') from err
+        except ConnectionError as exc:
+            raise ConnectionError(f'Could not connect to Redis with URL: {cache_url}') from exc
         return redis
 
     def load(self, state_key: str) -> dict:
         if self.redis.exists(state_key):
             return json.loads(self.redis.get(state_key))
-        else:
-            return {}
+
+        return {}
 
     def save(self, state: dict, state_key: str, px: Optional[int] = None) -> bool:
-        return self.redis.set(state_key, json.dumps(state), px=px)
+        try:
+            json_state = json.dumps(state)
+        except ValueError as exc:
+            raise ValueError(f'Could not cast state to json: {state}.') from exc
+
+        return self.redis.set(state_key, json_state, px=px)
 
     def delete(self, state_keys: List[str]) -> int:
         return self.redis.delete(*state_keys)
