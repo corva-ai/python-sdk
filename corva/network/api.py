@@ -2,17 +2,11 @@ import os
 import re
 from dataclasses import dataclass, field
 
-from requests import Session, HTTPError
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from worker.exceptions import ApiError
-from worker.settings import (
-    API_ROOT_URL,
-    DATA_API_ROOT_URL,
-    API_KEY,
-    APP_NAME
-)
+from corva.settings import API_KEY, APP_NAME, API_ROOT_URL, DATA_API_ROOT_URL
 
 
 @dataclass(eq=False)
@@ -20,7 +14,7 @@ class Api:
     HTTP_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
 
     timeout: int = 600  # seconds
-    n_retries: int = 3
+    max_retries: int = 3
     api_url: str = API_ROOT_URL
     data_api_url: str = DATA_API_ROOT_URL
     api_key: str = API_KEY
@@ -36,7 +30,7 @@ class Api:
             'https://',
             HTTPAdapter(
                 max_retries=Retry(
-                    total=self.n_retries,
+                    total=self.max_retries,
                     status_forcelist=[408, 429, 500, 502, 503, 504],
                     method_whitelist=list(self.HTTP_METHODS),
                     backoff_factor=0.3,
@@ -64,10 +58,12 @@ class Api:
         if path.startswith(self.api_url) or path.startswith(self.data_api_url):
             return path
 
+        # search text like api/v1/data or api/v1/message_producer in path
         if bool(re.search(r'api/v\d+/(data|message_producer)', path)):
             base_url = self.data_api_url
         else:
             base_url = self.api_url
+
         return os.path.join(base_url.strip('/'), path.strip('/'))
 
     def _request(
@@ -78,18 +74,18 @@ class Api:
             json=None,
             params=None,
             headers=None,
-            n_retries=None,
+            max_retries=None,
             timeout=None,
-            asset_id='Unknown',
+            asset_id=None,
     ):
         if method not in self.HTTP_METHODS:
-            raise ApiError(f'Invalid HTTP method {method}.')
+            raise ValueError(f'Invalid HTTP method {method}.')
 
-        n_retries = n_retries or self.n_retries
+        max_retries = max_retries or self.max_retries
         timeout = timeout or self.timeout
 
         # not thread safe
-        self.session.adapters['https://'].max_retries.total = n_retries
+        self.session.adapters['https://'].max_retries.total = max_retries
 
         response = self.session.request(
             method=method,
@@ -120,25 +116,11 @@ class Api:
                 json=json,
                 params=params,
                 headers=headers,
-                n_retries=n_retries,
+                max_retries=max_retries,
                 timeout=timeout,
                 asset_id=asset_id
             )
         )
-
-    # def get_by_id(self, path, **kwargs):
-    #     """
-    #     Get a document with the given kwargs ('collection', 'id')
-    #     :param path: API path
-    #     :param kwargs: 'collection' and 'id' kwargs are required
-    #     :return: a result object
-    #     """
-    #     collection = kwargs.pop('collection', None)
-    #     component_id = kwargs.pop('id', None)
-    #     path = '{0}{1}{2}/{3}'.format(self.api_url, path, collection, component_id)
-    #
-    #     result = self.get(path)
-    #     return result
 
 
 class Result:
@@ -149,8 +131,8 @@ class Result:
 
         try:
             self.data = response.json()
-        except Exception:
-            raise ApiError('Invalid API response')
+        except ValueError as exc:
+            raise ValueError('Invalid API response') from exc
 
     def __repr__(self):
         return repr(self.data)
@@ -164,10 +146,7 @@ class Result:
 
     @property
     def count(self):
-        if not self.data:
-            return 0
-        elif isinstance(self.data, (list, tuple)):
+        if isinstance(self.data, (list, set, tuple, dict)):
             return len(self.data)
-        elif isinstance(self.data, dict):
-            return 1
+
         return 0

@@ -2,7 +2,7 @@ from logging import LoggerAdapter, Formatter, getLogger
 from logging.config import dictConfig
 from time import gmtime
 
-from worker.settings import LOG_LEVEL
+from corva.settings import LOG_LEVEL
 
 
 class UtcFormatter(Formatter):

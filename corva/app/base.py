@@ -3,13 +3,13 @@ from dataclasses import dataclass, field
 from logging import Logger, LoggerAdapter
 from typing import Optional, Type, Union, Any, Dict
 
-from worker.constants import RAW_EVENT_TYPE
-from worker.event.base import BaseEvent
-from worker.logger import LOGGER
-from worker.network.api import Api
-from worker.settings import APP_KEY
-from worker.state.base import BaseState
-from worker.state.redis import RedisState
+from corva.constants import RAW_EVENT_TYPE
+from corva.event.base import BaseEvent
+from corva.logger import LOGGER
+from corva.network.api import Api
+from corva.settings import APP_KEY
+from corva.state.base import BaseState
+from corva.state.redis import RedisState
 
 
 @dataclass(frozen=True)

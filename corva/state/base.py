@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from logging import Logger, LoggerAdapter
 from typing import List, Union
 
-from worker.logger import LOGGER
+from corva.logger import LOGGER
 
 
 class BaseState(ABC):
@@ -14,7 +14,7 @@ class BaseState(ABC):
         ...
 
     @abstractmethod
-    def save(self, state: dict, state_key: str) -> None:
+    def save(self, state: dict, state_key: str) -> bool:
         ...
 
     @abstractmethod

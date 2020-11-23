@@ -1,21 +1,24 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
+import fakeredis
 import pytest
 
-from worker.event.base import BaseEvent
-from worker.state.redis import RedisState
-
-
-@pytest.fixture(scope='function')
-def redis():
-    return RedisState()
+from corva.event.base import BaseEvent
+from corva.state.redis import RedisState
 
 
 @pytest.fixture(scope='function', autouse=True)
-def flush_redis(redis):
-    redis.redis.flushall()
-    yield
-    redis.redis.flushall()
+def mock_redis():
+    server = fakeredis.FakeServer()
+    redis = fakeredis.FakeRedis(server=server)
+    with patch('redis.client.Redis.from_url', return_value=redis):
+        yield SimpleNamespace(server=server, redis=redis)
+
+
+@pytest.fixture(scope='function')
+def redis(mock_redis):
+    return RedisState()
 
 
 @pytest.fixture(scope='function')
