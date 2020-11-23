@@ -1,22 +1,25 @@
 import json
-import time
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+from freezegun import freeze_time
 from redis import ConnectionError
 
 from worker.state.redis import RedisState
 
 
-def test_connect():
-    redis = RedisState()
+def test_connect(redis):
     assert redis.redis.ping()
 
 
-def test_connect_exc():
+def test_connect_exc(mock_redis):
+    mock_redis.server.connected = False
+
     fake_cache_url = 'redis://random:6379'
+
     with pytest.raises(ConnectionError) as exc:
-        RedisState(cache_url='redis://random:6379')
+        RedisState(cache_url=fake_cache_url)
     assert str(exc.value) == f'Could not connect to Redis with URL: {fake_cache_url}'
 
 
@@ -29,22 +32,24 @@ def test_save(redis):
     assert redis.save(state=int(), state_key='random')
 
 
+def test_save_expire(redis):
+    with freeze_time('2020') as frozen_time:
+        now = datetime.utcnow()
+        key = 'key'
+        px = 1
+        assert redis.save(state={}, state_key=key, px=px)
+        frozen_time.move_to(now + timedelta(milliseconds=px))
+        assert redis.redis.exists(key)
+        frozen_time.move_to(now + timedelta(milliseconds=px + 1))
+        assert not redis.redis.exists(key)
+
+
 def test_save_json_dumps_exc(redis):
     state = {}
     with patch('worker.state.redis.json.dumps', side_effect=ValueError('')):
         with pytest.raises(ValueError) as exc:
             redis.save(state={}, state_key='key')
         assert str(exc.value) == f'Could not cast state to json: {state}.'
-
-
-def test_save_expire(redis):
-    key = 'key'
-    save_state = {'key1': {'nested1': {'nested2': ''}}}
-    px = 10
-    assert redis.save(state=save_state, state_key=key, px=px)
-    assert redis.redis.exists(key)
-    time.sleep((px + 1) / 1000)
-    assert not redis.redis.exists(key)
 
 
 def test_load(redis):
