@@ -26,6 +26,6 @@ class ScheduledEventData(BaseEventData):
     asset_name: str
     asset_type: str
     timezone: str
-    log_type: str = None
+    log_type: str
     log_identifier: Optional[str] = None
     day_shift_start: Optional[str] = None
