@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -10,16 +9,10 @@ from corva.event.data.base import BaseEventData
 
 
 class CustomException(Exception):
+    """Exception class that supports equality comparisons."""
+
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
-
-
-@pytest.fixture(scope='function')
-def patch_base_app():
-    with patch.object(BaseApp, '__abstractmethods__', set()), \
-         patch.object(BaseApp, 'event_cls') as event_cls_mock:
-        event_cls_mock.load.side_effect = lambda event: event
-        yield SimpleNamespace(event_cls_mock=event_cls_mock)
 
 
 def test_abstractmethods():
@@ -77,9 +70,9 @@ def test_run_correct_params(patch_base_app, patch_base_event):
     )
 
     with patch.object(base, 'pre_process', return_value=pre_process_result) as pre_process, \
-            patch.object(base, 'process', return_value=process_result) as process, \
-            patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
-            patch.object(base, 'post_process') as post_process:
+         patch.object(base, 'process', return_value=process_result) as process, \
+         patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
+         patch.object(base, 'post_process') as post_process:
         base.run(
             event=event,
             pre_process_kwargs=pre_process_kwargs,
@@ -105,9 +98,9 @@ def test_run_exc_in_pre_process(patch_base_app):
     on_fail_before_post_process_kwargs = {'fail_key_1': 'fail_val_1'}
 
     with patch.object(base, 'pre_process', side_effect=CustomException('')) as pre_process, \
-            patch.object(base, 'process') as process, \
-            patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
-            patch.object(base, 'post_process') as post_process:
+         patch.object(base, 'process') as process, \
+         patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
+         patch.object(base, 'post_process') as post_process:
         with pytest.raises(CustomException) as exc:
             base.run(
                 event=event,
@@ -129,9 +122,9 @@ def test_run_exc_in_process(patch_base_app, patch_base_event):
     pre_process_result = ProcessResult(event=BaseEvent([]))
 
     with patch.object(base, 'pre_process', return_value=pre_process_result) as pre_process, \
-            patch.object(base, 'process', side_effect=CustomException('')) as process, \
-            patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
-            patch.object(base, 'post_process') as post_process:
+         patch.object(base, 'process', side_effect=CustomException('')) as process, \
+         patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
+         patch.object(base, 'post_process') as post_process:
         with pytest.raises(CustomException) as exc:
             base.run(
                 event=event,
@@ -154,9 +147,9 @@ def test_run(patch_base_app, patch_base_event):
     process_result = ProcessResult(event=BaseEvent([]))
 
     with patch.object(base, 'pre_process', return_value=pre_process_result) as pre_process, \
-            patch.object(base, 'process', return_value=process_result) as process, \
-            patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
-            patch.object(base, 'post_process') as post_process:
+         patch.object(base, 'process', return_value=process_result) as process, \
+         patch.object(base, 'on_fail_before_post_process') as on_fail_before_post_process, \
+         patch.object(base, 'post_process') as post_process:
         base.run(event=event)
         assert pre_process.call_count == 1
         assert process.call_count == 1

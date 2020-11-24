@@ -23,7 +23,7 @@ def test_load_wrong_event_type():
 
 def test_load_invalid_json():
     event = '{}'
-    with patch('corva.event.base.json.loads', side_effect=json.JSONDecodeError('a', 'b', 0)):
+    with patch('corva.event.base.json.loads', side_effect=ValueError):
         with pytest.raises(ValueError) as exc:
             BaseEvent._load(event=event)
     assert str(exc.value) == 'Invalid event JSON'

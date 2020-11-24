@@ -28,19 +28,22 @@ class BaseEvent(ABC, UserList):
         if not event:
             raise ValueError('Empty event')
 
-        if isinstance(event, (str, bytes, bytearray)):
-            try:
-                event = json.loads(event)
-            except json.JSONDecodeError as error:
-                raise ValueError('Invalid event JSON') from error
-        else:
+        if not isinstance(event, (str, bytes, bytearray)):
             raise TypeError(f'Unknown event type {type(event)}')
+
+        try:
+            event = json.loads(event)
+        except ValueError as exc:
+            raise ValueError('Invalid event JSON') from exc
 
         return event
 
     def __eq__(self, other):
         return (
-                super().__eq__(other)
-                and
-                all(type(s) == type(o) for s, o in zip(self, other))
+            super().__eq__(other)
+            and
+            all(
+                type(self_value) == type(other_value)
+                for self_value, other_value in zip(self, other)
+            )
         )
