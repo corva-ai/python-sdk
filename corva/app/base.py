@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from logging import Logger, LoggerAdapter
 from typing import Optional, Type, Union, Any, Dict
 
-from corva.constants import RAW_EVENT_TYPE
 from corva.event.base import BaseEvent
 from corva.logger import LOGGER
 from corva.network.api import Api
@@ -20,12 +19,12 @@ class ProcessResult:
 
 class BaseApp(ABC):
     def __init__(
-            self,
-            app_key: str = APP_KEY,
-            provider: str = 'corva',
-            api: Optional[Api] = None,
-            state: Optional[BaseState] = None,
-            logger: Union[Logger, LoggerAdapter] = LOGGER
+         self,
+         app_key: str = APP_KEY,
+         provider: str = 'corva',
+         api: Optional[Api] = None,
+         state: Optional[BaseState] = None,
+         logger: Union[Logger, LoggerAdapter] = LOGGER
     ):
         self.app_key = app_key
         self.provider = provider
@@ -44,12 +43,12 @@ class BaseApp(ABC):
         return state_key
 
     def run(
-            self,
-            event: RAW_EVENT_TYPE,
-            pre_process_kwargs: Optional[dict] = None,
-            process_kwargs: Optional[dict] = None,
-            post_process_kwargs: Optional[dict] = None,
-            on_fail_before_post_process_kwargs: Optional[dict] = None
+         self,
+         event: str,
+         pre_process_kwargs: Optional[dict] = None,
+         process_kwargs: Optional[dict] = None,
+         post_process_kwargs: Optional[dict] = None,
+         on_fail_before_post_process_kwargs: Optional[dict] = None
     ):
         pre_process_kwargs = pre_process_kwargs or {}
         process_kwargs = process_kwargs or {}
@@ -75,7 +74,7 @@ class BaseApp(ABC):
             }
         )
 
-    def pre_process(self, event: RAW_EVENT_TYPE, load_kwargs: Optional[dict] = None, **kwargs) -> ProcessResult:
+    def pre_process(self, event: str, load_kwargs: Optional[dict] = None, **kwargs) -> ProcessResult:
         load_kwargs = load_kwargs or {}
         event = self.event_cls.load(event=event, **load_kwargs)
         return ProcessResult(event=event)
@@ -86,7 +85,7 @@ class BaseApp(ABC):
     def post_process(self, event: BaseEvent, **kwargs) -> ProcessResult:
         return ProcessResult(event=event)
 
-    def on_fail_before_post_process(self, event: Union[RAW_EVENT_TYPE, BaseEvent], **kwargs) -> None:
+    def on_fail_before_post_process(self, event: Union[str, BaseEvent], **kwargs) -> None:
         ...
 
     def fetch_asset_settings(self, asset_id: int):

@@ -32,13 +32,8 @@ def test_load_invalid_json():
 def test_load():
     event = {'key1': 'val1'}
 
-    for e in [
-        json.dumps(event),
-        json.dumps(event).encode(),
-        bytearray(json.dumps(event).encode())
-    ]:
-        loaded = BaseEvent._load(event=e)
-        assert loaded == event
+    loaded = BaseEvent._load(event=json.dumps(event))
+    assert loaded == event
 
 
 def test_iter(patch_base_event):
