@@ -13,8 +13,8 @@ def test_connect(redis):
     assert redis.redis.ping()
 
 
-def test_connect_exc(mock_redis):
-    mock_redis.server.connected = False
+def test_connect_exc(patch_redis):
+    patch_redis.server.connected = False
 
     fake_cache_url = 'redis://random:6379'
 

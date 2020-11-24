@@ -9,7 +9,7 @@ API_KEY: Final[str] = getenv('API_KEY')
 
 # Logger
 LOG_LEVEL: Final[str] = getenv('LOG_LEVEL', 'WARN')
-LOG_ASSET_ID: Final[int] = getenv('LOG_ASSET_ID', -1)
+LOG_ASSET_ID: Final[int] = int(getenv('LOG_ASSET_ID', -1))
 
 # Storage
 CACHE_URL: Final[str] = getenv('CACHE_URL')
