@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
 
-from corva.constants import VALUE_TYPE
+from corva.constants import REDIS_STORED_VALUE_TYPE
 from corva.settings import CACHE_URL
 
 
@@ -22,8 +22,8 @@ class CustomRedis(Redis):
          self,
          name: Optional[str] = None,
          key: Optional[str] = None,
-         value: Optional[VALUE_TYPE] = None,
-         mapping: Optional[Dict[str, VALUE_TYPE]] = None,
+         value: Optional[REDIS_STORED_VALUE_TYPE] = None,
+         mapping: Optional[Dict[str, REDIS_STORED_VALUE_TYPE]] = None,
          expiry: Union[int, timedelta, None] = DEFAULT_EXPIRY
     ) -> int:
         name = name or self.default_name
@@ -38,11 +38,11 @@ class CustomRedis(Redis):
 
         return n_set
 
-    def hget(self, key, name: Optional[str] = None) -> VALUE_TYPE:
+    def hget(self, key, name: Optional[str] = None) -> REDIS_STORED_VALUE_TYPE:
         name = name or self.default_name
         return super().hget(name=name, key=key)
 
-    def hgetall(self, name: Optional[str] = None) -> Dict[str, VALUE_TYPE]:
+    def hgetall(self, name: Optional[str] = None) -> Dict[str, REDIS_STORED_VALUE_TYPE]:
         name = name or self.default_name
         return super().hgetall(name=name)
 
