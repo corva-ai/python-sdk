@@ -1,39 +1,35 @@
-import json
-from typing import List, Optional
+from datetime import timedelta
+from typing import Dict, Optional, Union
 
-from redis import Redis, ConnectionError
+from redis import Redis, ConnectionError, from_url
 
 from corva.settings import CACHE_URL
-from corva.state.base import BaseState
 
 
-class RedisState(BaseState):
+class RedisState(Redis):
+    DEFAULT_EXPIRY: timedelta = timedelta(days=60)
+
     def __init__(self, cache_url: str = CACHE_URL, **kwargs):
-        super().__init__(**kwargs)
-        self.redis: Redis = self._connect(cache_url=cache_url)
-
-    @staticmethod
-    def _connect(cache_url: str) -> Redis:
-        redis = Redis.from_url(cache_url)
+        super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
         try:
-            redis.ping()
+            self.ping()
         except ConnectionError as exc:
             raise ConnectionError(f'Could not connect to Redis with URL: {cache_url}') from exc
-        return redis
 
-    def load(self, state_key: str) -> dict:
-        if self.redis.exists(state_key):
-            return json.loads(self.redis.get(state_key))
+    def hset(
+         self,
+         name: str,
+         key: Optional[str] = None,
+         value: Optional[Union[bytes, str, int, float]] = None,
+         mapping: Optional[Dict[str, Union[bytes, str, int, float]]] = None,
+         expiry: Union[int, timedelta, None] = DEFAULT_EXPIRY
+    ) -> int:
+        n_set = super().hset(name=name, key=key, value=value, mapping=mapping)
 
-        return {}
+        if expiry is None and self.pttl(name=name) > 0:
+            self.persist(name=name)
 
-    def save(self, state: dict, state_key: str, px: Optional[int] = None) -> bool:
-        try:
-            json_state = json.dumps(state)
-        except ValueError as exc:
-            raise ValueError(f'Could not cast state to json: {state}.') from exc
+        if expiry is not None:
+            self.expire(name=name, time=expiry)
 
-        return self.redis.set(state_key, json_state, px=px)
-
-    def delete(self, state_keys: List[str]) -> int:
-        return self.redis.delete(*state_keys)
+        return n_set
