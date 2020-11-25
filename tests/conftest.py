@@ -26,6 +26,4 @@ def patch_redis():
 
 @pytest.fixture(scope='function')
 def redis(patch_redis):
-    return RedisState(
-        cache_url='redis://random:6379'
-    )
+    return RedisState(cache_url='redis://random:6379')
