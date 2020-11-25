@@ -7,7 +7,6 @@ from corva.event.base import BaseEvent
 from corva.logger import LOGGER
 from corva.network.api import Api
 from corva.settings import APP_KEY
-from corva.state.base import BaseState
 from corva.state.redis import RedisState
 
 
@@ -23,7 +22,7 @@ class BaseApp(ABC):
          app_key: str = APP_KEY,
          provider: str = 'corva',
          api: Optional[Api] = None,
-         state: Optional[BaseState] = None,
+         state: Optional[RedisState] = None,
          logger: Union[Logger, LoggerAdapter] = LOGGER
     ):
         self.app_key = app_key

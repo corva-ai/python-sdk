@@ -9,19 +9,23 @@ from corva.event.base import BaseEvent
 from corva.state.redis import RedisState
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function', autouse=True)
 def patch_redis():
     """Patches RedisState
 
     1. patches RedisState.__bases__ to use FakeRedis instead of Redis
     2. patches redis.from_url with FakeRedis.from_url
+    3. patches default cache_url
     """
 
     redis_path = 'corva.state.redis'
 
     redis_state_patcher = patch(f'{redis_path}.RedisState.__bases__', (FakeRedis,))
+    init_defaults = list(RedisState.__init__.__defaults__)
+    init_defaults[0] = 'redis://localhost:6379'
     with redis_state_patcher, \
-         patch(f'{redis_path}.from_url', side_effect=FakeRedis.from_url):
+         patch(f'{redis_path}.from_url', side_effect=FakeRedis.from_url), \
+         patch(f'{redis_path}.RedisState.__init__.__defaults__', tuple(init_defaults)):
         # necessary to stop mock.patch from trying to call delattr when reversing the patch
         redis_state_patcher.is_local = True
         yield
@@ -29,7 +33,7 @@ def patch_redis():
 
 @pytest.fixture(scope='function')
 def redis(patch_redis):
-    return RedisState(cache_url='redis://random:6379')
+    return RedisState()
 
 
 @pytest.fixture(scope='function')

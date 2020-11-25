@@ -1,16 +1,19 @@
 from datetime import timedelta
+from logging import Logger, LoggerAdapter
 from typing import Dict, Optional, Union
 
 from redis import Redis, ConnectionError, from_url
 
+from corva.logger import LOGGER
 from corva.settings import CACHE_URL
 
 
 class RedisState(Redis):
     DEFAULT_EXPIRY: timedelta = timedelta(days=60)
 
-    def __init__(self, cache_url: str = CACHE_URL, **kwargs):
+    def __init__(self, cache_url: str = CACHE_URL, logger: Union[Logger, LoggerAdapter] = LOGGER, **kwargs):
         super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
+        self.logger = logger
         try:
             self.ping()
         except ConnectionError as exc:
