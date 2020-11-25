@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 from fakeredis import FakeServer
 from freezegun import freeze_time
@@ -54,3 +56,16 @@ def test_hset_expiry_disable(redis):
 
         redis.hset(name=name, key=key, value=value, expiry=None)
         assert redis.ttl(name=name) == -1
+
+
+def test_hset_expiry(redis):
+    name = 'name'
+    key = 'key'
+    value = 'val'
+    with freeze_time('2020') as frozen_time:
+        now = datetime.utcnow()
+        redis.hset(name=name, key=key, value=value, expiry=5)
+        frozen_time.move_to(now + timedelta(seconds=5))
+        assert redis.exists(name)
+        frozen_time.move_to(now + timedelta(seconds=5, microseconds=1))
+        assert not redis.exists(name)
