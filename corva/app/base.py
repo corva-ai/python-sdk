@@ -7,8 +7,8 @@ from corva.event.base import BaseEvent
 from corva.logger import LOGGER
 from corva.network.api import Api
 from corva.settings import APP_KEY
-from corva.state.base import BaseState
-from corva.state.redis import RedisState
+from corva.state.redis_adapter import RedisAdapter
+from corva.state.redis_state import RedisState
 
 
 @dataclass(frozen=True)
@@ -21,26 +21,25 @@ class BaseApp(ABC):
     def __init__(
          self,
          app_key: str = APP_KEY,
-         provider: str = 'corva',
          api: Optional[Api] = None,
-         state: Optional[BaseState] = None,
+         state: Optional[RedisState] = None,
+         event: Optional[str] = None,
          logger: Union[Logger, LoggerAdapter] = LOGGER
     ):
         self.app_key = app_key
-        self.provider = provider
         self.api = api or Api()
-        self.state = state or RedisState(logger=logger)
+        self.state = state or RedisState(
+            redis=RedisAdapter(
+                default_name=self.event_cls.get_state_key(event=event, app_key=app_key)
+            ),
+            logger=logger
+        )
         self.logger = logger
 
     @property
     @abstractmethod
     def event_cls(self) -> Type[BaseEvent]:
-        ...
-
-    @staticmethod
-    def get_state_key(provider: str, asset_id: int, app_key: str):
-        state_key = f'{provider}/{app_key}.{asset_id}'
-        return state_key
+        pass
 
     def run(
          self,
@@ -86,7 +85,7 @@ class BaseApp(ABC):
         return ProcessResult(event=event)
 
     def on_fail_before_post_process(self, event: Union[str, BaseEvent], **kwargs) -> None:
-        ...
+        pass
 
     def fetch_asset_settings(self, asset_id: int):
         pass
