@@ -1,12 +1,8 @@
 from corva.event.scheduled import ScheduledEvent
 
-SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 
-
-def test_load():
+def test_load(scheduled_event_str):
     """test that sample scheduled event loaded without exceptions"""
 
-    with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
-        event_str = scheduled_event.read()
-    event = ScheduledEvent.load(event=event_str)
+    event = ScheduledEvent.load(event=scheduled_event_str)
     assert len(event) == 3
