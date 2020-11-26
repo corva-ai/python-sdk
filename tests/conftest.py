@@ -6,11 +6,13 @@ from fakeredis import FakeRedis
 
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
+from corva.constants import STREAM_EVENT_TYPE
 from corva.event.base import BaseEvent
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
+STREAM_EVENT_FILE_PATH = 'data/tests/stream_event.json'
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -77,3 +79,14 @@ def scheduled_app(redis):
 def scheduled_event_str() -> str:
     with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
         return scheduled_event.read()
+
+
+@pytest.fixture(scope='session')
+def stream_event_str() -> str:
+    with open(STREAM_EVENT_FILE_PATH) as stream_event:
+        return stream_event.read()
+
+
+@pytest.fixture(scope='function')
+def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
+    return BaseEvent._load(event=stream_event_str)
