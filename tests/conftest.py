@@ -5,6 +5,7 @@ import pytest
 from fakeredis import FakeRedis
 
 from corva.app.base import BaseApp
+from corva.app.scheduled import ScheduledApp
 from corva.event.base import BaseEvent
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -65,6 +66,11 @@ def patch_base_app():
 @pytest.fixture(scope='function')
 def base_app(patch_base_app, redis):
     return BaseApp(state=redis)
+
+
+@pytest.fixture(scope='function')
+def scheduled_app(redis):
+    return ScheduledApp(state=redis)
 
 
 @pytest.fixture(scope='session')
