@@ -10,7 +10,7 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function', autouse=True)
 def patch_redis_adapter():
     """Patches RedisAdapter
 
@@ -24,7 +24,7 @@ def patch_redis_adapter():
     redis_adapter_patcher = patch(f'{redis_adapter_path}.RedisAdapter.__bases__', (FakeRedis,))
 
     init_defaults = list(RedisAdapter.__init__.__defaults__)
-    init_defaults[1] = 'redis://localhost:6379'
+    init_defaults[0] = 'redis://localhost:6379'
 
     with redis_adapter_patcher, \
          patch(f'{redis_adapter_path}.from_url', side_effect=FakeRedis.from_url), \
@@ -36,7 +36,7 @@ def patch_redis_adapter():
 
 @pytest.fixture(scope='function')
 def redis_adapter(patch_redis_adapter):
-    return RedisAdapter(default_name='default_name', cache_url='redis://random:6379', decode_responses=True)
+    return RedisAdapter(default_name='default_name', decode_responses=True)
 
 
 @pytest.fixture(scope='function')
@@ -58,3 +58,8 @@ def patch_base_app():
          patch.object(BaseApp, 'event_cls') as event_cls_mock:
         event_cls_mock.load.side_effect = lambda event: event
         yield SimpleNamespace(event_cls_mock=event_cls_mock)
+
+
+@pytest.fixture(scope='function')
+def base_app(patch_base_app, redis):
+    return BaseApp(state=redis)

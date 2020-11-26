@@ -1,3 +1,7 @@
+from logging import Logger, LoggerAdapter
+from typing import Union
+
+from corva.logger import LOGGER
 from corva.state.redis_adapter import RedisAdapter
 
 
@@ -8,8 +12,9 @@ class RedisState:
     This class provides and interface save, load and do other operation with data in redis cache.
     """
 
-    def __init__(self, redis: RedisAdapter):
+    def __init__(self, redis: RedisAdapter, logger: Union[Logger, LoggerAdapter] = LOGGER):
         self.redis = redis
+        self.logger = logger
 
     def store(self, **kwargs):
         return self.redis.hset(**kwargs)
