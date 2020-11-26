@@ -7,8 +7,7 @@ from typing import List
 
 from corva.constants import EVENT_TYPE
 from corva.event.data.base import BaseEventData
-from corva.settings import APP_KEY
-from corva.utils import get_provider
+from corva.utils import get_state_key
 
 
 class BaseEvent(ABC, UserList):
@@ -41,14 +40,17 @@ class BaseEvent(ABC, UserList):
         return event
 
     @classmethod
-    def get_state_key(cls, event: str, app_key=APP_KEY):
+    def get_state_key(cls, event: str, app_key):
         event = cls.load(event=event, app_key=app_key)
-        provider = get_provider(app_key=app_key)
         asset_id = event[0].asset_id
         app_stream_id = event[0].app_stream_id
         app_connection_id = event[0].app_connection_id
-        state_key = f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
-        return state_key
+        return get_state_key(
+            asset_id=asset_id,
+            app_stream_id=app_stream_id,
+            app_key=app_key,
+            app_connection_id=app_connection_id
+        )
 
     def __eq__(self, other):
         return (

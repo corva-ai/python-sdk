@@ -87,8 +87,6 @@ def test_abstractmethods():
 
 
 def test_get_state_key(patch_base_event):
-    base_event_path = 'corva.event.base'
-
     provider = 'provider'
     app_key = f'{provider}.app-key'
     asset_id = 1
@@ -99,7 +97,6 @@ def test_get_state_key(patch_base_event):
         data=[BaseEventData(asset_id=asset_id, app_stream_id=app_stream_id, app_connection_id=app_connection_id)]
     )
 
-    with patch.object(BaseEvent, 'load', return_value=event), \
-         patch(f'{base_event_path}.get_provider', return_value=provider):
+    with patch.object(BaseEvent, 'load', return_value=event):
         state_key = BaseEvent.get_state_key(event='', app_key=app_key)
         assert state_key == f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
