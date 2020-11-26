@@ -21,21 +21,6 @@ class BaseEvent(ABC, UserList):
         pass
 
     @classmethod
-    @abstractmethod
-    def get_asset_id(cls, event: EVENT_TYPE) -> int:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def get_app_stream_id(cls, event: EVENT_TYPE) -> int:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def get_app_connection_id(cls, event: EVENT_TYPE) -> int:
-        pass
-
-    @classmethod
     def _load(cls, event: str) -> EVENT_TYPE:
         event = cls._load_json(event=event)
         return event
@@ -57,11 +42,11 @@ class BaseEvent(ABC, UserList):
 
     @classmethod
     def get_state_key(cls, event: str, app_key=APP_KEY):
-        event = cls._load(event=event)
+        event = cls.load(event=event, app_key=app_key)
         provider = get_provider(app_key=app_key)
-        asset_id = cls.get_asset_id(event=event)
-        app_stream_id = cls.get_app_stream_id(event=event)
-        app_connection_id = cls.get_app_connection_id(event=event)
+        asset_id = event[0].asset_id
+        app_stream_id = event[0].app_stream_id
+        app_connection_id = event[0].app_connection_id
         state_key = f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
         return state_key
 
