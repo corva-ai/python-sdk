@@ -11,8 +11,8 @@ class ScheduledEventData(BaseEventData):
     app: int
     app_key: str
     app_version: Optional[int]
-    app_connection: int
-    app_stream: int
+    app_connection_id: int
+    app_stream_id: int
     source_type: str
     company: int
     provider: str

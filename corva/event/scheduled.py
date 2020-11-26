@@ -17,6 +17,8 @@ class ScheduledEvent(BaseEvent):
         for subdata in event:
             subdata['schedule_start'] /= 1000  # from ms to seconds
             subdata['schedule_end'] /= 1000  # from ms to seconds
+            subdata['app_connection_id'] = subdata.pop('app_connection')
+            subdata['app_stream_id'] = subdata.pop('app_stream')
             data.append(ScheduledEventData(**subdata))
 
         return ScheduledEvent(data=data)
