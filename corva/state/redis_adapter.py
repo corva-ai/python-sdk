@@ -7,7 +7,7 @@ from corva.constants import REDIS_STORED_VALUE_TYPE
 from corva.settings import CACHE_URL
 
 
-class CustomRedis(Redis):
+class RedisAdapter(Redis):
     DEFAULT_EXPIRY: timedelta = timedelta(days=60)
 
     def __init__(self, default_name: str, cache_url: str = CACHE_URL, **kwargs):
@@ -38,7 +38,7 @@ class CustomRedis(Redis):
 
         return n_set
 
-    def hget(self, key, name: Optional[str] = None) -> REDIS_STORED_VALUE_TYPE:
+    def hget(self, key: str, name: Optional[str] = None) -> REDIS_STORED_VALUE_TYPE:
         name = name or self.default_name
         return super().hget(name=name, key=key)
 
@@ -50,7 +50,7 @@ class CustomRedis(Redis):
         name = name or self.default_name
         return super().hdel(name, *keys)
 
-    def delete(self, *names) -> int:
+    def delete(self, *names: List[str]) -> int:
         names = names or [self.default_name]
         return super().delete(*names)
 
@@ -62,6 +62,6 @@ class CustomRedis(Redis):
         name = name or self.default_name
         return super().pttl(name=name)
 
-    def exists(self, *names) -> int:
+    def exists(self, *names: List[str]) -> int:
         names = names or [self.default_name]
         return super().exists(*names)
