@@ -42,10 +42,11 @@ def test_hset_mapping_and_hgetall(redis_adapter, name):
 
 @pytest.mark.parametrize('name', (None, NAME))
 def test_hdel_and_exists(redis_adapter, name):
-    if name is None:
-        exists = lambda: redis_adapter.exists()
-    else:
-        exists = lambda: redis_adapter.exists(name)
+    def exists():
+        if name is None:
+            return redis_adapter.exists()
+        else:
+            return redis_adapter.exists(name)
 
     assert redis_adapter.hset(name=name, key=KEY, value=VAL) == 1
     assert exists()
@@ -55,12 +56,17 @@ def test_hdel_and_exists(redis_adapter, name):
 
 @pytest.mark.parametrize('name', (None, NAME))
 def test_delete_and_exists(redis_adapter, name):
-    if name is None:
-        exists = lambda: redis_adapter.exists()
-        delete = lambda: redis_adapter.delete()
-    else:
-        exists = lambda: redis_adapter.exists(name)
-        delete = lambda: redis_adapter.delete(name)
+    def exists():
+        if name is None:
+            return redis_adapter.exists()
+        else:
+            return redis_adapter.exists(name)
+
+    def delete():
+        if name is None:
+            return redis_adapter.delete()
+        else:
+            return redis_adapter.delete(name)
 
     assert redis_adapter.hset(name=name, key=KEY, value=VAL) == 1
     assert exists()
