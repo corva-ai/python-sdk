@@ -9,6 +9,7 @@ from corva.event.base import BaseEvent
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
+APP_KEY = 'provider.app-name'
 SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 
 
@@ -74,12 +75,12 @@ def patch_base_app(patch_base_event):
 
 @pytest.fixture(scope='function')
 def base_app(patch_base_app):
-    return BaseApp(app_key='provider.app-name')
+    return BaseApp(app_key=APP_KEY)
 
 
 @pytest.fixture(scope='function')
 def scheduled_app(redis):
-    return ScheduledApp(state=redis)
+    return ScheduledApp(app_key=APP_KEY)
 
 
 @pytest.fixture(scope='session')

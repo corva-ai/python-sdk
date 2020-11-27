@@ -12,7 +12,7 @@ def test_post_process(scheduled_app):
     event = ScheduledEvent(data=[BaseEventData(schedule=1), BaseEventData(schedule=2)])
     with patch.object(BaseApp, 'post_process', return_value=SimpleNamespace(event=event)) as post_process, \
          patch.object(scheduled_app, 'update_schedule_status') as update_schedule_status:
-        post_result = scheduled_app.post_process(event=event)
+        post_result = scheduled_app.post_process(event=event, state='')
         post_process.assert_called_once()
         assert update_schedule_status.call_count == len(event)
         update_schedule_status.assert_has_calls(
