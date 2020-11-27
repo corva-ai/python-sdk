@@ -56,6 +56,16 @@ def test__get_states(base_app):
         assert state.redis.default_name == expected_default_name
 
 
+def test_run_load_params(base_app):
+    event = 'event'
+    for load_kwargs in [{'key1': 'val1'}, None]:
+        with patch.object(base_app.event_cls, 'load', side_effect=Exception) as load_mock, \
+             pytest.raises(Exception):
+            base_app.run(event=event, load_kwargs=load_kwargs)
+        load_kwargs = load_kwargs or {}
+        load_mock.assert_called_once_with(event=event, **load_kwargs)
+
+
 def test_run_exception(base_app):
     for object_, func_name in [
         (base_app.event_cls, 'load'),
