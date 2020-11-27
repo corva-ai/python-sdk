@@ -6,17 +6,6 @@ from corva.event.base import BaseEvent
 from corva.event.stream import StreamEvent
 
 
-def test_get_state_key(stream_event_str):
-    provider = 'corva'
-    app_key = 'corva.wits-depth-summary'
-    asset_id = 1
-    app_stream_id = 294712
-    app_connection_id = 1
-    state_key = StreamEvent.get_state_key(event=stream_event_str, app_key=app_key)
-    expected = f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
-    assert state_key == expected
-
-
 def test_get_asset_id_from_dict(stream_event):
     assert StreamEvent.GetAssetId.from_dict(data=stream_event[0]) == 1
 
