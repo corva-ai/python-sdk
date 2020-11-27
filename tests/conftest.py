@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +10,7 @@ from corva.event.base import BaseEvent
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
+APP_KEY = 'provider.app-name'
 SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 STREAM_EVENT_FILE_PATH = 'data/tests/stream_event.json'
 
@@ -51,28 +51,38 @@ def redis(redis_adapter):
 
 @pytest.fixture(scope='function')
 def patch_base_event():
-    with patch.object(BaseEvent, '__abstractmethods__', set()):
+    """Patches BaseEvent
+
+    1. patches __abstractmethods__, so we can initialize BaseEvent
+    2. patches load function
+    """
+
+    with patch.object(BaseEvent, '__abstractmethods__', set()), \
+         patch.object(BaseEvent, 'load', side_effect=lambda event: event):
         yield
 
 
 @pytest.fixture(scope='function')
-def patch_base_app():
-    # mock abstract methods of BaseApp, so we can initialize and test the class
-    # mock event_cls attribute of BaseApp, so we can use fake load function
+def patch_base_app(patch_base_event):
+    """Patches BaseApp
+
+    1. patches __abstractmethods__, so we can initialize BaseApp
+    2. patches event_cls with BaseEvent
+    """
+
     with patch.object(BaseApp, '__abstractmethods__', set()), \
-         patch.object(BaseApp, 'event_cls') as event_cls_mock:
-        event_cls_mock.load.side_effect = lambda event: event
-        yield SimpleNamespace(event_cls_mock=event_cls_mock)
+         patch.object(BaseApp, 'event_cls', BaseEvent):
+        yield
 
 
 @pytest.fixture(scope='function')
-def base_app(patch_base_app, redis):
-    return BaseApp(state=redis)
+def base_app(patch_base_app):
+    return BaseApp(app_key=APP_KEY)
 
 
 @pytest.fixture(scope='function')
 def scheduled_app(redis):
-    return ScheduledApp(state=redis)
+    return ScheduledApp(app_key=APP_KEY)
 
 
 @pytest.fixture(scope='session')
