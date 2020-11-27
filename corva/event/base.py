@@ -7,8 +7,6 @@ from typing import List
 
 from corva.constants import EVENT_TYPE
 from corva.event.data.base import BaseEventData
-from corva.settings import APP_KEY
-from corva.utils import get_provider
 
 
 class BaseEvent(ABC, UserList):
@@ -39,16 +37,6 @@ class BaseEvent(ABC, UserList):
             raise ValueError('Invalid event JSON') from exc
 
         return event
-
-    @classmethod
-    def get_state_key(cls, event: str, app_key=APP_KEY):
-        event = cls.load(event=event, app_key=app_key)
-        provider = get_provider(app_key=app_key)
-        asset_id = event[0].asset_id
-        app_stream_id = event[0].app_stream_id
-        app_connection_id = event[0].app_connection_id
-        state_key = f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
-        return state_key
 
     def __eq__(self, other):
         return (
