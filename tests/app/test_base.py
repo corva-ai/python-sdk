@@ -9,13 +9,6 @@ from corva.event.data.base import BaseEventData
 from corva.utils import get_state_key
 
 
-class CustomException(Exception):
-    """Exception class that supports equality comparisons."""
-
-    def __eq__(self, other):
-        return type(self) is type(other) and self.args == other.args
-
-
 def test_abstractmethods():
     assert getattr(BaseApp, '__abstractmethods__') == frozenset(['event_cls'])
     with pytest.raises(TypeError):
@@ -185,12 +178,12 @@ def test__run_exc_in_pre_process(base_app):
 
     on_fail_before_post_process_kwargs = {'fail_key_1': 'fail_val_1'}
 
-    with patch.object(base_app, 'pre_process', side_effect=CustomException) as pre_process, \
+    with patch.object(base_app, 'pre_process', side_effect=Exception) as pre_process, \
          patch.object(base_app, 'process') as process, \
          patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
          patch.object(base_app, 'post_process') as post_process, \
          patch.object(base_app, 'logger') as logger_mock, \
-         pytest.raises(CustomException) as exc:
+         pytest.raises(Exception) as exc:
         base_app._run(
             event=event,
             state=state,
@@ -215,11 +208,11 @@ def test__run_exc_in_process(base_app, patch_base_event):
     pre_process_result = ProcessResult(event=BaseEvent([]))
 
     with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
-         patch.object(base_app, 'process', side_effect=CustomException) as process, \
+         patch.object(base_app, 'process', side_effect=Exception) as process, \
          patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
          patch.object(base_app, 'post_process') as post_process, \
          patch.object(base_app, 'logger') as logger_mock, \
-         pytest.raises(CustomException) as exc:
+         pytest.raises(Exception) as exc:
         base_app._run(
             event=event,
             state=state,
