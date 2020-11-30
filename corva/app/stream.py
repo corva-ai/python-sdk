@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Optional, List
+from typing import Any, Optional, List
 
 from corva.app.base import BaseApp, ProcessResult
 from corva.event.base import BaseEvent
@@ -27,7 +27,7 @@ class StreamApp(BaseApp):
          process_kwargs: Optional[dict] = None,
          post_process_kwargs: Optional[dict] = None,
          on_fail_before_post_process_kwargs: Optional[dict] = None
-    ):
+    ) -> Any:
         load_kwargs = {'app_key': self.app_key, **(load_kwargs or {})}
         return super(StreamApp, self).run(
             event=event,
@@ -90,7 +90,7 @@ class StreamApp(BaseApp):
          event: BaseEvent,
          last_processed_timestamp: Optional[int],
          last_processed_depth: Optional[float]
-    ):
+    ) -> StreamEvent:
         data = []
         for subdata in event:  # type: StreamEventData
             data.append(
