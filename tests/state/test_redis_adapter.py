@@ -45,8 +45,7 @@ def test_hdel_and_exists(redis_adapter, name):
     def exists():
         if name is None:
             return redis_adapter.exists()
-        else:
-            return redis_adapter.exists(name)
+        return redis_adapter.exists(name)
 
     assert redis_adapter.hset(name=name, key=KEY, value=VAL) == 1
     assert exists()
@@ -59,8 +58,7 @@ def test_delete_and_exists(redis_adapter, name):
     def exists():
         if name is None:
             return redis_adapter.exists()
-        else:
-            return redis_adapter.exists(name)
+        return redis_adapter.exists(name)
 
     def delete():
         if name is None:
@@ -94,14 +92,14 @@ def test_hset_default_expiry(redis_adapter):
         assert redis_adapter.ttl() == RedisAdapter.DEFAULT_EXPIRY.total_seconds()
 
 
-def test_store_expiry_override(redis_adapter):
+def test_hset_expiry_override(redis_adapter):
     with freeze_time('2020'):
         for expiry in [10, 5, 20]:
             redis_adapter.hset(key=KEY, value=VAL, expiry=expiry)
             assert redis_adapter.ttl() == expiry
 
 
-def test_store_expiry_disable(redis_adapter):
+def test_hset_expiry_disable(redis_adapter):
     with freeze_time('2020'):
         redis_adapter.hset(key=KEY, value=VAL, expiry=5)
         assert redis_adapter.ttl() == 5
@@ -110,7 +108,7 @@ def test_store_expiry_disable(redis_adapter):
         assert redis_adapter.ttl() == -1
 
 
-def test_store_expiry(redis_adapter):
+def test_hset_expiry(redis_adapter):
     with freeze_time('2020') as frozen_time:
         now = datetime.utcnow()
         redis_adapter.hset(key=KEY, value=VAL, expiry=5)
