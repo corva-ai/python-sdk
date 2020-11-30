@@ -4,7 +4,7 @@ from corva.event.data.base import BaseEventData
 
 
 class Record(BaseEventData):
-    timestamp: int
+    timestamp: Optional[int] = None
     asset_id: int
     company_id: int
     version: int

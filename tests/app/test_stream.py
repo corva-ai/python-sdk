@@ -239,6 +239,22 @@ def test_post_process_correct_last_processed_timestamp(
     assert store_mock.call_args[1]['mapping']['last_processed_timestamp'] == 2
 
 
+def test_post_process_correct_last_processed_timestamp_none_in_records(
+     stream_app, stream_event_data_factory, redis, record_factory
+):
+    records = [record_factory(timestamp=None)]
+    data = stream_event_data_factory(records=records)
+    event = StreamEvent(data=[data])
+    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+         patch.object(redis, 'store') as store_mock:
+        stream_app.post_process(event=event, state=redis)
+    assert (
+         store_mock.call_args[1]['mapping']['last_processed_timestamp']
+         ==
+         stream_app.DEFAULT_LAST_PROCESSED_TIMESTAMP
+    )
+
+
 def test_post_process_correct_last_processed_timestamp_empty_records(
      stream_app, stream_event_data_factory, redis, record_factory
 ):
@@ -305,7 +321,7 @@ def test_post_process_store_call(
     store_mock.assert_called_once_with(mapping={'last_processed_timestamp': -1, 'last_processed_depth': -1})
 
 
-def test_post_process__return_value(
+def test_post_process_return_value(
      stream_app, stream_event_data_factory, redis, record_factory
 ):
     event = StreamEvent(data=[stream_event_data_factory()])

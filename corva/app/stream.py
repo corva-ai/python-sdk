@@ -65,7 +65,11 @@ class StreamApp(BaseApp):
 
         all_records: List[Record] = list(chain(*[subdata.records for subdata in event]))
         last_processed_timestamp = max(
-            [record.timestamp for record in all_records],
+            [
+                record.timestamp
+                for record in all_records
+                if record.timestamp is not None
+            ],
             default=self.DEFAULT_LAST_PROCESSED_TIMESTAMP
         )
         last_processed_depth = max(
