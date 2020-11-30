@@ -19,9 +19,8 @@ class RedisAdapter(Redis):
          logger: Union[Logger, LoggerAdapter] = LOGGER,
          **kwargs
     ):
-        super().__init__(
-            connection_pool=from_url(url=cache_url, **{'decode_responses': True, **kwargs}).connection_pool
-        )
+        kwargs.setdefault('decode_responses', True)
+        super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
         self.logger = logger
         self.default_name = default_name
         try:
