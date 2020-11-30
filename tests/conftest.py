@@ -38,7 +38,7 @@ def patch_redis_adapter():
 
 @pytest.fixture(scope='function')
 def redis_adapter(patch_redis_adapter):
-    return RedisAdapter(default_name='default_name', cache_url=CACHE_URL, decode_responses=True)
+    return RedisAdapter(default_name='default_name', cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='function')
