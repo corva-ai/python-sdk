@@ -69,7 +69,11 @@ class StreamApp(BaseApp):
             default=self.DEFAULT_LAST_PROCESSED_TIMESTAMP
         )
         last_processed_depth = max(
-            [record.measured_depth or self.DEFAULT_LAST_PROCESSED_DEPTH for record in all_records],
+            [
+                record.measured_depth
+                for record in all_records
+                if record.measured_depth is not None
+            ],
             default=self.DEFAULT_LAST_PROCESSED_DEPTH
         )
 
