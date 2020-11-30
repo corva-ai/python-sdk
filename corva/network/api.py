@@ -32,7 +32,7 @@ class Api:
                 max_retries=Retry(
                     total=self.max_retries,
                     status_forcelist=[408, 429, 500, 502, 503, 504],
-                    method_whitelist=list(self.HTTP_METHODS),
+                    allowed_methods=list(self.HTTP_METHODS),
                     backoff_factor=0.3,
                     raise_on_status=False
                 )

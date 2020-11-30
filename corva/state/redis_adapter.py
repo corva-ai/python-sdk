@@ -3,6 +3,8 @@ from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
 
+from corva.logger import LOGGER
+from logging import Logger, LoggerAdapter
 from corva.constants import REDIS_STORED_VALUE_TYPE
 from corva.settings import CACHE_URL
 
@@ -10,8 +12,15 @@ from corva.settings import CACHE_URL
 class RedisAdapter(Redis):
     DEFAULT_EXPIRY: timedelta = timedelta(days=60)
 
-    def __init__(self, default_name: str, cache_url: str = CACHE_URL, **kwargs):
+    def __init__(
+         self,
+         default_name: str,
+         cache_url: str = CACHE_URL,
+         logger: Union[Logger, LoggerAdapter] = LOGGER,
+         **kwargs
+    ):
         super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
+        self.logger = logger
         self.default_name = default_name
         try:
             self.ping()

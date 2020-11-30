@@ -1,6 +1,7 @@
 fakeredis==1.4.4
 flake8==3.8.4
 freezegun==1.0.0
+pydantic==1.7.2
 pytest==6.1.2
 redis==3.5.3
 requests==2.25.0
