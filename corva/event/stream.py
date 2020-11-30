@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List
 
 from corva.event.base import BaseEvent
 from corva.event.data.stream import StreamEventData
@@ -8,29 +8,15 @@ from corva.event.data.stream import StreamEventData
 
 class StreamEvent(BaseEvent):
     @classmethod
-    def load(cls, event: str, **kwargs) -> StreamEvent:
-        if 'app_key' not in kwargs:
-            raise ValueError('Missing app_key in kwargs.')
-        app_key: str = kwargs['app_key']
-        last_processed_timestamp: Optional[int] = kwargs.get('last_processed_timestamp')
-        last_processed_depth: Optional[float] = kwargs.get('last_processed_depth')
-
+    def load(cls, event: str, app_key: str, **kwargs) -> StreamEvent:
         event: List[dict] = super()._load(event=event)
 
         data = []
         for subdata in event:
-            records = subdata['records']
-
             asset_id = cls.GetAssetId.from_dict(data=subdata)
             app_connection_id = cls._get_app_connection_id(subdata=subdata, app_key=app_key)
             app_stream_id = subdata['metadata']['app_stream_id']
-            is_completed = cls._get_is_completed(records=records)
-
-            subdata['records'] = cls._filter_records(
-                records=records,
-                last_processed_timestamp=last_processed_timestamp,
-                last_processed_depth=last_processed_depth
-            )
+            is_completed = cls._get_is_completed(records=subdata['records'])
 
             data.append(StreamEventData(
                 **subdata,
@@ -48,25 +34,6 @@ class StreamEvent(BaseEvent):
             return records[-1].get('collection') == 'wits.completed'
         except IndexError as exc:
             raise ValueError(f'Records are empty: {records}') from exc
-
-    @classmethod
-    def _filter_records(
-         cls,
-         records: List[dict],
-         last_processed_timestamp: Optional[int] = None,
-         last_processed_depth: Optional[float] = None
-    ):
-        if cls._get_is_completed(records=records):
-            records = records[:-1]  # remove "completed" record
-
-        result = []
-        for record in records:
-            if last_processed_timestamp is not None and record['timestamp'] <= last_processed_timestamp:
-                continue
-            if last_processed_depth is not None and record['measured_depth'] <= last_processed_depth:
-                continue
-            result.append(record)
-        return result
 
     @staticmethod
     def _get_app_connection_id(subdata: dict, app_key: str):
