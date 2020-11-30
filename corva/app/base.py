@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 from corva.event.base import BaseEvent
 from corva.logger import LOGGER
 from corva.network.api import Api
-from corva.settings import APP_KEY
+from corva.settings import APP_KEY, CACHE_URL
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 from corva.utils import get_state_key
@@ -23,10 +23,12 @@ class BaseApp(ABC):
     def __init__(
          self,
          app_key: str = APP_KEY,
+         cache_url: str = CACHE_URL,
          api: Optional[Api] = None,
          logger: Union[Logger, LoggerAdapter] = LOGGER
     ):
         self.app_key = app_key
+        self.cache_url = cache_url
         self.api = api or Api()
         self.logger = logger
 
@@ -137,6 +139,7 @@ class BaseApp(ABC):
                         app_key=self.app_key,
                         app_connection_id=event[0].app_connection_id
                     ),
+                    cache_url=self.cache_url,
                     logger=self.logger
                 )
             ))
