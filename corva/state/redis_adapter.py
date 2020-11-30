@@ -6,7 +6,7 @@ from redis import Redis, from_url, ConnectionError
 
 from corva import settings
 from corva.constants import REDIS_STORED_VALUE_TYPE
-from corva.logger import LOGGER
+from corva.logger import DEFAULT_LOGGER
 
 
 class RedisAdapter(Redis):
@@ -16,7 +16,7 @@ class RedisAdapter(Redis):
          self,
          default_name: str,
          cache_url: str = settings.CACHE_URL,
-         logger: Union[Logger, LoggerAdapter] = LOGGER,
+         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER,
          **kwargs
     ):
         kwargs.setdefault('decode_responses', True)

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from corva import settings
 from corva.event.base import BaseEvent
-from corva.logger import LOGGER
+from corva.logger import DEFAULT_LOGGER
 from corva.network.api import Api
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -25,7 +25,7 @@ class BaseApp(ABC):
          app_key: str = settings.APP_KEY,
          cache_url: str = settings.CACHE_URL,
          api: Optional[Api] = None,
-         logger: Union[Logger, LoggerAdapter] = LOGGER
+         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
     ):
         self.app_key = app_key
         self.cache_url = cache_url

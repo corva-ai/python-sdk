@@ -55,4 +55,4 @@ class AppLogger(LogAdapter):
     extra_fields = ['asset_id']
 
 
-LOGGER = getLogger('main')
+DEFAULT_LOGGER = getLogger('main')
