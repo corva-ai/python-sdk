@@ -13,7 +13,7 @@ class StreamEvent(BaseEvent):
 
         data = []
         for subdata in event:
-            asset_id = cls.from_dict(data=subdata)
+            asset_id = cls.get_asset_id(data=subdata)
             app_connection_id = cls._get_app_connection_id(subdata=subdata, app_key=app_key)
             app_stream_id = subdata['metadata']['app_stream_id']
             is_completed = cls._get_is_completed(records=subdata['records'])
@@ -43,7 +43,7 @@ class StreamEvent(BaseEvent):
             raise ValueError(f'Can\'t get {app_key} from metadata.apps.') from exc
 
     @staticmethod
-    def from_dict(data: dict):
+    def get_asset_id(data: dict):
         try:
             return data['records'][0]['asset_id']
         except (IndexError, KeyError) as exc:
