@@ -47,7 +47,7 @@ class StreamApp(BaseApp):
             else self.DEFAULT_LAST_PROCESSED_TIMESTAMP
         )
         last_processed_depth = (
-            int(state.load(key='last_processed_depth'))
+            float(state.load(key='last_processed_depth'))
             if self.filter_by_depth
             else self.DEFAULT_LAST_PROCESSED_DEPTH
         )
