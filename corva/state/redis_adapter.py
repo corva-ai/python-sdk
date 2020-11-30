@@ -49,11 +49,11 @@ class RedisAdapter(Redis):
 
         return n_set
 
-    def hget(self, key: str, name: Optional[str] = None) -> REDIS_STORED_VALUE_TYPE:
+    def hget(self, key: str, name: Optional[str] = None) -> Union[REDIS_STORED_VALUE_TYPE, None]:
         name = name or self.default_name
         return super().hget(name=name, key=key)
 
-    def hgetall(self, name: Optional[str] = None) -> Dict[str, REDIS_STORED_VALUE_TYPE]:
+    def hgetall(self, name: Optional[str] = None) -> Dict[str, Union[REDIS_STORED_VALUE_TYPE, None]]:
         name = name or self.default_name
         return super().hgetall(name=name)
 
