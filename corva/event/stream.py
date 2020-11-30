@@ -19,11 +19,11 @@ class StreamEvent(BaseEvent):
             is_completed = cls._get_is_completed(records=subdata['records'])
 
             data.append(StreamEventData(
-                **subdata,
                 asset_id=asset_id,
                 app_connection_id=app_connection_id,
                 app_stream_id=app_stream_id,
-                is_completed=is_completed
+                is_completed=is_completed,
+                **subdata
             ))
 
         return StreamEvent(data=data)
