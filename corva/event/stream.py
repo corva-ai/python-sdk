@@ -13,7 +13,7 @@ class StreamEvent(BaseEvent):
 
         data = []
         for subdata in event:
-            asset_id = cls.GetAssetId.from_dict(data=subdata)
+            asset_id = cls.from_dict(data=subdata)
             app_connection_id = cls._get_app_connection_id(subdata=subdata, app_key=app_key)
             app_stream_id = subdata['metadata']['app_stream_id']
             is_completed = cls._get_is_completed(records=subdata['records'])
@@ -42,21 +42,9 @@ class StreamEvent(BaseEvent):
         except KeyError as exc:
             raise ValueError(f'Can\'t get {app_key} from metadata.apps.') from exc
 
-    class GetAssetId:
-        @classmethod
-        def from_event(cls, event: str):
-            event: List[dict] = BaseEvent._load(event=event)
-
-            try:
-                data = event[0]
-            except IndexError as exc:
-                raise ValueError(f'Could not find asset id in event: {event}.') from exc
-
-            return cls.from_dict(data=data)
-
-        @staticmethod
-        def from_dict(data: dict):
-            try:
-                return data['records'][0]['asset_id']
-            except (IndexError, KeyError) as exc:
-                raise ValueError(f'Could not find an asset id in data: {data}.') from exc
+    @staticmethod
+    def from_dict(data: dict):
+        try:
+            return data['records'][0]['asset_id']
+        except (IndexError, KeyError) as exc:
+            raise ValueError(f'Could not find an asset id in data: {data}.') from exc

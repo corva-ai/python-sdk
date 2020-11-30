@@ -8,33 +8,21 @@ from corva.event.stream import StreamEvent
 
 
 def test_get_asset_id_from_dict(stream_event):
-    assert StreamEvent.GetAssetId.from_dict(data=stream_event[0]) == 1
+    assert StreamEvent.from_dict(data=stream_event[0]) == 1
 
 
 def test_get_asset_id_from_dict_index_exc(stream_event):
     data = {'records': []}
     with pytest.raises(ValueError) as exc:
-        StreamEvent.GetAssetId.from_dict(data=data)
+        StreamEvent.from_dict(data=data)
     assert str(exc.value) == f'Could not find an asset id in data: {data}.'
 
 
 def test_get_asset_id_from_dict_key_exc(stream_event):
     data = {}
     with pytest.raises(ValueError) as exc:
-        StreamEvent.GetAssetId.from_dict(data=data)
+        StreamEvent.from_dict(data=data)
     assert str(exc.value) == f'Could not find an asset id in data: {data}.'
-
-
-def test_get_asset_id_from_event(stream_event_str):
-    asset_id = StreamEvent.GetAssetId.from_event(event=stream_event_str)
-    assert asset_id == 1
-
-
-def test_get_asset_id_from_event_index_exc():
-    event_str = '[]'
-    with pytest.raises(ValueError) as exc:
-        StreamEvent.GetAssetId.from_event(event=event_str)
-    assert str(exc.value) == f'Could not find asset id in event: {BaseEvent._load(event=event_str)}.'
 
 
 def test_get_app_connection(stream_event_str):
