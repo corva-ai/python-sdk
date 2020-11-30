@@ -4,9 +4,13 @@ import pytest
 from fakeredis import FakeRedis
 
 from corva.app.base import BaseApp
+from corva.app.scheduled import ScheduledApp
 from corva.event.base import BaseEvent
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
+
+APP_KEY = 'provider.app-name'
+SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -35,7 +39,7 @@ def patch_redis_adapter():
 
 @pytest.fixture(scope='function')
 def redis_adapter(patch_redis_adapter):
-    return RedisAdapter(default_name='default_name', cache_url='redis://random:6379', decode_responses=True)
+    return RedisAdapter(default_name='default_name', decode_responses=True)
 
 
 @pytest.fixture(scope='function')
@@ -71,4 +75,15 @@ def patch_base_app(patch_base_event):
 
 @pytest.fixture(scope='function')
 def base_app(patch_base_app):
-    return BaseApp(app_key='provider.app-name')
+    return BaseApp(app_key=APP_KEY)
+
+
+@pytest.fixture(scope='function')
+def scheduled_app(redis):
+    return ScheduledApp(app_key=APP_KEY)
+
+
+@pytest.fixture(scope='session')
+def scheduled_event_str() -> str:
+    with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
+        return scheduled_event.read()
