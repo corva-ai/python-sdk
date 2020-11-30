@@ -1,6 +1,5 @@
 from typing import List, Union
 
-
 REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 SCHEDULED_EVENT_TYPE = List[List[dict]]
 STREAM_EVENT_TYPE = List[dict]

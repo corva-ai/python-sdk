@@ -1,10 +1,11 @@
 from datetime import timedelta
+from logging import Logger, LoggerAdapter
 from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
-from corva.logger import LOGGER
-from logging import Logger, LoggerAdapter
+
 from corva.constants import REDIS_STORED_VALUE_TYPE
+from corva.logger import LOGGER
 from corva.settings import CACHE_URL
 
 
