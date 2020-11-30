@@ -100,7 +100,7 @@ def test_load_is_completed():
         app_key=app_key
     )
 
-    assert loaded_event[-1].is_completed == True
+    assert loaded_event[-1].is_completed
     assert len(loaded_event[-1].records) == 1
 
 

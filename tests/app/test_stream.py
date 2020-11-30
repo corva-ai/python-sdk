@@ -99,7 +99,7 @@ def test__filter_event(stream_event_data_factory):
     event = StreamEvent(data=data)
     with patch.object(
          StreamApp, '_filter_event_data', side_effect=lambda data, **kwargs: data
-    ) as _filter_event_data_mock:
+         ) as _filter_event_data_mock:
         result_event = StreamApp._filter_event(
             event=event,
             last_processed_timestamp=None,
