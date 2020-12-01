@@ -1,13 +1,29 @@
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Any
 
-from requests import HTTPError, Session
+from requests import HTTPError, Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from corva import settings
+
+
+@dataclass(frozen=True)
+class ApiResponse:
+    response: Response
+    data: Any = field(init=False)
+
+    def __post_init__(self):
+        object.__setattr__(self, 'data', self._load_data(response=self.response))
+
+    @staticmethod
+    def _load_data(response: Response):
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise ValueError('Invalid API response') from exc
 
 
 @dataclass(eq=False)
@@ -78,7 +94,7 @@ class Api:
          max_retries: Optional[int] = None,  # custom value for max number of retries
          timeout: Optional[int] = None,  # request timeout in seconds
          asset_id: Optional[int] = None,  # asset_id to use in error message
-    ):
+    ) -> ApiResponse:
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
 
@@ -110,44 +126,4 @@ class Api:
                 raise HTTPError(custom_error, response=response) from e
             raise
 
-        return Result(
-            response=response,
-            **dict(
-                data=data,
-                json=json,
-                params=params,
-                headers=headers,
-                max_retries=max_retries,
-                timeout=timeout,
-                asset_id=asset_id
-            )
-        )
-
-
-class Result:
-    def __init__(self, response, **kwargs):
-        self.response = response
-        self.params = kwargs
-        self.data = None
-
-        try:
-            self.data = response.json()
-        except ValueError as exc:
-            raise ValueError('Invalid API response') from exc
-
-    def __repr__(self):
-        return repr(self.data)
-
-    def __iter__(self):
-        return iter(self.data)
-
-    @property
-    def status(self):
-        return self.response.status_code
-
-    @property
-    def count(self):
-        if isinstance(self.data, (list, set, tuple, dict)):
-            return len(self.data)
-
-        return 0
+        return ApiResponse(response=response)
