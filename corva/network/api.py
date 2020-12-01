@@ -1,6 +1,7 @@
 import os
 import re
 from dataclasses import dataclass, field
+from typing import Optional
 
 from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
@@ -39,22 +40,22 @@ class Api:
             )
         )
 
-    def get(self, path, **kwargs):
+    def get(self, path: str, **kwargs):
         return self._request('GET', path, **kwargs)
 
-    def post(self, path, **kwargs):
+    def post(self, path: str, **kwargs):
         return self._request('POST', path, **kwargs)
 
-    def patch(self, path, **kwargs):
+    def patch(self, path: str, **kwargs):
         return self._request('PATCH', path, **kwargs)
 
-    def put(self, path, **kwargs):
+    def put(self, path: str, **kwargs):
         return self._request('PUT', path, **kwargs)
 
-    def delete(self, path, **kwargs):
+    def delete(self, path: str, **kwargs):
         return self._request('DELETE', path, **kwargs)
 
-    def _get_url(self, path):
+    def _get_url(self, path: str):
         if path.startswith(self.api_url) or path.startswith(self.data_api_url):
             return path
 
@@ -68,15 +69,15 @@ class Api:
 
     def _request(
          self,
-         method,
-         path,
-         data=None,
-         json=None,
-         params=None,
-         headers=None,
-         max_retries=None,
-         timeout=None,
-         asset_id=None,
+         method: str,
+         path: str,
+         data: Optional[dict] = None,  # form-encoded data
+         json: Optional[dict] = None,  # auto encodes dict to json and adds Content-Type=application/json header
+         params: Optional[dict] = None,  # url query string params
+         headers: Optional[dict] = None,  # additional headers to include in request
+         max_retries: Optional[int] = None,  # custom value for max number of retries
+         timeout: Optional[int] = None,  # request timeout in seconds
+         asset_id: Optional[int] = None,  # asset_id to use in error message
     ):
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
