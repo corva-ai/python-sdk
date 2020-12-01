@@ -10,7 +10,7 @@ class Record(BaseEventData):
     version: int
     data: Dict[str, Any]
     measured_depth: Optional[float] = None
-    collection: Optional[str] = None
+    collection: str
 
 
 class StreamEventData(BaseEventData):
