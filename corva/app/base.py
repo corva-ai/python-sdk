@@ -4,10 +4,10 @@ from itertools import groupby
 from logging import Logger, LoggerAdapter
 from typing import Any, Dict, List, Optional, Type, Union
 
+from corva import settings
 from corva.event.base import BaseEvent
-from corva.logger import LOGGER
+from corva.logger import DEFAULT_LOGGER
 from corva.network.api import Api
-from corva.settings import APP_KEY
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 from corva.utils import get_state_key
@@ -22,11 +22,13 @@ class ProcessResult:
 class BaseApp(ABC):
     def __init__(
          self,
-         app_key: str = APP_KEY,
+         app_key: str = settings.APP_KEY,
+         cache_url: str = settings.CACHE_URL,
          api: Optional[Api] = None,
-         logger: Union[Logger, LoggerAdapter] = LOGGER
+         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
     ):
         self.app_key = app_key
+        self.cache_url = cache_url
         self.api = api or Api()
         self.logger = logger
 
@@ -137,6 +139,7 @@ class BaseApp(ABC):
                         app_key=self.app_key,
                         app_connection_id=event[0].app_connection_id
                     ),
+                    cache_url=self.cache_url,
                     logger=self.logger
                 )
             ))

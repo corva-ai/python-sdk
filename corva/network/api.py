@@ -6,7 +6,7 @@ from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from corva.settings import API_KEY, APP_NAME, API_ROOT_URL, DATA_API_ROOT_URL
+from corva import settings
 
 
 @dataclass(eq=False)
@@ -15,10 +15,10 @@ class Api:
 
     timeout: int = 600  # seconds
     max_retries: int = 3
-    api_url: str = API_ROOT_URL
-    data_api_url: str = DATA_API_ROOT_URL
-    api_key: str = API_KEY
-    app_name: str = APP_NAME
+    api_url: str = settings.API_ROOT_URL
+    data_api_url: str = settings.DATA_API_ROOT_URL
+    api_key: str = settings.API_KEY
+    app_name: str = settings.APP_NAME
     session: Session = field(default_factory=Session)
 
     def __post_init__(self):
@@ -67,16 +67,16 @@ class Api:
         return os.path.join(base_url.strip('/'), path.strip('/'))
 
     def _request(
-            self,
-            method,
-            path,
-            data=None,
-            json=None,
-            params=None,
-            headers=None,
-            max_retries=None,
-            timeout=None,
-            asset_id=None,
+         self,
+         method,
+         path,
+         data=None,
+         json=None,
+         params=None,
+         headers=None,
+         max_retries=None,
+         timeout=None,
+         asset_id=None,
     ):
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')

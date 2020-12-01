@@ -99,29 +99,32 @@ def test_run(base_app):
         )
 
 
-def test_pre_process(base_app):
+def test_pre_process(base_app, redis):
     event = 'myevent'
-    state = ''
-    pre_res = base_app.pre_process(event=event, state=state)
+    pre_res = base_app.pre_process(event=event, state=redis)
     assert pre_res == ProcessResult(event=event, next_process_kwargs={})
 
 
-def test_process(base_app, patch_base_event):
-    base_event = BaseEvent(data=[])
-    assert base_app.process(event=base_event, state='') == ProcessResult(event=base_event, next_process_kwargs={})
-
-
-def test_post_process(base_app, patch_base_event):
+def test_process(base_app, patch_base_event, redis):
     base_event = BaseEvent(data=[])
     assert (
-         base_app.post_process(event=base_event, state='')
+         base_app.process(event=base_event, state=redis)
          ==
          ProcessResult(event=base_event, next_process_kwargs={})
     )
 
 
-def test_on_fail_before_post_process(base_app):
-    assert base_app.on_fail_before_post_process(event='myevent', state='') is None
+def test_post_process(base_app, patch_base_event, redis):
+    base_event = BaseEvent(data=[])
+    assert (
+         base_app.post_process(event=base_event, state=redis)
+         ==
+         ProcessResult(event=base_event, next_process_kwargs={})
+    )
+
+
+def test_on_fail_before_post_process(base_app, redis):
+    assert base_app.on_fail_before_post_process(event='myevent', state=redis) is None
 
 
 def test__run_correct_params(base_app, patch_base_event):

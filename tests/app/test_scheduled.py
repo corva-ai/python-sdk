@@ -8,12 +8,12 @@ from corva.event.data.base import BaseEventData
 from corva.event.scheduled import ScheduledEvent
 
 
-def test_post_process(scheduled_app):
+def test_post_process(scheduled_app, redis):
     event = ScheduledEvent(data=[BaseEventData(schedule=1), BaseEventData(schedule=2)])
     with patch.object(BaseApp, 'post_process', return_value=SimpleNamespace(event=event)) as post_process, \
          patch.object(scheduled_app, 'update_schedule_status') as update_schedule_status:
-        post_result = scheduled_app.post_process(event=event, state='')
-        post_process.assert_called_once()
+        post_result = scheduled_app.post_process(event=event, state=redis)
+        post_process.assert_called_once_with(event=event, state=redis)
         assert update_schedule_status.call_count == len(event)
         update_schedule_status.assert_has_calls(
             [

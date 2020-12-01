@@ -4,9 +4,9 @@ from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
 
+from corva import settings
 from corva.constants import REDIS_STORED_VALUE_TYPE
-from corva.logger import LOGGER
-from corva.settings import CACHE_URL
+from corva.logger import DEFAULT_LOGGER
 
 
 class RedisAdapter(Redis):
@@ -15,10 +15,11 @@ class RedisAdapter(Redis):
     def __init__(
          self,
          default_name: str,
-         cache_url: str = CACHE_URL,
-         logger: Union[Logger, LoggerAdapter] = LOGGER,
+         cache_url: str = settings.CACHE_URL,
+         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER,
          **kwargs
     ):
+        kwargs.setdefault('decode_responses', True)
         super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
         self.logger = logger
         self.default_name = default_name
@@ -47,11 +48,11 @@ class RedisAdapter(Redis):
 
         return n_set
 
-    def hget(self, key: str, name: Optional[str] = None) -> REDIS_STORED_VALUE_TYPE:
+    def hget(self, key: str, name: Optional[str] = None) -> Union[REDIS_STORED_VALUE_TYPE, None]:
         name = name or self.default_name
         return super().hget(name=name, key=key)
 
-    def hgetall(self, name: Optional[str] = None) -> Dict[str, REDIS_STORED_VALUE_TYPE]:
+    def hgetall(self, name: Optional[str] = None) -> Dict[str, Union[REDIS_STORED_VALUE_TYPE, None]]:
         name = name or self.default_name
         return super().hgetall(name=name)
 
