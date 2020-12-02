@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional, Any
 
-from requests import HTTPError, Response, Session
+from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
@@ -93,7 +93,6 @@ class Api:
          headers: Optional[dict] = None,  # additional headers to include in request
          max_retries: Optional[int] = None,  # custom value for max number of retries
          timeout: Optional[int] = None,  # request timeout in seconds
-         asset_id: Optional[int] = None,  # asset_id to use in error message
     ) -> ApiResponse:
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
@@ -114,16 +113,6 @@ class Api:
             timeout=timeout
         )
 
-        code_to_error = {
-            401: '401 Unable to reach Corva API.',
-            403: f'403 No access to asset {asset_id}.'
-        }
-
-        try:
-            response.raise_for_status()
-        except HTTPError as e:
-            if (custom_error := code_to_error.get(response.status_code)) is not None:
-                raise HTTPError(custom_error, response=response) from e
-            raise
+        response.raise_for_status()
 
         return ApiResponse(response=response)
