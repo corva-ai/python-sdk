@@ -3,14 +3,14 @@ from __future__ import annotations
 from itertools import chain
 from typing import List
 
-from corva.event.base import BaseEvent
 from corva.event.data.scheduled import ScheduledEventData
+from corva.event.event import Event
+from corva.event.loader.base import BaseLoader
 
 
-class ScheduledEvent(BaseEvent):
-    @classmethod
-    def load(cls, event: str, **kwargs) -> ScheduledEvent:
-        event: List[List[dict]] = super()._load(event=event)
+class ScheduledLoader(BaseLoader):
+    def load(self, event: str) -> Event:
+        event: List[List[dict]] = super()._load_json(event=event)
         event: List[dict] = list(chain(*event))
 
         data = []
@@ -21,4 +21,4 @@ class ScheduledEvent(BaseEvent):
             subdata['app_stream_id'] = subdata.pop('app_stream')
             data.append(ScheduledEventData(**subdata))
 
-        return ScheduledEvent(data=data)
+        return Event(data=data)
