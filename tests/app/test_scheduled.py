@@ -3,7 +3,7 @@ from unittest.mock import call
 from unittest.mock import patch
 
 from corva.app.base import BaseApp
-from corva.app.base import ProcessResult
+from corva.app.base import BaseProcessResult
 from corva.event.data.base import BaseEventData
 from corva.event.scheduled import ScheduledEvent
 
@@ -21,7 +21,7 @@ def test_post_process(scheduled_app, redis):
                 call(schedule=2, status='completed')
             ]
         )
-        assert post_result == ProcessResult(event=event)
+        assert post_result == BaseProcessResult(event=event)
 
 
 def test_update_schedule_status(scheduled_app):

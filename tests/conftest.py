@@ -7,7 +7,7 @@ from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.constants import STREAM_EVENT_TYPE
-from corva.event.base import BaseEvent
+from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -54,8 +54,8 @@ def patch_base_event():
     2. patches load function
     """
 
-    with patch.object(BaseEvent, '__abstractmethods__', set()), \
-         patch.object(BaseEvent, 'load', side_effect=lambda event: event):
+    with patch.object(Event, '__abstractmethods__', set()), \
+         patch.object(Event, 'load', side_effect=lambda event: event):
         yield
 
 
@@ -68,7 +68,7 @@ def patch_base_app(patch_base_event):
     """
 
     with patch.object(BaseApp, '__abstractmethods__', set()), \
-         patch.object(BaseApp, 'event_cls', BaseEvent):
+         patch.object(BaseApp, 'event_cls', Event):
         yield
 
 
@@ -101,4 +101,4 @@ def stream_event_str() -> str:
 
 @pytest.fixture(scope='function')
 def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
-    return BaseEvent._load(event=stream_event_str)
+    return Event._load(event=stream_event_str)

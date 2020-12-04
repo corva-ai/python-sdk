@@ -4,7 +4,7 @@ from unittest.mock import patch, call
 import pytest
 
 from corva.app.base import BaseApp
-from corva.app.base import ProcessResult
+from corva.app.base import BaseProcessResult
 from corva.app.stream import StreamApp
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.stream import StreamEvent
@@ -146,7 +146,7 @@ def test_run_custom_app_key(stream_app):
 
 def test_pre_process_calls_base(stream_app, stream_event_data_factory, redis):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)) as super_pre_process_mock, \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)) as super_pre_process_mock, \
          patch.object(stream_app, '_filter_event'):
         stream_app.pre_process(event=event, state=redis)
     super_pre_process_mock.assert_called_once_with(event=event, state=redis)
@@ -159,7 +159,7 @@ def test_pre_process_loads_last_processed_timestamp(stream_app, stream_event_dat
     redis.store(key='last_processed_timestamp', value=last_processed_timestamp)
 
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event') as _filter_event_mock:
         stream_app.pre_process(event=event, state=redis)
     assert _filter_event_mock.call_args[1]['last_processed_timestamp'] == last_processed_timestamp
@@ -169,10 +169,10 @@ def test_pre_process_default_last_processed_timestamp(stream_app, stream_event_d
     stream_app.filter_by_timestamp = False
 
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event') as _filter_event_mock:
         stream_app.pre_process(event=event, state=redis)
-    assert _filter_event_mock.call_args[1]['last_processed_timestamp'] == stream_app.DEFAULT_LAST_PROCESSED_TIMESTAMP
+    assert _filter_event_mock.call_args[1]['last_processed_timestamp'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
 def test_pre_process_loads_last_processed_depth(stream_app, stream_event_data_factory, redis):
@@ -182,7 +182,7 @@ def test_pre_process_loads_last_processed_depth(stream_app, stream_event_data_fa
     redis.store(key='last_processed_depth', value=last_processed_depth)
 
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event') as _filter_event_mock:
         stream_app.pre_process(event=event, state=redis)
     assert _filter_event_mock.call_args[1]['last_processed_depth'] == last_processed_depth
@@ -192,36 +192,36 @@ def test_pre_process_default_last_processed_depth(stream_app, stream_event_data_
     stream_app.filter_by_depth = False
 
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event') as _filter_event_mock:
         stream_app.pre_process(event=event, state=redis)
-    assert _filter_event_mock.call_args[1]['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_DEPTH
+    assert _filter_event_mock.call_args[1]['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
 def test_pre_process_calls__filter_event(stream_app, stream_event_data_factory, redis):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event') as _filter_event_mock:
         stream_app.pre_process(event=event, state=redis)
     _filter_event_mock.assert_called_once_with(
         event=event,
-        last_processed_timestamp=stream_app.DEFAULT_LAST_PROCESSED_TIMESTAMP,
-        last_processed_depth=stream_app.DEFAULT_LAST_PROCESSED_DEPTH
+        last_processed_timestamp=stream_app.DEFAULT_LAST_PROCESSED_VALUE,
+        last_processed_depth=stream_app.DEFAULT_LAST_PROCESSED_VALUE
     )
 
 
 def test_pre_process_return_value(stream_app, stream_event_data_factory, redis):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'pre_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'pre_process', return_value=BaseProcessResult(event=event)), \
          patch.object(stream_app, '_filter_event', return_value=event):
         result = stream_app.pre_process(event=event, state=redis)
-    assert type(result) == ProcessResult
-    assert result == ProcessResult(event=event, next_process_kwargs={})
+    assert type(result) == BaseProcessResult
+    assert result == BaseProcessResult(event=event, next_process_kwargs={})
 
 
 def test_post_process_calls_base(stream_app, stream_event_data_factory, redis):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)) as super_post_process_mock:
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)) as super_post_process_mock:
         stream_app.post_process(event=event, state=redis)
     super_post_process_mock.assert_called_once_with(event=event, state=redis)
 
@@ -234,7 +234,7 @@ def test_post_process_correct_last_processed_timestamp(
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = StreamEvent(data=[data1, data2])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
     assert store_mock.call_args[1]['mapping']['last_processed_timestamp'] == 2
@@ -246,13 +246,13 @@ def test_post_process_correct_last_processed_timestamp_none_in_records(
     records = [record_factory(timestamp=None)]
     data = stream_event_data_factory(records=records)
     event = StreamEvent(data=[data])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
     assert (
          store_mock.call_args[1]['mapping']['last_processed_timestamp']
          ==
-         stream_app.DEFAULT_LAST_PROCESSED_TIMESTAMP
+         stream_app.DEFAULT_LAST_PROCESSED_VALUE
     )
 
 
@@ -262,13 +262,13 @@ def test_post_process_correct_last_processed_timestamp_empty_records(
     data1 = stream_event_data_factory(records=[])
     data2 = stream_event_data_factory(records=[])
     event = StreamEvent(data=[data1, data2])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
     assert (
          store_mock.call_args[1]['mapping']['last_processed_timestamp']
          ==
-         stream_app.DEFAULT_LAST_PROCESSED_TIMESTAMP
+         stream_app.DEFAULT_LAST_PROCESSED_VALUE
     )
 
 
@@ -280,7 +280,7 @@ def test_post_process_correct_last_processed_depth(
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = StreamEvent(data=[data1, data2])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
     assert store_mock.call_args[1]['mapping']['last_processed_depth'] == 2
@@ -292,10 +292,10 @@ def test_post_process_correct_last_processed_depth_none_in_records(
     records = [record_factory(measured_depth=None)]
     data = stream_event_data_factory(records=records)
     event = StreamEvent(data=[data])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
-    assert store_mock.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_DEPTH
+    assert store_mock.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
 def test_post_process_correct_last_processed_depth_empty_records(
@@ -306,17 +306,17 @@ def test_post_process_correct_last_processed_depth_empty_records(
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = StreamEvent(data=[data1, data2])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
-    assert store_mock.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_DEPTH
+    assert store_mock.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
 def test_post_process_store_call(
      stream_app, stream_event_data_factory, redis, record_factory
 ):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)), \
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)), \
          patch.object(redis, 'store') as store_mock:
         stream_app.post_process(event=event, state=redis)
     store_mock.assert_called_once_with(mapping={'last_processed_timestamp': -1, 'last_processed_depth': -1})
@@ -326,6 +326,6 @@ def test_post_process_return_value(
      stream_app, stream_event_data_factory, redis, record_factory
 ):
     event = StreamEvent(data=[stream_event_data_factory()])
-    with patch.object(BaseApp, 'post_process', return_value=ProcessResult(event=event)):
+    with patch.object(BaseApp, 'post_process', return_value=BaseProcessResult(event=event)):
         result = stream_app.post_process(event=event, state=redis)
-    assert result == ProcessResult(event=event, next_process_kwargs={})
+    assert result == BaseProcessResult(event=event, next_process_kwargs={})
