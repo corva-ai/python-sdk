@@ -1,29 +1,11 @@
 import traceback
-from typing import Any, Dict, Literal, Optional
-
-from pydantic import BaseModel
+from typing import Literal
 
 from corva.app.base import BaseApp
-from corva.app.context import TaskContext
+from corva.app.utils.context import TaskContext
+from corva.app.utils.task_model import TaskData, UpdateTaskInfoData
 from corva.event.event import Event
 from corva.event.loader.task import TaskLoader
-
-
-class TaskData(BaseModel):
-    id: str
-    state: Literal['running', 'failed', 'succeeded']
-    fail_reason: Optional[Any] = None
-    asset_id: int
-    company_id: int
-    app_id: int
-    document_bucket: str
-    properties: Dict[str, Any]
-    payload: Dict[str, Any]
-
-
-class UpdateTaskInfoData(BaseModel):
-    fail_reason: Optional[str] = None
-    payload: dict = {}
 
 
 class TaskApp(BaseApp):
@@ -34,7 +16,7 @@ class TaskApp(BaseApp):
 
     def get_context(self, event: Event) -> TaskContext:
         if event[0].version != 2:
-            raise Exception('Only task API v2 supported')
+            raise Exception('Only utils API v2 supported')
 
         task_data = self.get_task_data(task_id=event[0].task_id)
 
