@@ -1,5 +1,5 @@
 from unittest.mock import patch
-
+from pytest_mock import MockerFixture
 import pytest
 from fakeredis import FakeRedis
 
@@ -47,29 +47,14 @@ def redis(redis_adapter):
 
 
 @pytest.fixture(scope='function')
-def patch_base_event():
-    """Patches BaseEvent
-
-    1. patches __abstractmethods__, so we can initialize BaseEvent
-    2. patches load function
-    """
-
-    with patch.object(Event, '__abstractmethods__', set()), \
-         patch.object(Event, 'load', side_effect=lambda event: event):
-        yield
-
-
-@pytest.fixture(scope='function')
-def patch_base_app(patch_base_event):
+def patch_base_app(mocker: MockerFixture):
     """Patches BaseApp
 
     1. patches __abstractmethods__, so we can initialize BaseApp
-    2. patches event_cls with BaseEvent
     """
 
-    with patch.object(BaseApp, '__abstractmethods__', set()), \
-         patch.object(BaseApp, 'event_cls', Event):
-        yield
+    mocker.patch.object(BaseApp, '__abstractmethods__', set())
+    yield
 
 
 @pytest.fixture(scope='function')
