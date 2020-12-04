@@ -1,7 +1,8 @@
 from unittest.mock import patch
-from pytest_mock import MockerFixture
+
 import pytest
 from fakeredis import FakeRedis
+from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
