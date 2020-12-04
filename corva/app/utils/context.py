@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from corva.app.utils.task_model import TaskData
 from corva.event.event import Event
 from corva.state.redis_state import RedisState
 
@@ -17,3 +18,8 @@ class ScheduledContext(BaseContext):
 
 class StreamContext(BaseContext):
     state: RedisState
+
+
+class TaskContext(BaseContext):
+    task: TaskData
+    save_data: dict = {}
