@@ -1,22 +1,31 @@
-from corva.utils import get_provider, get_state_key
+from corva.event.data.base import BaseEventData
+from corva.event.event import Event
+from corva.utils import GetStateKey
+
+PROVIDER = 'provider'
+APP_KEY = f'{PROVIDER}.app-key'
+ASSET_ID = 1
+APP_STREAM_ID = 2
+APP_CONNECTION_ID = 3
+STATE_KEY = f'{PROVIDER}/well/{ASSET_ID}/stream/{APP_STREAM_ID}/{APP_KEY}/{APP_CONNECTION_ID}'
 
 
-def test_get_state_key(patch_base_event):
-    provider = 'provider'
-    app_key = f'{provider}.app-key'
-    asset_id = 1
-    app_stream_id = 2
-    app_connection_id = 3
+def test_GetStateKey__get_provider():
+    assert GetStateKey._get_provider(app_key=APP_KEY) == PROVIDER
 
-    state_key = get_state_key(
-        asset_id=asset_id,
-        app_stream_id=app_stream_id,
-        app_key=app_key,
-        app_connection_id=app_connection_id
+
+def test_GetStateKey__get_key():
+    state_key = GetStateKey._get_key(
+        asset_id=ASSET_ID,
+        app_stream_id=APP_STREAM_ID,
+        app_key=APP_KEY,
+        app_connection_id=APP_CONNECTION_ID
     )
-    assert state_key == f'{provider}/well/{asset_id}/stream/{app_stream_id}/{app_key}/{app_connection_id}'
+    assert state_key == STATE_KEY
 
 
-def test_get_app_provider():
-    app_key = 'company.app-name'
-    assert get_provider(app_key=app_key) == 'company'
+def test_GetStateKey_from_event():
+    event = Event(
+        data=[BaseEventData(asset_id=ASSET_ID, app_stream_id=APP_STREAM_ID, app_connection_id=APP_CONNECTION_ID)]
+    )
+    assert GetStateKey.from_event(event=event, app_key=APP_KEY) == STATE_KEY
