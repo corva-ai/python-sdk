@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from corva.app.task import TaskData
+from corva.app.utils.task_model import TaskData
 from corva.event.event import Event
 from corva.state.redis_state import RedisState
 
