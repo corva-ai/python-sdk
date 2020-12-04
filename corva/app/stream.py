@@ -1,76 +1,76 @@
 from itertools import chain
-from typing import Any, Optional, List
+from typing import Optional, List
 
-from corva.app.base import BaseApp, ProcessResult
-from corva.event.base import BaseEvent
+from corva.app.base import BaseApp
+from corva.app.context import StreamContext
 from corva.event.data.stream import StreamEventData, Record
-from corva.event.stream import StreamEvent
+from corva.event.event import Event
+from corva.event.loader.stream import StreamLoader
+from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
+from corva.utils import GetStateKey
 
 
 class StreamApp(BaseApp):
-    DEFAULT_LAST_PROCESSED_TIMESTAMP = -1
-    DEFAULT_LAST_PROCESSED_DEPTH = -1
+    DEFAULT_LAST_PROCESSED_VALUE = -1
 
-    event_cls = StreamEvent
+    group_by_field = 'app_connection_id'
 
     def __init__(self, filter_by_timestamp: bool = False, filter_by_depth: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter_by_timestamp = filter_by_timestamp
         self.filter_by_depth = filter_by_depth
 
-    def run(
-         self,
-         event: str,
-         load_kwargs: Optional[dict] = None,
-         pre_process_kwargs: Optional[dict] = None,
-         process_kwargs: Optional[dict] = None,
-         post_process_kwargs: Optional[dict] = None,
-         on_fail_before_post_process_kwargs: Optional[dict] = None
-    ) -> Any:
-        load_kwargs = {'app_key': self.app_key, **(load_kwargs or {})}
-        return super(StreamApp, self).run(
+    def event_loader(self) -> StreamLoader:
+        return StreamLoader(app_key=self.app_key)
+
+    def get_context(self, event: Event) -> StreamContext:
+        return StreamContext(
             event=event,
-            load_kwargs=load_kwargs,
-            pre_process_kwargs=pre_process_kwargs,
-            process_kwargs=process_kwargs,
-            post_process_kwargs=post_process_kwargs,
-            on_fail_before_post_process_kwargs=on_fail_before_post_process_kwargs
+            state=RedisState(
+                redis=RedisAdapter(
+                    default_name=GetStateKey.from_event(event=event, app_key=self.app_key),
+                    cache_url=self.cache_url,
+                    logger=self.logger
+                ),
+                logger=self.logger
+            )
         )
 
-    def pre_process(self, event: BaseEvent, state: RedisState, **kwargs) -> ProcessResult:
-        event = super().pre_process(event=event, state=state, **kwargs).event
-
+    def pre_process(self, context: StreamContext) -> None:
         last_processed_timestamp = (
-            int(state.load(key='last_processed_timestamp'))
+            int(context.state.load(key='last_processed_timestamp'))
             if self.filter_by_timestamp
-            else self.DEFAULT_LAST_PROCESSED_TIMESTAMP
+            else self.DEFAULT_LAST_PROCESSED_VALUE
         )
+
         last_processed_depth = (
-            float(state.load(key='last_processed_depth'))
+            float(context.state.load(key='last_processed_depth'))
             if self.filter_by_depth
-            else self.DEFAULT_LAST_PROCESSED_DEPTH
+            else self.DEFAULT_LAST_PROCESSED_VALUE
         )
 
         event = self._filter_event(
-            event=event,
+            event=context.event,
             last_processed_timestamp=last_processed_timestamp,
             last_processed_depth=last_processed_depth
         )
 
-        return ProcessResult(event=event)
+        context.event = event
 
-    def post_process(self, event: BaseEvent, state: RedisState, **kwargs) -> ProcessResult:
-        event = super(StreamApp, self).post_process(event=event, state=state, **kwargs).event
+    def process(self, context: StreamContext) -> None:
+        pass
 
-        all_records: List[Record] = list(chain(*[subdata.records for subdata in event]))
+    def post_process(self, context: StreamContext) -> None:
+        all_records: List[Record] = list(chain(*[subdata.records for subdata in context.event]))
+
         last_processed_timestamp = max(
             [
                 record.timestamp
                 for record in all_records
                 if record.timestamp is not None
             ],
-            default=self.DEFAULT_LAST_PROCESSED_TIMESTAMP
+            default=self.DEFAULT_LAST_PROCESSED_VALUE
         )
         last_processed_depth = max(
             [
@@ -78,23 +78,24 @@ class StreamApp(BaseApp):
                 for record in all_records
                 if record.measured_depth is not None
             ],
-            default=self.DEFAULT_LAST_PROCESSED_DEPTH
+            default=self.DEFAULT_LAST_PROCESSED_VALUE
         )
 
         mapping = {'last_processed_timestamp': last_processed_timestamp,
                    'last_processed_depth': last_processed_depth}
 
-        state.store(mapping=mapping)
+        context.state.store(mapping=mapping)
 
-        return ProcessResult(event=event)
+    def on_fail(self, context: StreamContext, exception: Exception) -> None:
+        pass
 
     @classmethod
     def _filter_event(
          cls,
-         event: BaseEvent,
+         event: Event,
          last_processed_timestamp: Optional[int],
          last_processed_depth: Optional[float]
-    ) -> StreamEvent:
+    ) -> Event:
         data = []
         for subdata in event:  # type: StreamEventData
             data.append(
@@ -104,7 +105,8 @@ class StreamApp(BaseApp):
                     last_processed_depth=last_processed_depth
                 )
             )
-        return StreamEvent(data=data)
+
+        return Event(data=data)
 
     @staticmethod
     def _filter_event_data(
@@ -113,14 +115,16 @@ class StreamApp(BaseApp):
          last_processed_depth: Optional[float] = None
     ) -> StreamEventData:
         records = data.records
+
         if data.is_completed:
             records = records[:-1]  # remove "completed" record
 
-        result = []
+        new_records = []
         for record in records:
             if last_processed_timestamp is not None and record.timestamp <= last_processed_timestamp:
                 continue
             if last_processed_depth is not None and record.measured_depth <= last_processed_depth:
                 continue
-            result.append(record)
-        return data.copy(update={'records': result}, deep=True)
+            new_records.append(record)
+
+        return data.copy(update={'records': new_records}, deep=True)
