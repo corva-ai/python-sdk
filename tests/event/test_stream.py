@@ -3,7 +3,7 @@ import json
 import pytest
 
 from corva.constants import STREAM_EVENT_TYPE
-from corva.event.base import BaseEvent
+from corva.event.event import Event
 from corva.event.stream import StreamEvent
 
 
@@ -26,14 +26,14 @@ def test_get_asset_id_key_exc(stream_event):
 
 
 def test_get_app_connection(stream_event_str):
-    event: STREAM_EVENT_TYPE = BaseEvent._load(event=stream_event_str)
+    event: STREAM_EVENT_TYPE = Event._load(event=stream_event_str)
     for subdata, app_key, expected in zip(event, ['corva.wits-depth-summary', 'other.oil-price-app'], [1, 2]):
         app_connection_id = StreamEvent._get_app_connection_id(subdata=subdata, app_key=app_key)
         assert app_connection_id == expected
 
 
 def test_get_app_connection_key_error(stream_event_str):
-    event: STREAM_EVENT_TYPE = BaseEvent._load(event=stream_event_str)
+    event: STREAM_EVENT_TYPE = Event._load(event=stream_event_str)
     with pytest.raises(ValueError) as exc:
         StreamEvent._get_app_connection_id(subdata=event[0], app_key='random')
     assert str(exc.value) == 'Can\'t get random from metadata.apps.'

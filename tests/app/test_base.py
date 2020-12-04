@@ -3,8 +3,8 @@ from unittest.mock import patch, call
 import pytest
 
 from corva.app.base import BaseApp
-from corva.app.base import ProcessResult
-from corva.event.base import BaseEvent
+from corva.app.base import BaseProcessResult
+from corva.event.event import Event
 from corva.event.data.base import BaseEventData
 from corva.utils import get_state_key
 
@@ -16,7 +16,7 @@ def test_abstractmethods():
 
 
 def test__group_event(base_app):
-    event = BaseEvent(data=[
+    event = Event(data=[
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=2)]
@@ -30,10 +30,10 @@ def test__group_event(base_app):
 
 
 def test__get_states(base_app):
-    event1 = BaseEvent(data=[
+    event1 = Event(data=[
         BaseEventData(asset_id=1, app_stream_id=1, app_connection_id=1)
     ])
-    event2 = BaseEvent(data=[
+    event2 = Event(data=[
         BaseEventData(asset_id=2, app_stream_id=2, app_connection_id=2)
     ])
     events = [event1, event2]
@@ -102,24 +102,24 @@ def test_run(base_app):
 def test_pre_process(base_app, redis):
     event = 'myevent'
     pre_res = base_app.pre_process(event=event, state=redis)
-    assert pre_res == ProcessResult(event=event, next_process_kwargs={})
+    assert pre_res == BaseProcessResult(event=event, next_process_kwargs={})
 
 
 def test_process(base_app, patch_base_event, redis):
-    base_event = BaseEvent(data=[])
+    base_event = Event(data=[])
     assert (
          base_app.process(event=base_event, state=redis)
          ==
-         ProcessResult(event=base_event, next_process_kwargs={})
+         BaseProcessResult(event=base_event, next_process_kwargs={})
     )
 
 
 def test_post_process(base_app, patch_base_event, redis):
-    base_event = BaseEvent(data=[])
+    base_event = Event(data=[])
     assert (
          base_app.post_process(event=base_event, state=redis)
          ==
-         ProcessResult(event=base_event, next_process_kwargs={})
+         BaseProcessResult(event=base_event, next_process_kwargs={})
     )
 
 
@@ -135,15 +135,15 @@ def test__run_correct_params(base_app, patch_base_event):
     process_kwargs = {'pro_key_1': 'pro_val_1'}
     post_process_kwargs = {'post_key_1': 'post_val_1'}
 
-    pre_process_result = ProcessResult(
-        event=BaseEvent([]),
+    pre_process_result = BaseProcessResult(
+        event=Event([]),
         next_process_kwargs={
             'pre_next_key_1': 'pre_next_val_1',
             'pro_key_1': 'random'  # should be overridden by process_kwargs
         }
     )
-    process_result = ProcessResult(
-        event=BaseEvent([BaseEventData()]),
+    process_result = BaseProcessResult(
+        event=Event([BaseEventData()]),
         next_process_kwargs={
             'pro_next_key_1': 'pro_next_val_1',
             'post_key_1': 'random'  # should be overridden by post_process_kwargs
@@ -208,7 +208,7 @@ def test__run_exc_in_process(base_app, patch_base_event):
 
     on_fail_before_post_process_kwargs = {'fail_key_1': 'fail_val_1'}
 
-    pre_process_result = ProcessResult(event=BaseEvent([]))
+    pre_process_result = BaseProcessResult(event=Event([]))
 
     with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
          patch.object(base_app, 'process', side_effect=Exception) as process, \
@@ -235,8 +235,8 @@ def test__run(base_app, patch_base_event):
     event = 'myevent'
     state = 'state'
 
-    pre_process_result = ProcessResult(event=BaseEvent([]))
-    process_result = ProcessResult(event=BaseEvent([]))
+    pre_process_result = BaseProcessResult(event=Event([]))
+    process_result = BaseProcessResult(event=Event([]))
 
     with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
          patch.object(base_app, 'process', return_value=process_result) as process, \
