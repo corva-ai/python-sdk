@@ -5,6 +5,9 @@ from corva.state.redis_state import RedisState
 
 
 class BaseContext(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     event: Event
 
 
