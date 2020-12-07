@@ -3,11 +3,12 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis
 from pytest_mock import MockerFixture
-from corva.app.utils.context import TaskContext
+
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.app.task import TaskApp
+from corva.app.utils.context import TaskContext, StreamContext
 from corva.app.utils.task_model import TaskData
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.data.stream import Record, StreamEventData
@@ -201,8 +202,22 @@ def task_data_factory():
 
 
 @pytest.fixture(scope='function')
+def stream_context_factory(stream_event_data_factory, redis):
+    def _stream_context_factory(**kwargs):
+        for key, val in dict(
+             event=Event(data=[stream_event_data_factory()]),
+             state=redis,
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return StreamContext(**kwargs)
+
+    return _stream_context_factory
+
+
+@pytest.fixture(scope='session')
 def task_context_factory(task_event_data_factory, task_data_factory):
-    def _task_context(**kwargs):
+    def _task_context_factory(**kwargs):
         for key, val in dict(
              event=Event(data=[task_event_data_factory()]),
              task=task_data_factory(),
@@ -211,4 +226,4 @@ def task_context_factory(task_event_data_factory, task_data_factory):
 
         return TaskContext(**kwargs)
 
-    return _task_context
+    return _task_context_factory
