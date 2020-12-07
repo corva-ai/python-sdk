@@ -1,2 +1,0 @@
-class CorvaException(Exception):
-    pass
