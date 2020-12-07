@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
-from corva.app.utils.context import StreamContext
+from corva.app.utils.context import StreamContext, ScheduledContext
 from corva.constants import STREAM_EVENT_TYPE
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.data.stream import Record, StreamEventData
@@ -177,3 +177,17 @@ def stream_context_factory(stream_event_data_factory, redis):
         return StreamContext(**kwargs)
 
     return _stream_context_factory
+
+
+@pytest.fixture(scope='function')
+def scheduled_context_factory(scheduled_event_data_factory, redis):
+    def _scheduled_context_factory(**kwargs):
+        for key, val in dict(
+             event=Event(data=[scheduled_event_data_factory()]),
+             state=redis,
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return ScheduledContext(**kwargs)
+
+    return _scheduled_context_factory
