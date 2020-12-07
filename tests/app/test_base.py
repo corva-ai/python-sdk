@@ -33,6 +33,7 @@ def test_run_exc_in_event_loader_load(mocker: MockerFixture, base_app):
 
     with pytest.raises(Exception):
         base_app.run(event='')
+
     logger_spy.error.assert_called_once_with('Could not prepare events for run.')
 
 
@@ -43,34 +44,39 @@ def test_run_exc_in__group_event(mocker: MockerFixture, base_app):
 
     with pytest.raises(Exception):
         base_app.run(event='')
+
     logger_spy.error.assert_called_once_with('Could not prepare events for run.')
 
 
 def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
-    mocker.patch.object(BaseApp, 'event_loader')
     event1 = Event(data=[BaseEventData(a=1)])
     event2 = Event(data=[BaseEventData(a=2)])
+
+    mocker.patch.object(BaseApp, 'event_loader')
     mocker.patch.object(base_app, '_group_event', return_value=[event1, event2])
-    run_mock = mocker.patch.object(base_app, '_run'
-                                   )
+    run_mock = mocker.patch.object(base_app, '_run')
+
     base_app.run(event='')
+
     assert run_mock.call_count == 2
     run_mock.assert_has_calls([mocker.call(event=event1), mocker.call(event=event2)])
 
 
 def test__group_event(mocker: MockerFixture, base_app):
-    mocker.patch.object(BaseApp, 'group_by_field', new='app_connection_id')
-
     event = Event(data=[
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=2)]
     )
-    events = base_app._group_event(event=event)
     expected = [
         [event[0], event[1]],
         [event[2]]
     ]
+
+    mocker.patch.object(BaseApp, 'group_by_field', new='app_connection_id')
+
+    events = base_app._group_event(event=event)
+
     assert events == expected
 
 
@@ -80,6 +86,7 @@ def test__run_exc_in_get_context(mocker: MockerFixture, base_app):
 
     with pytest.raises(Exception):
         base_app._run(event=Event([]))
+
     logger_spy.error.assert_called_once_with('Could not get context.')
 
 
@@ -93,6 +100,7 @@ def test__run_exc_in_pre_process(mocker: MockerFixture, base_app):
 
     with pytest.raises(CustomException):
         base_app._run(event=Event([]))
+
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
     on_fail_spy.assert_called_once_with(context=context, exception=CustomException())
 
@@ -108,6 +116,7 @@ def test__run_exc_in_process(mocker: MockerFixture, base_app):
 
     with pytest.raises(CustomException):
         base_app._run(event=Event([]))
+
     pre_spy.assert_called_once_with(context=context)
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
     on_fail_spy.assert_called_once_with(context=context, exception=CustomException())
@@ -125,6 +134,7 @@ def test__run_exc_in_post_process(mocker: MockerFixture, base_app):
 
     with pytest.raises(CustomException):
         base_app._run(event=Event([]))
+
     pre_spy.assert_called_once_with(context=context)
     process_spy.assert_called_once_with(context=context)
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
