@@ -1,41 +1,12 @@
-from functools import partial
-
 import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.app.stream import StreamApp
 from corva.app.utils.context import StreamContext
-from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
 from tests.conftest import CustomException
-
-
-@pytest.fixture(scope='session')
-def record_factory():
-    return partial(
-        Record,
-        timestamp=int(),
-        asset_id=int(),
-        company_id=int(),
-        version=int(),
-        data={},
-        collection=str()
-    )
-
-
-@pytest.fixture(scope='session')
-def stream_event_data_factory(record_factory):
-    return partial(
-        StreamEventData,
-        records=[],
-        metadata={},
-        asset_id=int(),
-        app_connection_id=int(),
-        app_stream_id=int(),
-        is_completed=False
-    )
 
 
 @pytest.mark.parametrize(
