@@ -30,62 +30,52 @@ def test_get_context(mocker: MockerFixture, scheduled_app):
     assert isinstance(context, ScheduledContext)
 
 
-def test_pre_process_calls_base(mocker: MockerFixture, scheduled_app):
-    event = Event(data=[])
+def test_pre_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
+    context = scheduled_context_factory()
 
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
     super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
-
-    context = scheduled_app.get_context(event=event)
 
     scheduled_app.pre_process(context=context)
 
     super_pre_process_mock.assert_called_once_with(context=context)
 
 
-def test_process_calls_base(mocker: MockerFixture, scheduled_app):
-    event = Event(data=[])
+def test_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
+    context = scheduled_context_factory()
 
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
     super_process_mock = mocker.patch.object(BaseApp, 'process')
-
-    context = scheduled_app.get_context(event=event)
 
     scheduled_app.process(context=context)
 
     super_process_mock.assert_called_once_with(context=context)
 
 
-def test_post_process_calls_base(mocker: MockerFixture, scheduled_app):
-    event = Event(data=[])
+def test_post_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
+    context = scheduled_context_factory()
 
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
     super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
-
-    context = scheduled_app.get_context(event=event)
 
     scheduled_app.post_process(context=context)
 
     super_post_process_mock.assert_called_once_with(context=context)
 
 
-def test_on_fail_calls_base(mocker: MockerFixture, scheduled_app):
-    event = Event(data=[])
+def test_on_fail_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
+    context = scheduled_context_factory()
     exc = CustomException('')
 
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
     super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
-
-    context = scheduled_app.get_context(event=event)
 
     scheduled_app.on_fail(context=context, exception=exc)
 
     super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
 
 
-def test_post_process(mocker: MockerFixture, scheduled_app, scheduled_event_data_factory):
+def test_post_process(
+     mocker: MockerFixture, scheduled_app, scheduled_event_data_factory, scheduled_context_factory
+):
     event = Event(data=[scheduled_event_data_factory(schedule=1), scheduled_event_data_factory(schedule=2)])
-    context = scheduled_app.get_context(event=event)
+    context = scheduled_context_factory(event=event)
 
     update_schedule_status_mock = mocker.patch.object(scheduled_app, 'update_schedule_status')
 
