@@ -28,17 +28,19 @@ class ScheduledApp(BaseApp):
         )
 
     def pre_process(self, context: ScheduledContext) -> None:
-        pass
+        super().pre_process(context=context)
 
     def process(self, context: ScheduledContext) -> None:
-        pass
+        super().process(context=context)
 
     def post_process(self, context: ScheduledContext) -> None:
+        super().post_process(context=context)
+
         for data in context.event:  # type: ScheduledEventData
             self.update_schedule_status(schedule=data.schedule, status='completed')
 
     def on_fail(self, context: ScheduledContext, exception: Exception) -> None:
-        pass
+        super().on_fail(context=context, exception=exception)
 
     def update_schedule_status(self, schedule: int, status: str) -> dict:
         response = self.api.post(path=f'scheduler/{schedule}/{status}')
