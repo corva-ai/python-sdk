@@ -54,6 +54,7 @@ def test_post_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled
     context = scheduled_context_factory()
 
     super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
+    mocker.patch.object(scheduled_app, 'update_schedule_status')
 
     scheduled_app.post_process(context=context)
 
