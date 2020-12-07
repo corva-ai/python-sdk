@@ -8,9 +8,11 @@ from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.app.utils.context import StreamContext, ScheduledContext
+from corva.app.task import TaskApp
 from corva.constants import STREAM_EVENT_TYPE
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.data.stream import Record, StreamEventData
+from corva.event.data.task import TaskEventData
 from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -74,6 +76,11 @@ def scheduled_app():
 @pytest.fixture(scope='function')
 def stream_app():
     return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
+
+
+@pytest.fixture(scope='function')
+def task_app():
+    return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')
@@ -163,6 +170,39 @@ def scheduled_event_data_factory():
         return ScheduledEventData(**kwargs)
 
     return _scheduled_event_data_factory
+
+@pytest.fixture(scope='session')
+def task_event_data_factory():
+    def _task_event_data_factory(**kwargs):
+        for key, val in dict(
+             task_id=str(),
+             version=2
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return TaskEventData(**kwargs)
+
+    return _task_event_data_factory
+
+
+@pytest.fixture(scope='session')
+def task_data_factory():
+    def _task_data_factory(**kwargs):
+        for key, val in dict(
+             id=str(),
+             state='running',
+             asset_id=int(),
+             company_id=int(),
+             app_id=int(),
+             document_bucket=str(),
+             properties={},
+             payload={},
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return TaskEventData(**kwargs)
+
+    return _task_data_factory
 
 
 @pytest.fixture(scope='function')
