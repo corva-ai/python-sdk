@@ -20,6 +20,7 @@ from corva.state.redis_state import RedisState
 APP_KEY = 'provider.app-name'
 SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
 STREAM_EVENT_FILE_PATH = 'data/tests/stream_event.json'
+TASK_EVENT_FILE_PATH = 'data/tests/task_event.json'
 CACHE_URL = 'redis://localhost:6379'
 
 
@@ -94,6 +95,10 @@ def stream_event_str() -> str:
     with open(STREAM_EVENT_FILE_PATH) as stream_event:
         return stream_event.read()
 
+@pytest.fixture(scope='session')
+def task_event_str() -> str:
+    with open(TASK_EVENT_FILE_PATH) as task_event:
+        return task_event.read()
 
 class CustomException(Exception):
     def __eq__(self, other):
