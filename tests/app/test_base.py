@@ -4,11 +4,7 @@ from pytest_mock import MockerFixture
 from corva.app.base import BaseApp
 from corva.event.data.base import BaseEventData
 from corva.event.event import Event
-
-
-class CustomException(Exception):
-    def __eq__(self, other):
-        return type(self) is type(other) and self.args == other.args
+from tests.conftest import CustomException
 
 
 def test_abstractmethods():
