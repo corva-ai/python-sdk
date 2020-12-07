@@ -3,6 +3,7 @@ import json
 import pytest
 
 from corva.constants import STREAM_EVENT_TYPE
+from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
 
 
@@ -102,4 +103,7 @@ def test_load_is_completed():
 def test_load_from_file(stream_event_str):
     """Tests that stream event is loaded from file without exceptions."""
 
-    StreamLoader(app_key='corva.wits-depth-summary').load(event=stream_event_str)
+    event = StreamLoader(app_key='corva.wits-depth-summary').load(event=stream_event_str)
+
+    assert len(event) == 1
+    assert isinstance(event, Event)
