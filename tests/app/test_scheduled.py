@@ -1,32 +1,140 @@
-from types import SimpleNamespace
-from unittest.mock import call
-from unittest.mock import patch
+from functools import partial
+
+import pytest
+from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
-from corva.app.base import BaseProcessResult
-from corva.event.data.base import BaseEventData
-from corva.event.scheduled import ScheduledEvent
+from corva.app.scheduled import ScheduledApp
+from corva.app.utils.context import ScheduledContext
+from corva.event.data.scheduled import ScheduledEventData
+from corva.event.event import Event
+from corva.event.loader.scheduled import ScheduledLoader
+from tests.conftest import CustomException
 
 
-def test_post_process(scheduled_app, redis):
-    event = ScheduledEvent(data=[BaseEventData(schedule=1), BaseEventData(schedule=2)])
-    with patch.object(BaseApp, 'post_process', return_value=SimpleNamespace(event=event)) as post_process, \
-         patch.object(scheduled_app, 'update_schedule_status') as update_schedule_status:
-        post_result = scheduled_app.post_process(event=event, state=redis)
-        post_process.assert_called_once_with(event=event, state=redis)
-        assert update_schedule_status.call_count == len(event)
-        update_schedule_status.assert_has_calls(
-            [
-                call(schedule=1, status='completed'),
-                call(schedule=2, status='completed')
-            ]
-        )
-        assert post_result == BaseProcessResult(event=event)
+@pytest.fixture(scope='session')
+def scheduled_event_data_factory():
+    return partial(
+        ScheduledEventData,
+        cron_string=str(),
+        environment=str(),
+        app=int(),
+        app_key=str(),
+        app_version=None,
+        app_connection_id=int(),
+        app_stream_id=int(),
+        source_type=str(),
+        company=int(),
+        provider=str(),
+        schedule=int(),
+        interval=int(),
+        schedule_start=int(),
+        schedule_end=int(),
+        asset_id=int(),
+        asset_name=str(),
+        asset_type=str(),
+        timezone=str(),
+        log_type=str(),
+    )
 
 
-def test_update_schedule_status(scheduled_app):
+@pytest.mark.parametrize(
+    'attr_name,expected', (('group_by_field', 'app_connection_id'),)
+)
+def test_default_values(attr_name, expected):
+    assert getattr(ScheduledApp, attr_name) == expected
+
+
+def test_event_loader(scheduled_app):
+    event_loader = scheduled_app.event_loader()
+
+    assert isinstance(event_loader, ScheduledLoader)
+
+
+def test_get_context(mocker: MockerFixture, scheduled_app):
+    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
+
+    context = scheduled_app.get_context(event=Event(data=[]))
+
+    assert isinstance(context, ScheduledContext)
+
+
+def test_pre_process_calls_base(mocker: MockerFixture, scheduled_app):
+    event = Event(data=[])
+
+    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
+    super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
+
+    context = scheduled_app.get_context(event=event)
+
+    scheduled_app.pre_process(context=context)
+
+    super_pre_process_mock.assert_called_once_with(context=context)
+
+
+def test_process_calls_base(mocker: MockerFixture, scheduled_app):
+    event = Event(data=[])
+
+    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
+    super_process_mock = mocker.patch.object(BaseApp, 'process')
+
+    context = scheduled_app.get_context(event=event)
+
+    scheduled_app.process(context=context)
+
+    super_process_mock.assert_called_once_with(context=context)
+
+
+def test_post_process_calls_base(mocker: MockerFixture, scheduled_app):
+    event = Event(data=[])
+
+    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
+    super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
+
+    context = scheduled_app.get_context(event=event)
+
+    scheduled_app.post_process(context=context)
+
+    super_post_process_mock.assert_called_once_with(context=context)
+
+
+def test_on_fail_calls_base(mocker: MockerFixture, scheduled_app):
+    event = Event(data=[])
+    exc = CustomException('')
+
+    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
+    super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
+
+    context = scheduled_app.get_context(event=event)
+
+    scheduled_app.on_fail(context=context, exception=exc)
+
+    super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
+
+
+def test_post_process(mocker: MockerFixture, scheduled_app, scheduled_event_data_factory):
+    event = Event(data=[scheduled_event_data_factory(schedule=1), scheduled_event_data_factory(schedule=2)])
+    context = scheduled_app.get_context(event=event)
+
+    update_schedule_status_mock = mocker.patch.object(scheduled_app, 'update_schedule_status')
+
+    scheduled_app.post_process(context=context)
+
+    assert update_schedule_status_mock.call_count == len(event)
+    update_schedule_status_mock.assert_has_calls(
+        [
+            mocker.call(schedule=1, status='completed'),
+            mocker.call(schedule=2, status='completed')
+        ]
+    )
+
+
+def test_update_schedule_status(mocker: MockerFixture, scheduled_app):
     schedule = 1
     status = 'status'
-    with patch.object(scheduled_app, 'api') as api_mock:
-        scheduled_app.update_schedule_status(schedule=schedule, status=status)
-        api_mock.post.assert_called_once_with(path=f'scheduler/{schedule}/{status}')
+
+    api_mock = mocker.patch.object(scheduled_app, 'api')
+
+    scheduled_app.update_schedule_status(schedule=schedule, status=status)
+
+    api_mock.post.assert_called_once_with(path=f'scheduler/{schedule}/{status}')
