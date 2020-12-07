@@ -1,5 +1,4 @@
 from functools import partial
-from unittest.mock import call
 
 import pytest
 from pytest_mock import MockerFixture
@@ -141,8 +140,8 @@ def test__filter_event(mocker: MockerFixture, stream_event_data_factory):
 
     assert _filter_event_data_mock.call_count == 2
     _filter_event_data_mock.assert_has_calls([
-        call(data=data[0], last_processed_timestamp=None, last_processed_depth=None),
-        call(data=data[1], last_processed_timestamp=None, last_processed_depth=None)
+        mocker.call(data=data[0], last_processed_timestamp=None, last_processed_depth=None),
+        mocker.call(data=data[1], last_processed_timestamp=None, last_processed_depth=None)
     ])
     assert id(result_event) != id(event)
     assert result_event == event
