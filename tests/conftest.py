@@ -201,9 +201,9 @@ def task_data_factory():
     return _task_data_factory
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def task_context_factory(task_event_data_factory, task_data_factory):
-    def _task_context(**kwargs):
+    def _task_context_factory(**kwargs):
         for key, val in dict(
              event=Event(data=[task_event_data_factory()]),
              task=task_data_factory(),
@@ -212,7 +212,7 @@ def task_context_factory(task_event_data_factory, task_data_factory):
 
         return TaskContext(**kwargs)
 
-    return _task_context
+    return _task_context_factory
 
 
 @pytest.fixture(scope='function')
