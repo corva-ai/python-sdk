@@ -1,41 +1,12 @@
-from functools import partial
-
 import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.utils.context import ScheduledContext
-from corva.event.data.scheduled import ScheduledEventData
 from corva.event.event import Event
 from corva.event.loader.scheduled import ScheduledLoader
 from tests.conftest import CustomException
-
-
-@pytest.fixture(scope='session')
-def scheduled_event_data_factory():
-    return partial(
-        ScheduledEventData,
-        cron_string=str(),
-        environment=str(),
-        app=int(),
-        app_key=str(),
-        app_version=None,
-        app_connection_id=int(),
-        app_stream_id=int(),
-        source_type=str(),
-        company=int(),
-        provider=str(),
-        schedule=int(),
-        interval=int(),
-        schedule_start=int(),
-        schedule_end=int(),
-        asset_id=int(),
-        asset_name=str(),
-        asset_type=str(),
-        timezone=str(),
-        log_type=str(),
-    )
 
 
 @pytest.mark.parametrize(
