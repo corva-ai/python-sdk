@@ -3,12 +3,12 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis
 from pytest_mock import MockerFixture
-
+from corva.app.utils.context import TaskContext
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.app.task import TaskApp
-from corva.constants import STREAM_EVENT_TYPE
+from corva.app.utils.task_model import TaskData
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.data.stream import Record, StreamEventData
 from corva.event.data.task import TaskEventData
@@ -68,17 +68,17 @@ def base_app(patch_base_app):
 
 
 @pytest.fixture(scope='function')
-def scheduled_app(redis):
+def scheduled_app():
     return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='function')
-def stream_app(redis):
+def stream_app():
     return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='function')
-def task_app(redis):
+def task_app():
     return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
@@ -92,11 +92,6 @@ def scheduled_event_str() -> str:
 def stream_event_str() -> str:
     with open(STREAM_EVENT_FILE_PATH) as stream_event:
         return stream_event.read()
-
-
-@pytest.fixture(scope='function')
-def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
-    return Event._load(event=stream_event_str)
 
 
 class CustomException(Exception):
@@ -141,7 +136,7 @@ def stream_event_data_factory(record_factory):
 
 
 @pytest.fixture(scope='session')
-def scheduled_event_data_factory(record_factory):
+def scheduled_event_data_factory():
     def _scheduled_event_data_factory(**kwargs):
         for key, val in dict(
              cron_string=str(),
@@ -172,7 +167,7 @@ def scheduled_event_data_factory(record_factory):
 
 
 @pytest.fixture(scope='session')
-def task_event_data_factory(record_factory):
+def task_event_data_factory():
     def _task_event_data_factory(**kwargs):
         for key, val in dict(
              task_id=str(),
@@ -186,7 +181,7 @@ def task_event_data_factory(record_factory):
 
 
 @pytest.fixture(scope='session')
-def task_data_factory(record_factory):
+def task_data_factory():
     def _task_data_factory(**kwargs):
         for key, val in dict(
              id=str(),
@@ -200,6 +195,20 @@ def task_data_factory(record_factory):
         ).items():
             kwargs.setdefault(key, val)
 
-        return TaskEventData(**kwargs)
+        return TaskData(**kwargs)
 
     return _task_data_factory
+
+
+@pytest.fixture(scope='function')
+def task_context_factory(task_event_data_factory, task_data_factory):
+    def _task_context(**kwargs):
+        for key, val in dict(
+             event=Event(data=[task_event_data_factory()]),
+             task=task_data_factory(),
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return TaskContext(**kwargs)
+
+    return _task_context
