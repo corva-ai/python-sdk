@@ -246,17 +246,3 @@ def scheduled_context_factory(scheduled_event_data_factory, redis):
         return ScheduledContext(**kwargs)
 
     return _scheduled_context_factory
-
-
-@pytest.fixture(scope='session')
-def task_context_factory(task_event_data_factory, task_data_factory):
-    def _task_context_factory(**kwargs):
-        for key, val in dict(
-             event=Event(data=[task_event_data_factory()]),
-             task=task_data_factory(),
-        ).items():
-            kwargs.setdefault(key, val)
-
-        return TaskContext(**kwargs)
-
-    return _task_context_factory
