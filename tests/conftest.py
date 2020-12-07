@@ -7,9 +7,9 @@ from pytest_mock import MockerFixture
 from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
-from corva.app.utils.context import StreamContext, ScheduledContext
+from corva.app.utils.context import StreamContext, ScheduledContext, TaskContext
 from corva.app.task import TaskApp
-from corva.constants import STREAM_EVENT_TYPE
+from corva.app.utils.task_model import TaskData
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.data.stream import Record, StreamEventData
 from corva.event.data.task import TaskEventData
@@ -95,11 +95,6 @@ def stream_event_str() -> str:
         return stream_event.read()
 
 
-@pytest.fixture(scope='function')
-def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
-    return Event._load(event=stream_event_str)
-
-
 class CustomException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
@@ -171,6 +166,7 @@ def scheduled_event_data_factory():
 
     return _scheduled_event_data_factory
 
+
 @pytest.fixture(scope='session')
 def task_event_data_factory():
     def _task_event_data_factory(**kwargs):
@@ -200,9 +196,23 @@ def task_data_factory():
         ).items():
             kwargs.setdefault(key, val)
 
-        return TaskEventData(**kwargs)
+        return TaskData(**kwargs)
 
     return _task_data_factory
+
+
+@pytest.fixture(scope='function')
+def task_context_factory(task_event_data_factory, task_data_factory):
+    def _task_context(**kwargs):
+        for key, val in dict(
+             event=Event(data=[task_event_data_factory()]),
+             task=task_data_factory(),
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return TaskContext(**kwargs)
+
+    return _task_context
 
 
 @pytest.fixture(scope='function')

@@ -15,20 +15,19 @@ class TaskApp(BaseApp):
         return TaskLoader()
 
     def get_context(self, event: Event) -> TaskContext:
-        if event[0].version != 2:
-            raise Exception('Only utils API v2 supported')
-
         task_data = self.get_task_data(task_id=event[0].task_id)
 
         return TaskContext(event=event, task=task_data)
 
     def pre_process(self, context: TaskContext) -> None:
-        pass
+        super().pre_process(context=context)
 
     def process(self, context: TaskContext) -> None:
-        pass
+        super().process(context=context)
 
     def post_process(self, context: TaskContext) -> None:
+        super().post_process(context=context)
+
         self.update_task_data(
             task_id=context.task.id,
             status='success',
@@ -36,6 +35,8 @@ class TaskApp(BaseApp):
         )
 
     def on_fail(self, context: TaskContext, exception: Exception) -> None:
+        super().on_fail(context=context, exception=exception)
+
         data = UpdateTaskInfoData(
             fail_reason=str(exception),
             payload={'error': ''.join(traceback.TracebackException.from_exception(exception).format())}
