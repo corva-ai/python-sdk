@@ -118,9 +118,8 @@ def test__filter_event(mocker: MockerFixture, stream_event_data_factory):
     assert result_event == event
 
 
-def test_pre_process_calls_base(mocker: MockerFixture, stream_app, stream_event_data_factory):
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+def test_pre_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
+    context = stream_context_factory()
 
     super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
     mocker.patch.object(stream_app, '_filter_event')
@@ -130,9 +129,8 @@ def test_pre_process_calls_base(mocker: MockerFixture, stream_app, stream_event_
     super_pre_process_mock.assert_called_once_with(context=context)
 
 
-def test_process_calls_base(mocker: MockerFixture, stream_app, stream_event_data_factory):
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+def test_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
+    context = stream_context_factory()
 
     super_process_mock = mocker.patch.object(BaseApp, 'process')
 
@@ -141,9 +139,8 @@ def test_process_calls_base(mocker: MockerFixture, stream_app, stream_event_data
     super_process_mock.assert_called_once_with(context=context)
 
 
-def test_post_process_calls_base(mocker: MockerFixture, stream_app, stream_event_data_factory):
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+def test_post_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
+    context = stream_context_factory()
 
     super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
 
@@ -152,9 +149,8 @@ def test_post_process_calls_base(mocker: MockerFixture, stream_app, stream_event
     super_post_process_mock.assert_called_once_with(context=context)
 
 
-def test_on_fail_calls_base(mocker: MockerFixture, stream_app, stream_event_data_factory):
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+def test_on_fail_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
+    context = stream_context_factory()
     exc = CustomException('')
 
     super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
@@ -164,11 +160,10 @@ def test_on_fail_calls_base(mocker: MockerFixture, stream_app, stream_event_data
     super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
 
 
-def test_pre_process_loads_last_processed_timestamp(mocker: MockerFixture, stream_app, stream_event_data_factory):
+def test_pre_process_loads_last_processed_timestamp(mocker: MockerFixture, stream_app, stream_context_factory):
     stream_app.filter_by_timestamp = True
     last_processed_timestamp = 1
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory()
 
     context.state.store(key='last_processed_timestamp', value=last_processed_timestamp)
 
@@ -179,10 +174,9 @@ def test_pre_process_loads_last_processed_timestamp(mocker: MockerFixture, strea
     assert _filter_event_spy.call_args[1]['last_processed_timestamp'] == last_processed_timestamp
 
 
-def test_pre_process_default_last_processed_timestamp(mocker: MockerFixture, stream_app, stream_event_data_factory):
+def test_pre_process_default_last_processed_timestamp(mocker: MockerFixture, stream_app, stream_context_factory):
     stream_app.filter_by_timestamp = False
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory()
 
     _filter_event_spy = mocker.spy(stream_app, '_filter_event')
 
@@ -191,10 +185,9 @@ def test_pre_process_default_last_processed_timestamp(mocker: MockerFixture, str
     assert _filter_event_spy.call_args[1]['last_processed_timestamp'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
-def test_pre_process_loads_last_processed_depth(mocker: MockerFixture, stream_app, stream_event_data_factory):
+def test_pre_process_loads_last_processed_depth(mocker: MockerFixture, stream_app, stream_context_factory):
     stream_app.filter_by_depth = True
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory()
     last_processed_depth = 1
 
     context.state.store(key='last_processed_depth', value=last_processed_depth)
@@ -206,10 +199,9 @@ def test_pre_process_loads_last_processed_depth(mocker: MockerFixture, stream_ap
     assert _filter_event_spy.call_args[1]['last_processed_depth'] == last_processed_depth
 
 
-def test_pre_process_default_last_processed_depth(mocker: MockerFixture, stream_app, stream_event_data_factory, redis):
+def test_pre_process_default_last_processed_depth(mocker: MockerFixture, stream_app, stream_context_factory):
     stream_app.filter_by_depth = False
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory()
 
     _filter_event_spy = mocker.spy(stream_app, '_filter_event')
     stream_app.pre_process(context=context)
@@ -217,30 +209,29 @@ def test_pre_process_default_last_processed_depth(mocker: MockerFixture, stream_
     assert _filter_event_spy.call_args[1]['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
-def test_pre_process_calls__filter_event(mocker: MockerFixture, stream_app, stream_event_data_factory):
-    event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+def test_pre_process_calls__filter_event(mocker: MockerFixture, stream_app, stream_context_factory):
+    context = stream_context_factory()
 
     _filter_event_spy = mocker.spy(stream_app, '_filter_event')
 
     stream_app.pre_process(context=context)
 
     _filter_event_spy.assert_called_once_with(
-        event=event,
+        event=context.event,
         last_processed_timestamp=stream_app.DEFAULT_LAST_PROCESSED_VALUE,
         last_processed_depth=stream_app.DEFAULT_LAST_PROCESSED_VALUE
     )
 
 
 def test_post_process_correct_last_processed_timestamp(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     records1 = [record_factory(timestamp=1)]
     records2 = [record_factory(timestamp=2)]
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = Event(data=[data1, data2])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -250,12 +241,12 @@ def test_post_process_correct_last_processed_timestamp(
 
 
 def test_post_process_correct_last_processed_timestamp_none_in_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     records = [record_factory(timestamp=None)]
     data = stream_event_data_factory(records=records)
     event = Event(data=[data])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -269,12 +260,12 @@ def test_post_process_correct_last_processed_timestamp_none_in_records(
 
 
 def test_post_process_correct_last_processed_timestamp_empty_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     data1 = stream_event_data_factory(records=[])
     data2 = stream_event_data_factory(records=[])
     event = Event(data=[data1, data2])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -288,14 +279,14 @@ def test_post_process_correct_last_processed_timestamp_empty_records(
 
 
 def test_post_process_correct_last_processed_depth(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     records1 = [record_factory(measured_depth=1)]
     records2 = [record_factory(measured_depth=2)]
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = Event(data=[data1, data2])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -305,11 +296,11 @@ def test_post_process_correct_last_processed_depth(
 
 
 def test_post_process_correct_last_processed_depth_none_in_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     records = [record_factory(measured_depth=None)]
     event = Event(data=[stream_event_data_factory(records=records)])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -319,14 +310,14 @@ def test_post_process_correct_last_processed_depth_none_in_records(
 
 
 def test_post_process_correct_last_processed_depth_empty_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     records1 = []
     records2 = []
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
     event = Event(data=[data1, data2])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
@@ -336,10 +327,10 @@ def test_post_process_correct_last_processed_depth_empty_records(
 
 
 def test_post_process_store_call(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory
+     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
     event = Event(data=[stream_event_data_factory()])
-    context = stream_app.get_context(event=event)
+    context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
 
