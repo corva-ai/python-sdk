@@ -95,10 +95,12 @@ def stream_event_str() -> str:
     with open(STREAM_EVENT_FILE_PATH) as stream_event:
         return stream_event.read()
 
+
 @pytest.fixture(scope='session')
 def task_event_str() -> str:
     with open(TASK_EVENT_FILE_PATH) as task_event:
         return task_event.read()
+
 
 class CustomException(Exception):
     def __eq__(self, other):
