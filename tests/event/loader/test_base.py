@@ -3,7 +3,6 @@ import json
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.event.event import Event
 from corva.event.loader.base import BaseLoader
 
 BASE_LOADER_PATH = 'corva.event.loader.base'
@@ -47,6 +46,6 @@ def test__load_json():
 
 
 def test_abstractmethods():
-    assert getattr(Event, '__abstractmethods__') == frozenset(['load'])
+    assert getattr(BaseLoader, '__abstractmethods__') == frozenset(['load'])
     with pytest.raises(TypeError):
-        Event(data=[])
+        BaseLoader()
