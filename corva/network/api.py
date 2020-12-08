@@ -1,7 +1,6 @@
 import os
 import re
-from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
@@ -10,35 +9,50 @@ from urllib3 import Retry
 from corva import settings
 
 
-@dataclass(eq=False)
 class Api:
     ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
 
-    timeout: int = 600  # seconds
-    max_retries: int = 3
-    api_url: str = settings.API_ROOT_URL
-    data_api_url: str = settings.DATA_API_ROOT_URL
-    api_key: str = settings.API_KEY
-    app_name: str = settings.APP_NAME
-    session: Session = field(default_factory=Session)
+    def __init__(
+         self,
+         api_url: str = settings.API_ROOT_URL,
+         data_api_url: str = settings.DATA_API_ROOT_URL,
+         api_key: str = settings.API_KEY,
+         app_name: str = settings.APP_NAME,
+         timeout: int = 600,
+         max_retries: int = 3
+    ):
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.api_url = api_url
+        self.data_api_url = data_api_url
+        self.api_key = api_key
+        self.app_name = app_name
+        self.session = self._init_session(
+            api_key=api_key, app_name=app_name, max_retries=max_retries, allowed_methods=list(self.ALLOWED_METHODS)
+        )
 
-    def __post_init__(self):
-        self.session.headers.update({
-            'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_name
+    @staticmethod
+    def _init_session(api_key: str, app_name: str, max_retries: int, allowed_methods: List[str]):
+        session = Session()
+
+        session.headers.update({
+            'Authorization': f'API {api_key}',
+            'X-Corva-App': app_name
         })
-        self.session.mount(
+        session.mount(
             'https://',
             HTTPAdapter(
                 max_retries=Retry(
-                    total=self.max_retries,
+                    total=max_retries,
                     status_forcelist=[408, 429, 500, 502, 503, 504],
-                    allowed_methods=list(self.ALLOWED_METHODS),
+                    allowed_methods=allowed_methods,
                     backoff_factor=0.3,
                     raise_on_status=False
                 )
             )
         )
+
+        return session
 
     def get(self, path: str, **kwargs):
         return self._request('GET', path, **kwargs)
