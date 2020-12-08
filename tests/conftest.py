@@ -7,8 +7,6 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 APP_KEY = 'provider.app-name'
-SCHEDULED_EVENT_FILE_PATH = 'data/tests/scheduled_event.json'
-STREAM_EVENT_FILE_PATH = 'data/tests/stream_event.json'
 CACHE_URL = 'redis://localhost:6379'
 
 

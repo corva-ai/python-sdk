@@ -5,12 +5,11 @@ import pytest
 from corva.constants import STREAM_EVENT_TYPE
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
-from tests.conftest import STREAM_EVENT_FILE_PATH
 
 
 @pytest.fixture(scope='module')
 def stream_event_str() -> str:
-    with open(STREAM_EVENT_FILE_PATH) as stream_event:
+    with open('data/tests/stream_event.json') as stream_event:
         return stream_event.read()
 
 
