@@ -8,7 +8,6 @@ from corva.app.base import BaseApp
 from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.constants import STREAM_EVENT_TYPE
-from corva.event.data.scheduled import ScheduledEventData
 from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -94,34 +93,3 @@ def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
-
-
-@pytest.fixture(scope='session')
-def scheduled_event_data_factory():
-    def _scheduled_event_data_factory(**kwargs):
-        for key, val in dict(
-             cron_string=str(),
-             environment=str(),
-             app=int(),
-             app_key=str(),
-             app_version=None,
-             app_connection_id=int(),
-             app_stream_id=int(),
-             source_type=str(),
-             company=int(),
-             provider=str(),
-             schedule=int(),
-             interval=int(),
-             schedule_start=int(),
-             schedule_end=int(),
-             asset_id=int(),
-             asset_name=str(),
-             asset_type=str(),
-             timezone=str(),
-             log_type=str()
-        ).items():
-            kwargs.setdefault(key, val)
-
-        return ScheduledEventData(**kwargs)
-
-    return _scheduled_event_data_factory
