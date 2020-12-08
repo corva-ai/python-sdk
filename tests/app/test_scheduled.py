@@ -15,7 +15,7 @@ def scheduled_app():
     return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def scheduled_event_data_factory():
     def _scheduled_event_data_factory(**kwargs):
         default_kwargs = {

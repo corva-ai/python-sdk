@@ -15,7 +15,7 @@ def stream_app():
     return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def stream_event_data_factory(record_factory):
     def _stream_event_data_factory(**kwargs):
         default_params = {
@@ -33,7 +33,7 @@ def stream_event_data_factory(record_factory):
     return _stream_event_data_factory
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def record_factory():
     def _record_factory(**kwargs):
         default_params = {
