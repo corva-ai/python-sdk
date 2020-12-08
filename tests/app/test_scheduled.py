@@ -7,7 +7,12 @@ from corva.app.utils.context import ScheduledContext
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.event import Event
 from corva.event.loader.scheduled import ScheduledLoader
-from tests.conftest import ComparableException
+from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+
+
+@pytest.fixture(scope='function')
+def scheduled_app():
+    return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')

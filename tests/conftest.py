@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis
 
-from corva.app.scheduled import ScheduledApp
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -40,11 +39,6 @@ def redis_adapter(patch_redis_adapter):
 @pytest.fixture(scope='function')
 def redis(redis_adapter):
     return RedisState(redis=redis_adapter)
-
-
-@pytest.fixture(scope='function')
-def scheduled_app():
-    return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')
