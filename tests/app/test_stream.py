@@ -9,6 +9,20 @@ from corva.event.loader.stream import StreamLoader
 from tests.conftest import CustomException
 
 
+@pytest.fixture(scope='function')
+def stream_context_factory(stream_event_data_factory, redis):
+    def _stream_context_factory(**kwargs):
+        default_params = {
+            'event': Event(data=[stream_event_data_factory()]),
+            'state': redis
+        }
+        default_params.update(kwargs)
+
+        return StreamContext(**default_params)
+
+    return _stream_context_factory
+
+
 @pytest.mark.parametrize(
     'attr_name,expected', (('DEFAULT_LAST_PROCESSED_VALUE', -1), ('group_by_field', 'app_connection_id'))
 )
