@@ -12,7 +12,7 @@ from corva import settings
 
 @dataclass(eq=False)
 class Api:
-    HTTP_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
+    ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
 
     timeout: int = 600  # seconds
     max_retries: int = 3
@@ -33,7 +33,7 @@ class Api:
                 max_retries=Retry(
                     total=self.max_retries,
                     status_forcelist=[408, 429, 500, 502, 503, 504],
-                    allowed_methods=list(self.HTTP_METHODS),
+                    allowed_methods=list(self.ALLOWED_METHODS),
                     backoff_factor=0.3,
                     raise_on_status=False
                 )
@@ -78,7 +78,7 @@ class Api:
          timeout: Optional[int] = None,  # request timeout in seconds
     ) -> Response:
 
-        if method not in self.HTTP_METHODS:
+        if method not in self.ALLOWED_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
 
         max_retries = max_retries or self.max_retries
