@@ -13,30 +13,30 @@ from tests.conftest import ComparableException
 @pytest.fixture(scope='session')
 def scheduled_event_data_factory():
     def _scheduled_event_data_factory(**kwargs):
-        for key, val in dict(
-             cron_string=str(),
-             environment=str(),
-             app=int(),
-             app_key=str(),
-             app_version=None,
-             app_connection_id=int(),
-             app_stream_id=int(),
-             source_type=str(),
-             company=int(),
-             provider=str(),
-             schedule=int(),
-             interval=int(),
-             schedule_start=int(),
-             schedule_end=int(),
-             asset_id=int(),
-             asset_name=str(),
-             asset_type=str(),
-             timezone=str(),
-             log_type=str()
-        ).items():
-            kwargs.setdefault(key, val)
+        default_kwargs = {
+            'cron_string': str(),
+            'environment': str(),
+            'app': int(),
+            'app_key': str(),
+            'app_version': None,
+            'app_connection_id': int(),
+            'app_stream_id': int(),
+            'source_type': str(),
+            'company': int(),
+            'provider': str(),
+            'schedule': int(),
+            'interval': int(),
+            'schedule_start': int(),
+            'schedule_end': int(),
+            'asset_id': int(),
+            'asset_name': str(),
+            'asset_type': str(),
+            'timezone': str(),
+            'log_type': str()
+        }
+        default_kwargs.update(kwargs)
 
-        return ScheduledEventData(**kwargs)
+        return ScheduledEventData(**default_kwargs)
 
     return _scheduled_event_data_factory
 
