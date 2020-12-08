@@ -9,6 +9,20 @@ from corva.event.loader.scheduled import ScheduledLoader
 from tests.conftest import CustomException
 
 
+@pytest.fixture(scope='function')
+def scheduled_context_factory(scheduled_event_data_factory, redis):
+    def _scheduled_context_factory(**kwargs):
+        default_params = {
+            'event': Event(data=[scheduled_event_data_factory()]),
+            'state': redis
+        }
+        default_params.update(kwargs)
+
+        return ScheduledContext(**default_params)
+
+    return _scheduled_context_factory
+
+
 @pytest.mark.parametrize(
     'attr_name,expected', (('group_by_field', 'app_connection_id'),)
 )
