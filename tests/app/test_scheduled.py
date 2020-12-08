@@ -6,7 +6,7 @@ from corva.app.scheduled import ScheduledApp
 from corva.app.utils.context import ScheduledContext
 from corva.event.event import Event
 from corva.event.loader.scheduled import ScheduledLoader
-from tests.conftest import CustomException
+from tests.conftest import ComparableException
 
 
 @pytest.fixture(scope='function')
@@ -77,7 +77,7 @@ def test_post_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled
 
 def test_on_fail_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
     context = scheduled_context_factory()
-    exc = CustomException('')
+    exc = ComparableException('')
 
     super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
 

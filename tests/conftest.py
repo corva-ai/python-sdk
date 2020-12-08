@@ -92,7 +92,7 @@ def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
     return Event._load(event=stream_event_str)
 
 
-class CustomException(Exception):
+class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
 
