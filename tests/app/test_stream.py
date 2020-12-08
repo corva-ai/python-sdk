@@ -7,7 +7,12 @@ from corva.app.utils.context import StreamContext
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
-from tests.conftest import ComparableException
+from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+
+
+@pytest.fixture(scope='function')
+def stream_app():
+    return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')

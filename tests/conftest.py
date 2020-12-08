@@ -4,9 +4,6 @@ import pytest
 from fakeredis import FakeRedis
 
 from corva.app.scheduled import ScheduledApp
-from corva.app.stream import StreamApp
-from corva.constants import STREAM_EVENT_TYPE
-from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -48,11 +45,6 @@ def redis(redis_adapter):
 @pytest.fixture(scope='function')
 def scheduled_app():
     return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
-
-
-@pytest.fixture(scope='function')
-def stream_app():
-    return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')
