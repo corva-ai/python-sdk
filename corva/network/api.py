@@ -87,13 +87,13 @@ class Api:
          self,
          method: str,
          path: str,
-         data: Optional[dict] = None,  # form-encoded data
-         json: Optional[dict] = None,  # auto encodes dict to json and adds Content-Type=application/json header
+         data: Optional[dict] = None,  # request body
          params: Optional[dict] = None,  # url query string params
          headers: Optional[dict] = None,  # additional headers to include in request
          max_retries: Optional[int] = None,  # custom value for max number of retries
          timeout: Optional[int] = None,  # request timeout in seconds
     ) -> ApiResponse:
+
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
 
@@ -106,9 +106,8 @@ class Api:
         response = self.session.request(
             method=method,
             url=self._get_url(path=path),
-            data=data,
             params=params,
-            json=json,
+            json=data,
             headers=headers,
             timeout=timeout
         )
