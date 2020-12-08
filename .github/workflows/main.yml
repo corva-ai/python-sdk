@@ -1,0 +1,79 @@
+name: CI
+
+on: push
+
+jobs:
+  static:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: 'static'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  testing:
+    name: Automated Testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install --disable-pip-version-check -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          python -m coverage run --source=worker/ -m unittest -v
+
+      - name: coverage report
+        run: python -m coverage report
+
+  deploy:
+    name: Build and Publishing to PyPI
+    needs: [static, testing]
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Build the Package
+        run: |
+          rm -rf dist/*
+          python setup.py sdist bdist_wheel
+
+      - name: Publishing to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
