@@ -8,18 +8,10 @@ from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def patch_base_app(mocker: MockerFixture):
-    """Patches BaseApp
-
-    1. patches __abstractmethods__, so we can initialize BaseApp
-    """
-
+def base_app(mocker: MockerFixture):
+    # patch __abstractmethods__, so we can initialize BaseApp
     mocker.patch.object(BaseApp, '__abstractmethods__', set())
-    yield
 
-
-@pytest.fixture(scope='function')
-def base_app(patch_base_app):
     return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
