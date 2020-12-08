@@ -1,29 +1,13 @@
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Optional
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from corva import settings
-
-
-@dataclass(frozen=True)
-class ApiResponse:
-    response: Response
-    data: Any = field(init=False)
-
-    def __post_init__(self):
-        object.__setattr__(self, 'data', self._load_data(response=self.response))
-
-    @staticmethod
-    def _load_data(response: Response):
-        try:
-            return response.json()
-        except ValueError as exc:
-            raise ValueError('Invalid API response') from exc
 
 
 @dataclass(eq=False)
@@ -92,7 +76,7 @@ class Api:
          headers: Optional[dict] = None,  # additional headers to include in request
          max_retries: Optional[int] = None,  # custom value for max number of retries
          timeout: Optional[int] = None,  # request timeout in seconds
-    ) -> ApiResponse:
+    ) -> Response:
 
         if method not in self.HTTP_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
@@ -114,4 +98,4 @@ class Api:
 
         response.raise_for_status()
 
-        return ApiResponse(response=response)
+        return response
