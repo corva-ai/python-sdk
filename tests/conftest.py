@@ -53,12 +53,6 @@ def scheduled_event_str() -> str:
         return scheduled_event.read()
 
 
-@pytest.fixture(scope='session')
-def stream_event_str() -> str:
-    with open(STREAM_EVENT_FILE_PATH) as stream_event:
-        return stream_event.read()
-
-
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args

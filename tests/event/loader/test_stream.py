@@ -5,6 +5,7 @@ import pytest
 from corva.constants import STREAM_EVENT_TYPE
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
+from tests.conftest import STREAM_EVENT_FILE_PATH
 
 
 def test_get_asset_id():
@@ -107,3 +108,9 @@ def test_load_from_file(stream_event_str):
 
     assert len(event) == 1
     assert isinstance(event, Event)
+
+
+@pytest.fixture(scope='session')
+def stream_event_str() -> str:
+    with open(STREAM_EVENT_FILE_PATH) as stream_event:
+        return stream_event.read()
