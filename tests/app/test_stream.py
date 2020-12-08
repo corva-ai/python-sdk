@@ -4,9 +4,46 @@ from pytest_mock import MockerFixture
 from corva.app.base import BaseApp
 from corva.app.stream import StreamApp
 from corva.app.utils.context import StreamContext
+from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
 from tests.conftest import ComparableException
+
+
+@pytest.fixture(scope='session')
+def stream_event_data_factory(record_factory):
+    def _stream_event_data_factory(**kwargs):
+        default_params = {
+            'records': [],
+            'metadata': {},
+            'asset_id': int(),
+            'app_connection_id': int(),
+            'app_stream_id': int(),
+            'is_completed': False
+        }
+        default_params.update(kwargs)
+
+        return StreamEventData(**default_params)
+
+    return _stream_event_data_factory
+
+
+@pytest.fixture(scope='session')
+def record_factory():
+    def _record_factory(**kwargs):
+        default_params = {
+            'timestamp': int(),
+            'asset_id': int(),
+            'company_id': int(),
+            'version': int(),
+            'data': {},
+            'collection': str()
+        }
+        default_params.update(kwargs)
+
+        return Record(**default_params)
+
+    return _record_factory
 
 
 @pytest.fixture(scope='function')

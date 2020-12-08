@@ -9,7 +9,6 @@ from corva.app.scheduled import ScheduledApp
 from corva.app.stream import StreamApp
 from corva.constants import STREAM_EVENT_TYPE
 from corva.event.data.scheduled import ScheduledEventData
-from corva.event.data.stream import Record, StreamEventData
 from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -95,42 +94,6 @@ def stream_event(stream_event_str) -> STREAM_EVENT_TYPE:
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
-
-
-@pytest.fixture(scope='session')
-def record_factory():
-    def _record_factory(**kwargs):
-        for key, val in dict(
-             timestamp=int(),
-             asset_id=int(),
-             company_id=int(),
-             version=int(),
-             data={},
-             collection=str()
-        ).items():
-            kwargs.setdefault(key, val)
-
-        return Record(**kwargs)
-
-    return _record_factory
-
-
-@pytest.fixture(scope='session')
-def stream_event_data_factory(record_factory):
-    def _stream_event_data_factory(**kwargs):
-        for key, val in dict(
-             records=[],
-             metadata={},
-             asset_id=int(),
-             app_connection_id=int(),
-             app_stream_id=int(),
-             is_completed=False
-        ).items():
-            kwargs.setdefault(key, val)
-
-        return StreamEventData(**kwargs)
-
-    return _stream_event_data_factory
 
 
 @pytest.fixture(scope='session')
