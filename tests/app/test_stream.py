@@ -98,16 +98,14 @@ def test_filter_records_with_all_filters(stream_event_data_factory, record_facto
 def test__filter_event(stream_event_data_factory):
     data = [stream_event_data_factory(asset_id=1), stream_event_data_factory(asset_id=2)]
     event = StreamEvent(data=data)
-    with patch.object(
-         StreamApp, '_filter_event_data', side_effect=lambda data, **kwargs: data
-    ) as _filter_event_data_mock:
+    with patch.object(StreamApp, '_filter_event_data', side_effect=lambda data, **kwargs: data) as _mock:
         result_event = StreamApp._filter_event(
             event=event,
             last_processed_timestamp=None,
             last_processed_depth=None
         )
-    assert _filter_event_data_mock.call_count == 2
-    _filter_event_data_mock.assert_has_calls([
+    assert _mock.call_count == 2
+    _mock.assert_has_calls([
         call(data=data[0], last_processed_timestamp=None, last_processed_depth=None),
         call(data=data[1], last_processed_timestamp=None, last_processed_depth=None)
     ])
