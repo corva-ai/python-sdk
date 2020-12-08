@@ -5,7 +5,7 @@ from corva.event.loader.scheduled import ScheduledLoader
 from tests.conftest import SCHEDULED_EVENT_FILE_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def scheduled_event_str() -> str:
     with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
         return scheduled_event.read()

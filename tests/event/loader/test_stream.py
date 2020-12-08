@@ -8,7 +8,7 @@ from corva.event.loader.stream import StreamLoader
 from tests.conftest import STREAM_EVENT_FILE_PATH
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def stream_event_str() -> str:
     with open(STREAM_EVENT_FILE_PATH) as stream_event:
         return stream_event.read()
