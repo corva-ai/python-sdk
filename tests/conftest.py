@@ -41,12 +41,6 @@ def redis(redis_adapter):
     return RedisState(redis=redis_adapter)
 
 
-@pytest.fixture(scope='session')
-def scheduled_event_str() -> str:
-    with open(SCHEDULED_EVENT_FILE_PATH) as scheduled_event:
-        return scheduled_event.read()
-
-
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
