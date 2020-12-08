@@ -49,7 +49,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          python -m coverage run --source=worker/ -m unittest -v
+          python -m coverage run -m pytest -v
 
       - name: coverage report
         run: python -m coverage report
