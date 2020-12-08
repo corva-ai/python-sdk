@@ -3,7 +3,7 @@ from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.app.stream import StreamApp
-from corva.app.utils.context import StreamContext
+from corva.app.context import StreamContext
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
