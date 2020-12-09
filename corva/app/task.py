@@ -2,8 +2,8 @@ import traceback
 from typing import Literal
 
 from corva.app.base import BaseApp
-from corva.app.utils.context import TaskContext
-from corva.app.utils.task_model import TaskData, UpdateTaskInfoData
+from corva.app.context import TaskContext
+from corva.app.task_model import TaskData, UpdateTaskInfoData
 from corva.event.event import Event
 from corva.event.loader.task import TaskLoader
 

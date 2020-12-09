@@ -2,13 +2,14 @@ from unittest.mock import patch
 
 import pytest
 from fakeredis import FakeRedis
+
+from corva.app.context import TaskContext
 from corva.app.task import TaskApp
+from corva.app.task_model import TaskData
+from corva.event.data.task import TaskEventData
+from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
-from corva.app.utils.context import TaskContext
-from corva.app.utils.task_model import TaskData
-from corva.event.data.task import TaskEventData
-
 
 APP_KEY = 'provider.app-name'
 CACHE_URL = 'redis://localhost:6379'
@@ -47,14 +48,17 @@ class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
 
+
 @pytest.fixture(scope='function')
 def task_app():
     return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
+
 
 @pytest.fixture(scope='session')
 def task_event_str() -> str:
     with open('data/tests/task_event.json') as task_event:
         return task_event.read()
+
 
 @pytest.fixture(scope='session')
 def task_event_data_factory():
@@ -68,6 +72,7 @@ def task_event_data_factory():
         return TaskEventData(**kwargs)
 
     return _task_event_data_factory
+
 
 @pytest.fixture(scope='session')
 def task_data_factory():
@@ -87,6 +92,7 @@ def task_data_factory():
         return TaskData(**kwargs)
 
     return _task_data_factory
+
 
 @pytest.fixture(scope='session')
 def task_context_factory(task_event_data_factory, task_data_factory):

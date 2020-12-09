@@ -6,11 +6,11 @@ from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.app.task import TaskApp
-from corva.app.utils.context import TaskContext
-from corva.app.utils.task_model import UpdateTaskInfoData
+from corva.app.context import TaskContext
+from corva.app.task_model import UpdateTaskInfoData
 from corva.event.event import Event
 from corva.event.loader.task import TaskLoader
-from tests.conftest import CustomException
+from tests.conftest import ComparableException
 
 
 @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ def test_post_process_calls_base(mocker: MockerFixture, task_app, task_context_f
 
 def test_on_fail_calls_base(mocker: MockerFixture, task_app, task_context_factory):
     context = task_context_factory()
-    exc = CustomException('')
+    exc = ComparableException('')
 
     super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
     mocker.patch.object(task_app, 'update_task_data')
@@ -122,7 +122,7 @@ def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, ta
 
 def test_on_fail_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     context = task_context_factory()
-    exc = CustomException('123')
+    exc = ComparableException('123')
     update_task_data_info = UpdateTaskInfoData(
         fail_reason=str(exc),
         payload={'error': ''.join(traceback.TracebackException.from_exception(exc).format())}
