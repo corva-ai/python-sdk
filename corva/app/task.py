@@ -19,15 +19,7 @@ class TaskApp(BaseApp):
 
         return TaskContext(event=event, task=task_data)
 
-    def pre_process(self, context: TaskContext) -> None:
-        super().pre_process(context=context)
-
-    def process(self, context: TaskContext) -> None:
-        super().process(context=context)
-
     def post_process(self, context: TaskContext) -> None:
-        super().post_process(context=context)
-
         self.update_task_data(
             task_id=context.task.id,
             status='success',
@@ -35,8 +27,6 @@ class TaskApp(BaseApp):
         )
 
     def on_fail(self, context: TaskContext, exception: Exception) -> None:
-        super().on_fail(context=context, exception=exception)
-
         data = UpdateTaskInfoData(
             fail_reason=str(exception),
             payload={'error': ''.join(traceback.TracebackException.from_exception(exception).format())}
