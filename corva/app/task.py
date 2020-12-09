@@ -3,7 +3,7 @@ from typing import Literal
 
 from corva.app.base import BaseApp
 from corva.models.task import TaskData, UpdateTaskInfoData, TaskContext
-from corva.event.event import Event
+from corva.event import Event
 from corva.event.loader.task import TaskLoader
 
 

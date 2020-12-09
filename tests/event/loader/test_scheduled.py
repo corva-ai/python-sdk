@@ -1,6 +1,6 @@
 import pytest
 
-from corva.event.event import Event
+from corva.event import Event
 from corva.event.loader.scheduled import ScheduledLoader
 
 

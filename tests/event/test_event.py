@@ -1,5 +1,5 @@
 from corva.models.base import BaseEventData
-from corva.event.event import Event
+from corva.event import Event
 
 
 def test_iter():

@@ -1,5 +1,5 @@
 from corva.models.task import TaskEventData
-from corva.event.event import Event
+from corva.event import Event
 from corva.event.loader.base import BaseLoader
 
 

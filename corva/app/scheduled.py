@@ -1,6 +1,6 @@
 from corva.app.base import BaseApp
 from corva.models.scheduled import ScheduledContext, ScheduledEventData
-from corva.event.event import Event
+from corva.event import Event
 from corva.event.loader.scheduled import ScheduledLoader
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState

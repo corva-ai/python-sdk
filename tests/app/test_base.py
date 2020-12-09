@@ -3,7 +3,7 @@ from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.models.base import BaseEventData
-from corva.event.event import Event
+from corva.event import Event
 from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 

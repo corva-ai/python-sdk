@@ -4,7 +4,7 @@ import json
 from abc import abstractmethod, ABC
 
 from corva.constants import EVENT_TYPE
-from corva.event.event import Event
+from corva.event import Event
 
 
 class BaseLoader(ABC):

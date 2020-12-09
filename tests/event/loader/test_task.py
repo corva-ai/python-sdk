@@ -1,4 +1,4 @@
-from corva.event.event import Event
+from corva.event import Event
 from corva.event.loader.task import TaskLoader
 
 

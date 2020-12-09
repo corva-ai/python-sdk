@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Extra
 
-from corva.event.event import Event
+from corva.event import Event
 
 
 class BaseContext(BaseModel):
