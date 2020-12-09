@@ -1,13 +1,11 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.app.base import BaseApp
-from corva.app.scheduled import ScheduledApp
 from corva.app.context import ScheduledContext
+from corva.app.scheduled import ScheduledApp
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.event import Event
-from corva.event.loader.scheduled import ScheduledLoader
-from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
@@ -65,62 +63,6 @@ def scheduled_context_factory(scheduled_event_data_factory, redis):
 )
 def test_default_values(attr_name, expected):
     assert getattr(ScheduledApp, attr_name) == expected
-
-
-def test_event_loader(scheduled_app):
-    event_loader = scheduled_app.event_loader()
-
-    assert isinstance(event_loader, ScheduledLoader)
-
-
-def test_get_context(mocker: MockerFixture, scheduled_app):
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
-
-    context = scheduled_app.get_context(event=Event(data=[]))
-
-    assert isinstance(context, ScheduledContext)
-
-
-def test_pre_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
-    context = scheduled_context_factory()
-
-    super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
-
-    scheduled_app.pre_process(context=context)
-
-    super_pre_process_mock.assert_called_once_with(context=context)
-
-
-def test_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
-    context = scheduled_context_factory()
-
-    super_process_mock = mocker.patch.object(BaseApp, 'process')
-
-    scheduled_app.process(context=context)
-
-    super_process_mock.assert_called_once_with(context=context)
-
-
-def test_post_process_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
-    context = scheduled_context_factory()
-
-    super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
-    mocker.patch.object(scheduled_app, 'update_schedule_status')
-
-    scheduled_app.post_process(context=context)
-
-    super_post_process_mock.assert_called_once_with(context=context)
-
-
-def test_on_fail_calls_base(mocker: MockerFixture, scheduled_app, scheduled_context_factory):
-    context = scheduled_context_factory()
-    exc = ComparableException('')
-
-    super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
-
-    scheduled_app.on_fail(context=context, exception=exc)
-
-    super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
 
 
 def test_post_process(
