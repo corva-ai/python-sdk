@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
-from corva.app.task_model import UpdateTaskInfoData
+from corva.models.task import UpdateTaskInfoData
 from tests.conftest import ComparableException
 
 
