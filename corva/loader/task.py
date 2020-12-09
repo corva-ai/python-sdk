@@ -1,6 +1,6 @@
 from corva.models.task import TaskEventData
 from corva.event import Event
-from corva.event.loader.base import BaseLoader
+from corva.loader.base import BaseLoader
 
 
 class TaskLoader(BaseLoader):
@@ -9,4 +9,4 @@ class TaskLoader(BaseLoader):
 
         data = [TaskEventData(**event)]
 
-        return Event(data=data)
+        return Event(data)

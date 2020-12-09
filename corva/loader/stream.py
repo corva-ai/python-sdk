@@ -4,7 +4,7 @@ from typing import List
 
 from corva.event import Event
 from corva.models.stream import StreamEventData
-from corva.event.loader.base import BaseLoader
+from corva.loader.base import BaseLoader
 
 
 class StreamLoader(BaseLoader):
@@ -29,7 +29,7 @@ class StreamLoader(BaseLoader):
                 **subdata
             ))
 
-        return Event(data=data)
+        return Event(data)
 
     @staticmethod
     def _get_is_completed(records: List[dict]):

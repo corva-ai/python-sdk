@@ -96,7 +96,7 @@ def task_data_factory():
 def task_context_factory(task_event_data_factory, task_data_factory):
     def _task_context_factory(**kwargs):
         for key, val in dict(
-             event=Event(data=[task_event_data_factory()]),
+             event=Event([task_event_data_factory()]),
              task=task_data_factory(),
         ).items():
             kwargs.setdefault(key, val)

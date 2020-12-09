@@ -4,7 +4,7 @@ from typing import Optional, List
 from corva.app.base import BaseApp
 from corva.models.stream import StreamContext, Record, StreamEventData
 from corva.event import Event
-from corva.event.loader.stream import StreamLoader
+from corva.loader.stream import StreamLoader
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 from corva.utils import GetStateKey
@@ -99,7 +99,7 @@ class StreamApp(BaseApp):
                 )
             )
 
-        return Event(data=data)
+        return Event(data)
 
     @staticmethod
     def _filter_event_data(
