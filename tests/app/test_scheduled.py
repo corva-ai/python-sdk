@@ -58,11 +58,8 @@ def scheduled_context_factory(scheduled_event_data_factory, redis):
     return _scheduled_context_factory
 
 
-@pytest.mark.parametrize(
-    'attr_name,expected', (('group_by_field', 'app_connection_id'),)
-)
-def test_default_values(attr_name, expected):
-    assert getattr(ScheduledApp, attr_name) == expected
+def test_group_by_field():
+    assert ScheduledApp.group_by_field == 'app_connection_id'
 
 
 def test_post_process(
