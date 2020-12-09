@@ -1,7 +1,7 @@
 import pytest
 
 from corva.event import Event
-from corva.event.loader.scheduled import ScheduledLoader
+from corva.loader.scheduled import ScheduledLoader
 
 
 @pytest.fixture(scope='module')

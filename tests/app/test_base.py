@@ -53,8 +53,8 @@ def test_run_exc_in__group_event(mocker: MockerFixture, base_app):
 
 
 def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
-    event1 = Event(data=[BaseEventData(a=1)])
-    event2 = Event(data=[BaseEventData(a=2)])
+    event1 = Event([BaseEventData(a=1)])
+    event2 = Event([BaseEventData(a=2)])
 
     mocker.patch.object(BaseApp, 'event_loader')
     mocker.patch.object(base_app, '_group_event', return_value=[event1, event2])
@@ -67,7 +67,7 @@ def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
 
 
 def test__group_event(mocker: MockerFixture, base_app):
-    event = Event(data=[
+    event = Event([
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=2)]

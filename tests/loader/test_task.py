@@ -1,5 +1,5 @@
 from corva.event import Event
-from corva.event.loader.task import TaskLoader
+from corva.loader.task import TaskLoader
 
 
 def test_load(task_event_str):

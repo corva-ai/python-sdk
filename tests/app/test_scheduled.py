@@ -47,7 +47,7 @@ def scheduled_event_data_factory():
 def scheduled_context_factory(scheduled_event_data_factory, redis):
     def _scheduled_context_factory(**kwargs):
         default_params = {
-            'event': Event(data=[scheduled_event_data_factory()]),
+            'event': Event([scheduled_event_data_factory()]),
             'state': redis
         }
         default_params.update(kwargs)
@@ -64,7 +64,7 @@ def test_group_by_field():
 def test_post_process(
      mocker: MockerFixture, scheduled_app, scheduled_event_data_factory, scheduled_context_factory
 ):
-    event = Event(data=[scheduled_event_data_factory(schedule=1), scheduled_event_data_factory(schedule=2)])
+    event = Event([scheduled_event_data_factory(schedule=1), scheduled_event_data_factory(schedule=2)])
     context = scheduled_context_factory(event=event)
 
     update_schedule_status_mock = mocker.patch.object(scheduled_app, 'update_schedule_status')
