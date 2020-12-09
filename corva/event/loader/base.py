@@ -17,9 +17,6 @@ class BaseLoader(ABC):
         if not event:
             raise ValueError('Empty event')
 
-        if not isinstance(event, str):
-            raise TypeError(f'Unknown event type {type(event)}')
-
         try:
             event = json.loads(event)
         except ValueError as exc:
