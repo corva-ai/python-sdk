@@ -2,7 +2,7 @@ from itertools import chain
 from typing import Optional, List
 
 from corva.app.base import BaseApp
-from corva.app.utils.context import StreamContext
+from corva.app.context import StreamContext
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
@@ -38,8 +38,6 @@ class StreamApp(BaseApp):
         )
 
     def pre_process(self, context: StreamContext) -> None:
-        super().pre_process(context=context)
-
         last_processed_timestamp = (
             int(context.state.load(key='last_processed_timestamp'))
             if self.filter_by_timestamp
@@ -60,12 +58,7 @@ class StreamApp(BaseApp):
 
         context.event = event
 
-    def process(self, context: StreamContext) -> None:
-        super().process(context=context)
-
     def post_process(self, context: StreamContext) -> None:
-        super().post_process(context=context)
-
         all_records: List[Record] = list(chain(*[subdata.records for subdata in context.event]))
 
         last_processed_timestamp = max(
@@ -89,9 +82,6 @@ class StreamApp(BaseApp):
                    'last_processed_depth': last_processed_depth}
 
         context.state.store(mapping=mapping)
-
-    def on_fail(self, context: StreamContext, exception: Exception) -> None:
-        super().on_fail(context=context, exception=exception)
 
     @classmethod
     def _filter_event(

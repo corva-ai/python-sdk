@@ -4,7 +4,15 @@ from pytest_mock import MockerFixture
 from corva.app.base import BaseApp
 from corva.event.data.base import BaseEventData
 from corva.event.event import Event
-from tests.conftest import CustomException
+from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+
+
+@pytest.fixture(scope='function')
+def base_app(mocker: MockerFixture):
+    # patch __abstractmethods__, so we can initialize BaseApp
+    mocker.patch.object(BaseApp, '__abstractmethods__', set())
+
+    return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 def test_abstractmethods():
@@ -90,15 +98,15 @@ def test__run_exc_in_pre_process(mocker: MockerFixture, base_app):
     context = 'context'
 
     mocker.patch.object(base_app, 'get_context', return_value=context)
-    mocker.patch.object(base_app, 'pre_process', side_effect=CustomException)
+    mocker.patch.object(base_app, 'pre_process', side_effect=ComparableException)
     logger_spy = mocker.spy(base_app, 'logger')
     on_fail_spy = mocker.spy(base_app, 'on_fail')
 
-    with pytest.raises(CustomException):
+    with pytest.raises(ComparableException):
         base_app._run(event=Event([]))
 
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
-    on_fail_spy.assert_called_once_with(context=context, exception=CustomException())
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
 def test__run_exc_in_process(mocker: MockerFixture, base_app):
@@ -106,16 +114,16 @@ def test__run_exc_in_process(mocker: MockerFixture, base_app):
 
     mocker.patch.object(base_app, 'get_context', return_value=context)
     pre_spy = mocker.spy(base_app, 'pre_process')
-    mocker.patch.object(base_app, 'process', side_effect=CustomException)
+    mocker.patch.object(base_app, 'process', side_effect=ComparableException)
     logger_spy = mocker.spy(base_app, 'logger')
     on_fail_spy = mocker.spy(base_app, 'on_fail')
 
-    with pytest.raises(CustomException):
+    with pytest.raises(ComparableException):
         base_app._run(event=Event([]))
 
     pre_spy.assert_called_once_with(context=context)
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
-    on_fail_spy.assert_called_once_with(context=context, exception=CustomException())
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
 def test__run_exc_in_post_process(mocker: MockerFixture, base_app):
@@ -124,17 +132,17 @@ def test__run_exc_in_post_process(mocker: MockerFixture, base_app):
     mocker.patch.object(base_app, 'get_context', return_value=context)
     pre_spy = mocker.spy(base_app, 'pre_process')
     process_spy = mocker.spy(base_app, 'process')
-    mocker.patch.object(base_app, 'post_process', side_effect=CustomException)
+    mocker.patch.object(base_app, 'post_process', side_effect=ComparableException)
     logger_spy = mocker.spy(base_app, 'logger')
     on_fail_spy = mocker.spy(base_app, 'on_fail')
 
-    with pytest.raises(CustomException):
+    with pytest.raises(ComparableException):
         base_app._run(event=Event([]))
 
     pre_spy.assert_called_once_with(context=context)
     process_spy.assert_called_once_with(context=context)
     logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
-    on_fail_spy.assert_called_once_with(context=context, exception=CustomException())
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
 def test__run(mocker: MockerFixture, base_app):

@@ -7,6 +7,12 @@ from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
 
 
+@pytest.fixture(scope='module')
+def stream_event_str() -> str:
+    with open('data/tests/stream_event.json') as stream_event:
+        return stream_event.read()
+
+
 def test_get_asset_id():
     data = {'records': [{'asset_id': 1}]}
 

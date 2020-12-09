@@ -1,7 +1,6 @@
 import os
 import re
-from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import List, Optional
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
@@ -10,51 +9,50 @@ from urllib3 import Retry
 from corva import settings
 
 
-@dataclass(frozen=True)
-class ApiResponse:
-    response: Response
-    data: Any = field(init=False)
+class Api:
+    ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
 
-    def __post_init__(self):
-        object.__setattr__(self, 'data', self._load_data(response=self.response))
+    def __init__(
+         self,
+         api_url: str = settings.API_ROOT_URL,
+         data_api_url: str = settings.DATA_API_ROOT_URL,
+         api_key: str = settings.API_KEY,
+         app_name: str = settings.APP_NAME,
+         timeout: int = 600,
+         max_retries: int = 3
+    ):
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.api_url = api_url
+        self.data_api_url = data_api_url
+        self.api_key = api_key
+        self.app_name = app_name
+        self.session = self._init_session(
+            api_key=api_key, app_name=app_name, max_retries=max_retries, allowed_methods=list(self.ALLOWED_METHODS)
+        )
 
     @staticmethod
-    def _load_data(response: Response):
-        try:
-            return response.json()
-        except ValueError as exc:
-            raise ValueError('Invalid API response') from exc
+    def _init_session(api_key: str, app_name: str, max_retries: int, allowed_methods: List[str]):
+        session = Session()
 
-
-@dataclass(eq=False)
-class Api:
-    HTTP_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
-
-    timeout: int = 600  # seconds
-    max_retries: int = 3
-    api_url: str = settings.API_ROOT_URL
-    data_api_url: str = settings.DATA_API_ROOT_URL
-    api_key: str = settings.API_KEY
-    app_name: str = settings.APP_NAME
-    session: Session = field(default_factory=Session)
-
-    def __post_init__(self):
-        self.session.headers.update({
-            'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_name
+        session.headers.update({
+            'Authorization': f'API {api_key}',
+            'X-Corva-App': app_name
         })
-        self.session.mount(
+        session.mount(
             'https://',
             HTTPAdapter(
                 max_retries=Retry(
-                    total=self.max_retries,
+                    total=max_retries,
                     status_forcelist=[408, 429, 500, 502, 503, 504],
-                    allowed_methods=list(self.HTTP_METHODS),
+                    allowed_methods=allowed_methods,
                     backoff_factor=0.3,
                     raise_on_status=False
                 )
             )
         )
+
+        return session
 
     def get(self, path: str, **kwargs):
         return self._request('GET', path, **kwargs)
@@ -87,14 +85,14 @@ class Api:
          self,
          method: str,
          path: str,
-         data: Optional[dict] = None,  # form-encoded data
-         json: Optional[dict] = None,  # auto encodes dict to json and adds Content-Type=application/json header
+         data: Optional[dict] = None,  # request body
          params: Optional[dict] = None,  # url query string params
          headers: Optional[dict] = None,  # additional headers to include in request
          max_retries: Optional[int] = None,  # custom value for max number of retries
          timeout: Optional[int] = None,  # request timeout in seconds
-    ) -> ApiResponse:
-        if method not in self.HTTP_METHODS:
+    ) -> Response:
+
+        if method not in self.ALLOWED_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
 
         max_retries = max_retries or self.max_retries
@@ -106,13 +104,12 @@ class Api:
         response = self.session.request(
             method=method,
             url=self._get_url(path=path),
-            data=data,
             params=params,
-            json=json,
+            json=data,
             headers=headers,
             timeout=timeout
         )
 
         response.raise_for_status()
 
-        return ApiResponse(response=response)
+        return response
