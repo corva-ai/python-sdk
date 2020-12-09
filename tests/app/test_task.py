@@ -4,12 +4,8 @@ from types import SimpleNamespace
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.app.base import BaseApp
 from corva.app.task import TaskApp
-from corva.app.context import TaskContext
 from corva.app.task_model import UpdateTaskInfoData
-from corva.event.event import Event
-from corva.event.loader.task import TaskLoader
 from tests.conftest import ComparableException
 
 
@@ -18,63 +14,6 @@ from tests.conftest import ComparableException
 )
 def test_default_values(attr_name, expected):
     assert getattr(TaskApp, attr_name) == expected
-
-
-def test_event_loader(task_app):
-    event_loader = task_app.event_loader()
-
-    assert isinstance(event_loader, TaskLoader)
-
-
-def test_get_context(mocker: MockerFixture, task_app, task_data_factory, task_event_data_factory):
-    mocker.patch.object(task_app, 'get_task_data', return_value=task_data_factory())
-
-    context = task_app.get_context(event=Event(data=[task_event_data_factory()]))
-
-    assert isinstance(context, TaskContext)
-
-
-def test_pre_process_calls_base(mocker: MockerFixture, task_app, task_context_factory):
-    context = task_context_factory()
-
-    super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
-
-    task_app.pre_process(context=context)
-
-    super_pre_process_mock.assert_called_once_with(context=context)
-
-
-def test_process_calls_base(mocker: MockerFixture, task_app, task_context_factory):
-    context = task_context_factory()
-
-    super_process_mock = mocker.patch.object(BaseApp, 'process')
-
-    task_app.process(context=context)
-
-    super_process_mock.assert_called_once_with(context=context)
-
-
-def test_post_process_calls_base(mocker: MockerFixture, task_app, task_context_factory):
-    context = task_context_factory()
-
-    super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
-    mocker.patch.object(task_app, 'update_task_data')
-
-    task_app.post_process(context=context)
-
-    super_post_process_mock.assert_called_once_with(context=context)
-
-
-def test_on_fail_calls_base(mocker: MockerFixture, task_app, task_context_factory):
-    context = task_context_factory()
-    exc = ComparableException('')
-
-    super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
-    mocker.patch.object(task_app, 'update_task_data')
-
-    task_app.on_fail(context=context, exception=exc)
-
-    super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
 
 
 def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
