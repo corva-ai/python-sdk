@@ -37,7 +37,7 @@ setuptools.setup(
         "pydantic >= 1.7.2",
         "redis >= 3.5.3",
         "requests >= 2.25.0",
-        "urllib >= 1.26.2"
+        "urllib3 >= 1.26.2"
     ],
     license='The Unlicense',
 )
