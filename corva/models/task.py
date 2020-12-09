@@ -18,7 +18,7 @@ class TaskData(BaseModel):
     payload: Dict[str, Any]
 
 
-class UpdateTaskInfoData(BaseModel):
+class UpdateTaskData(BaseModel):
     fail_reason: Optional[str] = None
     payload: dict = {}
 

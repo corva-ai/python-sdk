@@ -1,10 +1,9 @@
-import traceback
 from types import SimpleNamespace
 
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
-from corva.models.task import UpdateTaskInfoData
+from corva.models.task import UpdateTaskData
 from tests.conftest import ComparableException
 
 
@@ -31,7 +30,7 @@ def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
 def test_update_task_data(mocker: MockerFixture, task_app):
     task_id = '1'
     status = 'fail'
-    data = UpdateTaskInfoData()
+    data = UpdateTaskData()
 
     put_mock = mocker.patch.object(task_app.api, 'put')
 
@@ -51,14 +50,14 @@ def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, ta
     update_task_data_mock.assert_called_once_with(
         task_id=context.task.id,
         status='success',
-        data=UpdateTaskInfoData(payload=save_data)
+        data=UpdateTaskData(payload=save_data)
     )
 
 
 def test_on_fail_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     context = task_context_factory()
     exc = ComparableException('123')
-    update_task_data_info = UpdateTaskInfoData(fail_reason=str(exc))
+    update_task_data_info = UpdateTaskData(fail_reason=str(exc))
 
     update_task_data_mock = mocker.patch.object(task_app, 'update_task_data')
 
