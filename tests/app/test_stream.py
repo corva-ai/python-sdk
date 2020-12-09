@@ -1,13 +1,11 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.app.base import BaseApp
-from corva.app.stream import StreamApp
 from corva.app.context import StreamContext
+from corva.app.stream import StreamApp
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
-from corva.event.loader.stream import StreamLoader
-from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
@@ -70,21 +68,6 @@ def stream_context_factory(stream_event_data_factory, redis):
 )
 def test_default_values(attr_name, expected):
     assert getattr(StreamApp, attr_name) == expected
-
-
-def test_event_loader(stream_app):
-    event_loader = stream_app.event_loader()
-
-    assert isinstance(event_loader, StreamLoader)
-    assert event_loader.app_key == stream_app.app_key
-
-
-def test_get_context(mocker: MockerFixture, stream_app):
-    mocker.patch('corva.utils.GetStateKey.from_event', return_value='')
-
-    context = stream_app.get_context(event=Event(data=[]))
-
-    assert isinstance(context, StreamContext)
 
 
 def test__filter_event_data_is_completed(stream_event_data_factory, record_factory):
@@ -172,48 +155,6 @@ def test__filter_event(mocker: MockerFixture, stream_event_data_factory):
     ])
     assert id(result_event) != id(event)
     assert result_event == event
-
-
-def test_pre_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
-    context = stream_context_factory()
-
-    super_pre_process_mock = mocker.patch.object(BaseApp, 'pre_process')
-    mocker.patch.object(stream_app, '_filter_event')
-
-    stream_app.pre_process(context=context)
-
-    super_pre_process_mock.assert_called_once_with(context=context)
-
-
-def test_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
-    context = stream_context_factory()
-
-    super_process_mock = mocker.patch.object(BaseApp, 'process')
-
-    stream_app.process(context=context)
-
-    super_process_mock.assert_called_once_with(context=context)
-
-
-def test_post_process_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
-    context = stream_context_factory()
-
-    super_post_process_mock = mocker.patch.object(BaseApp, 'post_process')
-
-    stream_app.post_process(context=context)
-
-    super_post_process_mock.assert_called_once_with(context=context)
-
-
-def test_on_fail_calls_base(mocker: MockerFixture, stream_app, stream_context_factory):
-    context = stream_context_factory()
-    exc = ComparableException('')
-
-    super_on_fail_mock = mocker.patch.object(BaseApp, 'on_fail')
-
-    stream_app.on_fail(context=context, exception=exc)
-
-    super_on_fail_mock.assert_called_once_with(context=context, exception=exc)
 
 
 def test_pre_process_loads_last_processed_timestamp(mocker: MockerFixture, stream_app, stream_context_factory):
