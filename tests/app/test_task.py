@@ -58,10 +58,7 @@ def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, ta
 def test_on_fail_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     context = task_context_factory()
     exc = ComparableException('123')
-    update_task_data_info = UpdateTaskInfoData(
-        fail_reason=str(exc),
-        payload={'error': ''.join(traceback.TracebackException.from_exception(exc).format())}
-    )
+    update_task_data_info = UpdateTaskInfoData(fail_reason=str(exc))
 
     update_task_data_mock = mocker.patch.object(task_app, 'update_task_data')
 

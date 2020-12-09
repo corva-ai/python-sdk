@@ -1,10 +1,9 @@
-import traceback
 from typing import Literal
 
 from corva.app.base import BaseApp
-from corva.models.task import TaskData, UpdateTaskInfoData, TaskContext
 from corva.event import Event
 from corva.loader.task import TaskLoader
+from corva.models.task import TaskData, UpdateTaskInfoData, TaskContext
 
 
 class TaskApp(BaseApp):
@@ -26,15 +25,8 @@ class TaskApp(BaseApp):
         )
 
     def on_fail(self, context: TaskContext, exception: Exception) -> None:
-        data = UpdateTaskInfoData(
-            fail_reason=str(exception),
-            payload={'error': ''.join(traceback.TracebackException.from_exception(exception).format())}
-        )
-        self.update_task_data(
-            task_id=context.task.id,
-            status='fail',
-            data=data
-        )
+        data = UpdateTaskInfoData(fail_reason=str(exception))
+        self.update_task_data(task_id=context.task.id, status='fail', data=data)
 
     def get_task_data(self, task_id: str) -> TaskData:
         response = self.api.get(path=f'v2/tasks/{task_id}')
