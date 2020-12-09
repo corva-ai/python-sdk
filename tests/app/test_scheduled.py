@@ -1,7 +1,7 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.models.context import ScheduledContext
+from corva.models.scheduled import ScheduledContext
 from corva.app.scheduled import ScheduledApp
 from corva.event.data.scheduled import ScheduledEventData
 from corva.event.event import Event
