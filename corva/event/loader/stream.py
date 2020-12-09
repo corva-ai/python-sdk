@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from corva.event.event import Event
-from corva.event.data.stream import StreamEventData
+from corva.models.stream import StreamEventData
 from corva.event.loader.base import BaseLoader
 
 

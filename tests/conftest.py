@@ -4,8 +4,7 @@ import pytest
 from fakeredis import FakeRedis
 
 from corva.app.task import TaskApp
-from corva.models.task import TaskData, TaskContext
-from corva.event.data.task import TaskEventData
+from corva.models.task import TaskData, TaskContext, TaskEventData
 from corva.event.event import Event
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState

@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import chain
 from typing import List
 
-from corva.event.data.scheduled import ScheduledEventData
+from corva.models.scheduled import ScheduledEventData
 from corva.event.event import Event
 from corva.event.loader.base import BaseLoader
 

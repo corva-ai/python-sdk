@@ -2,8 +2,7 @@ from itertools import chain
 from typing import Optional, List
 
 from corva.app.base import BaseApp
-from corva.models.stream import StreamContext
-from corva.event.data.stream import StreamEventData, Record
+from corva.models.stream import StreamContext, Record, StreamEventData
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader
 from corva.state.redis_adapter import RedisAdapter

@@ -1,4 +1,4 @@
-from corva.event.data.base import BaseEventData
+from corva.models.base import BaseEventData
 from corva.event.event import Event
 from corva.utils import GetStateKey
 
