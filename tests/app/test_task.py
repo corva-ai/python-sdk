@@ -1,7 +1,6 @@
 import traceback
 from types import SimpleNamespace
 
-import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
@@ -9,11 +8,8 @@ from corva.app.task_model import UpdateTaskInfoData
 from tests.conftest import ComparableException
 
 
-@pytest.mark.parametrize(
-    'attr_name,expected', (('group_by_field', 'task_id'),)
-)
-def test_default_values(attr_name, expected):
-    assert getattr(TaskApp, attr_name) == expected
+def test_group_by_field():
+    assert TaskApp.group_by_field == 'task_id'
 
 
 def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
