@@ -21,7 +21,7 @@ class TaskApp(BaseApp):
         self.update_task_data(
             task_id=context.task.id,
             status='success',
-            data=UpdateTaskData(payload=context.save_data)
+            data=UpdateTaskData(payload=context.task_result)
         )
 
     def on_fail(self, context: TaskContext, exception: Exception) -> None:

@@ -25,7 +25,7 @@ class UpdateTaskData(BaseModel):
 
 class TaskContext(BaseContext):
     task: TaskData
-    save_data: dict = {}
+    task_result: dict = {}
 
 
 class TaskEventData(BaseEventData):
