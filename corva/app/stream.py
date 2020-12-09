@@ -2,7 +2,7 @@ from itertools import chain
 from typing import Optional, List
 
 from corva.app.base import BaseApp
-from corva.app.context import StreamContext
+from corva.models.context import StreamContext
 from corva.event.data.stream import StreamEventData, Record
 from corva.event.event import Event
 from corva.event.loader.stream import StreamLoader

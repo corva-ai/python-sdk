@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis
 
-from corva.app.context import TaskContext
+from corva.models.context import TaskContext
 from corva.app.task import TaskApp
 from corva.models.task import TaskData
 from corva.event.data.task import TaskEventData

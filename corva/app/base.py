@@ -4,7 +4,7 @@ from logging import Logger, LoggerAdapter
 from typing import List, Optional, Union
 
 from corva import settings
-from corva.app.context import BaseContext
+from corva.models.context import BaseContext
 from corva.event.event import Event
 from corva.event.loader.base import BaseLoader
 from corva.logger import DEFAULT_LOGGER
