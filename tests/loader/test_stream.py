@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from corva.constants import STREAM_EVENT_TYPE
+from corva.types import STREAM_EVENT_TYPE
 from corva.event import Event
 from corva.loader.stream import StreamLoader
 

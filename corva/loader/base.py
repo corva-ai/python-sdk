@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from abc import abstractmethod, ABC
 
-from corva.constants import EVENT_TYPE
+from corva.types import EVENT_TYPE
 from corva.event import Event
 
 
