@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
+from corva.models.task import TaskStatus
 from corva.models.task import UpdateTaskData
 from tests.conftest import ComparableException
 
@@ -41,7 +42,7 @@ def test_update_task_data(mocker: MockerFixture, task_app):
 
 def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     save_data = {'key1': 'val1'}
-    context = task_context_factory(save_data=save_data)
+    context = task_context_factory(task_result  =save_data)
 
     update_task_data_mock = mocker.patch.object(task_app, 'update_task_data')
 
@@ -49,7 +50,7 @@ def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, ta
 
     update_task_data_mock.assert_called_once_with(
         task_id=context.task.id,
-        status='success',
+        status=TaskStatus.success.value,
         data=UpdateTaskData(payload=save_data)
     )
 
