@@ -2,8 +2,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
-from corva.models.base import BaseEventData
 from corva.event import Event
+from corva.models.base import BaseEventData
 from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 
@@ -53,10 +53,10 @@ def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
 
 
 def test__group_event(mocker: MockerFixture, base_app):
-    event = Event([
-        BaseEventData(app_connection_id=1),
-        BaseEventData(app_connection_id=1),
-        BaseEventData(app_connection_id=2)]
+    event = Event(
+        [BaseEventData(app_connection_id=1),
+         BaseEventData(app_connection_id=1),
+         BaseEventData(app_connection_id=2)]
     )
     expected = [
         [event[0], event[1]],
