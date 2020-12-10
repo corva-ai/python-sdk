@@ -17,4 +17,3 @@ def test_load(scheduled_event_str):
     event = ScheduledLoader().load(event=scheduled_event_str)
 
     assert len(event) == 3
-    assert isinstance(event, Event)
