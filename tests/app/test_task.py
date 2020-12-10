@@ -42,7 +42,7 @@ def test_update_task_data(mocker: MockerFixture, task_app):
 
 def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     save_data = {'key1': 'val1'}
-    context = task_context_factory(task_result  =save_data)
+    context = task_context_factory(task_result=save_data)
 
     update_task_data_mock = mocker.patch.object(task_app, 'update_task_data')
 
