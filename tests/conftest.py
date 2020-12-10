@@ -55,12 +55,6 @@ def task_app():
 
 
 @pytest.fixture(scope='session')
-def task_event_str() -> str:
-    with open(DATA_PATH / 'task_event.json') as task_event:
-        return task_event.read()
-
-
-@pytest.fixture(scope='session')
 def task_event_data_factory():
     def _task_event_data_factory(**kwargs):
         for key, val in dict(
