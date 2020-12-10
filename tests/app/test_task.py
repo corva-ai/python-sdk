@@ -4,7 +4,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
-from corva.models.task import TaskStatus, TaskData, TaskEventData
+from corva.event import Event
+from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext
 from corva.models.task import UpdateTaskData
 from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
@@ -46,6 +47,20 @@ def task_event_data_factory():
         return TaskEventData(**kwargs)
 
     return _task_event_data_factory
+
+
+@pytest.fixture(scope='session')
+def task_context_factory(task_event_data_factory, task_data_factory):
+    def _task_context_factory(**kwargs):
+        for key, val in dict(
+             event=Event([task_event_data_factory()]),
+             task=task_data_factory(),
+        ).items():
+            kwargs.setdefault(key, val)
+
+        return TaskContext(**kwargs)
+
+    return _task_context_factory
 
 
 def test_group_by_field():
