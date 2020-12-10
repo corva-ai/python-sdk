@@ -1,11 +1,17 @@
 from types import SimpleNamespace
 
+import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
 from corva.models.task import TaskStatus
 from corva.models.task import UpdateTaskData
-from tests.conftest import ComparableException
+from tests.conftest import ComparableException, APP_KEY, CACHE_URL
+
+
+@pytest.fixture(scope='function')
+def task_app():
+    return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 def test_group_by_field():

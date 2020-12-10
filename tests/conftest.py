@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis
 
-from corva.app.task import TaskApp
 from corva.event import Event
 from corva.models.task import TaskData, TaskContext, TaskEventData
 from corva.state.redis_adapter import RedisAdapter
@@ -47,11 +46,6 @@ def redis(redis_adapter):
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
-
-
-@pytest.fixture(scope='function')
-def task_app():
-    return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')
