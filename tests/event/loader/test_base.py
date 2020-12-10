@@ -34,9 +34,3 @@ def test__load_json():
     loaded = BaseLoader._load_json(event=json.dumps(event))
 
     assert loaded == event
-
-
-def test_abstractmethods():
-    assert getattr(BaseLoader, '__abstractmethods__') == frozenset(['load'])
-    with pytest.raises(TypeError):
-        BaseLoader()

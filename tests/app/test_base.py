@@ -16,21 +16,6 @@ def base_app(mocker: MockerFixture):
     return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
-def test_abstractmethods():
-    with pytest.raises(TypeError):
-        BaseApp()
-
-    assert (
-         getattr(BaseApp, '__abstractmethods__')
-         ==
-         frozenset([
-             'event_loader',
-             'group_by_field',
-             'get_context'
-         ])
-    )
-
-
 def test_run_exc_in_event_loader_load(mocker: MockerFixture, base_app):
     loader_mock = mocker.patch.object(BaseApp, 'event_loader')
     loader_mock.load.side_effect = Exception
