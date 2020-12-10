@@ -29,7 +29,7 @@ class TaskApp(BaseApp):
 
     def get_task_data(self, task_id: str) -> TaskData:
         response = self.api.get(path=f'v2/tasks/{task_id}')
-        return TaskData(**response.data)
+        return TaskData(**response.json())
 
     def update_task_data(self, task_id: str, status: TaskStatus, data: UpdateTaskData):
         return self.api.put(path=f'v2/tasks/{task_id}/{status}', json=data.dict())
