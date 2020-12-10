@@ -17,15 +17,6 @@ def test__load_json_empty_event():
     assert str(exc.value) == 'Empty event'
 
 
-def test__load_json_wrong_event_type():
-    event = {'': ''}
-
-    with pytest.raises(TypeError) as exc:
-        BaseLoader._load_json(event=event)
-
-    assert str(exc.value) == f'Unknown event type {type(event)}'
-
-
 def test__load_json_invalid_json(mocker: MockerFixture):
     event = '{}'
 
@@ -43,9 +34,3 @@ def test__load_json():
     loaded = BaseLoader._load_json(event=json.dumps(event))
 
     assert loaded == event
-
-
-def test_abstractmethods():
-    assert getattr(BaseLoader, '__abstractmethods__') == frozenset(['load'])
-    with pytest.raises(TypeError):
-        BaseLoader()

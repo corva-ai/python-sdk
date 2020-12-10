@@ -70,9 +70,6 @@ class Api:
         return self._request('DELETE', path, **kwargs)
 
     def _get_url(self, path: str):
-        if path.startswith(self.api_url) or path.startswith(self.data_api_url):
-            return path
-
         # search text like api/v1/data or api/v1/message_producer in path
         if bool(re.search(r'api/v\d+/(data|message_producer)', path)):
             base_url = self.data_api_url
