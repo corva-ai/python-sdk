@@ -8,8 +8,8 @@ from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def scheduled_app():
-    return ScheduledApp(app_key=APP_KEY, cache_url=CACHE_URL)
+def scheduled_app(api):
+    return ScheduledApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='module')

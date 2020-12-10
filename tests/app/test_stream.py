@@ -8,8 +8,8 @@ from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def stream_app():
-    return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
+def stream_app(api):
+    return StreamApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='module')
