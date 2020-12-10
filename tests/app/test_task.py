@@ -84,7 +84,7 @@ def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
 
 def test_update_task_data(mocker: MockerFixture, task_app):
     task_id = '1'
-    status = 'fail'
+    status = TaskStatus.fail.value
     data = UpdateTaskData()
 
     put_mock = mocker.patch.object(task_app.api, 'put')
@@ -120,6 +120,6 @@ def test_on_fail_calls_update_task_data(mocker: MockerFixture, task_app, task_co
 
     update_task_data_mock.assert_called_once_with(
         task_id=context.task.id,
-        status='fail',
+        status=TaskStatus.fail.value,
         data=update_task_data_info
     )
