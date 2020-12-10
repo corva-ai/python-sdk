@@ -1,6 +1,5 @@
 import pytest
 
-from corva.event import Event
 from corva.loader.scheduled import ScheduledLoader
 from tests.conftest import DATA_PATH
 
