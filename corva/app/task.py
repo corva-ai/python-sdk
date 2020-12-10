@@ -1,8 +1,7 @@
 from corva.app.base import BaseApp
 from corva.event import Event
 from corva.loader.task import TaskLoader
-from corva.models.task import TaskData, UpdateTaskData, TaskContext
-from corva.models.task import TaskStatus
+from corva.models.task import TaskData, UpdateTaskData, TaskContext, TaskStatus
 
 
 class TaskApp(BaseApp):
