@@ -84,8 +84,9 @@ def test_update_schedule_status(mocker: MockerFixture, scheduled_app):
     schedule = 1
     status = 'status'
 
-    api_mock = mocker.patch.object(scheduled_app, 'api')
+    mocker.patch.object(scheduled_app.api.session, 'request')
+    post_spy = mocker.patch.object(scheduled_app.api, 'post')
 
     scheduled_app.update_schedule_status(schedule=schedule, status=status)
 
-    api_mock.post.assert_called_once_with(path=f'scheduler/{schedule}/{status}')
+    post_spy.assert_called_once_with(path=f'scheduler/{schedule}/{status}')
