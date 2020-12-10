@@ -3,8 +3,7 @@ from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
 from corva.event import Event
-from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext
-from corva.models.task import UpdateTaskData
+from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext, UpdateTaskData
 from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 TASK_ID = '1'
