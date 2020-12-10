@@ -4,6 +4,7 @@ from corva.app.base import BaseApp
 from corva.event import Event
 from corva.loader.task import TaskLoader
 from corva.models.task import TaskData, UpdateTaskData, TaskContext
+from corva.models.task import TaskStatus
 
 
 class TaskApp(BaseApp):
@@ -20,13 +21,13 @@ class TaskApp(BaseApp):
     def post_process(self, context: TaskContext) -> None:
         self.update_task_data(
             task_id=context.task.id,
-            status='success',
+            status=TaskStatus.success.value,
             data=UpdateTaskData(payload=context.task_result)
         )
 
     def on_fail(self, context: TaskContext, exception: Exception) -> None:
         data = UpdateTaskData(fail_reason=str(exception))
-        self.update_task_data(task_id=context.task.id, status='fail', data=data)
+        self.update_task_data(task_id=context.task.id, status=TaskStatus.fail.value, data=data)
 
     def get_task_data(self, task_id: str) -> TaskData:
         response = self.api.get(path=f'v2/tasks/{task_id}')

@@ -1,4 +1,5 @@
-from typing import Any, Dict, Literal, Optional
+from enum import Enum
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 from pydantic.types import conint
@@ -6,9 +7,20 @@ from pydantic.types import conint
 from corva.models.base import BaseContext, BaseEventData
 
 
+class TaskStatus(Enum):
+    fail = 'fail'
+    success = 'success'
+
+
+class TaskState(Enum):
+    running = 'running'
+    failed = 'failed'
+    succeeded = 'succeeded'
+
+
 class TaskData(BaseModel):
     id: str
-    state: Literal['running', 'failed', 'succeeded']
+    state: TaskState
     fail_reason: Optional[Any] = None
     asset_id: int
     company_id: int
