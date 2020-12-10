@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 import pytest
 from pytest_mock import MockerFixture
 
@@ -11,8 +9,8 @@ from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def task_app():
-    return TaskApp(app_key=APP_KEY, cache_url=CACHE_URL)
+def task_app(api):
+    return TaskApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='session')
@@ -71,16 +69,17 @@ def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
     task_id = '1'
     task_data = task_data_factory()
 
-    get_mock = mocker.patch.object(
-        task_app.api,
-        'get',
-        return_value=SimpleNamespace(data=task_data.dict())
+    mocker.patch.object(
+        task_app.api.session,
+        'request',
+        return_value=mocker.Mock(**{'json.return_value': task_data.dict()})
     )
+    get_spy = mocker.spy(task_app.api, 'get')
 
     result = task_app.get_task_data(task_id=task_id)
 
     assert task_data == result
-    get_mock.assert_called_once_with(path=f'v2/tasks/{task_id}')
+    get_spy.assert_called_once_with(path=f'v2/tasks/{task_id}')
 
 
 def test_update_task_data(mocker: MockerFixture, task_app):
