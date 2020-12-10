@@ -2,14 +2,15 @@ import json
 
 import pytest
 
-from corva.types import STREAM_EVENT_TYPE
 from corva.event import Event
 from corva.loader.stream import StreamLoader
+from corva.types import STREAM_EVENT_TYPE
+from tests.conftest import DATA_PATH
 
 
 @pytest.fixture(scope='module')
 def stream_event_str() -> str:
-    with open('data/tests/stream_event.json') as stream_event:
+    with open(DATA_PATH / 'stream_event.json') as stream_event:
         return stream_event.read()
 
 

@@ -1,16 +1,18 @@
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from fakeredis import FakeRedis
 
 from corva.app.task import TaskApp
-from corva.models.task import TaskData, TaskContext, TaskEventData
 from corva.event import Event
+from corva.models.task import TaskData, TaskContext, TaskEventData
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 APP_KEY = 'provider.app-name'
 CACHE_URL = 'redis://localhost:6379'
+DATA_PATH = Path('tests/test_data')
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -54,7 +56,7 @@ def task_app():
 
 @pytest.fixture(scope='session')
 def task_event_str() -> str:
-    with open('data/tests/task_event.json') as task_event:
+    with open(DATA_PATH / 'task_event.json') as task_event:
         return task_event.read()
 
 
