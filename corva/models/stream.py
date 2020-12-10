@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 from corva.models.base import BaseContext, BaseEventData
 from corva.state.redis_state import RedisState
