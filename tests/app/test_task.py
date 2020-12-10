@@ -87,11 +87,12 @@ def test_update_task_data(mocker: MockerFixture, task_app):
     status = TaskStatus.fail.value
     data = UpdateTaskData()
 
-    put_mock = mocker.patch.object(task_app.api, 'put')
+    mocker.patch.object(task_app.api.session, 'request')
+    put_spy = mocker.spy(task_app.api, 'put')
 
     task_app.update_task_data(task_id=task_id, status=status, data=data)
 
-    put_mock.assert_called_once_with(path=f'v2/tasks/{task_id}/{status}', json=data.dict())
+    put_spy.assert_called_once_with(path=f'v2/tasks/{task_id}/{status}', data=data.dict())
 
 
 def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
