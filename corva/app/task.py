@@ -1,5 +1,3 @@
-from typing import Literal
-
 from corva.app.base import BaseApp
 from corva.event import Event
 from corva.loader.task import TaskLoader
@@ -33,5 +31,5 @@ class TaskApp(BaseApp):
         response = self.api.get(path=f'v2/tasks/{task_id}')
         return TaskData(**response.data)
 
-    def update_task_data(self, task_id: str, status: Literal['fail', 'success'], data: UpdateTaskData):
+    def update_task_data(self, task_id: str, status: TaskStatus, data: UpdateTaskData):
         return self.api.put(path=f'v2/tasks/{task_id}/{status}', json=data.dict())
