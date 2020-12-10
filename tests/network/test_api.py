@@ -14,12 +14,6 @@ def test_default_headers(api):
 
 
 def test_get_url(api):
-    path = f'{api.api_url}/1'
-    assert api._get_url(path=path) == path
-
-    path = f'{api.data_api_url}/1'
-    assert api._get_url(path=path) == path
-
     path = '/api/v10/data'
     assert api._get_url(path=path) == f'{api.data_api_url}{path}'
 
