@@ -1,6 +1,5 @@
 import pytest
 
-from corva.event import Event
 from corva.loader.task import TaskLoader
 from tests.conftest import DATA_PATH
 
@@ -17,4 +16,3 @@ def test_load(task_event_str):
     event = TaskLoader().load(event=task_event_str)
 
     assert len(event) == 1
-    assert isinstance(event, Event)
