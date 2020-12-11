@@ -12,9 +12,6 @@ class BaseLoader(ABC):
 
     @staticmethod
     def _load_json(event: str) -> EVENT_TYPE:
-        if not event:
-            raise ValueError('Empty event')
-
         try:
             event = json.loads(event)
         except ValueError as exc:
