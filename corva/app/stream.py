@@ -38,13 +38,13 @@ class StreamApp(BaseApp):
 
     def pre_process(self, context: StreamContext) -> None:
         last_processed_timestamp = (
-            int(context.state.load(key='last_processed_timestamp'))
+            int(context.state.load(key='last_processed_timestamp') or self.DEFAULT_LAST_PROCESSED_VALUE)
             if self.filter_by_timestamp
             else self.DEFAULT_LAST_PROCESSED_VALUE
         )
 
         last_processed_depth = (
-            float(context.state.load(key='last_processed_depth'))
+            float(context.state.load(key='last_processed_depth') or self.DEFAULT_LAST_PROCESSED_VALUE)
             if self.filter_by_depth
             else self.DEFAULT_LAST_PROCESSED_VALUE
         )

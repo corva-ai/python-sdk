@@ -181,6 +181,17 @@ def test_pre_process_default_last_processed_timestamp(mocker: MockerFixture, str
     assert _filter_event_spy.call_args[1]['last_processed_timestamp'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
 
 
+def test_pre_process_last_processed_timestamp_none(mocker: MockerFixture, stream_app, stream_context_factory):
+    stream_app.filter_by_timestamp = True
+    context = stream_context_factory()
+
+    _filter_event_spy = mocker.spy(stream_app, '_filter_event')
+
+    stream_app.pre_process(context=context)
+
+    assert _filter_event_spy.call_args[1]['last_processed_timestamp'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
+
+
 def test_pre_process_loads_last_processed_depth(mocker: MockerFixture, stream_app, stream_context_factory):
     stream_app.filter_by_depth = True
     context = stream_context_factory()
@@ -200,6 +211,17 @@ def test_pre_process_default_last_processed_depth(mocker: MockerFixture, stream_
     context = stream_context_factory()
 
     _filter_event_spy = mocker.spy(stream_app, '_filter_event')
+    stream_app.pre_process(context=context)
+
+    assert _filter_event_spy.call_args[1]['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
+
+
+def test_pre_process_last_processed_depth_none(mocker: MockerFixture, stream_app, stream_context_factory):
+    stream_app.filter_by_depth = True
+    context = stream_context_factory()
+
+    _filter_event_spy = mocker.spy(stream_app, '_filter_event')
+
     stream_app.pre_process(context=context)
 
     assert _filter_event_spy.call_args[1]['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE

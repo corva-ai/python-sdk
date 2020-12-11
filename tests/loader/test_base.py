@@ -8,15 +8,6 @@ from corva.loader.base import BaseLoader
 BASE_LOADER_PATH = 'corva.loader.base'
 
 
-def test__load_json_empty_event():
-    event = ''
-
-    with pytest.raises(ValueError) as exc:
-        BaseLoader._load_json(event=event)
-
-    assert str(exc.value) == 'Empty event'
-
-
 def test__load_json_invalid_json(mocker: MockerFixture):
     event = '{}'
 
