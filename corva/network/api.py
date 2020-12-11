@@ -1,7 +1,6 @@
 import os
 import re
 from typing import List, Optional
-from unittest.mock import patch
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
@@ -97,15 +96,16 @@ class Api:
         timeout = timeout or self.timeout
 
         # not thread safe
-        with patch.object(self.session.adapters['https://'].max_retries, 'total', max_retries):
-            response = self.session.request(
-                method=method,
-                url=self._get_url(path=path),
-                params=params,
-                json=data,
-                headers=headers,
-                timeout=timeout
-            )
+        self.session.adapters['https://'].max_retries.total = max_retries
+
+        response = self.session.request(
+            method=method,
+            url=self._get_url(path=path),
+            params=params,
+            json=data,
+            headers=headers,
+            timeout=timeout
+        )
 
         response.raise_for_status()
 
