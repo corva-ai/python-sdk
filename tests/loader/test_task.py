@@ -1,13 +1,11 @@
 import pytest
 
 from corva.loader.task import TaskLoader
-from tests.conftest import DATA_PATH
 
 
 @pytest.fixture(scope='session')
 def task_event_str() -> str:
-    with open(DATA_PATH / 'task_event.json') as task_event:
-        return task_event.read()
+    return '{"task_id": "dc5c16e4-c0e3-43fc-85b2-83b08b9da7d0", "version": 2}'
 
 
 def test_load(task_event_str):
