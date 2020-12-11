@@ -21,6 +21,7 @@ class StreamApp(BaseApp):
         self.filter_by_timestamp = filter_by_timestamp
         self.filter_by_depth = filter_by_depth
 
+    @property
     def event_loader(self) -> StreamLoader:
         return StreamLoader(app_key=self.app_key)
 

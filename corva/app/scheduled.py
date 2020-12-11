@@ -11,6 +11,7 @@ from corva.utils import GetStateKey
 class ScheduledApp(BaseApp):
     group_by_field = 'app_connection_id'
 
+    @property
     def event_loader(self) -> ScheduledLoader:
         return ScheduledLoader()
 
