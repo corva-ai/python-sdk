@@ -96,6 +96,8 @@ def test__run_exc_in_pre_process(mocker: MockerFixture, base_app):
 
 
 def test__run_exc_in_process(mocker: MockerFixture, base_app):
+    """Tests BaseApp._run function in case of exception in BaseApp.process"""
+
     context = 'context'
 
     mocker.patch.object(base_app, 'get_context', return_value=context)
