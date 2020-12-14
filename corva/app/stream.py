@@ -67,7 +67,7 @@ class StreamApp(BaseApp):
                 for record in all_records
                 if record.timestamp is not None
             ],
-            default=self.DEFAULT_LAST_PROCESSED_VALUE
+            default=None
         )
         last_processed_depth = max(
             [
@@ -75,11 +75,14 @@ class StreamApp(BaseApp):
                 for record in all_records
                 if record.measured_depth is not None
             ],
-            default=self.DEFAULT_LAST_PROCESSED_VALUE
+            default=None
         )
 
-        mapping = {'last_processed_timestamp': last_processed_timestamp,
-                   'last_processed_depth': last_processed_depth}
+        mapping = {}
+        if last_processed_timestamp is not None:
+            mapping['last_processed_timestamp'] = last_processed_timestamp
+        if last_processed_depth is not None:
+            mapping['last_processed_depth'] = last_processed_depth
 
         context.state.store(mapping=mapping)
 
