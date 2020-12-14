@@ -1,262 +1,154 @@
-from unittest.mock import patch, call
-
 import pytest
+from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
-from corva.app.base import ProcessResult
-from corva.event.base import BaseEvent
 from corva.event.data.base import BaseEventData
-from corva.utils import get_state_key
+from corva.event.event import Event
+from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 
-def test_abstractmethods():
-    assert getattr(BaseApp, '__abstractmethods__') == frozenset(['event_cls'])
-    with pytest.raises(TypeError):
-        BaseApp()
+@pytest.fixture(scope='function')
+def base_app(mocker: MockerFixture):
+    # as BaseApp is an abstract class, we cannot initialize it without overriding all abstract methods,
+    # so in order to initialize and test the class we patch __abstractmethods__
+    mocker.patch.object(BaseApp, '__abstractmethods__', set())
+
+    return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL)
 
 
-def test__group_event(base_app):
-    event = BaseEvent(data=[
+def test_run_exc_in_event_loader_load(mocker: MockerFixture, base_app):
+    loader_mock = mocker.patch.object(BaseApp, 'event_loader')
+    loader_mock.load.side_effect = Exception
+    logger_spy = mocker.spy(base_app, 'logger')
+
+    with pytest.raises(Exception):
+        base_app.run(event='')
+
+    logger_spy.error.assert_called_once_with('Could not prepare events for run.')
+
+
+def test_run_exc_in__group_event(mocker: MockerFixture, base_app):
+    mocker.patch.object(BaseApp, 'event_loader')
+    mocker.patch.object(base_app, '_group_event', side_effect=Exception)
+    logger_spy = mocker.spy(base_app, 'logger')
+
+    with pytest.raises(Exception):
+        base_app.run(event='')
+
+    logger_spy.error.assert_called_once_with('Could not prepare events for run.')
+
+
+def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
+    event1 = Event(data=[BaseEventData(a=1)])
+    event2 = Event(data=[BaseEventData(a=2)])
+
+    mocker.patch.object(BaseApp, 'event_loader')
+    mocker.patch.object(base_app, '_group_event', return_value=[event1, event2])
+    run_mock = mocker.patch.object(base_app, '_run')
+
+    base_app.run(event='')
+
+    assert run_mock.call_count == 2
+    run_mock.assert_has_calls([mocker.call(event=event1), mocker.call(event=event2)])
+
+
+def test__group_event(mocker: MockerFixture, base_app):
+    event = Event(data=[
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=1),
         BaseEventData(app_connection_id=2)]
     )
-    events = base_app._group_event(event=event)
     expected = [
-        [BaseEventData(app_connection_id=1), BaseEventData(app_connection_id=1)],
-        [BaseEventData(app_connection_id=2)]
+        [event[0], event[1]],
+        [event[2]]
     ]
+
+    mocker.patch.object(BaseApp, 'group_by_field', new='app_connection_id')
+
+    events = base_app._group_event(event=event)
+
     assert events == expected
 
 
-def test__get_states(base_app):
-    event1 = BaseEvent(data=[
-        BaseEventData(asset_id=1, app_stream_id=1, app_connection_id=1)
-    ])
-    event2 = BaseEvent(data=[
-        BaseEventData(asset_id=2, app_stream_id=2, app_connection_id=2)
-    ])
-    events = [event1, event2]
+def test__run_exc_in_get_context(mocker: MockerFixture, base_app):
+    mocker.patch.object(base_app, 'get_context', side_effect=Exception)
+    logger_spy = mocker.spy(base_app, 'logger')
 
-    states = base_app._get_states(events=events)
-    for state, event in zip(states, events):
-        expected_default_name = get_state_key(
-            asset_id=event[0].asset_id,
-            app_stream_id=event[0].app_stream_id,
-            app_connection_id=event[0].app_connection_id,
-            app_key=base_app.app_key
-        )
-        assert state.redis.default_name == expected_default_name
+    with pytest.raises(Exception):
+        base_app._run(event=Event([]))
+
+    logger_spy.error.assert_called_once_with('Could not get context.')
 
 
-def test_run_load_params(base_app):
-    event = 'event'
-    for load_kwargs in [{'key1': 'val1'}, None]:
-        with patch.object(base_app.event_cls, 'load', side_effect=Exception) as load_mock, \
-             pytest.raises(Exception):
-            base_app.run(event=event, load_kwargs=load_kwargs)
-        load_kwargs = load_kwargs or {}
-        load_mock.assert_called_once_with(event=event, **load_kwargs)
+def test__run_exc_in_pre_process(mocker: MockerFixture, base_app):
+    context = 'context'
+
+    mocker.patch.object(base_app, 'get_context', return_value=context)
+    mocker.patch.object(base_app, 'pre_process', side_effect=ComparableException)
+    logger_spy = mocker.spy(base_app, 'logger')
+    on_fail_spy = mocker.spy(base_app, 'on_fail')
+
+    with pytest.raises(ComparableException):
+        base_app._run(event=Event([]))
+
+    logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
-def test_run_exception(base_app):
-    for object_, func_name in [
-        (base_app.event_cls, 'load'),
-        (base_app, '_group_event'),
-        (base_app, '_get_states')
-    ]:
-        with patch.object(object_, func_name, side_effect=Exception), \
-             patch.object(base_app, 'logger') as logger_mock, \
-             pytest.raises(Exception):
-            base_app.run(event='')
-        logger_mock.error.assert_called_once_with('Could not prepare events and states for run.')
+def test__run_exc_in_process(mocker: MockerFixture, base_app):
+    """Tests BaseApp._run function in case of exception in BaseApp.process"""
+
+    context = 'context'
+
+    mocker.patch.object(base_app, 'get_context', return_value=context)
+    pre_spy = mocker.spy(base_app, 'pre_process')
+    mocker.patch.object(base_app, 'process', side_effect=ComparableException)
+    logger_spy = mocker.spy(base_app, 'logger')
+    on_fail_spy = mocker.spy(base_app, 'on_fail')
+
+    with pytest.raises(ComparableException):
+        base_app._run(event=Event([]))
+
+    pre_spy.assert_called_once_with(context=context)
+    logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
-def test_run(base_app):
-    with patch.object(base_app, '_group_event', return_value=[1, 2]), \
-         patch.object(base_app, '_get_states', return_value=[3, 4]), \
-         patch.object(base_app, '_run') as _run:
-        base_app.run('')
-        assert _run.call_count == 2
-        _run.assert_has_calls([
-            call(
-                event=1,
-                state=3,
-                pre_process_kwargs=None,
-                process_kwargs=None,
-                post_process_kwargs=None,
-                on_fail_before_post_process_kwargs=None
-            ),
-            call(
-                event=2,
-                state=4,
-                pre_process_kwargs=None,
-                process_kwargs=None,
-                post_process_kwargs=None,
-                on_fail_before_post_process_kwargs=None
-            )
-        ]
-        )
+def test__run_exc_in_post_process(mocker: MockerFixture, base_app):
+    """Tests BaseApp._run function in case of exception in BaseApp.post_process"""
+
+    context = 'context'
+
+    mocker.patch.object(base_app, 'get_context', return_value=context)
+    pre_spy = mocker.spy(base_app, 'pre_process')
+    process_spy = mocker.spy(base_app, 'process')
+    mocker.patch.object(base_app, 'post_process', side_effect=ComparableException)
+    logger_spy = mocker.spy(base_app, 'logger')
+    on_fail_spy = mocker.spy(base_app, 'on_fail')
+
+    with pytest.raises(ComparableException):
+        base_app._run(event=Event([]))
+
+    pre_spy.assert_called_once_with(context=context)
+    process_spy.assert_called_once_with(context=context)
+    logger_spy.error.assert_called_once_with('An error occurred in process pipeline.')
+    on_fail_spy.assert_called_once_with(context=context, exception=ComparableException())
 
 
-def test_pre_process(base_app, redis):
-    event = 'myevent'
-    pre_res = base_app.pre_process(event=event, state=redis)
-    assert pre_res == ProcessResult(event=event, next_process_kwargs={})
+def test__run(mocker: MockerFixture, base_app):
+    context = 'context'
+    event = Event([])
 
+    get_context_mock = mocker.patch.object(base_app, 'get_context', return_value=context)
+    pre_spy = mocker.spy(base_app, 'pre_process')
+    process_spy = mocker.spy(base_app, 'process')
+    post_spy = mocker.spy(base_app, 'post_process')
+    on_fail_spy = mocker.spy(base_app, 'on_fail')
 
-def test_process(base_app, patch_base_event, redis):
-    base_event = BaseEvent(data=[])
-    assert (
-         base_app.process(event=base_event, state=redis)
-         ==
-         ProcessResult(event=base_event, next_process_kwargs={})
-    )
+    base_app._run(event=event)
 
-
-def test_post_process(base_app, patch_base_event, redis):
-    base_event = BaseEvent(data=[])
-    assert (
-         base_app.post_process(event=base_event, state=redis)
-         ==
-         ProcessResult(event=base_event, next_process_kwargs={})
-    )
-
-
-def test_on_fail_before_post_process(base_app, redis):
-    assert base_app.on_fail_before_post_process(event='myevent', state=redis) is None
-
-
-def test__run_correct_params(base_app, patch_base_event):
-    event = 'myevent'
-    state = ''
-
-    pre_process_kwargs = {'pre_key_1': 'pre_val_1'}
-    process_kwargs = {'pro_key_1': 'pro_val_1'}
-    post_process_kwargs = {'post_key_1': 'post_val_1'}
-
-    pre_process_result = ProcessResult(
-        event=BaseEvent([]),
-        next_process_kwargs={
-            'pre_next_key_1': 'pre_next_val_1',
-            'pro_key_1': 'random'  # should be overridden by process_kwargs
-        }
-    )
-    process_result = ProcessResult(
-        event=BaseEvent([BaseEventData()]),
-        next_process_kwargs={
-            'pro_next_key_1': 'pro_next_val_1',
-            'post_key_1': 'random'  # should be overridden by post_process_kwargs
-        }
-    )
-
-    with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
-         patch.object(base_app, 'process', return_value=process_result) as process, \
-         patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
-         patch.object(base_app, 'post_process') as post_process:
-        base_app._run(
-            event=event,
-            state=state,
-            pre_process_kwargs=pre_process_kwargs,
-            process_kwargs=process_kwargs,
-            post_process_kwargs=post_process_kwargs
-        )
-        pre_process.assert_called_once_with(event=event, state=state, **pre_process_kwargs)
-        process.assert_called_once_with(
-            event=pre_process_result.event,
-            state=state,
-            **{**pre_process_result.next_process_kwargs, **process_kwargs}
-        )
-        post_process.assert_called_once_with(
-            event=process_result.event,
-            state=state,
-            **{**process_result.next_process_kwargs, **post_process_kwargs}
-        )
-        on_fail_before_post_process.assert_not_called()
-
-
-def test__run_exc_in_pre_process(base_app):
-    event = 'myevent'
-    state = 'state'
-
-    on_fail_before_post_process_kwargs = {'fail_key_1': 'fail_val_1'}
-
-    with patch.object(base_app, 'pre_process', side_effect=Exception) as pre_process, \
-         patch.object(base_app, 'process') as process, \
-         patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
-         patch.object(base_app, 'post_process') as post_process, \
-         patch.object(base_app, 'logger') as logger_mock, \
-         pytest.raises(Exception) as exc:
-        base_app._run(
-            event=event,
-            state=state,
-            on_fail_before_post_process_kwargs=on_fail_before_post_process_kwargs
-        )
-    logger_mock.error.assert_called_once_with('An error occurred in pre_process or process.')
-    assert str(exc.value) == ''
-    assert pre_process.call_count == 1
-    on_fail_before_post_process.assert_called_once_with(
-        event=event, state=state, **on_fail_before_post_process_kwargs
-    )
-    process.assert_not_called()
-    post_process.assert_not_called()
-
-
-def test__run_exc_in_process(base_app, patch_base_event):
-    event = 'myevent'
-    state = 'state'
-
-    on_fail_before_post_process_kwargs = {'fail_key_1': 'fail_val_1'}
-
-    pre_process_result = ProcessResult(event=BaseEvent([]))
-
-    with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
-         patch.object(base_app, 'process', side_effect=Exception) as process, \
-         patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
-         patch.object(base_app, 'post_process') as post_process, \
-         patch.object(base_app, 'logger') as logger_mock, \
-         pytest.raises(Exception) as exc:
-        base_app._run(
-            event=event,
-            state=state,
-            on_fail_before_post_process_kwargs=on_fail_before_post_process_kwargs
-        )
-    logger_mock.error.assert_called_once_with('An error occurred in pre_process or process.')
-    assert str(exc.value) == ''
-    assert pre_process.call_count == 1
-    assert process.call_count == 1
-    on_fail_before_post_process.assert_called_once_with(
-        event=pre_process_result.event, state=state, **on_fail_before_post_process_kwargs
-    )
-    post_process.assert_not_called()
-
-
-def test__run(base_app, patch_base_event):
-    event = 'myevent'
-    state = 'state'
-
-    pre_process_result = ProcessResult(event=BaseEvent([]))
-    process_result = ProcessResult(event=BaseEvent([]))
-
-    with patch.object(base_app, 'pre_process', return_value=pre_process_result) as pre_process, \
-         patch.object(base_app, 'process', return_value=process_result) as process, \
-         patch.object(base_app, 'on_fail_before_post_process') as on_fail_before_post_process, \
-         patch.object(base_app, 'post_process') as post_process:
-        base_app._run(event=event, state=state)
-        assert pre_process.call_count == 1
-        assert process.call_count == 1
-        assert post_process.call_count == 1
-        on_fail_before_post_process.assert_not_called()
-
-
-def test__run_except_in_post_process(base_app):
-    event = 'event'
-    state = 'state'
-
-    with patch.object(base_app, 'pre_process'), \
-         patch.object(base_app, 'process'), \
-         patch.object(base_app, 'post_process', side_effect=Exception), \
-         patch.object(base_app, 'logger') as logger_mock, \
-         pytest.raises(Exception):
-        base_app._run(event=event, state=state)
-    logger_mock.error.assert_called_once_with('An error occurred in post_process.')
+    get_context_mock.assert_called_once_with(event=event)
+    pre_spy.assert_called_once_with(context=context)
+    process_spy.assert_called_once_with(context=context)
+    post_spy.assert_called_once_with(context=context)
+    on_fail_spy.assert_not_called()

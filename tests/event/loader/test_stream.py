@@ -3,39 +3,54 @@ import json
 import pytest
 
 from corva.constants import STREAM_EVENT_TYPE
-from corva.event.base import BaseEvent
-from corva.event.stream import StreamEvent
+from corva.event.event import Event
+from corva.event.loader.stream import StreamLoader
 
 
-def test_get_asset_id(stream_event):
-    assert StreamEvent.get_asset_id(data=stream_event[0]) == 1
+@pytest.fixture(scope='module')
+def stream_event_str() -> str:
+    with open('data/tests/stream_event.json') as stream_event:
+        return stream_event.read()
 
 
-def test_get_asset_id_index_exc(stream_event):
+def test_get_asset_id():
+    data = {'records': [{'asset_id': 1}]}
+
+    assert StreamLoader.get_asset_id(data=data) == 1
+
+
+def test_get_asset_id_index_exc():
     data = {'records': []}
+
     with pytest.raises(ValueError) as exc:
-        StreamEvent.get_asset_id(data=data)
+        StreamLoader.get_asset_id(data=data)
+
     assert str(exc.value) == f'Could not find an asset id in data: {data}.'
 
 
-def test_get_asset_id_key_exc(stream_event):
+def test_get_asset_id_key_exc():
     data = {}
+
     with pytest.raises(ValueError) as exc:
-        StreamEvent.get_asset_id(data=data)
+        StreamLoader.get_asset_id(data=data)
+
     assert str(exc.value) == f'Could not find an asset id in data: {data}.'
 
 
-def test_get_app_connection(stream_event_str):
-    event: STREAM_EVENT_TYPE = BaseEvent._load(event=stream_event_str)
+def test__get_app_connection(stream_event_str):
+    event: STREAM_EVENT_TYPE = StreamLoader._load_json(event=stream_event_str)
+
     for subdata, app_key, expected in zip(event, ['corva.wits-depth-summary', 'other.oil-price-app'], [1, 2]):
-        app_connection_id = StreamEvent._get_app_connection_id(subdata=subdata, app_key=app_key)
+        app_connection_id = StreamLoader._get_app_connection_id(subdata=subdata, app_key=app_key)
         assert app_connection_id == expected
 
 
-def test_get_app_connection_key_error(stream_event_str):
-    event: STREAM_EVENT_TYPE = BaseEvent._load(event=stream_event_str)
+def test__get_app_connection_key_error(stream_event_str):
+    event: STREAM_EVENT_TYPE = StreamLoader._load_json(event=stream_event_str)
+
     with pytest.raises(ValueError) as exc:
-        StreamEvent._get_app_connection_id(subdata=event[0], app_key='random')
+        StreamLoader._get_app_connection_id(subdata=event[0], app_key='random')
+
     assert str(exc.value) == 'Can\'t get random from metadata.apps.'
 
 
@@ -46,14 +61,16 @@ def test_get_app_connection_key_error(stream_event_str):
          ([{}, {'collection': 'wits.completed'}], True)
     )
 )
-def test_get_is_completed(records, expected):
-    assert StreamEvent._get_is_completed(records=records) == expected
+def test__get_is_completed(records, expected):
+    assert StreamLoader._get_is_completed(records=records) == expected
 
 
 def test_get_is_completed_index_exc():
     records = []
+
     with pytest.raises(ValueError) as exc:
-        StreamEvent._get_is_completed(records=records)
+        StreamLoader._get_is_completed(records=records)
+
     assert str(exc.value) == f'Records are empty: {records}'
 
 
@@ -83,10 +100,7 @@ def test_load_is_completed():
         }
     ]
 
-    loaded_event: StreamEvent = StreamEvent.load(
-        event=json.dumps(event_str),
-        app_key=app_key
-    )
+    loaded_event = StreamLoader(app_key=app_key).load(event=json.dumps(event_str))
 
     assert loaded_event[-1].is_completed
     assert len(loaded_event[-1].records) == 1
@@ -95,4 +109,7 @@ def test_load_is_completed():
 def test_load_from_file(stream_event_str):
     """Tests that stream event is loaded from file without exceptions."""
 
-    StreamEvent.load(event=stream_event_str, app_key='corva.wits-depth-summary')
+    event = StreamLoader(app_key='corva.wits-depth-summary').load(event=stream_event_str)
+
+    assert len(event) == 1
+    assert isinstance(event, Event)
