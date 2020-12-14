@@ -1,5 +1,6 @@
 import pytest
 from pytest_mock import MockerFixture
+from redis import Redis
 
 from corva.app.context import StreamContext
 from corva.app.stream import StreamApp
@@ -259,42 +260,21 @@ def test_post_process_correct_last_processed_timestamp(
     assert store_spy.call_args[1]['mapping']['last_processed_timestamp'] == 2
 
 
-def test_post_process_correct_last_processed_timestamp_none_in_records(
+def test_post_process_correct_last_processed_timestamp_none_or_empty_records(
      mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
-    records = [record_factory(timestamp=None)]
-    data = stream_event_data_factory(records=records)
-    event = Event(data=[data])
-    context = stream_context_factory(event=event)
-
-    store_spy = mocker.spy(context.state, 'store')
-
-    stream_app.post_process(context=context)
-
-    assert (
-         store_spy.call_args[1]['mapping']['last_processed_timestamp']
-         ==
-         stream_app.DEFAULT_LAST_PROCESSED_VALUE
-    )
-
-
-def test_post_process_correct_last_processed_timestamp_empty_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
-):
-    data1 = stream_event_data_factory(records=[])
+    data1 = stream_event_data_factory(records=[record_factory(timestamp=None)])
     data2 = stream_event_data_factory(records=[])
     event = Event(data=[data1, data2])
     context = stream_context_factory(event=event)
 
+    mock = mocker.patch.object(Redis, 'hset')
     store_spy = mocker.spy(context.state, 'store')
 
     stream_app.post_process(context=context)
 
-    assert (
-         store_spy.call_args[1]['mapping']['last_processed_timestamp']
-         ==
-         stream_app.DEFAULT_LAST_PROCESSED_VALUE
-    )
+    assert 'last_processed_timestamp' not in store_spy.call_args[1]['mapping']
+    mock.assert_called_once()
 
 
 def test_post_process_correct_last_processed_depth(
@@ -314,35 +294,21 @@ def test_post_process_correct_last_processed_depth(
     assert store_spy.call_args[1]['mapping']['last_processed_depth'] == 2
 
 
-def test_post_process_correct_last_processed_depth_none_in_records(
+def test_post_process_correct_last_processed_depth_none_or_empty_records(
      mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
-    records = [record_factory(measured_depth=None)]
-    event = Event(data=[stream_event_data_factory(records=records)])
-    context = stream_context_factory(event=event)
-
-    store_spy = mocker.spy(context.state, 'store')
-
-    stream_app.post_process(context=context)
-
-    assert store_spy.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
-
-
-def test_post_process_correct_last_processed_depth_empty_records(
-     mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
-):
-    records1 = []
-    records2 = []
-    data1 = stream_event_data_factory(records=records1)
-    data2 = stream_event_data_factory(records=records2)
+    data1 = stream_event_data_factory(records=[record_factory(measured_depth=None)])
+    data2 = stream_event_data_factory(records=[])
     event = Event(data=[data1, data2])
     context = stream_context_factory(event=event)
 
+    mock = mocker.patch.object(Redis, 'hset')
     store_spy = mocker.spy(context.state, 'store')
 
     stream_app.post_process(context=context)
 
-    assert store_spy.call_args[1]['mapping']['last_processed_depth'] == stream_app.DEFAULT_LAST_PROCESSED_VALUE
+    assert 'last_processed_depth' not in store_spy.call_args[1]['mapping']
+    mock.assert_called_once()
 
 
 def test_post_process_store_call(
@@ -351,8 +317,10 @@ def test_post_process_store_call(
     event = Event(data=[stream_event_data_factory()])
     context = stream_context_factory(event=event)
 
+    mock = mocker.patch.object(Redis, 'hset')
     store_spy = mocker.spy(context.state, 'store')
 
     stream_app.post_process(context=context)
 
-    store_spy.assert_called_once_with(mapping={'last_processed_timestamp': -1, 'last_processed_depth': -1})
+    store_spy.assert_called_once_with(mapping={})
+    mock.assert_called_once()
