@@ -4,9 +4,9 @@ from logging import Logger, LoggerAdapter
 from typing import List, Optional, Union
 
 from corva import settings
-from corva.app.context import BaseContext
-from corva.event.event import Event
-from corva.event.loader.base import BaseLoader
+from corva.models.base import BaseContext
+from corva.event import Event
+from corva.loader.base import BaseLoader
 from corva.logger import DEFAULT_LOGGER
 from corva.network.api import Api
 
@@ -85,7 +85,7 @@ class BaseApp(ABC):
 
     def _group_event(self, event: Event) -> List[Event]:
         events = [
-            Event(data=list(group))
+            Event(list(group))
             for key, group in groupby(event, key=lambda data: getattr(data, self.group_by_field))
         ]
         return events

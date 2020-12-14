@@ -1,12 +1,12 @@
 import pytest
 
-from corva.event.event import Event
-from corva.event.loader.scheduled import ScheduledLoader
+from corva.loader.scheduled import ScheduledLoader
+from tests.conftest import DATA_PATH
 
 
 @pytest.fixture(scope='module')
 def scheduled_event_str() -> str:
-    with open('data/tests/scheduled_event.json') as scheduled_event:
+    with open(DATA_PATH / 'scheduled_event.json') as scheduled_event:
         return scheduled_event.read()
 
 
@@ -16,4 +16,3 @@ def test_load(scheduled_event_str):
     event = ScheduledLoader().load(event=scheduled_event_str)
 
     assert len(event) == 3
-    assert isinstance(event, Event)

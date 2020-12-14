@@ -1,12 +1,4 @@
 import pytest
-from pytest import fixture
-
-from corva.network.api import Api
-
-
-@fixture
-def api():
-    return Api(api_url='https://api', data_api_url='https://data')
 
 
 def test_default_headers(api):

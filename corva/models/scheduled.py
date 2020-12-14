@@ -1,6 +1,12 @@
-from typing import Optional
 from datetime import datetime
-from corva.event.data.base import BaseEventData
+from typing import Optional
+
+from corva.models.base import BaseContext, BaseEventData
+from corva.state.redis_state import RedisState
+
+
+class ScheduledContext(BaseContext):
+    state: RedisState
 
 
 class ScheduledEventData(BaseEventData):

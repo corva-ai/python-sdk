@@ -3,9 +3,9 @@ from __future__ import annotations
 from itertools import chain
 from typing import List
 
-from corva.event.data.scheduled import ScheduledEventData
-from corva.event.event import Event
-from corva.event.loader.base import BaseLoader
+from corva.models.scheduled import ScheduledEventData
+from corva.event import Event
+from corva.loader.base import BaseLoader
 
 
 class ScheduledLoader(BaseLoader):
@@ -19,4 +19,4 @@ class ScheduledLoader(BaseLoader):
             subdata['app_stream_id'] = subdata.pop('app_stream')
             data.append(ScheduledEventData(**subdata))
 
-        return Event(data=data)
+        return Event(data)

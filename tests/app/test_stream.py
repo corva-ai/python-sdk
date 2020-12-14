@@ -2,16 +2,15 @@ import pytest
 from pytest_mock import MockerFixture
 from redis import Redis
 
-from corva.app.context import StreamContext
+from corva.models.stream import StreamContext, Record, StreamEventData
 from corva.app.stream import StreamApp
-from corva.event.data.stream import StreamEventData, Record
-from corva.event.event import Event
+from corva.event import Event
 from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def stream_app():
-    return StreamApp(app_key=APP_KEY, cache_url=CACHE_URL)
+def stream_app(api):
+    return StreamApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
 
 
 @pytest.fixture(scope='module')
@@ -54,7 +53,7 @@ def record_factory():
 def stream_context_factory(stream_event_data_factory, redis):
     def _stream_context_factory(**kwargs):
         default_params = {
-            'event': Event(data=[stream_event_data_factory()]),
+            'event': Event([stream_event_data_factory()]),
             'state': redis
         }
         default_params.update(kwargs)
@@ -137,7 +136,7 @@ def test_filter_records_with_all_filters(stream_event_data_factory, record_facto
 
 def test__filter_event(mocker: MockerFixture, stream_event_data_factory):
     data = [stream_event_data_factory(asset_id=1), stream_event_data_factory(asset_id=2)]
-    event = Event(data=data)
+    event = Event(data)
 
     _filter_event_data_mock = mocker.patch.object(
         StreamApp, '_filter_event_data', side_effect=lambda data, **kwargs: data
@@ -250,7 +249,7 @@ def test_post_process_correct_last_processed_timestamp(
     records2 = [record_factory(timestamp=2)]
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
-    event = Event(data=[data1, data2])
+    event = Event([data1, data2])
     context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
@@ -265,7 +264,7 @@ def test_post_process_correct_last_processed_timestamp_none_or_empty_records(
 ):
     data1 = stream_event_data_factory(records=[record_factory(timestamp=None)])
     data2 = stream_event_data_factory(records=[])
-    event = Event(data=[data1, data2])
+    event = Event([data1, data2])
     context = stream_context_factory(event=event)
 
     mock = mocker.patch.object(Redis, 'hset')
@@ -284,7 +283,7 @@ def test_post_process_correct_last_processed_depth(
     records2 = [record_factory(measured_depth=2)]
     data1 = stream_event_data_factory(records=records1)
     data2 = stream_event_data_factory(records=records2)
-    event = Event(data=[data1, data2])
+    event = Event([data1, data2])
     context = stream_context_factory(event=event)
 
     store_spy = mocker.spy(context.state, 'store')
@@ -299,7 +298,7 @@ def test_post_process_correct_last_processed_depth_none_or_empty_records(
 ):
     data1 = stream_event_data_factory(records=[record_factory(measured_depth=None)])
     data2 = stream_event_data_factory(records=[])
-    event = Event(data=[data1, data2])
+    event = Event([data1, data2])
     context = stream_context_factory(event=event)
 
     mock = mocker.patch.object(Redis, 'hset')
@@ -314,7 +313,7 @@ def test_post_process_correct_last_processed_depth_none_or_empty_records(
 def test_post_process_store_call(
      mocker: MockerFixture, stream_app, stream_event_data_factory, record_factory, stream_context_factory
 ):
-    event = Event(data=[stream_event_data_factory()])
+    event = Event([stream_event_data_factory()])
     context = stream_context_factory(event=event)
 
     mock = mocker.patch.object(Redis, 'hset')

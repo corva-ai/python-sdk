@@ -3,9 +3,9 @@ import json
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.event.loader.base import BaseLoader
+from corva.loader.base import BaseLoader
 
-BASE_LOADER_PATH = 'corva.event.loader.base'
+BASE_LOADER_PATH = 'corva.loader.base'
 
 
 def test__load_json_invalid_json(mocker: MockerFixture):

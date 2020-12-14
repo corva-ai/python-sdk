@@ -1,13 +1,16 @@
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from fakeredis import FakeRedis
 
+from corva.network.api import Api
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 APP_KEY = 'provider.app-name'
 CACHE_URL = 'redis://localhost:6379'
+DATA_PATH = Path('tests/test_data')
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -37,6 +40,11 @@ def redis_adapter(patch_redis_adapter):
 @pytest.fixture(scope='function')
 def redis(redis_adapter):
     return RedisState(redis=redis_adapter)
+
+
+@pytest.fixture(scope='function')
+def api():
+    return Api(api_url='https://api.localhost.ai', data_api_url='https://data.localhost.ai')
 
 
 class ComparableException(Exception):
