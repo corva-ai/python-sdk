@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Union
 from redis import Redis, from_url, ConnectionError
 
 from corva import settings
-from corva.constants import REDIS_STORED_VALUE_TYPE
+from corva.types import REDIS_STORED_VALUE_TYPE
 from corva.logger import DEFAULT_LOGGER
 
 

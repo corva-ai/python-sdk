@@ -2,21 +2,24 @@ from __future__ import annotations
 
 from typing import List
 
-from corva.event.base import BaseEvent
-from corva.event.data.stream import StreamEventData
+from corva.event import Event
+from corva.models.stream import StreamEventData
+from corva.loader.base import BaseLoader
 
 
-class StreamEvent(BaseEvent):
-    @classmethod
-    def load(cls, event: str, app_key: str, **kwargs) -> StreamEvent:
-        event: List[dict] = super()._load(event=event)
+class StreamLoader(BaseLoader):
+    def __init__(self, app_key: str):
+        self.app_key = app_key
+
+    def load(self, event: str) -> Event:
+        event: List[dict] = super()._load_json(event=event)
 
         data = []
         for subdata in event:
-            asset_id = cls.get_asset_id(data=subdata)
-            app_connection_id = cls._get_app_connection_id(subdata=subdata, app_key=app_key)
+            asset_id = self.get_asset_id(data=subdata)
+            app_connection_id = self._get_app_connection_id(subdata=subdata, app_key=self.app_key)
             app_stream_id = subdata['metadata']['app_stream_id']
-            is_completed = cls._get_is_completed(records=subdata['records'])
+            is_completed = self._get_is_completed(records=subdata['records'])
 
             data.append(StreamEventData(
                 asset_id=asset_id,
@@ -26,7 +29,7 @@ class StreamEvent(BaseEvent):
                 **subdata
             ))
 
-        return StreamEvent(data=data)
+        return Event(data)
 
     @staticmethod
     def _get_is_completed(records: List[dict]):

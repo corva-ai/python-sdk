@@ -1,6 +1,12 @@
+from datetime import datetime
 from typing import Optional
 
-from corva.event.data.base import BaseEventData
+from corva.models.base import BaseContext, BaseEventData
+from corva.state.redis_state import RedisState
+
+
+class ScheduledContext(BaseContext):
+    state: RedisState
 
 
 class ScheduledEventData(BaseEventData):
@@ -20,8 +26,8 @@ class ScheduledEventData(BaseEventData):
     api_key: Optional[str] = None
     schedule: int
     interval: int
-    schedule_start: int
-    schedule_end: int
+    schedule_start: datetime
+    schedule_end: datetime
     asset_id: int
     asset_name: str
     asset_type: str

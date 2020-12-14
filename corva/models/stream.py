@@ -1,6 +1,11 @@
 from typing import Any, Dict, List, Optional
 
-from corva.event.data.base import BaseEventData
+from corva.models.base import BaseContext, BaseEventData
+from corva.state.redis_state import RedisState
+
+
+class StreamContext(BaseContext):
+    state: RedisState
 
 
 class Record(BaseEventData):
