@@ -70,6 +70,7 @@ jobs:
       - name: Build the Package
         run: |
           rm -rf dist/*
+          pip install wheel
           python setup.py sdist bdist_wheel
 
       - name: Publishing to PyPI
