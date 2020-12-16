@@ -5,7 +5,7 @@ Python 3.8+
 
 ### Set up the project
 ```sh
-cd ~/YOUR_PATH/python-worker-public
+cd ~/YOUR_PATH/python-sdk
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -20,5 +20,3 @@ venv/bin/python3 -m pytest tests
 ```sh
 venv/bin/python3 -m flake8
 ```
-
-
