@@ -8,6 +8,8 @@ from urllib3 import Retry
 
 
 class Api:
+    """Provides a convenient way to access Corva API and Corva Data API"""
+
     ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
     DEFAULT_TIMEOUT = 600
     DEFAULT_MAX_RETRIES = 3
