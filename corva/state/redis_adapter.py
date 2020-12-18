@@ -10,6 +10,12 @@ REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 
 
 class RedisAdapter(Redis):
+    """Expands basic redis functionality
+
+    Serves the purpose of adding custom logic on top of basic redis functions
+    (e.g. adding expiry to hset, which is not available out of the box).
+    """
+
     DEFAULT_EXPIRY: timedelta = timedelta(days=60)
 
     def __init__(
