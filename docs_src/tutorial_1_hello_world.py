@@ -17,4 +17,4 @@ def lambda_handler(event, context):
 
     """AWS lambda handler"""
 
-    user_job.run(event)  # 5 run your function
+    user_job(event)  # 5 run your function
