@@ -9,4 +9,4 @@ EVENT_TYPE = Union[
     STREAM_EVENT_TYPE,
     TASK_EVENT_TYPE
 ]
-DISPATCH_TYPE = Callable[['BaseContext', Callable[['BaseContext'], Any]], Any]
+DISPATCH_TYPE = Callable[['BaseContext', Callable[['BaseContext'], Any]], Any]  # noqa: F821
