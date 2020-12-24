@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from corva import BaseContext
+from corva.models.base import BaseContext
 from corva.types import DISPATCH_TYPE
 
 
