@@ -11,7 +11,7 @@ from corva.state.redis_state import RedisState
 class UserCallableMiddleware:
     def __init__(self, call: Callable):
         self.call = call
-        self.event_param_name, self.state_param_name, self.api_param_name = self.parse_callable(call=self.call)
+        self.event_param_name, self.api_param_name, self.state_param_name = self.parse_callable(call=self.call)
 
     def __call__(self, context: BaseContext) -> Any:
         kwargs = context.user_kwargs.copy()
