@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable, Any, Tuple, Optional
+from typing import Any, Callable, Optional, Tuple
 
 from pydantic.utils import lenient_issubclass
 
