@@ -1,6 +1,10 @@
+from typing import List, TypeVar
+
 from pydantic import BaseModel, Extra
 
-from corva.event import Event
+
+class BaseEvent:
+    pass
 
 
 class BaseContext(BaseModel):
@@ -19,9 +23,16 @@ class BaseContext(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    event: Event
+    event: BaseEvent
 
 
 class BaseEventData(BaseModel):
     class Config:
         extra = Extra.allow
+
+
+BaseEventDataTV = TypeVar('BaseEventDataTV', bound=BaseEventData)
+
+
+class ListEvent(BaseEvent, List[BaseEventDataTV]):
+    pass
