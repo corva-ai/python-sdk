@@ -1,4 +1,6 @@
-from typing import List, Union
+from typing import Any, Callable, List, Union
+
+from corva import BaseContext
 
 REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 SCHEDULED_EVENT_TYPE = List[List[dict]]
@@ -9,3 +11,4 @@ EVENT_TYPE = Union[
     STREAM_EVENT_TYPE,
     TASK_EVENT_TYPE
 ]
+DISPATCH_TYPE = Callable[[BaseContext, Callable[[BaseContext], Any]], Any]
