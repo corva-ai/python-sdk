@@ -3,8 +3,7 @@ from typing import Callable, Any, Tuple, Optional
 
 from pydantic.utils import lenient_issubclass
 
-from corva.models.base import BaseContext
-from corva.models.base import BaseEvent
+from corva.models.base import BaseContext, BaseEvent
 from corva.network.api import Api
 from corva.state.redis_state import RedisState
 
