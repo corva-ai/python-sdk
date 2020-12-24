@@ -1,6 +1,9 @@
-from typing import List, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from pydantic import BaseModel, Extra
+
+from corva.network.api import Api
+from corva.state.redis_state import RedisState
 
 
 class BaseEvent:
@@ -23,7 +26,12 @@ class BaseContext(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    event: BaseEvent
+    raw_event: str
+    event: Optional[BaseEvent] = None
+    api: Optional[Api] = None
+    state: Optional[RedisState] = None
+    user_kwargs: Dict[str, Any] = {}
+    user_result: Any = None
 
 
 class BaseEventData(BaseModel):
