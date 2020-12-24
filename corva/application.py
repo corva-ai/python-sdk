@@ -12,7 +12,7 @@ class Corva:
          self,
          *,
          middleware: Optional[List[Middleware]] = None
-    ) -> None:
+    ):
         self.user_middleware = middleware or []
 
     def build_middlware_stack(
