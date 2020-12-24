@@ -16,4 +16,4 @@ class UserMiddleware:
         self.dispatch = dispatch
 
     def __call__(self, context: BaseContext) -> Any:
-        self.dispatch(context, self.call)
+        return self.dispatch(context, self.call)
