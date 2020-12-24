@@ -15,7 +15,7 @@ class Corva:
     ):
         self.user_middleware = middleware or []
 
-    def build_middlware_stack(
+    def build_middleware_stack(
          self,
          *,
          call: Callable,
