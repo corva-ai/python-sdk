@@ -1,9 +1,9 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from corva.app.scheduled import ScheduledApp
 from corva.event import Event
+from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from tests.conftest import APP_KEY, CACHE_URL
 
 
@@ -61,6 +61,7 @@ def test_group_by_field():
     assert ScheduledApp.group_by_field == 'app_connection_id'
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test_post_process(
      mocker: MockerFixture, scheduled_app, scheduled_event_data_factory, scheduled_context_factory
 ):

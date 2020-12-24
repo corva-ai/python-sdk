@@ -94,6 +94,7 @@ def test_update_task_data(mocker: MockerFixture, task_app):
     put_spy.assert_called_once_with(path=f'v2/tasks/{TASK_ID}/{status}', data=data.dict())
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     save_data = {'key1': 'val1'}
     context = task_context_factory(task_result=save_data)
@@ -110,6 +111,7 @@ def test_post_process_calls_update_task_data(mocker: MockerFixture, task_app, ta
     )
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test_on_fail_calls_update_task_data(mocker: MockerFixture, task_app, task_context_factory):
     context = task_context_factory()
     exc = ComparableException('123')
