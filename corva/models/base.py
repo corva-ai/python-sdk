@@ -27,10 +27,12 @@ class BaseContext(BaseModel):
         arbitrary_types_allowed = True
 
     raw_event: str
+    user_kwargs: Dict[str, Any]
+    app_key: str
+
     event: Optional[BaseEvent] = None
     api: Optional[Api] = None
     state: Optional[RedisState] = None
-    user_kwargs: Dict[str, Any] = {}
     user_result: Any = None
 
 
