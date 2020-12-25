@@ -1,16 +1,19 @@
+from typing import List
+
 from corva.loader.base import BaseLoader
-from corva.models.stream import StreamEvent
-from corva.types import STREAM_EVENT_TYPE
+from corva.models.stream import StreamEvent, StreamEventData
 
 
-class StreamLoader(BaseLoader[StreamEvent, STREAM_EVENT_TYPE]):
+class StreamLoader(BaseLoader):
+    parse_as_type = List[StreamEventData]
+
     def __init__(self, app_key: str):
         self.app_key = app_key
 
     def load(self, event: str) -> StreamEvent:
-        event = super().load(event=event)  # type: StreamEvent
+        parsed = self.parse(event=event)  # type: StreamLoader.parse_as_type
 
-        for subevent in event:
-            subevent.app_key = self.app_key
+        for data in parsed:
+            data.app_key = self.app_key
 
-        return event
+        return StreamEvent(event)
