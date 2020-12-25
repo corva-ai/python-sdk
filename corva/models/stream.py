@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict, List, Optional
 
 from corva.models.base import BaseContext, BaseEventData, ListEvent
@@ -16,13 +15,13 @@ class StreamEventData(BaseEventData):
             weight_on_bit: Optional[int] = None
             state: Optional[str] = None
 
-        timestamp: Optional[datetime] = None
+        timestamp: Optional[int] = None
         asset_id: int
         company_id: int
         version: int
-        data: Data
         measured_depth: Optional[float] = None
         collection: str
+        data: Data
 
     class Metadata(BaseEventData):
         class AppKeyData(BaseEventData):
