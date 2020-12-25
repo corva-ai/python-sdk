@@ -16,4 +16,4 @@ class StreamLoader(BaseLoader):
         for data in parsed:
             data.app_key = self.app_key
 
-        return StreamEvent(event)
+        return StreamEvent(parsed)
