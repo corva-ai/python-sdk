@@ -2,9 +2,9 @@ from itertools import chain
 from typing import Optional, List
 
 from corva.app.base import BaseApp
-from corva.models.stream import StreamContext, Record, StreamEventData
 from corva.event import Event
 from corva.loader.stream import StreamLoader
+from corva.models.stream import StreamContext, StreamEventData
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 from corva.utils import GetStateKey
@@ -59,7 +59,7 @@ class StreamApp(BaseApp):
         context.event = event
 
     def post_process(self, context: StreamContext) -> None:
-        all_records: List[Record] = list(chain(*[subdata.records for subdata in context.event]))
+        all_records: List[StreamEventData.Record] = list(chain(*[subdata.records for subdata in context.event]))
 
         last_processed_timestamp = max(
             [
