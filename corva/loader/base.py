@@ -1,20 +1,14 @@
-import json
-from abc import abstractmethod, ABC
+from typing import Generic, TypeVar
 
-from corva.types import EVENT_TYPE
-from corva.event import Event
+from pydantic import parse_raw_as
+
+from corva.models.base import BaseEvent
+from corva.types import SCHEDULED_EVENT_TYPE, STREAM_EVENT_TYPE, TASK_EVENT_TYPE
+
+BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
+EventTypeTV = TypeVar('EventTypeTV', SCHEDULED_EVENT_TYPE, STREAM_EVENT_TYPE, TASK_EVENT_TYPE)
 
 
-class BaseLoader(ABC):
-    @abstractmethod
-    def load(self, event: str) -> Event:
-        pass
-
-    @staticmethod
-    def _load_json(event: str) -> EVENT_TYPE:
-        try:
-            event = json.loads(event)
-        except ValueError as exc:
-            raise ValueError('Invalid event JSON') from exc
-
-        return event
+class BaseLoader(Generic[BaseEventTV, EventTypeTV]):
+    def load(self, event: str) -> BaseEventTV:
+        return parse_raw_as(EventTypeTV, event)
