@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from corva.models.base import BaseContext, BaseEventData
+from pydantic import Field
+
+from corva.models.base import BaseContext, BaseEventData, ListEvent
 from corva.state.redis_state import RedisState
 
 
@@ -17,8 +19,8 @@ class ScheduledEventData(BaseEventData):
     app: int
     app_key: str
     app_version: Optional[int]
-    app_connection_id: int
-    app_stream_id: int
+    app_connection_id: int = Field(alias='app_connection')
+    app_stream_id: int = Field(alias='app_stream')
     source_type: str
     company: int
     provider: str
@@ -35,3 +37,7 @@ class ScheduledEventData(BaseEventData):
     log_type: str
     log_identifier: Optional[str] = None
     day_shift_start: Optional[str] = None
+
+
+class ScheduledEvent(ListEvent[ScheduledEventData]):
+    pass

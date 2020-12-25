@@ -1,22 +1,15 @@
-from __future__ import annotations
-
 from itertools import chain
 from typing import List
 
-from corva.models.scheduled import ScheduledEventData
-from corva.event import Event
 from corva.loader.base import BaseLoader
+from corva.models.scheduled import ScheduledEventData, ScheduledEvent
 
 
 class ScheduledLoader(BaseLoader):
-    def load(self, event: str) -> Event:
-        event: List[List[dict]] = super()._load_json(event=event)
-        event: List[dict] = list(chain(*event))
+    parse_as_type = List[List[ScheduledEventData]]
 
-        data = []
-        for subdata in event:
-            subdata['app_connection_id'] = subdata.pop('app_connection')
-            subdata['app_stream_id'] = subdata.pop('app_stream')
-            data.append(ScheduledEventData(**subdata))
+    def load(self, event: str) -> ScheduledEvent:
+        parsed = self.parse(event=event)  # type: ScheduledLoader.parse_as_type
+        parsed = list(chain(*parsed))
 
-        return Event(data)
+        return ScheduledEvent(parsed)
