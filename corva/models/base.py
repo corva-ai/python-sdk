@@ -1,6 +1,7 @@
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, Extra
+from pydantic.generics import GenericModel
 
 from corva.network.api import Api
 from corva.state.redis_state import RedisState
@@ -10,7 +11,10 @@ class BaseEvent:
     pass
 
 
-class BaseContext(BaseModel):
+BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
+
+
+class BaseContext(GenericModel, Generic[BaseEventTV]):
     """Used to pass different parameter sets to steps predefined in BaseApp.run function.
 
     Child classes of BaseApp may need:
@@ -30,7 +34,7 @@ class BaseContext(BaseModel):
     user_kwargs: Dict[str, Any]
     app_key: str
 
-    event: Optional[BaseEvent] = None
+    event: Optional[BaseEventTV] = None
     api: Optional[Api] = None
     state: Optional[RedisState] = None
     user_result: Any = None
