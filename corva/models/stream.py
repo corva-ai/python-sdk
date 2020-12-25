@@ -24,11 +24,11 @@ class StreamEventData(BaseEventData):
         data: Data
 
     class Metadata(BaseEventData):
-        class AppKeyData(BaseEventData):
+        class AppData(BaseEventData):
             app_connection_id: int
 
         app_stream_id: int
-        apps: Dict[str, AppKeyData]
+        apps: Dict[str, AppData]
 
     app_key: Optional[str] = None
     records: List[Record]
