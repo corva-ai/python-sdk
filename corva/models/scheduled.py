@@ -4,11 +4,6 @@ from typing import Optional
 from pydantic import Field
 
 from corva.models.base import BaseContext, BaseEventData, ListEvent
-from corva.state.redis_state import RedisState
-
-
-class ScheduledContext(BaseContext):
-    state: RedisState
 
 
 class ScheduledEventData(BaseEventData):
@@ -40,4 +35,8 @@ class ScheduledEventData(BaseEventData):
 
 
 class ScheduledEvent(ListEvent[ScheduledEventData]):
+    pass
+
+
+class ScheduledContext(BaseContext[ScheduledEvent]):
     pass

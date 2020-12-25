@@ -35,11 +35,6 @@ class UpdateTaskData(BaseModel):
     payload: dict = {}
 
 
-class TaskContext(BaseContext):
-    task: TaskData
-    task_result: dict = {}
-
-
 class TaskEventData(BaseEventData):
     id: Optional[str] = None
     task_id: str
@@ -47,4 +42,8 @@ class TaskEventData(BaseEventData):
 
 
 class TaskEvent(BaseEvent, TaskEventData):
+    pass
+
+
+class TaskContext(BaseContext[TaskEvent]):
     pass
