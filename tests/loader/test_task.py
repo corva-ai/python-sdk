@@ -11,6 +11,4 @@ def task_event_str() -> str:
 def test_load(task_event_str):
     """test that sample task event loads without exceptions"""
 
-    event = TaskLoader().load(event=task_event_str)
-
-    assert len(event) == 1
+    TaskLoader().load(event=task_event_str)

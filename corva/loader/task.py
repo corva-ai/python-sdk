@@ -1,12 +1,9 @@
-from corva.models.task import TaskEventData
-from corva.event import Event
 from corva.loader.base import BaseLoader
+from corva.models.task import TaskEvent
 
 
 class TaskLoader(BaseLoader):
-    def load(self, event: str) -> Event:
-        event: dict = super()._load_json(event=event)
+    parse_as_type = TaskEvent
 
-        data = [TaskEventData(**event)]
-
-        return Event(data)
+    def load(self, event: str) -> TaskEvent:
+        return self.parse(event=event)
