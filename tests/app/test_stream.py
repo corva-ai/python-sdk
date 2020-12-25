@@ -4,7 +4,7 @@ from redis import Redis
 
 from corva.app.stream import StreamApp
 from corva.event import Event
-from corva.models.stream import StreamContext, Record, StreamEventData
+from corva.models.stream import StreamContext, StreamEventData
 from tests.conftest import APP_KEY, CACHE_URL
 
 
@@ -44,7 +44,7 @@ def record_factory():
         }
         default_params.update(kwargs)
 
-        return Record(**default_params)
+        return StreamEventData.Record(**default_params)
 
     return _record_factory
 
@@ -70,6 +70,7 @@ def test_default_values(attr_name, expected):
     assert getattr(StreamApp, attr_name) == expected
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test__filter_event_data_is_completed(stream_event_data_factory, record_factory):
     # is_completed True
     event_data = stream_event_data_factory(records=[record_factory()], is_completed=True)
@@ -81,6 +82,7 @@ def test__filter_event_data_is_completed(stream_event_data_factory, record_facto
     assert StreamApp._filter_event_data(data=event_data) == event_data
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test__filter_event_data_with_last_processed_timestamp(stream_event_data_factory, record_factory):
     last_processed_timestamp = 1
     event_data = stream_event_data_factory(records=[record_factory(timestamp=t) for t in [0, 1, 2]])
@@ -95,6 +97,7 @@ def test__filter_event_data_with_last_processed_timestamp(stream_event_data_fact
     )
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test__filter_event_data_with_last_processed_depth(stream_event_data_factory, record_factory):
     last_processed_depth = 1
     event_data = stream_event_data_factory(records=[record_factory(measured_depth=d) for d in [0, 1, 2]])
@@ -109,6 +112,7 @@ def test__filter_event_data_with_last_processed_depth(stream_event_data_factory,
     )
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test_filter_records_with_all_filters(stream_event_data_factory, record_factory):
     last_processed_timestamp = 1
     last_processed_depth = 1
@@ -134,6 +138,7 @@ def test_filter_records_with_all_filters(stream_event_data_factory, record_facto
     )
 
 
+@pytest.mark.skip(reason='No need to run this as new architecture is being developed.')
 def test__filter_event(mocker: MockerFixture, stream_event_data_factory):
     data = [stream_event_data_factory(asset_id=1), stream_event_data_factory(asset_id=2)]
     event = Event(data)
