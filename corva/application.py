@@ -1,6 +1,6 @@
 from typing import Callable, List, Optional
 
-from corva.middleware.user_callable import UserCallableMiddleware
+from corva.middleware.unpack_context import unpack_context
 from corva.models.base import BaseContext
 from corva.types import MIDDLEWARE_CALL_TYPE, MIDDLEWARE_TYPE
 
@@ -40,7 +40,7 @@ class Corva:
         middleware_stack = (
              middleware
              + self.user_middleware
-             + [UserCallableMiddleware]
+             + [unpack_context]
         )
 
         return middleware_stack
