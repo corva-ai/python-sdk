@@ -16,7 +16,7 @@ def _split_event(
     return events
 
 
-def splitter_factory(*, split_by_field: str) -> Callable:
+def splitter_factory(split_by_field: str) -> Callable:
     def splitter(
          context: Union[ScheduledContext, StreamContext], call_next: Callable
     ) -> List[Union[ScheduledContext, StreamContext]]:
