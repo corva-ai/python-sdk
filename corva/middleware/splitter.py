@@ -1,35 +1,34 @@
 from itertools import groupby
-from typing import Any, Callable, List, Union
+from typing import Callable, List, Union
 
-from corva.models.base import BaseContext
-from corva.models.scheduled import ScheduledContext, ScheduledEvent
-from corva.models.stream import StreamContext, StreamEvent
+from corva.models.scheduled import ScheduledEvent, ScheduledContext
+from corva.models.stream import StreamEvent, StreamContext
 
 
-class SplitterMiddleware:
-    def __init__(self, call: Callable[[BaseContext], Any], split_by_field: str):
-        self.call = call
-        self.split_by_field = split_by_field
+def _split_event(
+     event: Union[StreamEvent, ScheduledEvent],
+     split_by_field: str
+) -> List[Union[StreamEvent, ScheduledEvent]]:
+    events = [
+        type(event)(list(group))
+        for key, group in groupby(event, key=lambda data: getattr(data, split_by_field))
+    ]
+    return events
 
-    def __call__(self, context: Union[StreamContext, ScheduledContext]) -> Any:
-        events = self.split_event(event=context.event, split_by_field=self.split_by_field)
 
-        results = [
-            self.call(
+def splitter_factory(*, split_by_field: str) -> Callable:
+    def splitter(
+         context: Union[ScheduledContext, StreamContext], call_next: Callable
+    ) -> List[Union[ScheduledContext, StreamContext]]:
+        events = _split_event(event=context.event, split_by_field=split_by_field)
+
+        contexts = [
+            call_next(
                 context.copy(update={'event': event}, deep=True)
             )
             for event in events
         ]
 
-        return results
+        return contexts
 
-    @staticmethod
-    def split_event(
-         event: Union[StreamEvent, ScheduledEvent],
-         split_by_field: str
-    ) -> List[Union[StreamEvent, ScheduledEvent]]:
-        events = [
-            type(event)(list(group))
-            for key, group in groupby(event, key=lambda data: getattr(data, split_by_field))
-        ]
-        return events
+    return splitter
