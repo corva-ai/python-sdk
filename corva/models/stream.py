@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from corva.models.base import BaseContext, BaseEventData, ListEvent
+from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
 
 
 class StreamEventData(BaseEventData):
@@ -50,5 +50,10 @@ class StreamEvent(ListEvent[StreamEventData]):
     pass
 
 
-class StreamContext(BaseContext[StreamEvent]):
+class StreamStateData(BaseStateData):
+    last_processed_timestamp: int = -1
+    last_processed_depth: float = -1
+
+
+class StreamContext(BaseContext[StreamEvent, StreamStateData]):
     pass

@@ -11,10 +11,15 @@ class BaseEvent:
     pass
 
 
+class BaseStateData(BaseModel):
+    pass
+
+
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
+BaseStateDataTV = TypeVar('BaseStateDataTV', bound=BaseStateData)
 
 
-class BaseContext(GenericModel, Generic[BaseEventTV]):
+class BaseContext(GenericModel, Generic[BaseEventTV, BaseStateDataTV]):
     """Used to pass different parameter sets to steps predefined in BaseApp.run function.
 
     Child classes of BaseApp may need:
@@ -37,6 +42,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV]):
     event: Optional[BaseEventTV] = None
     api: Optional[Api] = None
     state: Optional[RedisState] = None
+    state_data: Optional[BaseStateDataTV] = None
     user_result: Any = None
 
 
