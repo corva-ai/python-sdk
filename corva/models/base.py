@@ -39,8 +39,8 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseStateDataTV]):
 
     raw_event: str
     user_kwargs: Dict[str, Any]
-    app_key: str
 
+    app_key: Optional[str] = None
     event: Optional[BaseEventTV] = None
     api: Optional[Api] = None
     state: Optional[RedisState] = None
