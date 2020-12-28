@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEventData, BaseEvent
+from corva.models.base import BaseContext, BaseEventData, BaseEvent, BaseStateData
 
 
 class TaskStatus(Enum):
@@ -45,5 +45,5 @@ class TaskEvent(BaseEvent, TaskEventData):
     pass
 
 
-class TaskContext(BaseContext[TaskEvent]):
+class TaskContext(BaseContext[TaskEvent, BaseStateData]):
     pass

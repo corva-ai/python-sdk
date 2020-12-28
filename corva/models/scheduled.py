@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from corva.models.base import BaseContext, BaseEventData, ListEvent
+from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
 
 
 class ScheduledEventData(BaseEventData):
@@ -38,5 +38,5 @@ class ScheduledEvent(ListEvent[ScheduledEventData]):
     pass
 
 
-class ScheduledContext(BaseContext[ScheduledEvent]):
+class ScheduledContext(BaseContext[ScheduledEvent, BaseStateData]):
     pass
