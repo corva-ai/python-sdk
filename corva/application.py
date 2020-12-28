@@ -1,38 +1,52 @@
-from typing import Any, Callable, List, Optional
+from typing import Callable, List, Optional
 
-from corva.middleware.user import UserMiddleware
 from corva.middleware.user_callable import UserCallableMiddleware
-from corva.middleware.wrapper import Middleware
 from corva.models.base import BaseContext
-from corva.types import DISPATCH_TYPE
+from corva.types import MIDDLEWARE_CALL_TYPE, MIDDLEWARE_TYPE
+
+
+def wrap_call_in_middleware(
+     call: Callable,
+     middleware: Optional[List[MIDDLEWARE_TYPE]] = None
+) -> MIDDLEWARE_CALL_TYPE:
+    def wrapper_factory(mw, call):
+        def wrapper(ctx):
+            return mw(ctx, call)
+
+        return wrapper
+
+    middleware = middleware or []
+
+    for mw in reversed(middleware):
+        call = wrapper_factory(mw, call)
+
+    return call
 
 
 class Corva:
     def __init__(
          self,
          *,
-         middleware: Optional[List[Middleware]] = None
+         middleware: Optional[List[MIDDLEWARE_TYPE[BaseContext]]] = None
     ):
         self.user_middleware = middleware or []
 
-    def build_middleware_stack(
+    def get_middleware_stack(
          self,
-         *,
-         call: Callable,
-         middleware: Optional[List[Middleware]] = None
-    ) -> Callable[[BaseContext], Any]:
-        middleware = (
-             [Middleware(UserCallableMiddleware)]
+         middleware: Optional[List[MIDDLEWARE_TYPE[BaseContext]]] = None
+    ) -> List[MIDDLEWARE_TYPE[BaseContext]]:
+        middleware = middleware or []
+
+        middleware_stack = (
+             middleware
              + self.user_middleware
-             + middleware
-        )  # latest called first
+             + [UserCallableMiddleware]
+        )
 
-        for cls, options in middleware:
-            call = cls(call, **options)
-        return call
+        return middleware_stack
 
-    def add_middleware(self, func: DISPATCH_TYPE) -> None:
-        self.user_middleware.insert(0, Middleware(UserMiddleware, dispatch=func))
+    def add_middleware(self, func: MIDDLEWARE_TYPE[BaseContext]) -> None:
+        self.user_middleware.append(func)
 
-    def middleware(self, func: DISPATCH_TYPE) -> None:
+    def middleware(self, func: MIDDLEWARE_TYPE[BaseContext]) -> None:
         return self.add_middleware(func=func)
