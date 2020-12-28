@@ -12,7 +12,8 @@ class BaseEvent:
 
 
 class BaseStateData(BaseModel):
-    pass
+    class Config:
+        validate_assignment = True
 
 
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
@@ -34,6 +35,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseStateDataTV]):
 
     class Config:
         arbitrary_types_allowed = True
+        validate_assignment = True
 
     raw_event: str
     user_kwargs: Dict[str, Any]
