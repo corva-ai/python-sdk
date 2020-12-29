@@ -22,7 +22,7 @@ def wrap_call_in_middleware(
 
 
 class Corva:
-    def __init__(self, *, middleware: Optional[List[Callable]] = None):
+    def __init__(self, middleware: Optional[List[Callable]] = None):
         self.user_middleware = middleware or []
 
     def get_middleware_stack(
