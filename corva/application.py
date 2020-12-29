@@ -1,14 +1,12 @@
 from typing import Callable, List, Optional
 
 from corva.middleware.unpack_context import unpack_context
-from corva.models.base import BaseContext
-from corva.types import MIDDLEWARE_CALL_TYPE, MIDDLEWARE_TYPE
 
 
 def wrap_call_in_middleware(
      call: Callable,
-     middleware: Optional[List[MIDDLEWARE_TYPE]] = None
-) -> MIDDLEWARE_CALL_TYPE:
+     middleware: Optional[List[Callable]] = None
+) -> Callable:
     def wrapper_factory(mw, call):
         def wrapper(ctx):
             return mw(ctx, call)
@@ -24,17 +22,13 @@ def wrap_call_in_middleware(
 
 
 class Corva:
-    def __init__(
-         self,
-         *,
-         middleware: Optional[List[MIDDLEWARE_TYPE[BaseContext]]] = None
-    ):
+    def __init__(self, *, middleware: Optional[List[Callable]] = None):
         self.user_middleware = middleware or []
 
     def get_middleware_stack(
          self,
-         middleware: Optional[List[MIDDLEWARE_TYPE[BaseContext]]] = None
-    ) -> List[MIDDLEWARE_TYPE[BaseContext]]:
+         middleware: Optional[List[Callable]] = None
+    ) -> List[Callable]:
         middleware = middleware or []
         default_middleware = [unpack_context]  # default middleware, should be called last
 
@@ -46,8 +40,8 @@ class Corva:
 
         return middleware_stack
 
-    def add_middleware(self, func: MIDDLEWARE_TYPE[BaseContext]) -> None:
+    def add_middleware(self, func: Callable) -> None:
         self.user_middleware.append(func)
 
-    def middleware(self, func: MIDDLEWARE_TYPE[BaseContext]) -> None:
+    def middleware(self, func: Callable) -> None:
         return self.add_middleware(func=func)

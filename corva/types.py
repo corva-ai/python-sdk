@@ -1,6 +1,5 @@
-from typing import Any, Callable, List, TypeVar, Union
+from typing import List, Union
 
-_T = TypeVar('_T')
 REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 SCHEDULED_EVENT_TYPE = List[List[dict]]
 STREAM_EVENT_TYPE = List[dict]
@@ -10,5 +9,3 @@ EVENT_TYPE = Union[
     STREAM_EVENT_TYPE,
     TASK_EVENT_TYPE
 ]
-MIDDLEWARE_TYPE = Callable[[_T, Callable[[_T], Any]], Any]
-MIDDLEWARE_CALL_TYPE = Callable[[_T], Any]
