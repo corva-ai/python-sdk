@@ -25,6 +25,7 @@ class BaseContext(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        extra = Extra.allow
 
     raw_event: str
     user_kwargs: Dict[str, Any]
