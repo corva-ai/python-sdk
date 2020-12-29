@@ -36,11 +36,12 @@ class Corva:
          middleware: Optional[List[MIDDLEWARE_TYPE[BaseContext]]] = None
     ) -> List[MIDDLEWARE_TYPE[BaseContext]]:
         middleware = middleware or []
+        default_middleware = [unpack_context]  # default middleware, should be called last
 
         middleware_stack = (
              middleware
              + self.user_middleware
-             + [unpack_context]
+             + default_middleware
         )
 
         return middleware_stack
