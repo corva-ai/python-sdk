@@ -1,3 +1,22 @@
+"""
+Looks for arguments with special type annotations in function signature,
+then injects values from context into those arguments and calls the function.
+
+Example, when 'Event' and 'Api' are special type annotations:
+
+    def foo(event: 'Event', api: 'Api'): pass
+
+    @dataclass
+    class Context:
+        event: Event = None
+        api: Api = = None
+
+    context = Context()
+
+    # will `unpack` the context and call foo like this: foo(event=context.event, api=context.api)
+    unpack_context(context, foo)
+"""
+
 import inspect
 from typing import Callable, Optional, Tuple
 
