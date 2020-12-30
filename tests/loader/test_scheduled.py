@@ -1,6 +1,6 @@
 import pytest
 
-from corva.loader.scheduled import ScheduledLoader
+from corva.models.scheduled import ScheduledEvent
 from tests.conftest import DATA_PATH
 
 
@@ -13,6 +13,6 @@ def scheduled_event_str() -> str:
 def test_load(scheduled_event_str):
     """test that sample scheduled event loaded without exceptions"""
 
-    event = ScheduledLoader().load(event=scheduled_event_str)
+    event = ScheduledEvent.from_raw_event(scheduled_event_str)
 
     assert len(event) == 3
