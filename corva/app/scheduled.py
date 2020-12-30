@@ -1,7 +1,6 @@
 from corva.app.base import BaseApp
-from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from corva.event import Event
-from corva.loader.scheduled import ScheduledLoader
+from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 from corva.utils import GetStateKey
@@ -11,8 +10,8 @@ class ScheduledApp(BaseApp):
     group_by_field = 'app_connection_id'
 
     @property
-    def event_loader(self) -> ScheduledLoader:
-        return ScheduledLoader()
+    def event_loader(self):
+        return
 
     def get_context(self, event: Event) -> ScheduledContext:
         return ScheduledContext(
