@@ -1,7 +1,5 @@
 from typing import Callable, List, Optional
 
-from corva.middleware.unpack_context import unpack_context
-
 
 def wrap_call_in_middleware(
      call: Callable,
@@ -30,13 +28,8 @@ class Corva:
          middleware: Optional[List[Callable]] = None
     ) -> List[Callable]:
         middleware = middleware or []
-        default_middleware = [unpack_context]  # default middleware, should be called last
 
-        middleware_stack = (
-             middleware
-             + self.user_middleware
-             + default_middleware
-        )
+        middleware_stack = middleware + self.user_middleware
 
         return middleware_stack
 
