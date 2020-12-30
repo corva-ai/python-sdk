@@ -2,8 +2,9 @@ from typing import Any, Callable, List, Optional
 
 from corva.middleware.init_api import init_api_factory
 from corva.middleware.init_state import init_state_factory
-from corva.middleware.load_and_store_state import load_and_store_state
 from corva.middleware.loader import loader_factory
+
+from corva.middleware.load_and_store_state import load_and_store_state
 from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
 from corva.middleware.stream_filter import stream_filter_factory
@@ -67,8 +68,6 @@ class Corva:
 
          filter_by_timestamp=False,
          filter_by_depth=False,
-
-         include_context=False
     ) -> Callable:
         def decorator(func) -> Callable:
             def wrapper(event, **kwargs) -> Any:
@@ -89,7 +88,7 @@ class Corva:
                     stream
                 ]
                 tail_middleware = [
-                    unpack_context_factory(include_state=True, include_context=include_context)
+                    unpack_context_factory(include_state=True)
                 ]
 
                 middleware_stack = self.get_middleware_stack(
