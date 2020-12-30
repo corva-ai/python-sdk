@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from typing import Any, List, Optional, TypeVar
 
 from pydantic import BaseModel, Extra
@@ -6,8 +9,11 @@ from corva.network.api import Api
 from corva.state.redis_state import RedisState
 
 
-class BaseEvent:
-    pass
+class BaseEvent(ABC):
+    @staticmethod
+    @abstractmethod
+    def from_raw_event(event: str, **kwargs) -> BaseEvent:
+        pass
 
 
 class BaseContext(BaseModel):

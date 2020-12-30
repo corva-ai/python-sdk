@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, parse_raw_as
 from pydantic.types import conint
 
 from corva.models.base import BaseContext, BaseEventData, BaseEvent
@@ -47,4 +49,6 @@ class TaskEventData(BaseEventData):
 
 
 class TaskEvent(BaseEvent, TaskEventData):
-    pass
+    @staticmethod
+    def from_raw_event(event: str, **kwargs) -> TaskEvent:
+        return parse_raw_as(TaskEvent, event)
