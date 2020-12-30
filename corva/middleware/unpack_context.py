@@ -3,7 +3,7 @@ from typing import Callable
 from corva.models.base import BaseContext
 
 
-def unpack_context_factory(*, include_state=False, include_context=False):
+def unpack_context_factory(include_state=False):
     def unpack_context(context: BaseContext, call_next: Callable) -> BaseContext:
         """
         Calls user function with 'unpacked' arguments from context.
@@ -16,8 +16,6 @@ def unpack_context_factory(*, include_state=False, include_context=False):
 
         if include_state:
             args.append(context.state)
-        if include_context:
-            args.append(context)
 
         context.user_result = call_next(*args)
 

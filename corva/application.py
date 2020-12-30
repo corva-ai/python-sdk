@@ -49,9 +49,6 @@ class Corva:
     def add_middleware(self, func: Callable) -> None:
         self.user_middleware.append(func)
 
-    def middleware(self, func: Callable) -> None:
-        return self.add_middleware(func=func)
-
     def stream(
          self,
          func=None,
