@@ -59,7 +59,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     # cache params
     cache_url: Optional[str] = None
-    cache_kwargs: dict = {}
+    cache_kwargs: Optional[dict] = None
 
     @property
     def provider(self) -> str:
@@ -109,7 +109,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             adapter_params = dict(
                 default_name=self.cache_key,
                 cache_url=self.cache_url,
-                **self.cache_kwargs
+                **(self.cache_kwargs or {})
             )
 
             self._state = RedisState(redis=RedisAdapter(**adapter_params))
@@ -125,7 +125,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         return self._state_data
 
     @state_data.setter
-    def state_data(self, value: BaseDataTV):
+    def state_data(self, value):
         self._state_data = value
 
 
