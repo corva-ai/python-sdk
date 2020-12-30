@@ -4,9 +4,8 @@ from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
 
-from corva import settings
-from corva.types import REDIS_STORED_VALUE_TYPE
 from corva.logger import DEFAULT_LOGGER
+from corva.types import REDIS_STORED_VALUE_TYPE
 
 
 class RedisAdapter(Redis):
@@ -15,7 +14,7 @@ class RedisAdapter(Redis):
     def __init__(
          self,
          default_name: str,
-         cache_url: str = settings.CACHE_URL,
+         cache_url: str,
          logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER,
          **kwargs
     ):
