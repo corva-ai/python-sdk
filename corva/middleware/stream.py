@@ -30,4 +30,6 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
         last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
     )
 
+    context.state.store(mapping=context.state_data.dict(exclude_defaults=True, exclude_none=True))
+
     return context
