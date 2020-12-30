@@ -46,7 +46,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     _event: Optional[BaseEventTV] = None
     _api: Optional[Api] = None
     _state: Optional[RedisState] = None
-    state_data: Optional[BaseDataTV] = None
+    _state_data: Optional[BaseDataTV] = None
     user_result: Any = None
 
     # api params
@@ -115,6 +115,18 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             self._state = RedisState(redis=RedisAdapter(**adapter_params))
 
         return self._state
+
+    @property
+    def state_data(self) -> BaseDataTV:
+        if self._state_data:
+            state_data_dict = self.state.load_all()
+            self._state_data = BaseDataTV(**state_data_dict)
+
+        return self._state_data
+
+    @state_data.setter
+    def state_data(self, value: BaseDataTV):
+        self._state_data = value
 
 
 class ListEvent(BaseEvent, List[BaseDataTV]):
