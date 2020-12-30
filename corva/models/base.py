@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel, Extra, PrivateAttr
+from pydantic import BaseModel, Extra
 from pydantic.generics import GenericModel
 
 from corva.network.api import Api
@@ -43,9 +43,9 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     raw_event: str
     app_key: str
 
-    _event: BaseEventTV = PrivateAttr()
-    _api: Api = PrivateAttr()
-    _state: RedisState = PrivateAttr()
+    _event: Optional[BaseEventTV] = None
+    _api: Optional[Api] = None
+    _state: Optional[RedisState] = None
     state_data: Optional[BaseDataTV] = None
     user_result: Any = None
 
