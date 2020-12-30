@@ -9,7 +9,6 @@ def load_and_store_state(context: BaseContext, call_next: Callable) -> BaseConte
 
     context = call_next(context)
 
-    if context.state_data:
-        context.state.store(mapping=context.state_data.dict(exclude_defaults=True))
+    context.state.store(mapping=context.state_data.dict(exclude_defaults=True, exclude_none=True))
 
     return context
