@@ -44,7 +44,7 @@ class Corva:
     def add_middleware(self, func: Callable) -> None:
         self.user_middleware.append(func)
 
-    def Corva(
+    def stream(
          self,
          func=None,
          *,
@@ -66,8 +66,8 @@ class Corva:
          cache_url: str = settings.CACHE_URL,
          cache_kwargs: Optional[dict] = None,
     ) -> Callable:
-        def decorator(func) -> Callable:
-            def wrapper(event, **kwargs) -> Any:
+        def wrapper_factory(func) -> Callable:
+            def wrapper(event) -> Any:
                 middleware = [
                     splitter_factory(split_by_field='app_connection_id'),
                     stream
@@ -104,6 +104,6 @@ class Corva:
             return wrapper
 
         if func is None:
-            return decorator
+            return wrapper_factory
         else:
-            return decorator(func)
+            return wrapper_factory(func)
