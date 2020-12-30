@@ -1,33 +1,41 @@
+from __future__ import annotations
+
 from typing import Dict, List, Optional
+
+from pydantic import parse_raw_as
 
 from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
 
 
+class RecordData(BaseEventData):
+    hole_depth: Optional[float] = None
+    weight_on_bit: Optional[int] = None
+    state: Optional[str] = None
+
+
+class Record(BaseEventData):
+    timestamp: Optional[int] = None
+    asset_id: int
+    company_id: int
+    version: int
+    measured_depth: Optional[float] = None
+    collection: str
+    data: RecordData
+
+
+class AppMetadata(BaseEventData):
+    app_connection_id: int
+
+
+class StreamEventMetadata(BaseEventData):
+    app_stream_id: int
+    apps: Dict[str, AppMetadata]
+
+
 class StreamEventData(BaseEventData):
-    class Record(BaseEventData):
-        class Data(BaseEventData):
-            hole_depth: Optional[float] = None
-            weight_on_bit: Optional[int] = None
-            state: Optional[str] = None
-
-        timestamp: Optional[int] = None
-        asset_id: int
-        company_id: int
-        version: int
-        measured_depth: Optional[float] = None
-        collection: str
-        data: Data
-
-    class Metadata(BaseEventData):
-        class AppData(BaseEventData):
-            app_connection_id: int
-
-        app_stream_id: int
-        apps: Dict[str, AppData]
-
     app_key: Optional[str] = None
     records: List[Record]
-    metadata: Metadata
+    metadata: StreamEventMetadata
 
     @property
     def asset_id(self) -> int:
@@ -43,11 +51,23 @@ class StreamEventData(BaseEventData):
 
     @property
     def is_completed(self) -> bool:
-        return self.records[-1].collection == 'wits.completed'
+        if len(self.records):
+            return self.records[-1].collection == 'wits.completed'
+
+        return False
 
 
 class StreamEvent(ListEvent[StreamEventData]):
-    pass
+    @staticmethod
+    def from_raw_event(event: str, **kwargs) -> StreamEvent:
+        app_key: str = kwargs['app_key']
+
+        parsed = parse_raw_as(List[StreamEventData], event)  # type: List[StreamEventData]
+
+        for data in parsed:
+            data.app_key = app_key
+
+        return StreamEvent(parsed)
 
 
 class StreamStateData(BaseStateData):

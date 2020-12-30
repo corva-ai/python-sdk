@@ -4,10 +4,9 @@ from logging import Logger, LoggerAdapter
 from typing import List, Optional, Union
 
 from corva import settings
-from corva.models.base import BaseContext
 from corva.event import Event
-from corva.loader.base import BaseLoader
 from corva.logger import DEFAULT_LOGGER
+from corva.models.base import BaseContext
 from corva.network.api import Api
 
 
@@ -26,7 +25,7 @@ class BaseApp(ABC):
 
     @property
     @abstractmethod
-    def event_loader(self) -> BaseLoader:
+    def event_loader(self):
         pass
 
     @property

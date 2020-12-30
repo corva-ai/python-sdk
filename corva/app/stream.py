@@ -3,7 +3,6 @@ from typing import Optional, List
 
 from corva.app.base import BaseApp
 from corva.event import Event
-from corva.loader.stream import StreamLoader
 from corva.models.stream import StreamContext, StreamEventData
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
@@ -21,8 +20,8 @@ class StreamApp(BaseApp):
         self.filter_by_depth = filter_by_depth
 
     @property
-    def event_loader(self) -> StreamLoader:
-        return StreamLoader(app_key=self.app_key)
+    def event_loader(self):
+        return
 
     def get_context(self, event: Event) -> StreamContext:
         return StreamContext(

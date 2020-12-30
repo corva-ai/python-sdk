@@ -1,7 +1,10 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
 
-from pydantic import Field
+from datetime import datetime
+from itertools import chain
+from typing import List, Optional
+
+from pydantic import Field, parse_raw_as
 
 from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
 
@@ -35,7 +38,12 @@ class ScheduledEventData(BaseEventData):
 
 
 class ScheduledEvent(ListEvent[ScheduledEventData]):
-    pass
+    @staticmethod
+    def from_raw_event(event: str, **kwargs) -> ScheduledEvent:
+        parsed = parse_raw_as(List[List[ScheduledEventData]], event)  # type: List[List[ScheduledEventData]]
+        parsed = list(chain(*parsed))
+
+        return ScheduledEvent(parsed)
 
 
 class ScheduledContext(BaseContext[ScheduledEvent, BaseStateData]):

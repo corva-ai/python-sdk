@@ -1,6 +1,5 @@
 from corva.app.base import BaseApp
 from corva.event import Event
-from corva.loader.task import TaskLoader
 from corva.models.task import TaskData, UpdateTaskData, TaskContext, TaskStatus
 
 
@@ -8,8 +7,8 @@ class TaskApp(BaseApp):
     group_by_field = 'task_id'
 
     @property
-    def event_loader(self) -> TaskLoader:
-        return TaskLoader()
+    def event_loader(self):
+        return
 
     def get_context(self, event: Event) -> TaskContext:
         task_data = self.get_task_data(task_id=event[0].task_id)
