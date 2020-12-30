@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from pydantic import parse_raw_as
 
 from corva.models.base import BaseContext, BaseData, ListEvent
+from corva.utils import FilterStreamEvent
 
 
 class RecordData(BaseData):
@@ -76,4 +77,20 @@ class StreamStateData(BaseData):
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
-    pass
+    filter_by_timestamp: bool = False
+    filter_by_depth: bool = False
+
+    @property
+    def event(self) -> StreamEvent:
+        if self._event is None:
+            event = super().event
+
+            self._event = FilterStreamEvent.run(
+                event=event,
+                by_timestamp=self.filter_by_timestamp,
+                by_depth=self.filter_by_depth,
+                last_processed_timestamp=self.state_data.last_processed_timestamp,
+                last_processed_depth=self.state_data.last_processed_depth
+            )
+
+        return self._event
