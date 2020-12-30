@@ -3,7 +3,7 @@ from typing import Callable
 from corva.models.stream import StreamContext, StreamEvent, StreamEventData
 
 
-def stream_filter_factory(by_timestamp: bool = False, by_depth: bool = False) -> Callable:
+def stream_filter_factory(*, by_timestamp: bool = False, by_depth: bool = False) -> Callable:
     def stream_filter(context: StreamContext, call_next: Callable) -> StreamContext:
         context.event = _filter_event(
             event=context.event,
