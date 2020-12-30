@@ -1,6 +1,5 @@
 from typing import Any, Callable, List, Optional
 
-from corva.loader.stream import StreamLoader
 from corva.middleware.init_api import init_api_factory
 from corva.middleware.init_state import init_state_factory
 from corva.middleware.load_and_store_state import load_and_store_state
@@ -8,10 +7,9 @@ from corva.middleware.loader import loader_factory
 from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
 from corva.middleware.stream_filter import stream_filter_factory
-from corva.middleware.unpack_context import unpack_context
-from corva.models.base import BaseContext
+from corva.middleware.unpack_context import unpack_context_factory
 from corva.models.stream import StreamContext
-from corva.types import MIDDLEWARE_CALL_TYPE, MIDDLEWARE_TYPE
+from corva.models.stream import StreamEvent
 
 
 def wrap_call_in_middleware(
@@ -38,11 +36,13 @@ class Corva:
 
     def get_middleware_stack(
          self,
-         middleware: Optional[List[Callable]] = None
+         middleware: Optional[List[Callable]] = None,
+         tail_middleware: Optional[List[Callable]] = None
     ) -> List[Callable]:
         middleware = middleware or []
+        tail_middleware = tail_middleware or []
 
-        middleware_stack = middleware + self.user_middleware
+        middleware_stack = middleware + self.user_middleware + tail_middleware
 
         return middleware_stack
 
@@ -69,12 +69,14 @@ class Corva:
          cache_kwargs: Optional[dict],
 
          filter_by_timestamp=False,
-         filter_by_depth=False
+         filter_by_depth=False,
+
+         include_context=False
     ) -> Callable:
         def decorator(func) -> Callable:
             def wrapper(event, **kwargs) -> Any:
                 middleware = [
-                    loader_factory(loader=StreamLoader(app_key=app_key)),
+                    loader_factory(loader=StreamEvent.from_raw_event, loader_kwargs={'app_key': app_key}),
                     init_api_factory(
                         api_url=api_url,
                         data_api_url=api_data_url,
@@ -89,7 +91,14 @@ class Corva:
                     stream_filter_factory(by_timestamp=filter_by_timestamp, by_depth=filter_by_depth),
                     stream
                 ]
-                middleware_stack = self.get_middleware_stack(middleware=middleware)
+                tail_middleware = [
+                    unpack_context_factory(include_state=True, include_context=include_context)
+                ]
+
+                middleware_stack = self.get_middleware_stack(
+                    middleware=middleware,
+                    tail_middleware=tail_middleware
+                )
 
                 call = wrap_call_in_middleware(call=func, middleware=middleware_stack)
 
