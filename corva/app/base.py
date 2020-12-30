@@ -20,7 +20,7 @@ class BaseApp(ABC):
     ):
         self.app_key = app_key
         self.cache_url = cache_url
-        self.api = api or Api()
+        self.api = api
         self.logger = logger
 
     @property

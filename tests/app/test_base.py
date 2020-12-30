@@ -8,12 +8,12 @@ from tests.conftest import ComparableException, APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def base_app(mocker: MockerFixture):
+def base_app(mocker: MockerFixture, api):
     # as BaseApp is an abstract class, we cannot initialize it without overriding all abstract methods,
     # so in order to initialize and test the class we patch __abstractmethods__
     mocker.patch.object(BaseApp, '__abstractmethods__', set())
 
-    return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL)
+    return BaseApp(app_key=APP_KEY, cache_url=CACHE_URL, api=api)
 
 
 def test_run_exc_in_event_loader_load(mocker: MockerFixture, base_app):

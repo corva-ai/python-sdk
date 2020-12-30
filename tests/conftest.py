@@ -44,7 +44,12 @@ def redis(redis_adapter):
 
 @pytest.fixture(scope='function')
 def api():
-    return Api(api_url='https://api.localhost.ai', data_api_url='https://data.localhost.ai')
+    return Api(
+        api_url='https://api.localhost.ai',
+        data_api_url='https://data.localhost.ai',
+        api_key='',
+        app_name=''
+    )
 
 
 class ComparableException(Exception):
