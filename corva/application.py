@@ -1,16 +1,10 @@
 from typing import Any, Callable, List, Optional
 
-from corva.middleware.init_api import init_api_factory
-from corva.middleware.init_state import init_state_factory
-from corva.middleware.loader import loader_factory
-
-from corva.middleware.load_and_store_state import load_and_store_state
+from corva import settings
 from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
-from corva.middleware.stream_filter import stream_filter_factory
 from corva.middleware.unpack_context import unpack_context_factory
 from corva.models.stream import StreamContext
-from corva.models.stream import StreamEvent
 
 
 def wrap_call_in_middleware(
@@ -50,41 +44,32 @@ class Corva:
     def add_middleware(self, func: Callable) -> None:
         self.user_middleware.append(func)
 
-    def stream(
+    def Corva(
          self,
          func=None,
          *,
-         app_key: str,
+         filter_by_timestamp=False,
+         filter_by_depth=False,
 
-         api_url: str,
-         api_data_url: str,
-         api_key: str,
-         api_name: str,
+         # misc params
+         app_key: str = settings.APP_KEY,
+
+         # api params
+         api_url: str = settings.API_ROOT_URL,
+         api_data_url: str = settings.DATA_API_ROOT_URL,
+         api_key: str = settings.API_KEY,
+         api_app_name: str = settings.APP_NAME,
          api_timeout: Optional[int] = None,
          api_max_retries: Optional[int] = None,
 
-         cache_url: str,
-         cache_kwargs: Optional[dict],
-
-         filter_by_timestamp=False,
-         filter_by_depth=False,
+         # cache params
+         cache_url: str = settings.CACHE_URL,
+         cache_kwargs: Optional[dict] = None,
     ) -> Callable:
         def decorator(func) -> Callable:
             def wrapper(event, **kwargs) -> Any:
                 middleware = [
-                    loader_factory(loader=StreamEvent.from_raw_event, loader_kwargs={'app_key': app_key}),
-                    init_api_factory(
-                        api_url=api_url,
-                        data_api_url=api_data_url,
-                        api_key=api_key,
-                        api_name=api_name,
-                        timeout=api_timeout,
-                        max_retries=api_max_retries
-                    ),
                     splitter_factory(split_by_field='app_connection_id'),
-                    init_state_factory(cache_url=cache_url, cache_kwargs=cache_kwargs),
-                    load_and_store_state,
-                    stream_filter_factory(by_timestamp=filter_by_timestamp, by_depth=filter_by_depth),
                     stream
                 ]
                 tail_middleware = [
@@ -98,7 +83,20 @@ class Corva:
 
                 call = wrap_call_in_middleware(call=func, middleware=middleware_stack)
 
-                ctx = StreamContext(raw_event=event, user_kwargs=kwargs, app_key=app_key)
+                ctx = StreamContext(
+                    raw_event=event,
+                    app_key=app_key,
+                    api_url=api_url,
+                    api_data_url=api_data_url,
+                    api_key=api_key,
+                    api_app_name=api_app_name,
+                    api_timeout=api_timeout,
+                    api_max_retries=api_max_retries,
+                    cache_url=cache_url,
+                    cache_kwargs=cache_kwargs,
+                    filter_by_timestamp=filter_by_timestamp,
+                    filter_by_depth=filter_by_depth
+                )
                 ctxs = call(ctx)  # type: List[StreamContext]
 
                 return [ctx.user_result for ctx in ctxs]

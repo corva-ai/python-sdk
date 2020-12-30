@@ -53,7 +53,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     api_url: str
     api_data_url: str
     api_key: str
-    api_name: str
+    api_app_name: str
     api_timeout: Optional[int] = None
     api_max_retries: Optional[int] = None
 
@@ -91,7 +91,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
                 api_url=self.api_url,
                 data_api_url=self.api_data_url,
                 api_key=self.api_key,
-                api_name=self.api_name
+                api_name=self.api_app_name
             )
 
             if self.api_timeout is not None:
