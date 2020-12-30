@@ -2,7 +2,7 @@ import pytest
 
 from corva.app.stream import StreamApp
 from corva.event import Event
-from corva.models.stream import StreamContext, StreamEventData
+from corva.models.stream import StreamContext, StreamEventData, Record
 from tests.conftest import APP_KEY, CACHE_URL
 
 
@@ -42,7 +42,7 @@ def record_factory():
         }
         default_params.update(kwargs)
 
-        return StreamEventData.Record(**default_params)
+        return Record(**default_params)
 
     return _record_factory
 
