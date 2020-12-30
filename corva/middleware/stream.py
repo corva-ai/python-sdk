@@ -5,6 +5,8 @@ from corva.models.stream import StreamContext, StreamStateData
 
 
 def stream(context: StreamContext, call_next: Callable) -> StreamContext:
+    """Stores needed data in state for future runs."""
+
     context = call_next(context)  # type: StreamContext
 
     all_records = list(chain(*[subdata.records for subdata in context.event]))
