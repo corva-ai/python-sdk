@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel, parse_raw_as
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEventData, BaseEvent, BaseStateData
+from corva.models.base import BaseContext, BaseData, BaseEvent
 
 
 class TaskStatus(Enum):
@@ -37,7 +37,7 @@ class UpdateTaskData(BaseModel):
     payload: dict = {}
 
 
-class TaskEventData(BaseEventData):
+class TaskEventData(BaseData):
     id: Optional[str] = None
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
@@ -49,5 +49,5 @@ class TaskEvent(BaseEvent, TaskEventData):
         return parse_raw_as(TaskEvent, event)
 
 
-class TaskContext(BaseContext[TaskEvent, BaseStateData]):
+class TaskContext(BaseContext[TaskEvent, BaseData]):
     pass

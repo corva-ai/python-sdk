@@ -4,16 +4,16 @@ from typing import Dict, List, Optional
 
 from pydantic import parse_raw_as
 
-from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
+from corva.models.base import BaseContext, BaseData, ListEvent
 
 
-class RecordData(BaseEventData):
+class RecordData(BaseData):
     hole_depth: Optional[float] = None
     weight_on_bit: Optional[int] = None
     state: Optional[str] = None
 
 
-class Record(BaseEventData):
+class Record(BaseData):
     timestamp: Optional[int] = None
     asset_id: int
     company_id: int
@@ -23,16 +23,16 @@ class Record(BaseEventData):
     data: RecordData
 
 
-class AppMetadata(BaseEventData):
+class AppMetadata(BaseData):
     app_connection_id: int
 
 
-class StreamEventMetadata(BaseEventData):
+class StreamEventMetadata(BaseData):
     app_stream_id: int
     apps: Dict[str, AppMetadata]
 
 
-class StreamEventData(BaseEventData):
+class StreamEventData(BaseData):
     app_key: Optional[str] = None
     records: List[Record]
     metadata: StreamEventMetadata
@@ -70,7 +70,7 @@ class StreamEvent(ListEvent[StreamEventData]):
         return StreamEvent(parsed)
 
 
-class StreamStateData(BaseStateData):
+class StreamStateData(BaseData):
     last_processed_timestamp: int = -1
     last_processed_depth: float = -1
 

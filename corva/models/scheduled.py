@@ -6,10 +6,10 @@ from typing import List, Optional
 
 from pydantic import Field, parse_raw_as
 
-from corva.models.base import BaseContext, BaseEventData, ListEvent, BaseStateData
+from corva.models.base import BaseContext, BaseData, ListEvent
 
 
-class ScheduledEventData(BaseEventData):
+class ScheduledEventData(BaseData):
     type: Optional[str] = None
     collection: Optional[str] = None
     cron_string: str
@@ -46,5 +46,5 @@ class ScheduledEvent(ListEvent[ScheduledEventData]):
         return ScheduledEvent(parsed)
 
 
-class ScheduledContext(BaseContext[ScheduledEvent, BaseStateData]):
+class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):
     pass
