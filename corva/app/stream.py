@@ -4,9 +4,6 @@ from typing import Optional, List
 from corva.app.base import BaseApp
 from corva.event import Event
 from corva.models.stream import StreamContext, StreamEventData
-from corva.state.redis_adapter import RedisAdapter
-from corva.state.redis_state import RedisState
-from corva.utils import GetStateKey
 
 
 class StreamApp(BaseApp):
@@ -24,17 +21,7 @@ class StreamApp(BaseApp):
         return
 
     def get_context(self, event: Event) -> StreamContext:
-        return StreamContext(
-            event=event,
-            state=RedisState(
-                redis=RedisAdapter(
-                    default_name=GetStateKey.from_event(event=event, app_key=self.app_key),
-                    cache_url=self.cache_url,
-                    logger=self.logger
-                ),
-                logger=self.logger
-            )
-        )
+        return StreamContext()
 
     def pre_process(self, context: StreamContext) -> None:
         last_processed_timestamp = (
