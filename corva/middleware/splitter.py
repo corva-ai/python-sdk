@@ -20,6 +20,14 @@ def splitter_factory(split_by_field: str) -> Callable:
     def splitter(
          context: Union[ScheduledContext, StreamContext], call_next: Callable
     ) -> List[Union[ScheduledContext, StreamContext]]:
+        """ Splits event into multiple ones.
+
+        In theory one event might have data for multiple assets. We have N partitions in Kafka
+         and each active asset has a dedicated partition.
+         If we for some reason run out of partitions, one partition might receive data for multiple assets.
+         Extremely rare case.
+        """
+
         events = _split_event(event=context.event, split_by_field=split_by_field)
 
         contexts = [
