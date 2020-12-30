@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 from pydantic import parse_raw_as
 
 from corva.models.base import BaseContext, BaseData, ListEvent
-from corva.utils import FilterStreamEvent
 
 
 class RecordData(BaseData):
@@ -82,6 +81,8 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
 
     @property
     def event(self) -> StreamEvent:
+        from corva.utils import FilterStreamEvent
+
         if self._event is None:
             event = super().event
 
