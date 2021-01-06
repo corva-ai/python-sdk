@@ -1,11 +1,11 @@
-from corva import Api, Corva, Event, State
+from corva import Api, Corva, StreamEvent, State
 
 app = Corva()  # 1 initialize the app
 
 
 @app.stream  # 2 add decorator with needed event type to your function
-def user_job(event: Event, api: Api, state: State):
-    # 3 add parameters with predefined types, that will be injected automatically
+def stream_app(event: StreamEvent, api: Api, state: State):
+    # 3 above, add parameters with predefined types, that will be injected automatically
 
     """User's main logic function"""
 
@@ -17,4 +17,4 @@ def lambda_handler(event, context):
 
     """AWS lambda handler"""
 
-    user_job(event)  # 5 pass only event as parameter to your function call
+    stream_app(event)  # 5 pass only event as parameter to your function call
