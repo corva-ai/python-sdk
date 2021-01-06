@@ -98,11 +98,11 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     @cached_property
     def state(self) -> RedisState:
-        adapter_params = dict(
-            default_name=self.cache_key,
-            cache_url=self.cache_url,
+        adapter_params = {
+            'default_name': self.cache_key,
+            'cache_url': self.cache_url,
             **(self.cache_kwargs or {})
-        )
+        }
 
         return RedisState(redis=RedisAdapter(**adapter_params))
 
