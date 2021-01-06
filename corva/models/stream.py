@@ -56,7 +56,7 @@ class StreamEventData(BaseEventData):
 
     @property
     def is_completed(self) -> bool:
-        if len(self.records):
+        if self.records:
             return self.records[-1].collection == 'wits.completed'
 
         return False
