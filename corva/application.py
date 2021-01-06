@@ -105,5 +105,5 @@ class Corva:
 
         if func is None:
             return wrapper_factory
-        else:
-            return wrapper_factory(func)
+
+        return wrapper_factory(func)
