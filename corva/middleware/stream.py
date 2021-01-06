@@ -28,8 +28,12 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
         default=StreamStateData.__fields__['last_processed_depth'].default
     )
 
-    context.state_data = StreamStateData(
-        last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
+    object.__setattr__(
+        context,
+        'state_data',
+        StreamStateData(
+            last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
+        )
     )
 
     context.state.store(mapping=context.state_data.dict(exclude_defaults=True, exclude_none=True))

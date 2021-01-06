@@ -32,7 +32,7 @@ def splitter_factory(split_by_field: str) -> Callable:
 
         contexts = [
             call_next(
-                context.copy(update={'_event': event}, deep=True)
+                context.copy(update={'event': event}, deep=True)
             )
             for event in events
         ]

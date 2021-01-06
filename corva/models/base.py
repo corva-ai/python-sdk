@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, List, Optional, TypeVar
+from functools import cached_property
+from typing import Any, Generic, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel, Extra
 from pydantic.generics import GenericModel
@@ -16,6 +17,7 @@ class BaseConfig:
     arbitrary_types_allowed = True
     extra = Extra.allow
     validate_assignment = True
+    keep_untouched = (cached_property,)
 
 
 class BaseEvent(ABC):
@@ -41,12 +43,9 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         pass
 
     raw_event: str
+    state_data_cls: Optional[Type[BaseDataTV]] = None
     app_key: str
 
-    _event: Optional[BaseEventTV] = None
-    _api: Optional[Api] = None
-    _state: Optional[RedisState] = None
-    _state_data: Optional[BaseDataTV] = None
     user_result: Any = None
 
     # api params
@@ -77,56 +76,40 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             f'{self.app_key}/{event.app_connection_id}'
         )
 
-    @property
+    @cached_property
     def event(self) -> BaseEventTV:
-        if self._event is None:
-            self._event = BaseEventTV.from_raw_event(self.raw_event, app_key=self.app_key)
+        return BaseEventTV.from_raw_event(self.raw_event, app_key=self.app_key)
 
-        return self._event
-
-    @property
+    @cached_property
     def api(self) -> Api:
-        if self._api is None:
-            kwargs = dict(
-                api_url=self.api_url,
-                data_api_url=self.api_data_url,
-                api_key=self.api_key,
-                api_name=self.api_app_name
-            )
+        kwargs = dict(
+            api_url=self.api_url,
+            data_api_url=self.api_data_url,
+            api_key=self.api_key,
+            api_name=self.api_app_name
+        )
 
-            if self.api_timeout is not None:
-                kwargs['timeout'] = self.api_timeout
-            if self.api_max_retries is not None:
-                kwargs['max_retries'] = self.api_max_retries
+        if self.api_timeout is not None:
+            kwargs['timeout'] = self.api_timeout
+        if self.api_max_retries is not None:
+            kwargs['max_retries'] = self.api_max_retries
 
-            self._api = Api(**kwargs)
+        return Api(**kwargs)
 
-        return self._api
-
-    @property
+    @cached_property
     def state(self) -> RedisState:
-        if self._state is None:
-            adapter_params = dict(
-                default_name=self.cache_key,
-                cache_url=self.cache_url,
-                **(self.cache_kwargs or {})
-            )
+        adapter_params = dict(
+            default_name=self.cache_key,
+            cache_url=self.cache_url,
+            **(self.cache_kwargs or {})
+        )
 
-            self._state = RedisState(redis=RedisAdapter(**adapter_params))
+        return RedisState(redis=RedisAdapter(**adapter_params))
 
-        return self._state
-
-    @property
+    @cached_property
     def state_data(self) -> BaseDataTV:
-        if self._state_data:
-            state_data_dict = self.state.load_all()
-            self._state_data = BaseDataTV(**state_data_dict)
-
-        return self._state_data
-
-    @state_data.setter
-    def state_data(self, value):
-        self._state_data = value
+        state_data_dict = self.state.load_all()
+        return self.state_data_cls(**state_data_dict)
 
 
 class ListEvent(BaseEvent, List[BaseDataTV]):
