@@ -96,7 +96,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
             if self.api_timeout is not None:
                 kwargs['timeout'] = self.api_timeout
-            if self.api_timeout is not None:
+            if self.api_max_retries is not None:
                 kwargs['max_retries'] = self.api_max_retries
 
             self._api = Api(**kwargs)
