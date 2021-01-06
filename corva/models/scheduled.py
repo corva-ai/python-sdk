@@ -45,7 +45,7 @@ class ScheduledEventData(BaseEventData):
 class ScheduledEvent(ListEvent[ScheduledEventData]):
     @staticmethod
     def from_raw_event(event: str, **kwargs) -> ScheduledEvent:
-        parsed = parse_raw_as(List[List[ScheduledEventData]], event)  # type: List[List[ScheduledEventData]]
+        parsed = parse_raw_as(List[List[ScheduledEventData]], event)
         parsed = list(chain(*parsed))
 
         return ScheduledEvent(parsed)
