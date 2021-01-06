@@ -111,6 +111,9 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         state_data_dict = self.state.load_all()
         return self.state_data_cls(**state_data_dict)
 
+    def store_state_data(self) -> int:
+        return self.state.store(mapping=self.state_data.dict(exclude_defaults=True, exclude_none=True))
+
 
 class ListEvent(BaseEvent, List[BaseDataTV]):
     """Base class for list events (events that consist of more than one event data)."""

@@ -36,6 +36,6 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
         )
     )
 
-    context.state.store(mapping=context.state_data.dict(exclude_defaults=True, exclude_none=True))
+    context.store_state_data()
 
     return context
