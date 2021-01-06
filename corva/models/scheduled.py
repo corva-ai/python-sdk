@@ -46,6 +46,9 @@ class ScheduledEvent(ListEvent[ScheduledEventData]):
     @staticmethod
     def from_raw_event(event: str, **kwargs) -> ScheduledEvent:
         parsed = parse_raw_as(List[List[ScheduledEventData]], event)
+
+        # raw event from queue comes in from of 2d array of datas
+        # flatten parsed event into 1d array of datas, which is expected by ScheduledEvent
         parsed = list(chain(*parsed))
 
         return ScheduledEvent(parsed)
