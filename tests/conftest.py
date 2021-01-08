@@ -60,15 +60,15 @@ def settings():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def patch_settings(settings):
+def patch_settings(settings, mocker):
     settings_path = 'corva.settings.SETTINGS'
 
-    with patch.multiple(
-         settings_path,
-         APP_KEY=settings.APP_KEY,
-         CACHE_URL=settings.CACHE_URL
-    ):
-        yield
+    mocker.patch.multiple(
+        settings_path,
+        APP_KEY=settings.APP_KEY,
+        CACHE_URL=settings.CACHE_URL
+    )
+    yield
 
 
 @pytest.fixture(scope='session')
