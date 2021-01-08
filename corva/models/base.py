@@ -105,7 +105,11 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         return self.state_data_cls(**state_data_dict)
 
     def store_state_data(self) -> int:
-        return self.state.store(mapping=self.state_data.dict(exclude_defaults=True, exclude_none=True))
+        store_data = self.state_data.dict(exclude_defaults=True, exclude_none=True)
+        if store_data:
+            return self.state.store(mapping=store_data)
+
+        return 0
 
 
 class ListEvent(BaseEvent, List[BaseDataTV]):
