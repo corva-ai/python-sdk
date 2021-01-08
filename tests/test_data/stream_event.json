@@ -2,20 +2,20 @@
   {
     "metadata": {
       "apps": {
-        "corva.wits-depth-summary": {
-          "app_connection_id": 1
+        "provider.app-name": {
+          "app_connection_id": 0
         },
-        "other.oil-price-app": {
-          "app_connection_id": 2
+        "provider.app-name-other": {
+          "app_connection_id": 1
         }
       },
-      "app_stream_id": 294712
+      "app_stream_id": 2
     },
     "records": [
       {
-        "asset_id": 1,
+        "asset_id": 3,
         "timestamp": 1546300800,
-        "company_id": 24,
+        "company_id": 4,
         "version": 1,
         "data": {
           "hole_depth": 99.4,
@@ -25,9 +25,9 @@
         "collection": "collection"
       },
       {
-        "asset_id": 1,
+        "asset_id": 3,
         "timestamp": 1546300801,
-        "company_id": 24,
+        "company_id": 4,
         "version": 1,
         "data": {
           "hole_depth": 99.4,
@@ -37,9 +37,10 @@
         "collection": "collection"
       },
       {
-        "asset_id": 1,
+        "asset_id": 3,
+        "timestamp": 1546300802,
         "measured_depth": 1.0,
-        "company_id": 24,
+        "company_id": 4,
         "version": 1,
         "data": {
           "hole_depth": 99.4,
