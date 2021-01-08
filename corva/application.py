@@ -52,22 +52,31 @@ class Corva:
          filter_by_depth=False,
 
          # misc params
-         app_key: str = settings.APP_KEY,
+         app_key: Optional[str] = None,
 
          # api params
-         api_url: str = settings.API_ROOT_URL,
-         api_data_url: str = settings.DATA_API_ROOT_URL,
-         api_key: str = settings.API_KEY,
-         api_app_name: str = settings.APP_NAME,
+         api_url: Optional[str] = None,
+         api_data_url: Optional[str] = None,
+         api_key: Optional[str] = None,
+         api_app_name: Optional[str] = None,
          api_timeout: Optional[int] = None,
          api_max_retries: Optional[int] = None,
 
          # cache params
-         cache_url: str = settings.CACHE_URL,
+         cache_url: Optional[str] = None,
          cache_kwargs: Optional[dict] = None,
     ) -> Callable:
         def wrapper_factory(func) -> Callable:
             def wrapper(event) -> Any:
+                nonlocal app_key, api_url, api_data_url, api_key, api_app_name, cache_url
+
+                app_key = app_key or settings.APP_KEY
+                api_url = api_url or settings.API_ROOT_URL
+                api_data_url = api_data_url or settings.DATA_API_ROOT_URL
+                api_key = api_key or settings.API_KEY
+                api_app_name = api_app_name or settings.APP_NAME
+                cache_url = cache_url or settings.CACHE_URL
+
                 middleware = [
                     splitter_factory(split_by_field='app_connection_id'),
                     stream
