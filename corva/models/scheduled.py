@@ -50,4 +50,4 @@ class ScheduledEvent(ListEvent[ScheduledEventData]):
 
 
 class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):
-    event_cls: Type[ScheduledEvent] = ScheduledEvent  # overriding type because of pydantic issue #878
+    event_cls: Type[ScheduledEvent] = ScheduledEvent

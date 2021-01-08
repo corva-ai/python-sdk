@@ -77,8 +77,8 @@ class StreamStateData(BaseData):
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
-    event_cls: Type[StreamEvent] = StreamEvent  # overriding type because of pydantic issue #878
-    state_data_cls: Type[StreamStateData] = StreamStateData  # overriding type because of pydantic issue #878
+    event_cls: Type[StreamEvent] = StreamEvent
+    state_data_cls: Type[StreamStateData] = StreamStateData
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
 
