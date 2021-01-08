@@ -24,7 +24,7 @@ class BaseConfig:
 class BaseEvent(ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: str, **kwargs) -> BaseEvent:
+    def from_raw_event(event: str) -> BaseEvent:
         pass
 
 
@@ -71,7 +71,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     @cached_property
     def event(self) -> BaseEventTV:
-        return self.event_cls.from_raw_event(self.raw_event, app_key=self.settings.APP_KEY)
+        return self.event_cls.from_raw_event(self.raw_event)
 
     @cached_property
     def api(self) -> Api:

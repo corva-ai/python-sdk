@@ -60,14 +60,8 @@ class StreamEventData(BaseData):
 
 class StreamEvent(ListEvent[StreamEventData]):
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> StreamEvent:
-        app_key: str = kwargs['app_key']
-
+    def from_raw_event(event: str) -> StreamEvent:
         parsed = parse_raw_as(List[StreamEventData], event)  # type: List[StreamEventData]
-
-        for data in parsed:
-            data.app_key = app_key
-
         return StreamEvent(parsed)
 
 
@@ -87,6 +81,9 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
         from corva.utils import FilterStreamEvent
 
         event = super().event
+
+        for subdata in event:  # type: StreamEventData
+            subdata.app_key = self.settings.APP_KEY
 
         event = FilterStreamEvent.run(
             event=event,

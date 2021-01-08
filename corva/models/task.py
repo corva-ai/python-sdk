@@ -45,7 +45,7 @@ class TaskEventData(BaseData):
 
 class TaskEvent(BaseEvent, TaskEventData):
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> TaskEvent:
+    def from_raw_event(event: str) -> TaskEvent:
         return parse_raw_as(TaskEvent, event)
 
 
