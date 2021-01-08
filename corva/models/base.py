@@ -8,6 +8,7 @@ from pydantic import BaseModel, Extra
 from pydantic.generics import GenericModel
 
 from corva.network.api import Api
+from corva.settings import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -45,25 +46,16 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     raw_event: str
     event_cls: Type[BaseEventTV]
     state_data_cls: Optional[Type[BaseDataTV]] = None
-    app_key: str
+    settings: Settings
 
     user_result: Any = None
 
     # api params
-    api_url: str
-    api_data_url: str
-    api_key: str
-    api_app_name: str
     api_timeout: Optional[int] = None
     api_max_retries: Optional[int] = None
 
     # cache params
-    cache_url: Optional[str] = None
     cache_kwargs: Optional[dict] = None
-
-    @property
-    def provider(self) -> str:
-        return self.app_key.split('.')[0]
 
     @property
     def cache_key(self) -> str:
@@ -73,21 +65,21 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             event = event[0]
 
         return (
-            f'{self.provider}/well/{event.asset_id}/stream/{event.app_stream_id}/'
-            f'{self.app_key}/{event.app_connection_id}'
+            f'{self.settings.PROVIDER}/well/{event.asset_id}/stream/{event.app_stream_id}/'
+            f'{self.settings.APP_KEY}/{event.app_connection_id}'
         )
 
     @cached_property
     def event(self) -> BaseEventTV:
-        return self.event_cls.from_raw_event(self.raw_event, app_key=self.app_key)
+        return self.event_cls.from_raw_event(self.raw_event, app_key=self.settings.APP_KEY)
 
     @cached_property
     def api(self) -> Api:
         kwargs = {
-            'api_url': self.api_url,
-            'data_api_url': self.api_data_url,
-            'api_key': self.api_key,
-            'app_name': self.api_app_name
+            'api_url': self.settings.API_ROOT_URL,
+            'data_api_url': self.settings.DATA_API_ROOT_URL,
+            'api_key': self.settings.API_KEY,
+            'app_name': self.settings.APP_NAME
         }
 
         if self.api_timeout is not None:
@@ -101,7 +93,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     def state(self) -> RedisState:
         adapter_params = {
             'default_name': self.cache_key,
-            'cache_url': self.cache_url,
+            'cache_url': self.settings.CACHE_URL,
             **(self.cache_kwargs or {})
         }
 

@@ -4,7 +4,7 @@ from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
 from corva.middleware.unpack_context import unpack_context_factory
 from corva.models.stream import StreamContext
-from corva.settings import settings
+from corva.settings import Settings
 
 
 def wrap_call_in_middleware(
@@ -58,7 +58,6 @@ class Corva:
          api_url: Optional[str] = None,
          api_data_url: Optional[str] = None,
          api_key: Optional[str] = None,
-         api_app_name: Optional[str] = None,
          api_timeout: Optional[int] = None,
          api_max_retries: Optional[int] = None,
 
@@ -68,14 +67,12 @@ class Corva:
     ) -> Callable:
         def wrapper_factory(func) -> Callable:
             def wrapper(event) -> Any:
-                nonlocal app_key, api_url, api_data_url, api_key, api_app_name, cache_url
-
-                app_key = app_key or settings.APP_KEY
-                api_url = api_url or settings.API_ROOT_URL
-                api_data_url = api_data_url or settings.DATA_API_ROOT_URL
-                api_key = api_key or settings.API_KEY
-                api_app_name = api_app_name or settings.APP_NAME
-                cache_url = cache_url or settings.CACHE_URL
+                settings = Settings()
+                settings.APP_KEY = app_key or settings.APP_KEY
+                settings.API_ROOT_URL = api_url or settings.API_ROOT_URL
+                settings.DATA_API_ROOT_URL = api_data_url or settings.DATA_API_ROOT_URL
+                settings.API_KEY = api_key or settings.APP_KEY
+                settings.CACHE_URL = cache_url or settings.CACHE_URL
 
                 middleware = [
                     splitter_factory(split_by_field='app_connection_id'),
@@ -94,14 +91,9 @@ class Corva:
 
                 ctx = StreamContext(
                     raw_event=event,
-                    app_key=app_key,
-                    api_url=api_url,
-                    api_data_url=api_data_url,
-                    api_key=api_key,
-                    api_app_name=api_app_name,
+                    settings=settings,
                     api_timeout=api_timeout,
                     api_max_retries=api_max_retries,
-                    cache_url=cache_url,
                     cache_kwargs=cache_kwargs,
                     filter_by_timestamp=filter_by_timestamp,
                     filter_by_depth=filter_by_depth

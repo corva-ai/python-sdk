@@ -7,14 +7,14 @@ from corva.event import Event
 from corva.logger import DEFAULT_LOGGER
 from corva.models.base import BaseContext
 from corva.network.api import Api
-from corva.settings import settings
+from corva.settings import SETTINGS
 
 
 class BaseApp(ABC):
     def __init__(
          self,
-         app_key: str = settings.APP_KEY,
-         cache_url: str = settings.CACHE_URL,
+         app_key: str = SETTINGS.APP_KEY,
+         cache_url: str = SETTINGS.CACHE_URL,
          api: Optional[Api] = None,
          logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
     ):

@@ -41,4 +41,4 @@ class Settings(BaseSettings):
         return self.APP_KEY.split('.')[0]
 
 
-settings = Settings()
+SETTINGS = Settings()
