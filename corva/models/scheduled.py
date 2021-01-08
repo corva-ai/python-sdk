@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from itertools import chain
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from pydantic import Field, parse_raw_as
 
@@ -50,4 +50,4 @@ class ScheduledEvent(ListEvent[ScheduledEventData]):
 
 
 class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):
-    pass
+    event_cls: Type[ScheduledEvent] = ScheduledEvent  # overriding type because of pydantic issue #878

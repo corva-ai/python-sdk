@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 from pydantic import BaseModel, parse_raw_as
 from pydantic.types import conint
@@ -50,4 +50,4 @@ class TaskEvent(BaseEvent, TaskEventData):
 
 
 class TaskContext(BaseContext[TaskEvent, BaseData]):
-    pass
+    event_cls: Type[TaskEvent] = TaskEvent  # overriding type because of pydantic issue #878

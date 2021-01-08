@@ -43,6 +43,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         pass
 
     raw_event: str
+    event_cls: Type[BaseEventTV]
     state_data_cls: Optional[Type[BaseDataTV]] = None
     app_key: str
 
@@ -78,7 +79,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     @cached_property
     def event(self) -> BaseEventTV:
-        return BaseEventTV.from_raw_event(self.raw_event, app_key=self.app_key)
+        return self.event_cls.from_raw_event(self.raw_event, app_key=self.app_key)
 
     @cached_property
     def api(self) -> Api:

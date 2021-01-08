@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
 from pydantic import parse_raw_as
 
@@ -77,7 +77,8 @@ class StreamStateData(BaseData):
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
-    state_data_cls = StreamStateData
+    event_cls: Type[StreamEvent] = StreamEvent  # overriding type because of pydantic issue #878
+    state_data_cls: Type[StreamStateData] = StreamStateData  # overriding type because of pydantic issue #878
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
 
