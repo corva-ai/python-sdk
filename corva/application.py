@@ -4,7 +4,7 @@ from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
 from corva.middleware.unpack_context import unpack_context_factory
 from corva.models.stream import StreamContext
-from corva.settings import Settings
+from corva.settings import Settings, SETTINGS
 
 
 def wrap_call_in_middleware(
@@ -62,7 +62,7 @@ class Corva:
     ) -> Callable:
         def wrapper_factory(func) -> Callable:
             def wrapper(event) -> Any:
-                settings_ = settings or Settings()
+                settings_ = settings or SETTINGS.copy()
 
                 middleware = [
                     splitter_factory(split_by_field='app_connection_id'),
