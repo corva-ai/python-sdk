@@ -51,28 +51,18 @@ class Corva:
          filter_by_timestamp=False,
          filter_by_depth=False,
 
-         # misc params
-         app_key: Optional[str] = None,
+         settings: Optional[Settings] = None,
 
          # api params
-         api_url: Optional[str] = None,
-         api_data_url: Optional[str] = None,
-         api_key: Optional[str] = None,
          api_timeout: Optional[int] = None,
          api_max_retries: Optional[int] = None,
 
          # cache params
-         cache_url: Optional[str] = None,
          cache_kwargs: Optional[dict] = None,
     ) -> Callable:
         def wrapper_factory(func) -> Callable:
             def wrapper(event) -> Any:
-                settings = Settings()
-                settings.APP_KEY = app_key or settings.APP_KEY
-                settings.API_ROOT_URL = api_url or settings.API_ROOT_URL
-                settings.DATA_API_ROOT_URL = api_data_url or settings.DATA_API_ROOT_URL
-                settings.API_KEY = api_key or settings.APP_KEY
-                settings.CACHE_URL = cache_url or settings.CACHE_URL
+                settings_ = settings or Settings()
 
                 middleware = [
                     splitter_factory(split_by_field='app_connection_id'),
@@ -91,7 +81,7 @@ class Corva:
 
                 ctx = StreamContext(
                     raw_event=event,
-                    settings=settings,
+                    settings=settings_,
                     api_timeout=api_timeout,
                     api_max_retries=api_max_retries,
                     cache_kwargs=cache_kwargs,
