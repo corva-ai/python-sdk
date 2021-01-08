@@ -51,12 +51,24 @@ def api():
     )
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def settings():
     return Settings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379'
     )
+
+
+@pytest.fixture(scope='function', autouse=True)
+def patch_settings(settings):
+    settings_path = 'corva.settings.SETTINGS'
+
+    with patch.multiple(
+         settings_path,
+         APP_KEY=settings.APP_KEY,
+         CACHE_URL=settings.CACHE_URL
+    ):
+        yield
 
 
 class ComparableException(Exception):
