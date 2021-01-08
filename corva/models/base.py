@@ -83,12 +83,12 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     @cached_property
     def api(self) -> Api:
-        kwargs = dict(
-            api_url=self.api_url,
-            data_api_url=self.api_data_url,
-            api_key=self.api_key,
-            api_name=self.api_app_name
-        )
+        kwargs = {
+            'api_url': self.api_url,
+            'data_api_url': self.api_data_url,
+            'api_key': self.api_key,
+            'app_name': self.api_app_name
+        }
 
         if self.api_timeout is not None:
             kwargs['timeout'] = self.api_timeout
