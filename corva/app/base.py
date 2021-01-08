@@ -3,11 +3,11 @@ from itertools import groupby
 from logging import Logger, LoggerAdapter
 from typing import List, Optional, Union
 
-from corva import settings
 from corva.event import Event
 from corva.logger import DEFAULT_LOGGER
 from corva.models.base import BaseContext
 from corva.network.api import Api
+from corva.settings import settings
 
 
 class BaseApp(ABC):

@@ -1,10 +1,10 @@
 from typing import Any, Callable, List, Optional
 
-from corva import settings
 from corva.middleware.splitter import splitter_factory
 from corva.middleware.stream import stream
 from corva.middleware.unpack_context import unpack_context_factory
 from corva.models.stream import StreamContext
+from corva.settings import settings
 
 
 def wrap_call_in_middleware(

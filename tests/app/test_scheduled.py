@@ -4,12 +4,11 @@ from pytest_mock import MockerFixture
 from corva.app.scheduled import ScheduledApp
 from corva.event import Event
 from corva.models.scheduled import ScheduledContext, ScheduledEventData
-from tests.conftest import APP_KEY, CACHE_URL
 
 
 @pytest.fixture(scope='function')
-def scheduled_app(api):
-    return ScheduledApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
+def scheduled_app(api, settings):
+    return ScheduledApp(api=api, app_key=settings.APP_KEY, cache_url=settings.CACHE_URL)
 
 
 @pytest.fixture(scope='module')

@@ -5,11 +5,10 @@ import pytest
 from fakeredis import FakeRedis
 
 from corva.network.api import Api
+from corva.settings import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
-APP_KEY = 'provider.app-name'
-CACHE_URL = 'redis://localhost:6379'
 DATA_PATH = Path('tests/test_data')
 
 
@@ -33,8 +32,8 @@ def patch_redis_adapter():
 
 
 @pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter):
-    return RedisAdapter(default_name='default_name', cache_url=CACHE_URL)
+def redis_adapter(patch_redis_adapter, settings):
+    return RedisAdapter(default_name='default_name', cache_url=settings.CACHE_URL)
 
 
 @pytest.fixture(scope='function')
@@ -49,6 +48,14 @@ def api():
         data_api_url='https://data.localhost.ai',
         api_key='',
         app_name=''
+    )
+
+
+@pytest.fixture(scope='session')
+def settings():
+    return Settings(
+        APP_KEY='provider.app-name',
+        CACHE_URL='redis://localhost:6379'
     )
 
 
