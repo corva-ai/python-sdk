@@ -50,4 +50,4 @@ class TaskEvent(BaseEvent, TaskEventData):
 
 
 class TaskContext(BaseContext[TaskEvent, BaseData]):
-    event_cls: Type[TaskEvent] = TaskEvent
+    pass

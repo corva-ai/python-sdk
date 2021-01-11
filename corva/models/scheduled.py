@@ -50,4 +50,4 @@ class ScheduledEvent(BaseEvent, ScheduledEventData):
 
 
 class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):
-    event_cls: Type[ScheduledEvent] = ScheduledEvent
+    pass
