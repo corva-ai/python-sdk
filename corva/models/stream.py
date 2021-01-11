@@ -30,6 +30,7 @@ class AppMetadata(BaseData):
 
 class StreamEventMetadata(BaseData):
     app_stream_id: int
+    source_type: Optional[str] = None
     apps: Dict[str, AppMetadata]
 
 
