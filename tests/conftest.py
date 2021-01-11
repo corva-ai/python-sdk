@@ -1,9 +1,12 @@
+import json
+from functools import partial
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from fakeredis import FakeRedis
+from fakeredis import FakeRedis, FakeServer
 
+from corva.models import stream
 from corva.network.api import Api
 from corva.settings import Settings
 from corva.state.redis_adapter import RedisAdapter
@@ -25,7 +28,7 @@ def patch_redis_adapter():
     redis_adapter_patcher = patch(f'{redis_adapter_path}.RedisAdapter.__bases__', (FakeRedis,))
 
     with redis_adapter_patcher, \
-         patch(f'{redis_adapter_path}.from_url', side_effect=FakeRedis.from_url):
+         patch(f'{redis_adapter_path}.from_url', side_effect=partial(FakeRedis.from_url, server=FakeServer())):
         # necessary to stop mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
         yield
@@ -80,3 +83,56 @@ def raw_stream_event() -> str:
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
+
+
+class StreamDataMixer:
+    @classmethod
+    def record_data(cls, **kwargs) -> stream.RecordData:
+        default_kwargs = {}
+        default_kwargs.update(**kwargs)
+
+        return stream.RecordData(**default_kwargs)
+
+    @classmethod
+    def record(cls, **kwargs) -> stream.Record:
+        default_kwargs = {
+            'asset_id': int(),
+            'company_id': int(),
+            'version': int(),
+            'collection': str(),
+            'data': cls.record_data()
+        }
+        default_kwargs.update(kwargs)
+
+        return stream.Record(**default_kwargs)
+
+    @classmethod
+    def app_metadata(cls, **kwargs) -> stream.AppMetadata:
+        default_kwargs = {'app_connection_id': int()}
+        default_kwargs.update(kwargs)
+
+        return stream.AppMetadata(**default_kwargs)
+
+    @classmethod
+    def stream_event_metadata(cls, **kwargs) -> stream.StreamEventMetadata:
+        default_kwargs = {
+            'app_stream_id': int(),
+            'apps': {}
+        }
+        default_kwargs.update(kwargs)
+
+        return stream.StreamEventMetadata(**default_kwargs)
+
+    @classmethod
+    def stream_event(cls, **kwargs) -> stream.StreamEvent:
+        default_kwargs = {
+            'records': [],
+            'metadata': cls.stream_event_metadata()
+        }
+        default_kwargs.update(kwargs)
+
+        return stream.StreamEvent(**default_kwargs)
+
+    @classmethod
+    def to_raw_event(cls, *events: stream.StreamEvent) -> str:
+        return json.dumps([event.dict() for event in events])
