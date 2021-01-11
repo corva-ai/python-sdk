@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from itertools import chain
-from typing import List, Optional, Type
+from typing import List, Optional
 
 from pydantic import Field, parse_raw_as
 
