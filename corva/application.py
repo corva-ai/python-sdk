@@ -68,9 +68,7 @@ class Corva:
                     splitter_factory(split_by_field='app_connection_id'),
                     stream
                 ]
-                tail_middleware = [
-                    unpack_context_factory(include_state=True)
-                ]
+                tail_middleware = [unpack_context_factory(include_state=True)]
 
                 middleware_stack = self.get_middleware_stack(
                     middleware=middleware,
