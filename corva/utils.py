@@ -1,4 +1,4 @@
-from corva.models.stream import StreamEvent, StreamEventData
+from corva.models.stream import StreamEvent
 
 
 class FilterStreamEvent:
@@ -11,31 +11,9 @@ class FilterStreamEvent:
          last_processed_timestamp: int,
          last_processed_depth: float
     ) -> StreamEvent:
-        data = []
-        for subdata in event:  # type: StreamEventData
-            data.append(
-                cls._filter_event_data(
-                    data=subdata,
-                    by_timestamp=by_timestamp,
-                    by_depth=by_depth,
-                    last_processed_timestamp=last_processed_timestamp,
-                    last_processed_depth=last_processed_depth
-                )
-            )
+        records = event.records
 
-        return StreamEvent(data)
-
-    @staticmethod
-    def _filter_event_data(
-         data: StreamEventData,
-         by_timestamp: bool,
-         by_depth: bool,
-         last_processed_timestamp: int,
-         last_processed_depth: float
-    ) -> StreamEventData:
-        records = data.records
-
-        if data.is_completed:
+        if event.is_completed:
             records = records[:-1]  # remove "completed" record
 
         new_records = []
@@ -47,4 +25,4 @@ class FilterStreamEvent:
 
             new_records.append(record)
 
-        return data.copy(update={'records': new_records}, deep=True)
+        return event.copy(update={'records': new_records}, deep=True)
