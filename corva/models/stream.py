@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import Dict, List, Optional, Type
 
-from pydantic import parse_raw_as
+from pydantic import parse_raw_as, validator
 
 from corva.models.base import BaseContext, BaseData, BaseEvent
 
@@ -38,10 +38,29 @@ class StreamEventData(BaseData):
     app_key: Optional[str] = None
     records: List[Record]
     metadata: StreamEventMetadata
+    asset_id: Optional[int] = None
 
-    @property
-    def asset_id(self) -> int:
-        return self.records[0].asset_id
+    @validator('asset_id', pre=True, always=True)
+    def set_asset_id(cls, v, values):
+        """dynamically sets value for asset_id
+
+        asset_id could've been defined as property like below.
+
+        @property
+        def asset_id(self) -> Optional[int]:
+            return self.records[0].asset_id if self.records else None
+
+        The issue with the above method is:
+         after filtering, we may end up with empty records. Which leads to asset_id becoming None.
+         Using this validator we are able to dynamically set and store value of asset_id,
+         no matter what happens to records.
+        """
+
+        records = values['records']  # type: List[Record]
+        if records:
+            return records[0].asset_id
+
+        return v
 
     @property
     def app_connection_id(self) -> int:
