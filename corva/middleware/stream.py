@@ -14,7 +14,7 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
             for record in context.event.records
             if record.timestamp is not None
         ],
-        default=StreamStateData.__fields__['last_processed_timestamp'].default
+        default=context.cache_data.last_processed_timestamp
     )
     last_processed_depth = max(
         [
@@ -22,7 +22,7 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
             for record in context.event.records
             if record.measured_depth is not None
         ],
-        default=StreamStateData.__fields__['last_processed_depth'].default
+        default=context.cache_data.last_processed_depth
     )
 
     object.__setattr__(
