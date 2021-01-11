@@ -73,7 +73,7 @@ class StreamStateData(BaseData):
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
-    state_data_cls: Type[StreamStateData] = StreamStateData
+    cache_data_cls: Type[StreamStateData] = StreamStateData
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
 
@@ -89,8 +89,8 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
             event=event,
             by_timestamp=self.filter_by_timestamp,
             by_depth=self.filter_by_depth,
-            last_processed_timestamp=self.state_data.last_processed_timestamp,
-            last_processed_depth=self.state_data.last_processed_depth
+            last_processed_timestamp=self.cache_data.last_processed_timestamp,
+            last_processed_depth=self.cache_data.last_processed_depth
         )
 
         return event

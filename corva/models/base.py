@@ -45,7 +45,6 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     _event: BaseEventTV
     settings: Settings
-    state_data_cls: Optional[Type[BaseDataTV]] = None
 
     user_result: Any = None
 
@@ -55,6 +54,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     # cache params
     cache_kwargs: Optional[dict] = None
+    cache_data_cls: Optional[Type[BaseDataTV]] = None
 
     @property
     def cache_key(self) -> str:
@@ -84,7 +84,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         return Api(**kwargs)
 
     @cached_property
-    def state(self) -> RedisState:
+    def cache(self) -> RedisState:
         adapter_params = {
             'default_name': self.cache_key,
             'cache_url': self.settings.CACHE_URL,
@@ -94,13 +94,13 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         return RedisState(redis=RedisAdapter(**adapter_params))
 
     @cached_property
-    def state_data(self) -> BaseDataTV:
-        state_data_dict = self.state.load_all()
-        return self.state_data_cls(**state_data_dict)
+    def cache_data(self) -> BaseDataTV:
+        state_data_dict = self.cache.load_all()
+        return self.cache_data_cls(**state_data_dict)
 
-    def store_state_data(self) -> int:
-        store_data = self.state_data.dict(exclude_defaults=True, exclude_none=True)
+    def store_cache_data(self) -> int:
+        store_data = self.cache_data.dict(exclude_defaults=True, exclude_none=True)
         if store_data:
-            return self.state.store(mapping=store_data)
+            return self.cache.store(mapping=store_data)
 
         return 0

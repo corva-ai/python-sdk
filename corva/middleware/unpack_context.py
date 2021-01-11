@@ -15,7 +15,7 @@ def unpack_context_factory(include_state=False):
         args = [context.event, context.api]
 
         if include_state:
-            args.append(context.state)
+            args.append(context.cache)
 
         context.user_result = call_next(*args)
 

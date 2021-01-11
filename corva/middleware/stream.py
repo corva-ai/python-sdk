@@ -27,12 +27,12 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
 
     object.__setattr__(
         context,
-        'state_data',
+        'cache_data',
         StreamStateData(
             last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
         )
     )
 
-    context.store_state_data()
+    context.store_cache_data()
 
     return context
