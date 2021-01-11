@@ -6,7 +6,7 @@ from typing import List, Optional, Type
 
 from pydantic import Field, parse_raw_as
 
-from corva.models.base import BaseContext, BaseData, ListEvent
+from corva.models.base import BaseContext, BaseData, BaseEvent
 
 
 class ScheduledEventData(BaseData):
@@ -37,16 +37,16 @@ class ScheduledEventData(BaseData):
     day_shift_start: Optional[str] = None
 
 
-class ScheduledEvent(ListEvent[ScheduledEventData]):
+class ScheduledEvent(BaseEvent, ScheduledEventData):
     @staticmethod
-    def from_raw_event(event: str) -> ScheduledEvent:
-        parsed = parse_raw_as(List[List[ScheduledEventData]], event)
+    def from_raw_event(event: str) -> List[ScheduledEvent]:
+        events = parse_raw_as(List[List[ScheduledEvent]], event)
 
-        # raw event from queue comes in from of 2d array of datas
-        # flatten parsed event into 1d array of datas, which is expected by ScheduledEvent
-        parsed = list(chain(*parsed))
+        # raw event from queue comes in from of 2d array of ScheduledEvent
+        # flatten parsed event into 1d array of ScheduledEvent, which is an expected return type
+        events = list(chain(*events))
 
-        return ScheduledEvent(parsed)
+        return events
 
 
 class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):

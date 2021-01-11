@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Type
 
 from pydantic import parse_raw_as
 
-from corva.models.base import BaseContext, BaseData, ListEvent
+from corva.models.base import BaseContext, BaseData, BaseEvent
 
 
 class RecordData(BaseData):
@@ -59,11 +59,12 @@ class StreamEventData(BaseData):
         return False
 
 
-class StreamEvent(ListEvent[StreamEventData]):
+class StreamEvent(BaseEvent, StreamEventData):
     @staticmethod
-    def from_raw_event(event: str) -> StreamEvent:
-        parsed = parse_raw_as(List[StreamEventData], event)  # type: List[StreamEventData]
-        return StreamEvent(parsed)
+    def from_raw_event(event: str) -> List[StreamEvent]:
+        events = parse_raw_as(List[StreamEvent], event)
+
+        return events
 
 
 class StreamStateData(BaseData):
@@ -81,10 +82,9 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
     def event(self) -> StreamEvent:
         from corva.utils import FilterStreamEvent
 
-        event = super().event
+        event = super().event  # type: StreamEvent
 
-        for subdata in event:  # type: StreamEventData
-            subdata.app_key = self.settings.APP_KEY
+        event.app_key = self.settings.APP_KEY
 
         event = FilterStreamEvent.run(
             event=event,

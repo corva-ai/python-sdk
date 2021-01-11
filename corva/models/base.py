@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Extra
 from pydantic.generics import GenericModel
@@ -24,7 +24,7 @@ class BaseConfig:
 class BaseEvent(ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: str) -> BaseEvent:
+    def from_raw_event(event: str) -> Union[List[BaseEvent], BaseEvent]:
         pass
 
 
@@ -43,10 +43,9 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     class Config(BaseConfig):
         pass
 
-    raw_event: str
-    event_cls: Type[BaseEventTV]
-    state_data_cls: Optional[Type[BaseDataTV]] = None
+    _event: BaseEventTV
     settings: Settings
+    state_data_cls: Optional[Type[BaseDataTV]] = None
 
     user_result: Any = None
 
@@ -59,19 +58,14 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     @property
     def cache_key(self) -> str:
-        event = self.event
-
-        if isinstance(event, list):
-            event = event[0]
-
         return (
-            f'{self.settings.PROVIDER}/well/{event.asset_id}/stream/{event.app_stream_id}/'
-            f'{self.settings.APP_KEY}/{event.app_connection_id}'
+            f'{self.settings.PROVIDER}/well/{self.event.asset_id}/stream/{self.event.app_stream_id}/'
+            f'{self.settings.APP_KEY}/{self.event.app_connection_id}'
         )
 
     @cached_property
     def event(self) -> BaseEventTV:
-        return self.event_cls.from_raw_event(self.raw_event)
+        return self._event
 
     @cached_property
     def api(self) -> Api:
@@ -110,9 +104,3 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             return self.state.store(mapping=store_data)
 
         return 0
-
-
-class ListEvent(BaseEvent, List[BaseDataTV]):
-    """Base class for list events (events that consist of more than one event data)."""
-
-    pass
