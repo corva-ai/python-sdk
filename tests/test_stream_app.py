@@ -105,3 +105,17 @@ def test_empty_records_error(settings):
 
     with pytest.raises(ValueError):
         app.stream(func=stream_app)(raw_event)
+
+
+def test_only_one_filter_allowed_at_a_time(settings):
+    stream_event_metadata = StreamDataMixer.stream_event_metadata(
+        apps={settings.APP_KEY: StreamDataMixer.app_metadata()}
+    )
+    stream_event = StreamDataMixer.stream_event(
+        records=[StreamDataMixer.record()],
+        metadata=stream_event_metadata
+    )
+    raw_event = StreamDataMixer.to_raw_event(stream_event)
+
+    with pytest.raises(ValueError):
+        app.stream(func=stream_app, filter_by_timestamp=True, filter_by_depth=True)(raw_event)

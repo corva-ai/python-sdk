@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import Dict, List, Optional, Type
 
-from pydantic import parse_raw_as, validator
+from pydantic import parse_raw_as, validator, root_validator
 
 from corva.models.base import BaseContext, BaseData, BaseEvent
 
@@ -115,6 +115,13 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
     cache_data_cls: Type[StreamStateData] = StreamStateData
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
+
+    @root_validator(pre=True)
+    def check_one_active_filter_at_most(cls, values):
+        if values['filter_by_timestamp'] and values['filter_by_depth']:
+            raise ValueError('filter_by_timestamp and filter_by_depth can\'t be set to True together.')
+
+        return values
 
     @cached_property
     def event(self) -> StreamEvent:
