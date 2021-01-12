@@ -73,13 +73,13 @@ class Corva:
 
             call = wrap_call_in_middleware(call=func, middleware=middleware)
 
-            events = StreamEvent.from_raw_event(event=event)
+            events = StreamEvent.from_raw_event(event=event, app_key=settings_.APP_KEY)
 
             results = []
 
             for event in events:
                 ctx = StreamContext(
-                    _event=event,
+                    event=event,
                     settings=settings_,
                     api_timeout=api_timeout,
                     api_max_retries=api_max_retries,

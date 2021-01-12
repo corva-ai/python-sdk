@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import cached_property
 from typing import Dict, List, Optional, Type
 
 from pydantic import parse_raw_as, validator, root_validator
@@ -80,8 +79,13 @@ class StreamEventData(BaseData):
 
 class StreamEvent(BaseEvent, StreamEventData):
     @staticmethod
-    def from_raw_event(event: str) -> List[StreamEvent]:
-        events = parse_raw_as(List[StreamEvent], event)
+    def from_raw_event(event: str, **kwargs) -> List[StreamEvent]:
+        app_key = kwargs['app_key']
+
+        events = parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
+
+        for event in events:
+            event.app_key = app_key
 
         return events
 
@@ -122,19 +126,3 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
             raise ValueError('filter_by_timestamp and filter_by_depth can\'t be set to True together.')
 
         return values
-
-    @cached_property
-    def event(self) -> StreamEvent:
-        event = super().event  # type: StreamEvent
-
-        event.app_key = self.settings.APP_KEY
-
-        event = StreamEvent.filter(
-            event=event,
-            by_timestamp=self.filter_by_timestamp,
-            by_depth=self.filter_by_depth,
-            last_timestamp=self.cache_data.last_processed_timestamp,
-            last_depth=self.cache_data.last_processed_depth
-        )
-
-        return event

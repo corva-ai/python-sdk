@@ -24,7 +24,7 @@ class BaseConfig:
 class BaseEvent(ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: str) -> Union[List[BaseEvent], BaseEvent]:
+    def from_raw_event(event: str, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
         pass
 
 
@@ -43,7 +43,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
     class Config(BaseConfig):
         pass
 
-    _event: BaseEventTV
+    event: BaseEventTV
     settings: Settings
 
     user_result: Any = None
@@ -62,10 +62,6 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             f'{self.settings.PROVIDER}/well/{self.event.asset_id}/stream/{self.event.app_stream_id}/'
             f'{self.settings.APP_KEY}/{self.event.app_connection_id}'
         )
-
-    @cached_property
-    def event(self) -> BaseEventTV:
-        return self._event
 
     @cached_property
     def api(self) -> Api:

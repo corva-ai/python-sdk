@@ -1,10 +1,18 @@
 from typing import Callable
 
-from corva.models.stream import StreamContext, StreamStateData
+from corva.models.stream import StreamContext, StreamEvent, StreamStateData
 
 
 def stream(context: StreamContext, call_next: Callable) -> StreamContext:
     """Stores needed data in state for future runs."""
+
+    context.event = StreamEvent.filter(
+        event=context.event,
+        by_timestamp=context.filter_by_timestamp,
+        by_depth=context.filter_by_depth,
+        last_timestamp=context.cache_data.last_processed_timestamp,
+        last_depth=context.cache_data.last_processed_depth
+    )
 
     context = call_next(context)  # type: StreamContext
 
