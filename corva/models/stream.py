@@ -85,6 +85,26 @@ class StreamEvent(BaseEvent, StreamEventData):
 
         return events
 
+    @staticmethod
+    def filter(
+         event: StreamEvent, by_timestamp: bool, by_depth: bool, last_timestamp: int, last_depth: float
+    ) -> StreamEvent:
+        records = event.records
+
+        if event.is_completed:
+            records = records[:-1]  # remove "completed" record
+
+        new_records = []
+        for record in records:
+            if by_timestamp and record.timestamp <= last_timestamp:
+                continue
+            if by_depth and record.measured_depth <= last_depth:
+                continue
+
+            new_records.append(record)
+
+        return event.copy(update={'records': new_records}, deep=True)
+
 
 class StreamStateData(BaseData):
     last_processed_timestamp: int = -1
@@ -98,18 +118,16 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
 
     @cached_property
     def event(self) -> StreamEvent:
-        from corva.utils import FilterStreamEvent
-
         event = super().event  # type: StreamEvent
 
         event.app_key = self.settings.APP_KEY
 
-        event = FilterStreamEvent.run(
+        event = StreamEvent.filter(
             event=event,
             by_timestamp=self.filter_by_timestamp,
             by_depth=self.filter_by_depth,
-            last_processed_timestamp=self.cache_data.last_processed_timestamp,
-            last_processed_depth=self.cache_data.last_processed_depth
+            last_timestamp=self.cache_data.last_processed_timestamp,
+            last_depth=self.cache_data.last_processed_depth
         )
 
         return event
