@@ -25,14 +25,10 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
         default=context.cache_data.last_processed_depth
     )
 
-    object.__setattr__(
-        context,
-        'cache_data',
+    context.store_cache_data(
         StreamStateData(
             last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
         )
     )
-
-    context.store_cache_data()
 
     return context

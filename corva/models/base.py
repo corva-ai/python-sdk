@@ -93,14 +93,14 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
         return RedisState(redis=RedisAdapter(**adapter_params))
 
-    @cached_property
+    @property
     def cache_data(self) -> BaseDataTV:
         state_data_dict = self.cache.load_all()
         return self.cache_data_cls(**state_data_dict)
 
-    def store_cache_data(self) -> int:
-        store_data = self.cache_data.dict(exclude_defaults=True, exclude_none=True)
-        if store_data:
-            return self.cache.store(mapping=store_data)
+    def store_cache_data(self, cache_data: BaseDataTV) -> int:
+        cache_data = cache_data.dict(exclude_defaults=True, exclude_none=True)
+        if cache_data:
+            return self.cache.store(mapping=cache_data)
 
         return 0
