@@ -29,18 +29,6 @@ class Corva:
     def __init__(self, middleware: Optional[List[Callable]] = None):
         self.user_middleware = middleware or []
 
-    def get_middleware_stack(
-         self,
-         middleware: Optional[List[Callable]] = None,
-         tail_middleware: Optional[List[Callable]] = None
-    ) -> List[Callable]:
-        middleware = middleware or []
-        tail_middleware = tail_middleware or []
-
-        middleware_stack = middleware + self.user_middleware + tail_middleware
-
-        return middleware_stack
-
     def add_middleware(self, func: Callable) -> None:
         self.user_middleware.append(func)
 
@@ -81,15 +69,9 @@ class Corva:
         def wrapper(event) -> List[Any]:
             settings_ = settings or SETTINGS.copy()
 
-            middleware = [stream]
-            tail_middleware = [unpack_context_factory(include_state=True)]
+            middleware = [stream] + self.user_middleware + [unpack_context_factory(include_state=True)]
 
-            middleware_stack = self.get_middleware_stack(
-                middleware=middleware,
-                tail_middleware=tail_middleware
-            )
-
-            call = wrap_call_in_middleware(call=func, middleware=middleware_stack)
+            call = wrap_call_in_middleware(call=func, middleware=middleware)
 
             events = StreamEvent.from_raw_event(event=event)
 
