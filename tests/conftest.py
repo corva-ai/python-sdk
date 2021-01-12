@@ -135,4 +135,4 @@ class StreamDataMixer:
 
     @classmethod
     def to_raw_event(cls, *events: stream.StreamEvent) -> str:
-        return json.dumps([event.dict() for event in events])
+        return json.dumps([event.dict(exclude_defaults=True) for event in events])
