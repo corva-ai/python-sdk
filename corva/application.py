@@ -1,3 +1,4 @@
+from functools import partial, wraps
 from typing import Any, Callable, List, Optional
 
 from corva.middleware.stream import stream
@@ -47,8 +48,8 @@ class Corva:
          self,
          func=None,
          *,
-         filter_by_timestamp=False,
-         filter_by_depth=False,
+         filter_by_timestamp: bool = False,
+         filter_by_depth: bool = False,
 
          settings: Optional[Settings] = None,
 
@@ -57,44 +58,56 @@ class Corva:
          api_max_retries: Optional[int] = None,
 
          # cache params
-         cache_kwargs: Optional[dict] = None,
+         cache_kwargs: Optional[dict] = None
     ) -> Callable:
-        def wrapper_factory(func) -> Callable:
-            def wrapper(event) -> Any:
-                settings_ = settings or SETTINGS.copy()
+        """Decorates a function to be a stream one
 
-                middleware = [stream]
-                tail_middleware = [unpack_context_factory(include_state=True)]
-
-                middleware_stack = self.get_middleware_stack(
-                    middleware=middleware,
-                    tail_middleware=tail_middleware
-                )
-
-                call = wrap_call_in_middleware(call=func, middleware=middleware_stack)
-
-                events = StreamEvent.from_raw_event(event=event)
-
-                results = []
-
-                for event in events:
-                    ctx = StreamContext(
-                        _event=event,
-                        settings=settings_,
-                        api_timeout=api_timeout,
-                        api_max_retries=api_max_retries,
-                        cache_kwargs=cache_kwargs,
-                        filter_by_timestamp=filter_by_timestamp,
-                        filter_by_depth=filter_by_depth
-                    )
-                    ctx = call(ctx)  # type: StreamContext
-                    results.append(ctx.user_result)
-
-                return results
-
-            return wrapper
+        Can be used both with and without arguments.
+        https://github.com/dabeaz/python-cookbook/blob/master/src/9/defining_a_decorator_that_takes_an_optional_argument/example.py
+        """
 
         if func is None:
-            return wrapper_factory
+            return partial(
+                self.stream,
+                filter_by_timestamp=filter_by_timestamp,
+                filter_by_depth=filter_by_depth,
+                settings=settings,
+                api_timeout=api_timeout,
+                api_max_retries=api_max_retries,
+                cache_kwargs=cache_kwargs
+            )
 
-        return wrapper_factory(func)
+        @wraps(func)
+        def wrapper(event) -> List[Any]:
+            settings_ = settings or SETTINGS.copy()
+
+            middleware = [stream]
+            tail_middleware = [unpack_context_factory(include_state=True)]
+
+            middleware_stack = self.get_middleware_stack(
+                middleware=middleware,
+                tail_middleware=tail_middleware
+            )
+
+            call = wrap_call_in_middleware(call=func, middleware=middleware_stack)
+
+            events = StreamEvent.from_raw_event(event=event)
+
+            results = []
+
+            for event in events:
+                ctx = StreamContext(
+                    _event=event,
+                    settings=settings_,
+                    api_timeout=api_timeout,
+                    api_max_retries=api_max_retries,
+                    cache_kwargs=cache_kwargs,
+                    filter_by_timestamp=filter_by_timestamp,
+                    filter_by_depth=filter_by_depth
+                )
+                ctx = call(ctx)  # type: StreamContext
+                results.append(ctx.user_result)
+
+            return results
+
+        return wrapper
