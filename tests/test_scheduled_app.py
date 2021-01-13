@@ -26,6 +26,6 @@ def test_run():
 
 
 def test_set_completed_status():
-    result, = app.scheduled(scheduled_app)(EVENT)
+    results = app.scheduled(scheduled_app)(EVENT)
 
-    result.post.assert_called_once_with(path='scheduler/0/completed')
+    results[0].post.assert_called_once_with(path='scheduler/0/completed')
