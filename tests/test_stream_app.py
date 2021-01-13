@@ -9,6 +9,18 @@ def stream_app(event, api, state):
     return event
 
 
+def test_run(settings):
+    """Test that both usages of decorator run successfully"""
+
+    event = (
+                '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "", "data": {}}], '
+                '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, "asset_id": 0}]'
+            ) % settings.APP_KEY
+
+    app.stream()(stream_app)(event)
+    app.stream(stream_app)(event)
+
+
 @pytest.mark.parametrize(
     'collection, expected',
     [
