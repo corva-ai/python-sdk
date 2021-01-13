@@ -1,5 +1,4 @@
 from functools import partial
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -9,8 +8,6 @@ from corva.network.api import Api
 from corva.settings import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
-
-DATA_PATH = Path('tests/test_data')
 
 
 @pytest.fixture(scope='function', autouse=True)
