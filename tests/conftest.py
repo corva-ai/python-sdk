@@ -58,7 +58,9 @@ def api():
 def settings():
     return Settings(
         APP_KEY='provider.app-name',
-        CACHE_URL='redis://localhost:6379'
+        CACHE_URL='redis://localhost:6379',
+        API_ROOT_URL='https://api.localhost.ai',
+        DATA_API_ROOT_URL='https://data.localhost.ai'
     )
 
 
@@ -68,8 +70,7 @@ def patch_settings(settings, mocker):
 
     mocker.patch.multiple(
         settings_path,
-        APP_KEY=settings.APP_KEY,
-        CACHE_URL=settings.CACHE_URL
+        **settings.dict()
     )
     yield
 
