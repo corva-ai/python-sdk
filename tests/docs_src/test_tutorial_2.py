@@ -1,5 +1,11 @@
 from docs_src.tutorial_2_configuration import lambda_handler
 
 
-def test_tutorial(raw_stream_event):
-    lambda_handler(raw_stream_event, None)
+def test_tutorial(settings):
+    event = (
+                '[{"records": [{"timestamp": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
+                '"asset_id": 0}]'
+            ) % settings.APP_KEY
+
+    lambda_handler(event, None)
