@@ -28,55 +28,48 @@ def wrap_call_in_middleware(
     return call
 
 
-def app_wrapper_factory(
+def app_wrapper(
+     event,
      *,
      func: Callable,
-
-     head_middleware: List[Callable],
-     user_middleware: List[Callable],
-     tail_middleware: List[Callable],
-
      event_cls: Type[BaseEvent],
      context_cls: Type[BaseContext],
-
+     head_middleware: Optional[List[Callable]] = None,
+     user_middleware: Optional[List[Callable]] = None,
+     tail_middleware: Optional[List[Callable]] = None,
+     context_kwargs: Optional[dict] = None,
      settings: Optional[Settings] = None,
-
-     # api params
      api_timeout: Optional[int] = None,
      api_max_retries: Optional[int] = None,
+     cache_kwargs: Optional[dict] = None
+) -> List[Any]:
+    head_middleware = head_middleware or []
+    user_middleware = user_middleware or []
+    tail_middleware = tail_middleware or []
+    context_kwargs = context_kwargs or {}
+    settings = settings or SETTINGS.copy()
 
-     # cache params
-     cache_kwargs: Optional[dict] = None,
+    middleware = head_middleware + user_middleware + tail_middleware
 
-     context_kwargs: Optional[dict] = None
-) -> Callable:
-    def app_wrapper(event) -> List[Any]:
-        settings_ = settings or SETTINGS.copy()
-        context_kwargs_ = context_kwargs or {}
+    call = wrap_call_in_middleware(call=func, middleware=middleware)
 
-        middleware = head_middleware + user_middleware + tail_middleware
+    events = event_cls.from_raw_event(event=event, app_key=settings.APP_KEY)
 
-        call = wrap_call_in_middleware(call=func, middleware=middleware)
+    results = []
 
-        events = event_cls.from_raw_event(event=event, app_key=settings_.APP_KEY)
+    for event in events:
+        ctx = context_cls(
+            event=event,
+            settings=settings,
+            api_timeout=api_timeout,
+            api_max_retries=api_max_retries,
+            cache_kwargs=cache_kwargs,
+            **context_kwargs
+        )
+        ctx = call(ctx)  # type: BaseContext
+        results.append(ctx.user_result)
 
-        results = []
-
-        for event in events:
-            ctx = context_cls(
-                event=event,
-                settings=settings_,
-                api_timeout=api_timeout,
-                api_max_retries=api_max_retries,
-                cache_kwargs=cache_kwargs,
-                **context_kwargs_
-            )
-            ctx = call(ctx)  # type: BaseContext
-            results.append(ctx.user_result)
-
-        return results
-
-    return app_wrapper
+    return results
 
 
 class Corva:
@@ -119,7 +112,8 @@ class Corva:
                 cache_kwargs=cache_kwargs
             )
 
-        app_wrapper = app_wrapper_factory(
+        wrapper = partial(
+            app_wrapper,
             func=func,
             head_middleware=[stream],
             user_middleware=self.user_middleware,
@@ -136,7 +130,7 @@ class Corva:
             }
         )
 
-        return wraps(func)(app_wrapper)
+        return wraps(func)(wrapper)
 
     def scheduled(
          self,
@@ -160,7 +154,8 @@ class Corva:
                 cache_kwargs=cache_kwargs
             )
 
-        app_wrapper = app_wrapper_factory(
+        wrapper = partial(
+            app_wrapper,
             func=func,
             head_middleware=[scheduled],
             user_middleware=self.user_middleware,
@@ -174,4 +169,4 @@ class Corva:
             context_kwargs={}
         )
 
-        return wraps(func)(app_wrapper)
+        return wraps(func)(wrapper)
