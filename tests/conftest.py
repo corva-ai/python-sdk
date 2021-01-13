@@ -72,12 +72,6 @@ def patch_settings(settings, mocker):
     yield
 
 
-@pytest.fixture(scope='session')
-def raw_stream_event() -> str:
-    with open(DATA_PATH / 'stream_event.json') as stream_event:
-        return stream_event.read()
-
-
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
