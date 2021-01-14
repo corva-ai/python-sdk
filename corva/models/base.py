@@ -43,14 +43,10 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     event: BaseEventTV
     settings: Settings
-    _api: Optional[Api] = None
+    api: Api
     _cache: Optional[RedisState] = None
 
     user_result: Any = None
-
-    # api params
-    api_timeout: Optional[int] = None
-    api_max_retries: Optional[int] = None
 
     # cache params
     cache_kwargs: Optional[dict] = None
@@ -62,27 +58,6 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             f'{self.settings.PROVIDER}/well/{self.event.asset_id}/stream/{self.event.app_stream_id}/'
             f'{self.settings.APP_KEY}/{self.event.app_connection_id}'
         )
-
-    @property
-    def api(self) -> Api:
-        if self._api is not None:
-            return self._api
-
-        kwargs = {
-            'api_url': self.settings.API_ROOT_URL,
-            'data_api_url': self.settings.DATA_API_ROOT_URL,
-            'api_key': self.settings.API_KEY,
-            'app_name': self.settings.APP_NAME
-        }
-
-        if self.api_timeout is not None:
-            kwargs['timeout'] = self.api_timeout
-        if self.api_max_retries is not None:
-            kwargs['max_retries'] = self.api_max_retries
-
-        self._api = Api(**kwargs)
-
-        return self._api
 
     @property
     def cache(self) -> RedisState:
