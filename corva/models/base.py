@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from functools import cached_property
 from typing import Any, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Extra
@@ -18,7 +17,6 @@ class BaseConfig:
     arbitrary_types_allowed = True
     extra = Extra.allow
     validate_assignment = True
-    keep_untouched = (cached_property,)
 
 
 class BaseEvent(ABC):
@@ -45,6 +43,8 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     event: BaseEventTV
     settings: Settings
+    _api: Optional[Api] = None
+    _cache: Optional[RedisState] = None
 
     user_result: Any = None
 
@@ -63,8 +63,11 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
             f'{self.settings.APP_KEY}/{self.event.app_connection_id}'
         )
 
-    @cached_property
+    @property
     def api(self) -> Api:
+        if self._api is not None:
+            return self._api
+
         kwargs = {
             'api_url': self.settings.API_ROOT_URL,
             'data_api_url': self.settings.DATA_API_ROOT_URL,
@@ -77,17 +80,24 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         if self.api_max_retries is not None:
             kwargs['max_retries'] = self.api_max_retries
 
-        return Api(**kwargs)
+        self._api = Api(**kwargs)
 
-    @cached_property
+        return self._api
+
+    @property
     def cache(self) -> RedisState:
+        if self._cache is not None:
+            return self._cache
+
         adapter_params = {
             'default_name': self.cache_key,
             'cache_url': self.settings.CACHE_URL,
             **(self.cache_kwargs or {})
         }
 
-        return RedisState(redis=RedisAdapter(**adapter_params))
+        self._cache = RedisState(redis=RedisAdapter(**adapter_params))
+
+        return self._cache
 
     @property
     def cache_data(self) -> BaseDataTV:
