@@ -1,4 +1,4 @@
-from docs_src.tutorial_1_hello_world import lambda_handler
+from docs_src import tutorial_1_hello_world
 
 
 def test_tutorial(settings):
@@ -7,4 +7,4 @@ def test_tutorial(settings):
                 '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, "asset_id": 0}]'
             ) % settings.APP_KEY
 
-    lambda_handler(event, None)
+    tutorial_1_hello_world.lambda_handler(event, None)

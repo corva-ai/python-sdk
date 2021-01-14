@@ -1,4 +1,4 @@
-from docs_src.tutorial_2_configuration import lambda_handler
+from docs_src import tutorial_2_configuration
 
 
 def test_tutorial(settings):
@@ -8,4 +8,4 @@ def test_tutorial(settings):
                 '"asset_id": 0}]'
             ) % settings.APP_KEY
 
-    lambda_handler(event, None)
+    tutorial_2_configuration.lambda_handler(event, None)
