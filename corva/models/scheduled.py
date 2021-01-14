@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from itertools import chain
+import itertools
 from typing import List, Optional
 
-from pydantic import Field, parse_raw_as
+import pydantic
 
 from corva.models.base import BaseContext, BaseEventData, ListEvent
 from corva.state.redis_state import RedisState
@@ -22,8 +22,8 @@ class ScheduledEventData(BaseEventData):
     app: int
     app_key: str
     app_version: Optional[int]
-    app_connection_id: int = Field(alias='app_connection')
-    app_stream_id: int = Field(alias='app_stream')
+    app_connection_id: int = pydantic.Field(alias='app_connection')
+    app_stream_id: int = pydantic.Field(alias='app_stream')
     source_type: str
     company: int
     provider: str
@@ -45,10 +45,10 @@ class ScheduledEventData(BaseEventData):
 class ScheduledEvent(ListEvent[ScheduledEventData]):
     @staticmethod
     def from_raw_event(event: str, **kwargs) -> ScheduledEvent:
-        parsed = parse_raw_as(List[List[ScheduledEventData]], event)
+        parsed = pydantic.parse_raw_as(List[List[ScheduledEventData]], event)
 
         # raw event from queue comes in from of 2d array of datas
         # flatten parsed event into 1d array of datas, which is expected by ScheduledEvent
-        parsed = list(chain(*parsed))
+        parsed = list(itertools.chain(*parsed))
 
         return ScheduledEvent(parsed)
