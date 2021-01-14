@@ -2,7 +2,7 @@ from typing import Any, Callable, List, Optional
 
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
-from corva.settings import Settings
+from corva.settings import SETTINGS
 from corva.stream import stream
 
 
@@ -18,7 +18,7 @@ class Corva:
          api_max_retries: Optional[int] = None,
          cache_kwargs: Optional[dict] = None
     ):
-        self.settings = Settings()
+        self.settings = SETTINGS.copy()
         self.cache_kwargs = cache_kwargs
 
         if api_url is not None:
