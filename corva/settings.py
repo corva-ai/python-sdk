@@ -1,4 +1,3 @@
-from functools import cached_property
 from os import getenv
 from typing import Optional
 
@@ -6,9 +5,6 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    class Config:
-        keep_untouched = (cached_property,)
-
     # api
     API_ROOT_URL: Optional[str] = None
     DATA_API_ROOT_URL: Optional[str] = None
@@ -23,7 +19,7 @@ class Settings(BaseSettings):
     # misc
     APP_KEY: Optional[str] = None  # <provider>.<app-name-with-dashes>
 
-    @cached_property
+    @property
     def APP_NAME(self) -> str:
         if app_name := getenv('APP_NAME') is not None:
             return app_name
@@ -33,7 +29,7 @@ class Settings(BaseSettings):
 
         return app_name
 
-    @cached_property
+    @property
     def PROVIDER(self) -> str:
         if provider := getenv('PROVIDER') is not None:
             return provider
