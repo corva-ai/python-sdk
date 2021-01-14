@@ -67,6 +67,6 @@ class Corva:
                 filter_by_depth=filter_by_depth
             )
 
-            results.append(stream(fn)(context=ctx))
+            results.append(stream(fn=fn, context=ctx))
 
         return results
