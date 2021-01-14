@@ -1,36 +1,4 @@
-from functools import partial, wraps
-from typing import Any, Callable, List, Optional
-
-from corva.middleware.stream import stream
-from corva.middleware.unpack_context import unpack_context_factory
-from corva.models.stream import StreamContext, StreamEvent
-from corva.settings import Settings, SETTINGS
-
-
-def wrap_call_in_middleware(
-     call: Callable,
-     middleware: Optional[List[Callable]] = None
-) -> Callable:
-    def wrapper_factory(mw, call):
-        def wrapper(ctx):
-            return mw(ctx, call)
-
-        return wrapper
-
-    middleware = middleware or []
-
-    for mw in reversed(middleware):
-        call = wrapper_factory(mw, call)
-
-    return call
-
-
 class Corva:
-    def __init__(self, middleware: Optional[List[Callable]] = None):
-        self.user_middleware = middleware or []
-
-    def add_middleware(self, func: Callable) -> None:
-        self.user_middleware.append(func)
 
     def stream(
          self,
