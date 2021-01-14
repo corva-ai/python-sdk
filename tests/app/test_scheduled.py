@@ -1,9 +1,9 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from corva.app.scheduled import ScheduledApp
 from corva.event import Event
+from corva.models.scheduled import ScheduledContext, ScheduledEventData
 from tests.conftest import APP_KEY, CACHE_URL
 
 
@@ -59,25 +59,6 @@ def scheduled_context_factory(scheduled_event_data_factory, redis):
 
 def test_group_by_field():
     assert ScheduledApp.group_by_field == 'app_connection_id'
-
-
-def test_post_process(
-     mocker: MockerFixture, scheduled_app, scheduled_event_data_factory, scheduled_context_factory
-):
-    event = Event([scheduled_event_data_factory(schedule=1), scheduled_event_data_factory(schedule=2)])
-    context = scheduled_context_factory(event=event)
-
-    update_schedule_status_mock = mocker.patch.object(scheduled_app, 'update_schedule_status')
-
-    scheduled_app.post_process(context=context)
-
-    assert update_schedule_status_mock.call_count == len(event)
-    update_schedule_status_mock.assert_has_calls(
-        [
-            mocker.call(schedule=1, status='completed'),
-            mocker.call(schedule=2, status='completed')
-        ]
-    )
 
 
 def test_update_schedule_status(mocker: MockerFixture, scheduled_app):
