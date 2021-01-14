@@ -3,7 +3,7 @@ from typing import Any, Callable, List, Optional
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
 from corva.settings import SETTINGS
-from corva.stream import stream
+from corva.stream import stream_runner
 
 
 class Corva:
@@ -67,6 +67,6 @@ class Corva:
                 filter_by_depth=filter_by_depth
             )
 
-            results.append(stream(fn=fn, context=ctx))
+            results.append(stream_runner(fn=fn, context=ctx))
 
         return results
