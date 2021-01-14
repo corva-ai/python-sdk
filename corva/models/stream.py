@@ -30,6 +30,7 @@ class Record(BaseEventData):
 
 class AppMetadata(BaseEventData):
     app_connection_id: int
+    app_version: Optional[int] = None
 
 
 class StreamEventMetadata(BaseEventData):
