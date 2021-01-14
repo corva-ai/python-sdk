@@ -9,11 +9,6 @@ from corva.network.api import Api
 from corva.state.redis_state import RedisState
 
 
-
-from corva.network.api import Api
-from corva.state.redis_state import RedisState
-
-
 class BaseEvent(ABC):
     @staticmethod
     @abstractmethod
@@ -41,6 +36,7 @@ class BaseEventData(BaseModel):
     class Config:
         extra = Extra.allow
         allow_population_by_field_name = True
+
 
 BaseEventDataTV = TypeVar('BaseEventDataTV', bound=BaseEventData)
 
