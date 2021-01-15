@@ -49,7 +49,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
     user_result: Any = None
 
     # cache params
-    cache_kwargs: Optional[dict] = None
+    cache_kwargs: dict = {}
     cache_data_cls: Optional[Type[CorvaBaseModelTV]] = None
 
     @property
@@ -67,7 +67,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
         adapter_params = {
             'default_name': self.cache_key,
             'cache_url': self.settings.CACHE_URL,
-            **(self.cache_kwargs or {})
+            **self.cache_kwargs
         }
 
         self._cache = RedisState(redis=RedisAdapter(**adapter_params))

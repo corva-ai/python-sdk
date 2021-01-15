@@ -18,7 +18,7 @@ class Corva:
          api_max_retries: Optional[int] = None,
          cache_kwargs: Optional[dict] = None
     ):
-        self.cache_kwargs = cache_kwargs
+        self.cache_kwargs = cache_kwargs or {}
 
         self.settings = CorvaSettings(
             API_ROOT_URL=api_url or CORVA_SETTINGS.API_ROOT_URL,
