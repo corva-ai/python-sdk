@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, parse_raw_as
+import pydantic
 from pydantic.types import conint
 
 from corva.models.base import BaseContext, BaseEventData, BaseEvent
@@ -20,7 +20,7 @@ class TaskState(Enum):
     succeeded = 'succeeded'
 
 
-class TaskData(BaseModel):
+class TaskData(pydantic.BaseModel):
     id: str
     state: TaskState
     fail_reason: Optional[Any] = None
@@ -32,7 +32,7 @@ class TaskData(BaseModel):
     payload: Dict[str, Any]
 
 
-class UpdateTaskData(BaseModel):
+class UpdateTaskData(pydantic.BaseModel):
     fail_reason: Optional[str] = None
     payload: dict = {}
 
@@ -51,4 +51,4 @@ class TaskEventData(BaseEventData):
 class TaskEvent(BaseEvent, TaskEventData):
     @staticmethod
     def from_raw_event(event: str, **kwargs) -> TaskEvent:
-        return parse_raw_as(TaskEvent, event)
+        return pydantic.parse_raw_as(TaskEvent, event)
