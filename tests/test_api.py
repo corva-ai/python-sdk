@@ -1,5 +1,18 @@
 import pytest
 
+from corva.network.api import Api
+from corva.settings import CORVA_SETTINGS
+
+
+@pytest.fixture(scope='function')
+def api():
+    return Api(
+        api_url=CORVA_SETTINGS.API_ROOT_URL,
+        data_api_url=CORVA_SETTINGS.DATA_API_ROOT_URL,
+        api_key=CORVA_SETTINGS.API_KEY,
+        app_name=CORVA_SETTINGS
+    )
+
 
 def test_default_headers(api):
     assert not {'Authorization', 'X-Corva-App'} - set(api.session.headers)

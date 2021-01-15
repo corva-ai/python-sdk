@@ -5,13 +5,14 @@ from fakeredis import FakeServer
 from freezegun import freeze_time
 from redis import ConnectionError
 
+from corva.settings import CORVA_SETTINGS
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
 @pytest.fixture(scope='function')
-def redis(corva_settings):
-    redis_adapter = RedisAdapter(name='name', cache_url=corva_settings.CACHE_URL)
+def redis():
+    redis_adapter = RedisAdapter(name='name', cache_url=CORVA_SETTINGS.CACHE_URL)
     return RedisState(redis=redis_adapter)
 
 
