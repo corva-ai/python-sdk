@@ -7,7 +7,7 @@ from fakeredis import FakeRedis, FakeServer
 
 from corva.application import Corva
 from corva.network.api import Api
-from corva.settings import Settings
+from corva.settings import CorvaSettings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -55,7 +55,7 @@ def api():
 
 @pytest.fixture(scope='function')
 def settings():
-    return Settings(
+    return CorvaSettings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379'
     )
@@ -63,7 +63,7 @@ def settings():
 
 @pytest.fixture(scope='function', autouse=True)
 def patch_settings(settings, mocker):
-    settings_path = 'corva.settings.SETTINGS'
+    settings_path = 'corva.settings.CORVA_SETTINGS'
 
     mocker.patch.multiple(
         settings_path,
