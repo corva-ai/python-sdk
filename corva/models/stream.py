@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Type
 
-from pydantic import parse_raw_as, validator, root_validator
+import pydantic
+
+from corva.models.base import BaseContext, BaseEventData
+from corva.state.redis_state import RedisState
 
 from corva.models.base import BaseContext, BaseData, BaseEvent
 
@@ -83,7 +86,7 @@ class StreamEvent(BaseEvent, StreamEventData):
     def from_raw_event(event: str, **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        events = parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
+        events = pydantic.parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
 
         for event in events:
             event.app_key = app_key
