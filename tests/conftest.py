@@ -26,8 +26,10 @@ def patch_redis_adapter():
 
     redis_adapter_patcher = patch(f'{redis_adapter_path}.RedisAdapter.__bases__', (FakeRedis,))
 
+    server = FakeServer()  # use FakeServer to share cache between different instances of RedisState
+
     with redis_adapter_patcher, \
-         patch(f'{redis_adapter_path}.from_url', side_effect=partial(FakeRedis.from_url, server=FakeServer())):
+         patch(f'{redis_adapter_path}.from_url', side_effect=partial(FakeRedis.from_url, server=server)):
         # necessary to stop mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
         yield
