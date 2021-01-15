@@ -1,6 +1,6 @@
 import pytest
 
-from corva.loader.task import TaskLoader
+from corva.models.task import TaskEvent
 
 
 @pytest.fixture(scope='session')
@@ -11,6 +11,4 @@ def task_event_str() -> str:
 def test_load(task_event_str):
     """test that sample task event loads without exceptions"""
 
-    event = TaskLoader().load(event=task_event_str)
-
-    assert len(event) == 1
+    TaskEvent.from_raw_event(task_event_str)
