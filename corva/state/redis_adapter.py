@@ -1,7 +1,10 @@
 from datetime import timedelta
+from logging import Logger, LoggerAdapter
 from typing import Optional, List, Dict, Union
 
 from redis import Redis, from_url, ConnectionError
+
+from corva.logger import DEFAULT_LOGGER
 
 REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 
@@ -13,10 +16,12 @@ class RedisAdapter(Redis):
          self,
          default_name: str,
          cache_url: str,
+         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER,
          **kwargs
     ):
         kwargs.setdefault('decode_responses', True)
         super().__init__(connection_pool=from_url(url=cache_url, **kwargs).connection_pool)
+        self.logger = logger
         self.default_name = default_name
         try:
             self.ping()
