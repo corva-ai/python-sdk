@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime
 import itertools
+from datetime import datetime
 from typing import List, Optional
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseData, BaseEvent
+from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
-class ScheduledEventData(BaseData):
+class ScheduledEventData(CorvaBaseModel):
     type: Optional[str] = None
     collection: Optional[str] = None
     cron_string: str
@@ -49,5 +49,5 @@ class ScheduledEvent(BaseEvent, ScheduledEventData):
         return events
 
 
-class ScheduledContext(BaseContext[ScheduledEvent, BaseData]):
+class ScheduledContext(BaseContext[ScheduledEvent, CorvaBaseModel]):
     pass

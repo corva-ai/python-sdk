@@ -2,7 +2,7 @@ from logging import LoggerAdapter, Formatter, getLogger
 from logging.config import dictConfig
 from time import gmtime
 
-from corva.settings import SETTINGS
+from corva.settings import CORVA_SETTINGS
 
 
 class UtcFormatter(Formatter):
@@ -21,14 +21,14 @@ dictConfig(
         'handlers': {
             'stream': {
                 'class': 'logging.StreamHandler',
-                'level': SETTINGS.LOG_LEVEL,
+                'level': CORVA_SETTINGS.LOG_LEVEL,
                 'formatter': 'default',
                 'stream': 'ext://sys.stdout'
             }
         },
         'loggers': {
             'main': {
-                'level': SETTINGS.LOG_LEVEL,
+                'level': CORVA_SETTINGS.LOG_LEVEL,
                 'handlers': ['stream'],
                 'propagate': False
             }

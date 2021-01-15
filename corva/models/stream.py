@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Type
 
-from pydantic import parse_raw_as, validator, root_validator
+import pydantic
 
-from corva.models.base import BaseContext, BaseData, BaseEvent
+from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
-class RecordData(BaseData):
+class RecordData(CorvaBaseModel):
     hole_depth: Optional[float] = None
     weight_on_bit: Optional[int] = None
     state: Optional[str] = None
 
 
-class Record(BaseData):
+class Record(CorvaBaseModel):
     timestamp: Optional[int] = None
     asset_id: int
     company_id: int
@@ -23,24 +23,24 @@ class Record(BaseData):
     data: RecordData
 
 
-class AppMetadata(BaseData):
+class AppMetadata(CorvaBaseModel):
     app_connection_id: int
     app_version: Optional[int] = None
 
 
-class StreamEventMetadata(BaseData):
+class StreamEventMetadata(CorvaBaseModel):
     app_stream_id: int
     source_type: Optional[str] = None
     apps: Dict[str, AppMetadata]
 
 
-class StreamEventData(BaseData):
+class StreamEventData(CorvaBaseModel):
     app_key: Optional[str] = None
     records: List[Record]
     metadata: StreamEventMetadata
     asset_id: int = None
 
-    @validator('asset_id', pre=True, always=True)
+    @pydantic.validator('asset_id', pre=True, always=True)
     def set_asset_id(cls, v, values):
         """dynamically sets value for asset_id
 
@@ -83,7 +83,7 @@ class StreamEvent(BaseEvent, StreamEventData):
     def from_raw_event(event: str, **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        events = parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
+        events = pydantic.parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
 
         for event in events:
             event.app_key = app_key
@@ -111,9 +111,9 @@ class StreamEvent(BaseEvent, StreamEventData):
         return event.copy(update={'records': new_records}, deep=True)
 
 
-class StreamStateData(BaseData):
-    last_processed_timestamp: int = -1
-    last_processed_depth: float = -1
+class StreamStateData(CorvaBaseModel):
+    last_processed_timestamp: Optional[int] = None
+    last_processed_depth: Optional[float] = None
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
@@ -121,7 +121,7 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
 
-    @root_validator(pre=True)
+    @pydantic.root_validator(pre=True)
     def check_one_active_filter_at_most(cls, values):
         if values['filter_by_timestamp'] and values['filter_by_depth']:
             raise ValueError('filter_by_timestamp and filter_by_depth can\'t be set to True together.')

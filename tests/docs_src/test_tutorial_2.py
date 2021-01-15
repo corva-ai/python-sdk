@@ -1,11 +1,11 @@
-from docs_src.tutorial_2_configuration import lambda_handler
+from docs_src import tutorial_2_configuration
 
 
-def test_tutorial(settings):
+def test_tutorial(corva_settings):
     event = (
                 '[{"records": [{"timestamp": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
                 '"asset_id": 0}]'
-            ) % settings.APP_KEY
+            ) % corva_settings.APP_KEY
 
-    lambda_handler(event, None)
+    tutorial_2_configuration.lambda_handler(event, None)

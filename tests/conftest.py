@@ -5,7 +5,7 @@ import pytest
 from fakeredis import FakeRedis, FakeServer
 
 from corva.network.api import Api
-from corva.settings import Settings
+from corva.settings import CorvaSettings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -22,16 +22,18 @@ def patch_redis_adapter():
 
     redis_adapter_patcher = patch(f'{redis_adapter_path}.RedisAdapter.__bases__', (FakeRedis,))
 
+    server = FakeServer()  # use FakeServer to share cache between different instances of RedisState
+
     with redis_adapter_patcher, \
-         patch(f'{redis_adapter_path}.from_url', side_effect=partial(FakeRedis.from_url, server=FakeServer())):
+         patch(f'{redis_adapter_path}.from_url', side_effect=partial(FakeRedis.from_url, server=server)):
         # necessary to stop mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
         yield
 
 
 @pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter, settings):
-    return RedisAdapter(default_name='default_name', cache_url=settings.CACHE_URL)
+def redis_adapter(patch_redis_adapter, corva_settings):
+    return RedisAdapter(default_name='default_name', cache_url=corva_settings.CACHE_URL)
 
 
 @pytest.fixture(scope='function')
@@ -50,8 +52,10 @@ def api():
 
 
 @pytest.fixture(scope='function')
-def settings():
-    return Settings(
+def corva_settings():
+    """proper corva settings for testing"""
+
+    return CorvaSettings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379',
         API_ROOT_URL='https://api.localhost.ai',
@@ -60,12 +64,14 @@ def settings():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def patch_settings(settings, mocker):
-    settings_path = 'corva.settings.SETTINGS'
+def patch_corva_settings(corva_settings, mocker):
+    """replaces empty values in global corva settings with proper test values"""
+
+    settings_path = 'corva.settings.CORVA_SETTINGS'
 
     mocker.patch.multiple(
         settings_path,
-        **settings.dict()
+        **corva_settings.dict()
     )
     yield
 

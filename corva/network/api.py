@@ -9,6 +9,8 @@ from urllib3 import Retry
 
 class Api:
     ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
+    DEFAULT_TIMEOUT = 600
+    DEFAULT_MAX_RETRIES = 3
 
     def __init__(
          self,
@@ -16,11 +18,11 @@ class Api:
          data_api_url: str,
          api_key: str,
          app_name: str,
-         timeout: int = 600,
-         max_retries: int = 3
+         timeout: Optional[int] = None,
+         max_retries: Optional[int] = None
     ):
-        self.timeout = timeout
-        self.max_retries = max_retries
+        self.timeout = timeout or self.DEFAULT_TIMEOUT
+        self.max_retries = max_retries or self.DEFAULT_MAX_RETRIES
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key

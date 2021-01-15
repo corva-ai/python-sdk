@@ -3,20 +3,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Optional, Type, TypeVar, Union
 
-from pydantic import BaseModel, Extra
+import pydantic
 from pydantic.generics import GenericModel
 
 from corva.network.api import Api
-from corva.settings import Settings
+from corva.settings import CorvaSettings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
-
-
-class BaseConfig:
-    allow_population_by_field_name = True
-    arbitrary_types_allowed = True
-    extra = Extra.allow
-    validate_assignment = True
 
 
 class BaseEvent(ABC):
@@ -26,35 +19,38 @@ class BaseEvent(ABC):
         pass
 
 
-class BaseData(BaseModel):
-    class Config(BaseConfig):
-        pass
+class CorvaModelConfig:
+    allow_population_by_field_name = True
+    arbitrary_types_allowed = True
+    extra = pydantic.Extra.allow
+    validate_assignment = True
+
+
+class CorvaBaseModel(pydantic.BaseModel):
+    Config = CorvaModelConfig
+
+
+class CorvaGenericModel(GenericModel):
+    Config = CorvaModelConfig
 
 
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
-BaseDataTV = TypeVar('BaseDataTV', bound=BaseData)
+CorvaBaseModelTV = TypeVar('CorvaBaseModelTV', bound=CorvaBaseModel)
 
 
-class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
+class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
     """Stores common data for running a Corva app."""
 
-    class Config(BaseConfig):
-        pass
-
     event: BaseEventTV
-    settings: Settings
-    _api: Optional[Api] = None
+    settings: CorvaSettings
+    api: Api
     _cache: Optional[RedisState] = None
 
     user_result: Any = None
 
-    # api params
-    api_timeout: Optional[int] = None
-    api_max_retries: Optional[int] = None
-
     # cache params
-    cache_kwargs: Optional[dict] = None
-    cache_data_cls: Optional[Type[BaseDataTV]] = None
+    cache_kwargs: dict = {}
+    cache_data_cls: Optional[Type[CorvaBaseModelTV]] = None
 
     @property
     def cache_key(self) -> str:
@@ -64,49 +60,27 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         )
 
     @property
-    def api(self) -> Api:
-        if self._api is not None:
-            return self._api
-
-        kwargs = {
-            'api_url': self.settings.API_ROOT_URL,
-            'data_api_url': self.settings.DATA_API_ROOT_URL,
-            'api_key': self.settings.API_KEY,
-            'app_name': self.settings.APP_NAME
-        }
-
-        if self.api_timeout is not None:
-            kwargs['timeout'] = self.api_timeout
-        if self.api_max_retries is not None:
-            kwargs['max_retries'] = self.api_max_retries
-
-        self._api = Api(**kwargs)
-
-        return self._api
-
-    @property
     def cache(self) -> RedisState:
         if self._cache is not None:
             return self._cache
 
-        adapter_params = {
-            'default_name': self.cache_key,
-            'cache_url': self.settings.CACHE_URL,
-            **(self.cache_kwargs or {})
-        }
+        redis_adapter = RedisAdapter(
+            default_name=self.cache_key,
+            cache_url=self.settings.CACHE_URL,
+            **self.cache_kwargs
+        )
 
-        self._cache = RedisState(redis=RedisAdapter(**adapter_params))
+        self._cache = RedisState(redis=redis_adapter)
 
         return self._cache
 
     @property
-    def cache_data(self) -> BaseDataTV:
+    def cache_data(self) -> CorvaBaseModelTV:
         state_data_dict = self.cache.load_all()
         return self.cache_data_cls(**state_data_dict)
 
-    def store_cache_data(self, cache_data: BaseDataTV) -> int:
-        cache_data = cache_data.dict(exclude_defaults=True, exclude_none=True)
-        if cache_data:
+    def store_cache_data(self, cache_data: CorvaBaseModelTV) -> int:
+        if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
             return self.cache.store(mapping=cache_data)
 
         return 0

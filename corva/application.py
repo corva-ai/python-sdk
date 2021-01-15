@@ -1,136 +1,67 @@
-from functools import partial, wraps
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional
 
-from corva.middleware.scheduled import scheduled
-from corva.middleware.stream import stream
-from corva.middleware.unpack_context import unpack_context_factory
-from corva.models.base import BaseContext, BaseEvent
-from corva.models.scheduled import ScheduledEvent, ScheduledContext
 from corva.models.stream import StreamContext, StreamEvent
-from corva.settings import Settings, SETTINGS
-
-
-def wrap_call_in_middleware(
-     call: Callable,
-     middleware: Optional[List[Callable]] = None
-) -> Callable:
-    def wrapper_factory(mw, call):
-        def wrapper(ctx):
-            return mw(ctx, call)
-
-        return wrapper
-
-    middleware = middleware or []
-
-    for mw in reversed(middleware):
-        call = wrapper_factory(mw, call)
-
-    return call
-
-
-def app_wrapper(
-     event,
-     *,
-     func: Callable,
-     event_cls: Type[BaseEvent],
-     context_cls: Type[BaseContext],
-     head_middleware: Optional[List[Callable]] = None,
-     user_middleware: Optional[List[Callable]] = None,
-     tail_middleware: Optional[List[Callable]] = None,
-     context_kwargs: Optional[dict] = None,
-     settings: Optional[Settings] = None,
-     api_timeout: Optional[int] = None,
-     api_max_retries: Optional[int] = None,
-     cache_kwargs: Optional[dict] = None
-) -> List[Any]:
-    head_middleware = head_middleware or []
-    user_middleware = user_middleware or []
-    tail_middleware = tail_middleware or []
-    context_kwargs = context_kwargs or {}
-    settings = settings or SETTINGS.copy()
-
-    middleware = head_middleware + user_middleware + tail_middleware
-
-    call = wrap_call_in_middleware(call=func, middleware=middleware)
-
-    events = event_cls.from_raw_event(event=event, app_key=settings.APP_KEY)
-
-    results = []
-
-    for event in events:
-        ctx = context_cls(
-            event=event,
-            settings=settings,
-            api_timeout=api_timeout,
-            api_max_retries=api_max_retries,
-            cache_kwargs=cache_kwargs,
-            **context_kwargs
-        )
-        ctx = call(ctx)  # type: BaseContext
-        results.append(ctx.user_result)
-
-    return results
+from corva.network.api import Api
+from corva.settings import CorvaSettings, CORVA_SETTINGS
+from corva.stream import stream_runner
 
 
 class Corva:
-    def __init__(self, middleware: Optional[List[Callable]] = None):
-        self.user_middleware = middleware or []
+    def __init__(
+         self,
+         api_url: Optional[str] = None,
+         data_api_url: Optional[str] = None,
+         cache_url: Optional[str] = None,
+         api_key: Optional[str] = None,
+         app_key: Optional[str] = None,
+         api_timeout: Optional[int] = None,
+         api_max_retries: Optional[int] = None,
+         cache_kwargs: Optional[dict] = None
+    ):
+        self.cache_kwargs = cache_kwargs or {}
 
-    def add_middleware(self, func: Callable) -> None:
-        self.user_middleware.append(func)
+        self.settings = CorvaSettings(
+            API_ROOT_URL=api_url or CORVA_SETTINGS.API_ROOT_URL,
+            DATA_API_ROOT_URL=data_api_url or CORVA_SETTINGS.DATA_API_ROOT_URL,
+            API_KEY=api_key or CORVA_SETTINGS.API_KEY,
+            CACHE_URL=cache_url or CORVA_SETTINGS.CACHE_URL,
+            APP_KEY=app_key or CORVA_SETTINGS.APP_KEY
+        )
+
+        self.api = Api(
+            api_url=self.settings.API_ROOT_URL,
+            data_api_url=self.settings.DATA_API_ROOT_URL,
+            api_key=self.settings.API_KEY,
+            app_name=self.settings.APP_NAME,
+            timeout=api_timeout,
+            max_retries=api_max_retries
+        )
 
     def stream(
          self,
-         func=None,
+         fn: Callable,
+         event: str,
          *,
          filter_by_timestamp: bool = False,
-         filter_by_depth: bool = False,
+         filter_by_depth: bool = False
+    ) -> List[Any]:
+        events = StreamEvent.from_raw_event(event=event, app_key=self.settings.APP_KEY)
 
-         settings: Optional[Settings] = None,
+        results = []
 
-         # api params
-         api_timeout: Optional[int] = None,
-         api_max_retries: Optional[int] = None,
-
-         # cache params
-         cache_kwargs: Optional[dict] = None
-    ) -> Callable:
-        """Decorates a function to be a stream one
-
-        Can be used both with and without arguments.
-        https://github.com/dabeaz/python-cookbook/blob/master/src/9/defining_a_decorator_that_takes_an_optional_argument/example.py
-        """
-
-        if func is None:
-            return partial(
-                self.stream,
+        for event in events:
+            ctx = StreamContext(
+                event=event,
+                settings=self.settings,
+                api=self.api,
+                cache_kwargs=self.cache_kwargs,
                 filter_by_timestamp=filter_by_timestamp,
-                filter_by_depth=filter_by_depth,
-                settings=settings,
-                api_timeout=api_timeout,
-                api_max_retries=api_max_retries,
-                cache_kwargs=cache_kwargs
+                filter_by_depth=filter_by_depth
             )
 
-        wrapper = partial(
-            app_wrapper,
-            func=func,
-            head_middleware=[stream],
-            user_middleware=self.user_middleware,
-            tail_middleware=[unpack_context_factory(include_state=True)],
-            event_cls=StreamEvent,
-            context_cls=StreamContext,
-            settings=settings,
-            api_timeout=api_timeout,
-            api_max_retries=api_max_retries,
-            cache_kwargs=cache_kwargs,
-            context_kwargs={
-                'filter_by_timestamp': filter_by_timestamp,
-                'filter_by_depth': filter_by_depth
-            }
-        )
+            results.append(stream_runner(fn=fn, context=ctx))
 
-        return wraps(func)(wrapper)
+        return results
 
     def scheduled(
          self,

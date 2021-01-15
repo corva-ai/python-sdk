@@ -1,20 +1,23 @@
-from typing import Callable
+from typing import Any, Callable
 
 from corva.models.stream import StreamContext, StreamEvent, StreamStateData
 
 
-def stream(context: StreamContext, call_next: Callable) -> StreamContext:
-    """Stores needed data in state for future runs."""
+def stream_runner(fn: Callable, context: StreamContext) -> Any:
+    if (last_timestamp := context.cache_data.last_processed_timestamp) is None:
+        last_timestamp = -1  # filtering will leave all records, as no timestamp can be negative
+    if (last_depth := context.cache_data.last_processed_depth) is None:
+        last_depth = -1  # filtering will leave all records, as no depth can be negative
 
     context.event = StreamEvent.filter(
         event=context.event,
         by_timestamp=context.filter_by_timestamp,
         by_depth=context.filter_by_depth,
-        last_timestamp=context.cache_data.last_processed_timestamp,
-        last_depth=context.cache_data.last_processed_depth
+        last_timestamp=last_timestamp,
+        last_depth=last_depth
     )
 
-    context = call_next(context)  # type: StreamContext
+    result = fn(context.event, context.api, context.cache)
 
     last_processed_timestamp = max(
         [
@@ -35,8 +38,9 @@ def stream(context: StreamContext, call_next: Callable) -> StreamContext:
 
     context.store_cache_data(
         StreamStateData(
-            last_processed_timestamp=last_processed_timestamp, last_processed_depth=last_processed_depth
+            last_processed_timestamp=last_processed_timestamp,
+            last_processed_depth=last_processed_depth
         )
     )
 
-    return context
+    return result
