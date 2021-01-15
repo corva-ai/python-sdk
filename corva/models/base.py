@@ -12,13 +12,6 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
-class BaseConfig:
-    allow_population_by_field_name = True
-    arbitrary_types_allowed = True
-    extra = Extra.allow
-    validate_assignment = True
-
-
 class BaseEvent(ABC):
     @staticmethod
     @abstractmethod
@@ -26,20 +19,27 @@ class BaseEvent(ABC):
         pass
 
 
-class BaseData(BaseModel):
-    class Config(BaseConfig):
-        pass
+class CorvaModelConfig:
+    allow_population_by_field_name = True
+    arbitrary_types_allowed = True
+    extra = Extra.allow
+    validate_assignment = True
+
+
+class CorvaBaseModel(BaseModel):
+    Config = CorvaModelConfig
+
+
+class CorvaGenericModel(GenericModel):
+    Config = CorvaModelConfig
 
 
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
-BaseDataTV = TypeVar('BaseDataTV', bound=BaseData)
+CorvaBaseModelTV = TypeVar('CorvaBaseModelTV', bound=CorvaBaseModel)
 
 
-class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
+class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
     """Stores common data for running a Corva app."""
-
-    class Config(BaseConfig):
-        pass
 
     event: BaseEventTV
     settings: Settings
@@ -50,7 +50,7 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
 
     # cache params
     cache_kwargs: Optional[dict] = None
-    cache_data_cls: Optional[Type[BaseDataTV]] = None
+    cache_data_cls: Optional[Type[CorvaBaseModelTV]] = None
 
     @property
     def cache_key(self) -> str:
@@ -75,11 +75,11 @@ class BaseContext(GenericModel, Generic[BaseEventTV, BaseDataTV]):
         return self._cache
 
     @property
-    def cache_data(self) -> BaseDataTV:
+    def cache_data(self) -> CorvaBaseModelTV:
         state_data_dict = self.cache.load_all()
         return self.cache_data_cls(**state_data_dict)
 
-    def store_cache_data(self, cache_data: BaseDataTV) -> int:
+    def store_cache_data(self, cache_data: CorvaBaseModelTV) -> int:
         cache_data = cache_data.dict(exclude_defaults=True, exclude_none=True)
         if cache_data:
             return self.cache.store(mapping=cache_data)

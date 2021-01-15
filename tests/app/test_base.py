@@ -3,7 +3,7 @@ from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
 from corva.event import Event
-from corva.models.base import BaseData
+from corva.models.base import CorvaBaseModel
 from tests.conftest import ComparableException
 
 
@@ -39,8 +39,8 @@ def test_run_exc_in__group_event(mocker: MockerFixture, base_app):
 
 
 def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
-    event1 = Event([BaseData(a=1)])
-    event2 = Event([BaseData(a=2)])
+    event1 = Event([CorvaBaseModel(a=1)])
+    event2 = Event([CorvaBaseModel(a=2)])
 
     mocker.patch.object(BaseApp, 'event_loader')
     mocker.patch.object(base_app, '_group_event', return_value=[event1, event2])
@@ -54,9 +54,9 @@ def test_run_runs_for_each_event(mocker: MockerFixture, base_app):
 
 def test__group_event(mocker: MockerFixture, base_app):
     event = Event(
-        [BaseData(app_connection_id=1),
-         BaseData(app_connection_id=1),
-         BaseData(app_connection_id=2)]
+        [CorvaBaseModel(app_connection_id=1),
+         CorvaBaseModel(app_connection_id=1),
+         CorvaBaseModel(app_connection_id=2)]
     )
     expected = [
         [event[0], event[1]],

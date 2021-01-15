@@ -4,16 +4,16 @@ from typing import Dict, List, Optional, Type
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseData, BaseEvent
+from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
-class RecordData(BaseData):
+class RecordData(CorvaBaseModel):
     hole_depth: Optional[float] = None
     weight_on_bit: Optional[int] = None
     state: Optional[str] = None
 
 
-class Record(BaseData):
+class Record(CorvaBaseModel):
     timestamp: Optional[int] = None
     asset_id: int
     company_id: int
@@ -23,18 +23,18 @@ class Record(BaseData):
     data: RecordData
 
 
-class AppMetadata(BaseData):
+class AppMetadata(CorvaBaseModel):
     app_connection_id: int
     app_version: Optional[int] = None
 
 
-class StreamEventMetadata(BaseData):
+class StreamEventMetadata(CorvaBaseModel):
     app_stream_id: int
     source_type: Optional[str] = None
     apps: Dict[str, AppMetadata]
 
 
-class StreamEventData(BaseData):
+class StreamEventData(CorvaBaseModel):
     app_key: Optional[str] = None
     records: List[Record]
     metadata: StreamEventMetadata
@@ -111,7 +111,7 @@ class StreamEvent(BaseEvent, StreamEventData):
         return event.copy(update={'records': new_records}, deep=True)
 
 
-class StreamStateData(BaseData):
+class StreamStateData(CorvaBaseModel):
     last_processed_timestamp: int = -1
     last_processed_depth: float = -1
 
