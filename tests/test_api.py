@@ -22,5 +22,5 @@ def test_get_url(api):
 def test_request_invalid_method(api):
     method = 'random'
     with pytest.raises(ValueError) as exc:
-        api._request(method=method, path='random')
+        api._request(method=method)(path='random')
     assert str(exc.value) == f'Invalid HTTP method {method}.'
