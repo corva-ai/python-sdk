@@ -64,13 +64,13 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
         if self._cache is not None:
             return self._cache
 
-        adapter_params = {
-            'default_name': self.cache_key,
-            'cache_url': self.settings.CACHE_URL,
+        redis_adapter = RedisAdapter(
+            default_name=self.cache_key,
+            cache_url=self.settings.CACHE_URL,
             **self.cache_kwargs
-        }
+        )
 
-        self._cache = RedisState(redis=RedisAdapter(**adapter_params))
+        self._cache = RedisState(redis=redis_adapter)
 
         return self._cache
 
