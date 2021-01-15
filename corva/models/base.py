@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Optional, Type, TypeVar, Union
 
-from pydantic import BaseModel, Extra
+import pydantic
 from pydantic.generics import GenericModel
 
 from corva.network.api import Api
@@ -22,11 +22,11 @@ class BaseEvent(ABC):
 class CorvaModelConfig:
     allow_population_by_field_name = True
     arbitrary_types_allowed = True
-    extra = Extra.allow
+    extra = pydantic.Extra.allow
     validate_assignment = True
 
 
-class CorvaBaseModel(BaseModel):
+class CorvaBaseModel(pydantic.BaseModel):
     Config = CorvaModelConfig
 
 
