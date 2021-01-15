@@ -34,8 +34,8 @@ def patch_redis_adapter():
 
 
 @pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter, settings):
-    return RedisAdapter(default_name='default_name', cache_url=settings.CACHE_URL)
+def redis_adapter(patch_redis_adapter, corva_settings):
+    return RedisAdapter(default_name='default_name', cache_url=corva_settings.CACHE_URL)
 
 
 @pytest.fixture(scope='function')
@@ -54,7 +54,7 @@ def api():
 
 
 @pytest.fixture(scope='function')
-def settings():
+def corva_settings():
     return CorvaSettings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379'
@@ -62,13 +62,13 @@ def settings():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def patch_settings(settings, mocker):
+def patch_corva_settings(corva_settings, mocker):
     settings_path = 'corva.settings.CORVA_SETTINGS'
 
     mocker.patch.multiple(
         settings_path,
-        APP_KEY=settings.APP_KEY,
-        CACHE_URL=settings.CACHE_URL
+        APP_KEY=corva_settings.APP_KEY,
+        CACHE_URL=corva_settings.CACHE_URL
     )
     yield
 
@@ -79,12 +79,12 @@ class ComparableException(Exception):
 
 
 @pytest.fixture
-def app(settings):
+def app(corva_settings):
     app = Corva(
-        api_url=settings.API_ROOT_URL,
-        data_api_url=settings.DATA_API_ROOT_URL,
-        cache_url=settings.CACHE_URL,
-        api_key=settings.API_KEY,
-        app_key=settings.APP_KEY
+        api_url=corva_settings.API_ROOT_URL,
+        data_api_url=corva_settings.DATA_API_ROOT_URL,
+        cache_url=corva_settings.CACHE_URL,
+        api_key=corva_settings.API_KEY,
+        app_key=corva_settings.APP_KEY
     )
     return app
