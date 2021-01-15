@@ -1,7 +1,9 @@
 from typing import Any, Callable, List, Optional
 
+from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
+from corva.scheduled import scheduled_runner
 from corva.settings import CorvaSettings, CORVA_SETTINGS
 from corva.stream import stream_runner
 
@@ -63,41 +65,19 @@ class Corva:
 
         return results
 
-    def scheduled(
-         self,
-         func=None,
-         *,
-         settings: Optional[Settings] = None,
+    def scheduled(self, fn: Callable, event: str):
+        events = ScheduledEvent.from_raw_event(event=event)
 
-         # api params
-         api_timeout: Optional[int] = None,
-         api_max_retries: Optional[int] = None,
+        results = []
 
-         # cache params
-         cache_kwargs: Optional[dict] = None
-    ):
-        if func is None:
-            return partial(
-                self.scheduled,
-                settings=settings,
-                api_timeout=api_timeout,
-                api_max_retries=api_max_retries,
-                cache_kwargs=cache_kwargs
+        for event in events:
+            ctx = ScheduledContext(
+                event=event,
+                settings=self.settings,
+                api=self.api,
+                cache_kwargs=self.cache_kwargs
             )
 
-        wrapper = partial(
-            app_wrapper,
-            func=func,
-            head_middleware=[scheduled],
-            user_middleware=self.user_middleware,
-            tail_middleware=[unpack_context_factory(include_state=True)],
-            event_cls=ScheduledEvent,
-            context_cls=ScheduledContext,
-            settings=settings,
-            api_timeout=api_timeout,
-            api_max_retries=api_max_retries,
-            cache_kwargs=cache_kwargs,
-            context_kwargs={}
-        )
+            results.append(scheduled_runner(fn=fn, context=ctx))
 
-        return wraps(func)(wrapper)
+        return results

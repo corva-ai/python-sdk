@@ -1,11 +1,11 @@
-from typing import Callable
+from typing import Any, Callable
 
 from corva.models.scheduled import ScheduledContext
 
 
-def scheduled(context: ScheduledContext, call_next: Callable) -> ScheduledContext:
-    context = call_next(context)  # type: ScheduledContext
+def scheduled_runner(fn: Callable, context: ScheduledContext) -> Any:
+    result = fn(context.event, context.api, context.cache)
 
     context.api.post(path=f'scheduler/{context.event.schedule}/completed')
 
-    return context
+    return result
