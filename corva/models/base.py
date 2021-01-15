@@ -80,8 +80,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
         return self.cache_data_cls(**state_data_dict)
 
     def store_cache_data(self, cache_data: CorvaBaseModelTV) -> int:
-        cache_data = cache_data.dict(exclude_defaults=True, exclude_none=True)
-        if cache_data:
+        if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
             return self.cache.store(mapping=cache_data)
 
         return 0
