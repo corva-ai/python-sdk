@@ -112,8 +112,8 @@ class StreamEvent(BaseEvent, StreamEventData):
 
 
 class StreamStateData(CorvaBaseModel):
-    last_processed_timestamp: int = -1
-    last_processed_depth: float = -1
+    last_processed_timestamp: Optional[int] = None
+    last_processed_depth: Optional[float] = None
 
 
 class StreamContext(BaseContext[StreamEvent, StreamStateData]):
