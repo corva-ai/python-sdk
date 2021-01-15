@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis, FakeServer
 
-from corva.application import Corva
 from corva.network.api import Api
 from corva.settings import CorvaSettings
 from corva.state.redis_adapter import RedisAdapter
@@ -82,15 +81,3 @@ def patch_corva_settings(corva_settings, mocker):
 class ComparableException(Exception):
     def __eq__(self, other):
         return type(self) is type(other) and self.args == other.args
-
-
-@pytest.fixture
-def app(corva_settings):
-    app = Corva(
-        api_url=corva_settings.API_ROOT_URL,
-        data_api_url=corva_settings.DATA_API_ROOT_URL,
-        cache_url=corva_settings.CACHE_URL,
-        api_key=corva_settings.API_KEY,
-        app_key=corva_settings.APP_KEY
-    )
-    return app
