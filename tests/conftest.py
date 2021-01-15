@@ -57,6 +57,8 @@ def api():
 
 @pytest.fixture(scope='function')
 def corva_settings():
+    """proper corva settings for testing"""
+
     return CorvaSettings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379'
@@ -65,6 +67,8 @@ def corva_settings():
 
 @pytest.fixture(scope='function', autouse=True)
 def patch_corva_settings(corva_settings, mocker):
+    """replaces empty values in global corva settings with proper test values"""
+
     settings_path = 'corva.settings.CORVA_SETTINGS'
 
     mocker.patch.multiple(
