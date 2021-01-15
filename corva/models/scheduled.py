@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
 import itertools
+from datetime import datetime
 from typing import List, Optional
 
 import pydantic

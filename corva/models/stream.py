@@ -4,9 +4,6 @@ from typing import Dict, List, Optional, Type
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseEventData
-from corva.state.redis_state import RedisState
-
 from corva.models.base import BaseContext, BaseData, BaseEvent
 
 
@@ -43,7 +40,7 @@ class StreamEventData(BaseData):
     metadata: StreamEventMetadata
     asset_id: int = None
 
-    @validator('asset_id', pre=True, always=True)
+    @pydantic.validator('asset_id', pre=True, always=True)
     def set_asset_id(cls, v, values):
         """dynamically sets value for asset_id
 
@@ -124,7 +121,7 @@ class StreamContext(BaseContext[StreamEvent, StreamStateData]):
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
 
-    @root_validator(pre=True)
+    @pydantic.root_validator(pre=True)
     def check_one_active_filter_at_most(cls, values):
         if values['filter_by_timestamp'] and values['filter_by_depth']:
             raise ValueError('filter_by_timestamp and filter_by_depth can\'t be set to True together.')
