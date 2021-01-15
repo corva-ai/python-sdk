@@ -25,7 +25,7 @@ class Settings(BaseSettings):
             return app_name
 
         app_name_with_dashes = self.APP_KEY.split('.')[1]
-        app_name = ' '.join(app_name_with_dashes.split('-')).title()
+        app_name = app_name_with_dashes.replace('-', ' ').title()
 
         return app_name
 
