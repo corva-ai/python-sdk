@@ -3,9 +3,9 @@ from typing import Any, Callable, List, Optional
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
-from corva.scheduled import scheduled_runner
+from corva.runners.scheduled import scheduled_runner
+from corva.runners.stream import stream_runner
 from corva.settings import CorvaSettings, CORVA_SETTINGS
-from corva.stream import stream_runner
 
 
 class Corva:
