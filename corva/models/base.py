@@ -65,7 +65,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
             return self._cache
 
         redis_adapter = RedisAdapter(
-            default_name=self.cache_key,
+            name=self.cache_key,
             cache_url=self.settings.CACHE_URL,
             **self.cache_kwargs
         )

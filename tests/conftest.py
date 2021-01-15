@@ -6,8 +6,6 @@ from fakeredis import FakeRedis, FakeServer
 
 from corva.network.api import Api
 from corva.settings import CorvaSettings
-from corva.state.redis_adapter import RedisAdapter
-from corva.state.redis_state import RedisState
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -29,16 +27,6 @@ def patch_redis_adapter():
         # necessary to stop mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
         yield
-
-
-@pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter, corva_settings):
-    return RedisAdapter(default_name='default_name', cache_url=corva_settings.CACHE_URL)
-
-
-@pytest.fixture(scope='function')
-def redis(redis_adapter):
-    return RedisState(redis=redis_adapter)
 
 
 @pytest.fixture(scope='function')

@@ -11,26 +11,34 @@ class RedisState:
     def __init__(self, redis: RedisAdapter):
         self.redis = redis
 
-    def store(self, **kwargs):
-        return self.redis.hset(**kwargs)
+    @property
+    def store(self):
+        return self.redis.hset
 
-    def load(self, **kwargs):
-        return self.redis.hget(**kwargs)
+    @property
+    def load(self):
+        return self.redis.hget
 
-    def load_all(self, **kwargs):
-        return self.redis.hgetall(**kwargs)
+    @property
+    def load_all(self):
+        return self.redis.hgetall
 
-    def delete(self, **kwargs):
-        return self.redis.hdel(**kwargs)
+    @property
+    def delete(self):
+        return self.redis.hdel
 
-    def delete_all(self, *names):
-        return self.redis.delete(*names)
+    @property
+    def delete_all(self):
+        return self.redis.delete
 
-    def ttl(self, **kwargs):
-        return self.redis.ttl(**kwargs)
+    @property
+    def ttl(self):
+        return self.redis.ttl
 
-    def pttl(self, **kwargs):
-        return self.redis.pttl(**kwargs)
+    @property
+    def pttl(self):
+        return self.redis.pttl
 
-    def exists(self, *names):
-        return self.redis.exists(*names)
+    @property
+    def exists(self):
+        return self.redis.exists
