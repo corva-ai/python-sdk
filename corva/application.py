@@ -2,7 +2,7 @@ from typing import Any, Callable, List, Optional
 
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
-from corva.settings import CORVA_SETTINGS
+from corva.settings import CorvaSettings, CORVA_SETTINGS
 from corva.stream import stream_runner
 
 
@@ -18,31 +18,23 @@ class Corva:
          api_max_retries: Optional[int] = None,
          cache_kwargs: Optional[dict] = None
     ):
-        self.settings = CORVA_SETTINGS.copy()
         self.cache_kwargs = cache_kwargs
 
-        if api_url is not None:
-            self.settings.API_ROOT_URL = api_url
-        if data_api_url is not None:
-            self.settings.DATA_API_ROOT_URL = data_api_url
-        if cache_url is not None:
-            self.settings.CACHE_URL = cache_url
-        if api_key is not None:
-            self.settings.API_KEY = api_key
-        if app_key is not None:
-            self.settings.APP_KEY = app_key
+        self.settings = CorvaSettings(
+            API_ROOT_URL=api_url or CORVA_SETTINGS.API_ROOT_URL,
+            DATA_API_ROOT_URL=data_api_url or CORVA_SETTINGS.DATA_API_ROOT_URL,
+            API_KEY=api_key or CORVA_SETTINGS.API_KEY,
+            CACHE_URL=cache_url or CORVA_SETTINGS.CACHE_URL,
+            APP_KEY=app_key or CORVA_SETTINGS.APP_KEY
+        )
 
-        api_kwargs = {}
-        if api_timeout is not None:
-            api_kwargs['timeout'] = api_timeout
-        if api_max_retries is not None:
-            api_kwargs['max_retries'] = api_max_retries
         self.api = Api(
             api_url=self.settings.API_ROOT_URL,
             data_api_url=self.settings.DATA_API_ROOT_URL,
             api_key=self.settings.API_KEY,
             app_name=self.settings.APP_NAME,
-            **api_kwargs
+            timeout=api_timeout,
+            max_retries=api_max_retries
         )
 
     def stream(
