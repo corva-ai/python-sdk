@@ -54,20 +54,25 @@ class Api:
 
         return session
 
-    def get(self, path: str, **kwargs):
-        return self._request('GET', path, **kwargs)
+    @property
+    def get(self):
+        return self._request('GET')
 
-    def post(self, path: str, **kwargs):
-        return self._request('POST', path, **kwargs)
+    @property
+    def post(self):
+        return self._request('POST')
 
-    def patch(self, path: str, **kwargs):
-        return self._request('PATCH', path, **kwargs)
+    @property
+    def patch(self):
+        return self._request('PATCH')
 
-    def put(self, path: str, **kwargs):
-        return self._request('PUT', path, **kwargs)
+    @property
+    def put(self):
+        return self._request('PUT')
 
-    def delete(self, path: str, **kwargs):
-        return self._request('DELETE', path, **kwargs)
+    @property
+    def delete(self):
+        return self._request('DELETE')
 
     def _get_url(self, path: str):
         # search text like api/v1/data or api/v1/message_producer in path
@@ -78,35 +83,36 @@ class Api:
 
         return os.path.join(base_url.strip('/'), path.strip('/'))
 
-    def _request(
-         self,
-         method: str,
-         path: str,
-         data: Optional[dict] = None,  # request body
-         params: Optional[dict] = None,  # url query string params
-         headers: Optional[dict] = None,  # additional headers to include in request
-         max_retries: Optional[int] = None,  # custom value for max number of retries
-         timeout: Optional[int] = None,  # request timeout in seconds
-    ) -> Response:
+    def _request(self, method: str):
+        def _request_helper(
+             path: str,
+             *,
+             data: Optional[dict] = None,  # request body
+             params: Optional[dict] = None,  # url query string params
+             headers: Optional[dict] = None,  # additional headers to include in request
+             max_retries: Optional[int] = None,  # custom value for max number of retries
+             timeout: Optional[int] = None,  # request timeout in seconds
+        ) -> Response:
+            if method not in self.ALLOWED_METHODS:
+                raise ValueError(f'Invalid HTTP method {method}.')
 
-        if method not in self.ALLOWED_METHODS:
-            raise ValueError(f'Invalid HTTP method {method}.')
+            max_retries = max_retries or self.max_retries
+            timeout = timeout or self.timeout
 
-        max_retries = max_retries or self.max_retries
-        timeout = timeout or self.timeout
+            # not thread safe
+            self.session.adapters['https://'].max_retries.total = max_retries
 
-        # not thread safe
-        self.session.adapters['https://'].max_retries.total = max_retries
+            response = self.session.request(
+                method=method,
+                url=self._get_url(path=path),
+                params=params,
+                json=data,
+                headers=headers,
+                timeout=timeout
+            )
 
-        response = self.session.request(
-            method=method,
-            url=self._get_url(path=path),
-            params=params,
-            json=data,
-            headers=headers,
-            timeout=timeout
-        )
+            response.raise_for_status()
 
-        response.raise_for_status()
+            return response
 
-        return response
+        return _request_helper

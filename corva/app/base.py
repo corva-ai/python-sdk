@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from itertools import groupby
-from logging import Logger, LoggerAdapter
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from corva.event import Event
-from corva.logger import DEFAULT_LOGGER
 from corva.models.base import BaseContext
 from corva.network.api import Api
 from corva.settings import CORVA_SETTINGS
@@ -15,13 +13,11 @@ class BaseApp(ABC):
          self,
          app_key: str = CORVA_SETTINGS.APP_KEY,
          cache_url: str = CORVA_SETTINGS.CACHE_URL,
-         api: Optional[Api] = None,
-         logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
+         api: Optional[Api] = None
     ):
         self.app_key = app_key
         self.cache_url = cache_url
         self.api = api
-        self.logger = logger
 
     @property
     @abstractmethod
@@ -42,7 +38,6 @@ class BaseApp(ABC):
             event = self.event_loader.load(event=event)
             events = self._group_event(event=event)
         except Exception:
-            self.logger.error('Could not prepare events for run.')
             raise
 
         for event in events:
@@ -52,7 +47,6 @@ class BaseApp(ABC):
         try:
             context = self.get_context(event=event)
         except Exception:
-            self.logger.error('Could not get context.')
             raise
 
         try:
@@ -60,7 +54,6 @@ class BaseApp(ABC):
             self.process(context=context)
             self.post_process(context=context)
         except Exception as exc:
-            self.logger.error('An error occurred in process pipeline.')
             self.on_fail(context=context, exception=exc)
             raise
 

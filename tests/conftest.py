@@ -4,11 +4,6 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis, FakeServer
 
-from corva.network.api import Api
-from corva.settings import CorvaSettings
-from corva.state.redis_adapter import RedisAdapter
-from corva.state.redis_state import RedisState
-
 
 @pytest.fixture(scope='function', autouse=True)
 def patch_redis_adapter():
@@ -31,47 +26,18 @@ def patch_redis_adapter():
         yield
 
 
-@pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter, corva_settings):
-    return RedisAdapter(default_name='default_name', cache_url=corva_settings.CACHE_URL)
-
-
-@pytest.fixture(scope='function')
-def redis(redis_adapter):
-    return RedisState(redis=redis_adapter)
-
-
-@pytest.fixture(scope='function')
-def api():
-    return Api(
-        api_url='https://api.localhost.ai',
-        data_api_url='https://data.localhost.ai',
-        api_key='',
-        app_name=''
-    )
-
-
-@pytest.fixture(scope='function')
-def corva_settings():
-    """proper corva settings for testing"""
-
-    return CorvaSettings(
-        APP_KEY='provider.app-name',
-        CACHE_URL='redis://localhost:6379',
-        API_ROOT_URL='https://api.localhost.ai',
-        DATA_API_ROOT_URL='https://data.localhost.ai'
-    )
-
-
 @pytest.fixture(scope='function', autouse=True)
-def patch_corva_settings(corva_settings, mocker):
+def patch_corva_settings(mocker):
     """replaces empty values in global corva settings with proper test values"""
 
     settings_path = 'corva.settings.CORVA_SETTINGS'
 
     mocker.patch.multiple(
         settings_path,
-        **corva_settings.dict()
+        APP_KEY='provider.app-name',
+        CACHE_URL='redis://localhost:6379',
+        API_ROOT_URL='https://api.localhost.ai',
+        DATA_API_ROOT_URL='https://data.localhost.ai'
     )
     yield
 

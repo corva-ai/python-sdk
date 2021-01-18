@@ -4,13 +4,23 @@ from pytest_mock import MockerFixture
 from corva.app.task import TaskApp
 from corva.event import Event
 from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext, UpdateTaskData
+from corva.network.api import Api
+from corva.settings import CORVA_SETTINGS
 
 TASK_ID = '1'
 
 
 @pytest.fixture(scope='function')
-def task_app(api, corva_settings):
-    return TaskApp(api=api, app_key=corva_settings.APP_KEY, cache_url=corva_settings.CACHE_URL)
+def task_app():
+    return TaskApp(
+        api=Api(
+            api_url=CORVA_SETTINGS.API_ROOT_URL,
+            data_api_url=CORVA_SETTINGS.DATA_API_ROOT_URL,
+            api_key=CORVA_SETTINGS.API_KEY,
+            app_name=CORVA_SETTINGS.APP_NAME
+        ),
+        app_key=CORVA_SETTINGS.APP_KEY, cache_url=CORVA_SETTINGS.CACHE_URL
+    )
 
 
 @pytest.fixture(scope='session')
@@ -73,12 +83,12 @@ def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
         'request',
         return_value=mocker.Mock(**{'json.return_value': task_data.dict()})
     )
-    get_spy = mocker.spy(task_app.api, 'get')
+    type(task_app.api).get = mocker.PropertyMock(return_value=mocker.Mock(wraps=task_app.api.get))
 
     result = task_app.get_task_data(task_id=TASK_ID)
 
     assert task_data == result
-    get_spy.assert_called_once_with(path=f'v2/tasks/{TASK_ID}')
+    task_app.api.get.assert_called_once_with(path=f'v2/tasks/{TASK_ID}')
 
 
 def test_update_task_data(mocker: MockerFixture, task_app):
@@ -86,8 +96,8 @@ def test_update_task_data(mocker: MockerFixture, task_app):
     data = UpdateTaskData()
 
     mocker.patch.object(task_app.api.session, 'request')
-    put_spy = mocker.spy(task_app.api, 'put')
+    type(task_app.api).put = mocker.PropertyMock(return_value=mocker.Mock(wraps=task_app.api.put))
 
     task_app.update_task_data(task_id=TASK_ID, status=status, data=data)
 
-    put_spy.assert_called_once_with(path=f'v2/tasks/{TASK_ID}/{status}', data=data.dict())
+    task_app.api.put.assert_called_once_with(path=f'v2/tasks/{TASK_ID}/{status}', data=data.dict())
