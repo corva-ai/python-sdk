@@ -72,6 +72,8 @@ class StreamEventData(CorvaBaseModel):
 
     @property
     def is_completed(self) -> bool:
+        """there can only be 1 completed record, always located at the end of the list"""
+
         if self.records:
             return self.records[-1].collection == 'wits.completed'
 
@@ -97,6 +99,7 @@ class StreamEvent(BaseEvent, StreamEventData):
         records = event.records
 
         if event.is_completed:
+            # there can only be 1 completed record, always located at the end of the list
             records = records[:-1]  # remove "completed" record
 
         new_records = []
