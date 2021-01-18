@@ -6,9 +6,9 @@ from corva.state.redis_adapter import RedisAdapter
 
 
 class RedisState:
-    """Provides an interface to save, load and do other operations with data in redis.
+    """An interface to save, load and do other operations with data in redis.
 
-    As AWS Lambda is meant to be stateless, so the apps need some mechanism to share the data between invokes.
+    As AWS Lambda is meant to be stateless, the apps need some mechanism to share the data between invokes.
     Redis provides an in-memory low latency storage for such data.
     This class provides and interface to save, load and do other operations with data in redis.
     """
