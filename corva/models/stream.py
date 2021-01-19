@@ -92,9 +92,9 @@ class StreamEvent(BaseEvent, StreamEventData):
 
         return events
 
-    @staticmethod
+    @classmethod
     def filter(
-         event: StreamEvent, by_timestamp: bool, by_depth: bool, last_timestamp: int, last_depth: float
+         cls, event: StreamEvent, by_timestamp: bool, by_depth: bool, last_timestamp: int, last_depth: float
     ) -> StreamEvent:
         records = event.records
 
@@ -102,16 +102,30 @@ class StreamEvent(BaseEvent, StreamEventData):
             # there can only be 1 completed record, always located at the end of the list
             records = records[:-1]  # remove "completed" record
 
-        new_records = []
+        new_records = list(
+            cls._filter_records(
+                records=records,
+                by_timestamp=by_timestamp,
+                by_depth=by_depth,
+                last_timestamp=last_timestamp,
+                last_depth=last_depth
+            )
+        )
+
+        return event.copy(update={'records': new_records}, deep=True)
+
+    @staticmethod
+    def _filter_records(
+         records: List[Record], by_timestamp: bool, by_depth: bool, last_timestamp: int, last_depth: float
+    ):
         for record in records:
             if by_timestamp and record.timestamp <= last_timestamp:
                 continue
+
             if by_depth and record.measured_depth <= last_depth:
                 continue
 
-            new_records.append(record)
-
-        return event.copy(update={'records': new_records}, deep=True)
+            yield record
 
 
 class StreamStateData(CorvaBaseModel):
