@@ -120,7 +120,7 @@ The apps might need to communicate with Corva API and Corva Data API.
 The sdk provides an `Api` class - a thin wrapper around `requests`
 library that handles authorization, adds timeouts and retries to request.
 `Api` instance is inserted automatically as a second parameter to each app type.
-`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.<br>
+`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT` and `DELETE`.<br>
 **Note**: It is recommended to use `Api` class as type hint, 
 so that editors and tools can give you better support.
 
