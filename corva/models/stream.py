@@ -56,11 +56,12 @@ class StreamEventData(CorvaBaseModel):
          no matter what happens to records.
         """
 
-        records = values['records']  # type: List[Record]
-        if records:
-            return records[0].asset_id
+        records = values.get('records', [])  # type: List[Record]
 
-        raise ValueError('Can\'t determine asset_id as records are empty (which should not happen).')
+        if len(records) == 0:
+            raise ValueError('Can\'t determine asset_id as records are empty (which should not happen).')
+
+        return records[0].asset_id
 
     @property
     def app_connection_id(self) -> int:
