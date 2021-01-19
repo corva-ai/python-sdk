@@ -35,8 +35,8 @@ def patch_redis_adapter():
 
 
 @pytest.fixture(scope='function')
-def redis_adapter(patch_redis_adapter, corva_settings):
-    return RedisAdapter(default_name='default_name', cache_url=corva_settings.CACHE_URL)
+def redis_adapter(patch_redis_adapter, settings):
+    return RedisAdapter(default_name='default_name', cache_url=settings.CACHE_URL)
 
 
 @pytest.fixture(scope='function')
@@ -54,8 +54,9 @@ def api():
     )
 
 
+# TODO: delete fixture below and instead use mocked global settings from corva.configuration.SETTINGS
 @pytest.fixture(scope='function')
-def corva_settings():
+def settings():
     """proper corva settings for testing"""
 
     return Settings(
@@ -65,15 +66,15 @@ def corva_settings():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def patch_corva_settings(corva_settings, mocker):
+def patch_settings(settings, mocker):
     """replaces empty values in global corva settings with proper test values"""
 
     settings_path = 'corva.configuration.SETTINGS'
 
     mocker.patch.multiple(
         settings_path,
-        APP_KEY=corva_settings.APP_KEY,
-        CACHE_URL=corva_settings.CACHE_URL
+        APP_KEY=settings.APP_KEY,
+        CACHE_URL=settings.CACHE_URL
     )
     yield
 

@@ -7,8 +7,8 @@ from corva.models.scheduled import ScheduledContext, ScheduledEventData
 
 
 @pytest.fixture(scope='function')
-def scheduled_app(api, corva_settings):
-    return ScheduledApp(api=api, app_key=corva_settings.APP_KEY, cache_url=corva_settings.CACHE_URL)
+def scheduled_app(api, settings):
+    return ScheduledApp(api=api, app_key=settings.APP_KEY, cache_url=settings.CACHE_URL)
 
 
 @pytest.fixture(scope='module')
