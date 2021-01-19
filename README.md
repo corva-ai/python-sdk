@@ -15,57 +15,60 @@ Python 3.8+
 $ pip install corva-sdk
 ```
 
-## App examples
+## Apps examples
+There are three app types, that you can develop: `stream`, `scheduled`, `task`.
 
-#### Stream
+#### Examples
 
-```python
-from corva import Api, Cache, Corva, StreamEvent
+1. **Stream**
+   
+   ```python
+   from corva import Api, Cache, Corva, StreamEvent
+   
+   
+   # 1 define a function with required parameters, that will be provided by sdk
+   def stream_app(event: StreamEvent, api: Api, cache: Cache):
+       """Main logic function"""
+       pass
+   
+   
+   # 2 define a function that will be run by AWS lambda
+   def lambda_handler(event, context):
+       """AWS lambda handler"""
+       corva = Corva()  # 3 initialize Corva
+       corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
+   ```
 
+2. **Scheduled**
 
-# 1 define a function with required parameters, that will be provided by sdk
-def stream_app(event: StreamEvent, api: Api, cache: Cache):
-    """Main logic function"""
-    pass
+   ```python
+   from corva import Api, Cache, Corva, ScheduledEvent
+   
+   
+   def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
+       pass
+   
+   
+   def lambda_handler(event, context):
+       corva = Corva()
+       corva.scheduled(scheduled_app, event)
+   ```
 
+3. **Task** (will be added soon)
 
-# 2 define a function that will be run by AWS lambda
-def lambda_handler(event, context):
-    """AWS lambda handler"""
-    corva = Corva()  # 3 initialize Corva
-    corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
-```
-
-#### Scheduled
-
-```python
-from corva import Api, Cache, Corva, ScheduledEvent
-
-
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-    pass
-
-
-def lambda_handler(event, context):
-    corva = Corva()
-    corva.scheduled(scheduled_app, event)
-```
-
-#### Task (will be added soon)
-
-```python
-from corva import Api, Cache, Corva, TaskEvent
-
-
-# note, that task app doesn't receive cache parameter
-def task_app(event: TaskEvent, api: Api):
-    pass
-
-
-def lambda_handler(event, context):
-    corva = Corva()
-    corva.task(task_app, event)
-```
+   ```python
+   from corva import Api, Cache, Corva, TaskEvent
+   
+   
+   # note, that task app doesn't receive cache parameter
+   def task_app(event: TaskEvent, api: Api):
+       pass
+   
+   
+   def lambda_handler(event, context):
+       corva = Corva()
+       corva.task(task_app, event)
+   ```
 
 ## Event
 
