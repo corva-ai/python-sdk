@@ -15,7 +15,7 @@ Python 3.8+
 $ pip install corva-sdk
 ```
 
-## Apps examples
+## Apps
 There are three app types, that you can develop: `stream`, `scheduled`, `task`.
 
 #### Examples
