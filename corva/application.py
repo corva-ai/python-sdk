@@ -2,7 +2,7 @@ from typing import Any, Callable, List, Optional
 
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
-from corva.settings import CorvaSettings, CORVA_SETTINGS
+from corva.configuration import Settings, SETTINGS
 from corva.stream import stream_runner
 
 
@@ -20,12 +20,12 @@ class Corva:
     ):
         self.cache_kwargs = cache_kwargs or {}
 
-        self.settings = CorvaSettings(
-            API_ROOT_URL=api_url or CORVA_SETTINGS.API_ROOT_URL,
-            DATA_API_ROOT_URL=data_api_url or CORVA_SETTINGS.DATA_API_ROOT_URL,
-            API_KEY=api_key or CORVA_SETTINGS.API_KEY,
-            CACHE_URL=cache_url or CORVA_SETTINGS.CACHE_URL,
-            APP_KEY=app_key or CORVA_SETTINGS.APP_KEY
+        self.settings = Settings(
+            API_ROOT_URL=api_url or SETTINGS.API_ROOT_URL,
+            DATA_API_ROOT_URL=data_api_url or SETTINGS.DATA_API_ROOT_URL,
+            API_KEY=api_key or SETTINGS.API_KEY,
+            CACHE_URL=cache_url or SETTINGS.CACHE_URL,
+            APP_KEY=app_key or SETTINGS.APP_KEY
         )
 
         self.api = Api(

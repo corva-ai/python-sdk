@@ -7,7 +7,7 @@ import pydantic
 from pydantic.generics import GenericModel
 
 from corva.network.api import Api
-from corva.settings import CorvaSettings
+from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -41,7 +41,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
     """Stores common data for running a Corva app."""
 
     event: BaseEventTV
-    settings: CorvaSettings
+    settings: Settings
     api: Api
     _cache: Optional[RedisState] = None
 

@@ -6,7 +6,7 @@ import pytest
 from fakeredis import FakeRedis, FakeServer
 
 from corva.network.api import Api
-from corva.settings import CorvaSettings
+from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -58,7 +58,7 @@ def api():
 def corva_settings():
     """proper corva settings for testing"""
 
-    return CorvaSettings(
+    return Settings(
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379'
     )
@@ -68,7 +68,7 @@ def corva_settings():
 def patch_corva_settings(corva_settings, mocker):
     """replaces empty values in global corva settings with proper test values"""
 
-    settings_path = 'corva.settings.CORVA_SETTINGS'
+    settings_path = 'corva.configuration.SETTINGS'
 
     mocker.patch.multiple(
         settings_path,

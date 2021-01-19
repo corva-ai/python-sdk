@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseSettings
 
 
-class CorvaSettings(BaseSettings):
+class Settings(BaseSettings):
     # api
     API_ROOT_URL: Optional[str] = None
     DATA_API_ROOT_URL: Optional[str] = None
@@ -37,4 +37,4 @@ class CorvaSettings(BaseSettings):
         return self.APP_KEY.split('.')[0]
 
 
-CORVA_SETTINGS = CorvaSettings()
+SETTINGS = Settings()
