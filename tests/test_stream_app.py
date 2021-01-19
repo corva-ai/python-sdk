@@ -17,7 +17,8 @@ def stream_app(event, api, cache):
 def test_is_completed(collection, expected, corva_settings):
     event = (
                 '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "%s", "data": {}}],'
-                ' "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, "asset_id": 0}]'
+                ' "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}, '
+                '"asset_id": 0}]'
             ) % (collection, corva_settings.APP_KEY)
 
     app = Corva()
@@ -30,8 +31,8 @@ def test_is_completed(collection, expected, corva_settings):
 def test_asset_id_persists_after_no_records_left_after_filtering(corva_settings):
     event = (
                 '[{"records": [{"asset_id": 123, "company_id": 0, "version": 0, "collection": "wits.completed", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
-                '"asset_id": 123}]'
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                '"app_version": 0}}}, "asset_id": 123}]'
             ) % corva_settings.APP_KEY
 
     app = Corva()
@@ -54,8 +55,8 @@ def test_filter_by(filter_by, record_attr, corva_settings):
                 '[{"records": [{"%s": -2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": -1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
-                '"asset_id": 0}]'
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                '"app_version": 0}}}, "asset_id": 0}]'
             ) % (record_attr, record_attr, record_attr, corva_settings.APP_KEY)
 
     app = Corva()
@@ -79,8 +80,8 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, corva_settin
                 '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
-                '"asset_id": 0}]'
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                '"app_version": 0}}}, "asset_id": 0}]'
             ) % (record_attr, record_attr, record_attr, corva_settings.APP_KEY)
 
     app = Corva()
@@ -95,8 +96,8 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, corva_settin
                      '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                      '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                      '"data": {}}, {"%s": 3, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                     '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}, '
-                     '"asset_id": 0}]'
+                     '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                     '"app_version": 0}}}, "asset_id": 0}]'
                  ) % (record_attr, record_attr, record_attr, record_attr, app.settings.APP_KEY)
 
     next_results = app.stream(stream_app, next_event, **{filter_by: True})
