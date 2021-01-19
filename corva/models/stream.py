@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional
 
 import pydantic
 
@@ -119,10 +119,20 @@ class StreamStateData(CorvaBaseModel):
     last_processed_depth: Optional[float] = None
 
 
-class StreamContext(BaseContext[StreamEvent, StreamStateData]):
-    cache_data_cls: Type[StreamStateData] = StreamStateData
+class StreamContext(BaseContext[StreamEvent]):
     filter_by_timestamp: bool = False
     filter_by_depth: bool = False
+
+    @property
+    def cache_data(self) -> StreamStateData:
+        state_data_dict = self.cache.load_all()
+        return StreamStateData(**state_data_dict)
+
+    def store_cache_data(self, cache_data: StreamStateData) -> int:
+        if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
+            return self.cache.store(mapping=cache_data)
+
+        return 0
 
     @pydantic.root_validator(pre=True)
     def check_one_active_filter_at_most(cls, values):

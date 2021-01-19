@@ -49,5 +49,5 @@ class TaskEvent(BaseEvent, TaskEventData):
         return pydantic.parse_raw_as(TaskEvent, event)
 
 
-class TaskContext(BaseContext[TaskEvent, CorvaBaseModel]):
+class TaskContext(BaseContext[TaskEvent]):
     pass

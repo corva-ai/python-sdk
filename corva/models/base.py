@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Generic, List, Optional, TypeVar, Union
 
 import pydantic
 from pydantic.generics import GenericModel
@@ -35,10 +35,9 @@ class CorvaGenericModel(GenericModel):
 
 
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
-CorvaBaseModelTV = TypeVar('CorvaBaseModelTV', bound=CorvaBaseModel)
 
 
-class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
+class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
     """Stores common data for running a Corva app."""
 
     event: BaseEventTV
@@ -50,7 +49,6 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
 
     # cache params
     cache_kwargs: dict = {}
-    cache_data_cls: Optional[Type[CorvaBaseModelTV]] = None
 
     @property
     def cache_key(self) -> str:
@@ -73,14 +71,3 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV, CorvaBaseModelTV]):
         self._cache = RedisState(redis=redis_adapter)
 
         return self._cache
-
-    @property
-    def cache_data(self) -> CorvaBaseModelTV:
-        state_data_dict = self.cache.load_all()
-        return self.cache_data_cls(**state_data_dict)
-
-    def store_cache_data(self, cache_data: CorvaBaseModelTV) -> int:
-        if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
-            return self.cache.store(mapping=cache_data)
-
-        return 0
