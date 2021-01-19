@@ -1,7 +1,8 @@
 Corva python-sdk is a framework for building stream, scheduled and task apps.
 
 ## Contents
-- [Requirements](#requirements) 
+
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [App types](#app-types)
 - [Event](#event)
@@ -13,10 +14,10 @@ Corva python-sdk is a framework for building stream, scheduled and task apps.
 
 Python 3.8+
 
-* [Pydantic](https://github.com/samuelcolvin/pydantic)
-* [Redis](https://pypi.org/project/redis/)
-* [Requests](https://pypi.org/project/requests/)
-* [urllib3](https://pypi.org/project/urllib3/)
+- [Pydantic](https://github.com/samuelcolvin/pydantic)
+- [Redis](https://pypi.org/project/redis/)
+- [Requests](https://pypi.org/project/requests/)
+- [urllib3](https://pypi.org/project/urllib3/)
 
 ## Installation
 
@@ -25,12 +26,15 @@ $ pip install corva-sdk
 ```
 
 ## App types
-There are three app types, that you can build: `stream`, `scheduled` and `task`.
+
+There are three app types, that you can build: `stream`, `scheduled` and `task`.<br>
+**Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
+support.
 
 #### Examples:
 
 1. **Stream**
-   
+
    ```python
    from corva import Api, Cache, Corva, StreamEvent
    
@@ -83,8 +87,8 @@ There are three app types, that you can build: `stream`, `scheduled` and `task`.
 
 Event is what triggers app execution. It contains necessary data for app to run e.g. `asset_id`, that triggered the
 event. Every app type receives `Event` instance as a first parameter. Each app type has its own event type:
-`StreamEvent`, `ScheduledEvent`, `TaskEvent`. It is recommened to use these classes as type hints, like in app
-examples above, so that it is easier to discover, what fields each event has.
+`StreamEvent`, `ScheduledEvent`, `TaskEvent`. <br>
+**Note**: It is recommended to use event classes as type hints, so that editors and tools can give you better support.
 
 #### Example:
 
@@ -107,7 +111,8 @@ The apps might need to communicate with Corva API and Corva Data API. The sdk pr
 around `requests`
 library that handles authorization, adds timeouts and retries to request.
 `Api` instance is inserted automatically as a second parameter to each app type.
-`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.
+`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.<br>
+**Note**: It is recommended to use `Api` class as type hint, so that editors and tools can give you better support.
 
 #### Examples:
 
@@ -139,10 +144,11 @@ def lambda_handler(event, context):
 Sometimes apps need to share some data between runs. The sdk provides a `Cache` class that allows you to store, load and
 do other operations with data.
 `Cache` instance is inserted automatically as a last parameter to `stream` and `scheduled` apps. <br>
-**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store the data between invokes.
+**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store the data between invokes.<br>
 
 `Cache` uses a dict-like database, so the data is stored as `key:value` pairs.
-`key` should be of `str` type, and `value` can be any of the following types: `str`, `int`, `float`, `bytes`.
+`key` should be of `str` type, and `value` can be any of the following types: `str`, `int`, `float`, `bytes`.<br>
+**Note**: It is recommended to use `Cache` class as type hint, so that editors and tools can give you better support.
 
 #### Examples:
 
