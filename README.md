@@ -31,57 +31,62 @@ There are three app types, that you can build: `stream`, `scheduled` and `task`.
 **Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
 support.
 
-#### Examples:
+#### Stream
 
-1. **Stream**
+```python
+from corva import Api, Cache, Corva, StreamEvent
 
-   ```python
-   from corva import Api, Cache, Corva, StreamEvent
-   
-   
-   # 1 define a function with required parameters, that will be provided by sdk
-   def stream_app(event: StreamEvent, api: Api, cache: Cache):
-       """Main logic function"""
-       pass
-   
-   
-   # 2 define a function that will be run by AWS lambda
-   def lambda_handler(event, context):
-       """AWS lambda handler"""
-       corva = Corva()  # 3 initialize Corva
-       corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
-   ```
 
-2. **Scheduled**
+# 1 define a function with required parameters, that will be provided by sdk
+def stream_app(event: StreamEvent, api: Api, cache: Cache):
+    """Main logic function"""
+    pass
 
-   ```python
-   from corva import Api, Cache, Corva, ScheduledEvent
-   
-   
-   def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-       pass
-   
-   
-   def lambda_handler(event, context):
-       corva = Corva()
-       corva.scheduled(scheduled_app, event)
-   ```
 
-3. **Task** (will be added soon)
+# 2 define a function that will be run by AWS lambda
+def lambda_handler(event, context):
+    """AWS lambda handler"""
+    corva = Corva()  # 3 initialize Corva
+    corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
+```
 
-   ```python
-   from corva import Api, Cache, Corva, TaskEvent
-   
-   
-   # note, that task app doesn't receive cache parameter
-   def task_app(event: TaskEvent, api: Api):
-       pass
-   
-   
-   def lambda_handler(event, context):
-       corva = Corva()
-       corva.task(task_app, event)
-   ```
+`Corva.stream` provides two additional parameters:
+
+- `filter_by_timestamp` - if set to `True` will take the latest processed
+  `timestamp` from cache and filter out records from event with either smaller or same `timestamp`;
+- `filter_by_depth` - if set to `True` will take the latest processed
+  `measured_depth` from cache and filter out records from event with either smaller or same `measured_depth`.
+
+#### Scheduled
+
+```python
+from corva import Api, Cache, Corva, ScheduledEvent
+
+
+def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
+    pass
+
+
+def lambda_handler(event, context):
+    corva = Corva()
+    corva.scheduled(scheduled_app, event)
+```
+
+#### Task (will be added soon)
+
+```python
+from corva import Api, Corva, TaskEvent
+
+
+# note, that task app doesn't receive cache parameter
+def task_app(event: TaskEvent, api: Api):
+    pass
+
+
+def lambda_handler(event, context):
+    corva = Corva()
+    corva.task(task_app, event)
+```
 
 ## Event
 
