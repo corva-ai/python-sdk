@@ -1,5 +1,14 @@
 Corva python-sdk is a framework for building stream, scheduled and task apps.
 
+## Contents
+- [Requirements](#requirements) 
+- [Installation](#installation)
+- [App types](#app-types)
+- [Event](#event)
+- [Api](#api)
+- [Cache](#cache)
+- [Contributing](#contributing)
+
 ## Requirements
 
 Python 3.8+
@@ -15,10 +24,10 @@ Python 3.8+
 $ pip install corva-sdk
 ```
 
-## Apps
-There are three app types, that you can develop: `stream`, `scheduled`, `task`.
+## App types
+There are three app types, that you can build: `stream`, `scheduled` and `task`.
 
-#### Examples
+#### Examples:
 
 1. **Stream**
    
@@ -73,9 +82,9 @@ There are three app types, that you can develop: `stream`, `scheduled`, `task`.
 ## Event
 
 Event is what triggers app execution. It contains necessary data for app to run e.g. `asset_id`, that triggered the
-event. Every app type receives `Event` instance as a first parameter. There are three event types matched to app
-types: `StreamEvent`, `ScheduledEvent`, `TaskEvent`. It is recommened to use these classes as type hints, like in app
-examples above, so that it is easier to discover, what fields each event type has.
+event. Every app type receives `Event` instance as a first parameter. Each app type has its own event type:
+`StreamEvent`, `ScheduledEvent`, `TaskEvent`. It is recommened to use these classes as type hints, like in app
+examples above, so that it is easier to discover, what fields each event has.
 
 #### Example:
 
@@ -218,9 +227,9 @@ do other operations with data.
       corva.scheduled(my_app, event)
    ```
 
-## Development - contributing
+## Contributing
 
-### Set up the project
+#### Set up the project
 
 ```console
 $ cd ~/YOUR_PATH/python-sdk
@@ -229,13 +238,13 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-### Run tests
+#### Run tests
 
 ```console
 $ venv/bin/python3 -m pytest tests
 ```
 
-### Run code linter
+#### Run code linter
 
 ```console
 $ venv/bin/python3 -m flake8
