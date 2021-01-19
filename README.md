@@ -28,8 +28,8 @@ $ pip install corva-sdk
 ## App types
 
 There are three app types, that you can build: `stream`, `scheduled` and `task`.<br>
-**Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
-support.
+**Note**: it is recommended to use type hints like in examples below,
+so that editors and tools can give you better support.
 
 #### Stream
 
@@ -53,9 +53,11 @@ def lambda_handler(event, context):
 `Corva.stream` provides two additional parameters:
 
 - `filter_by_timestamp` - if set to `True` will take the latest processed
-  `timestamp` from cache and filter out records from event with either smaller or same `timestamp`;
+  `timestamp` from cache and filter out records from event with 
+  either smaller or same `timestamp`;
 - `filter_by_depth` - if set to `True` will take the latest processed
-  `measured_depth` from cache and filter out records from event with either smaller or same `measured_depth`.
+  `measured_depth` from cache and filter out records from event with
+  either smaller or same `measured_depth`.
 
 #### Scheduled
 
@@ -90,10 +92,12 @@ def lambda_handler(event, context):
 
 ## Event
 
-Event is what triggers app execution. It contains necessary data for app to run e.g. `asset_id`, that triggered the
-event. Every app type receives `Event` instance as a first parameter. Each app type has its own event type:
-`StreamEvent`, `ScheduledEvent`, `TaskEvent`. <br>
-**Note**: It is recommended to use event classes as type hints, so that editors and tools can give you better support.
+Event is what triggers app execution.
+It contains necessary data for app to run e.g. `asset_id`, that triggered the event.
+Every app type receives `Event` instance as a first parameter.
+Each app type has its own event type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`. <br>
+**Note**: It is recommended to use event classes as type hints,
+so that editors and tools can give you better support.
 
 #### Example:
 
@@ -112,12 +116,13 @@ def lambda_handler(event, context):
 
 ## Api
 
-The apps might need to communicate with Corva API and Corva Data API. The sdk provides an `Api` class - a thin wrapper
-around `requests`
+The apps might need to communicate with Corva API and Corva Data API.
+The sdk provides an `Api` class - a thin wrapper around `requests`
 library that handles authorization, adds timeouts and retries to request.
 `Api` instance is inserted automatically as a second parameter to each app type.
 `Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.<br>
-**Note**: It is recommended to use `Api` class as type hint, so that editors and tools can give you better support.
+**Note**: It is recommended to use `Api` class as type hint, 
+so that editors and tools can give you better support.
 
 #### Examples:
 
@@ -146,14 +151,19 @@ def lambda_handler(event, context):
 
 ## Cache
 
-Sometimes apps need to share some data between runs. The sdk provides a `Cache` class that allows you to store, load and
+Sometimes apps need to share some data between runs.
+The sdk provides a `Cache` class that allows you to store, load and
 do other operations with data.
-`Cache` instance is inserted automatically as a last parameter to `stream` and `scheduled` apps. <br>
-**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store the data between invokes.<br>
+`Cache` instance is inserted automatically as a last parameter
+to `stream` and `scheduled` apps. <br>
+**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store
+the data between invokes.<br>
 
 `Cache` uses a dict-like database, so the data is stored as `key:value` pairs.
-`key` should be of `str` type, and `value` can be any of the following types: `str`, `int`, `float`, `bytes`.<br>
-**Note**: It is recommended to use `Cache` class as type hint, so that editors and tools can give you better support.
+`key` should be of `str` type, and `value` can be any of
+the following types: `str`, `int`, `float`, `bytes`.<br>
+**Note**: It is recommended to use `Cache` class as type hint,
+so that editors and tools can give you better support.
 
 #### Examples:
 
