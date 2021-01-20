@@ -117,7 +117,7 @@ def test_empty_records_error(settings):
         app.stream(stream_app, event)
 
     assert '1 validation error' in str(exc.value)
-    assert 'Can\'t determine asset_id as records are empty (which should not happen).' in str(exc.value)
+    assert 'Can\'t set asset_id as records are empty (which should not happen).' in str(exc.value)
 
 
 def test_only_one_filter_allowed_at_a_time(settings):

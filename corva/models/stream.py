@@ -59,7 +59,7 @@ class StreamEventData(CorvaBaseModel):
         records = values.get('records', [])  # type: List[Record]
 
         if len(records) == 0:
-            raise ValueError('Can\'t determine asset_id as records are empty (which should not happen).')
+            raise ValueError('Can\'t set asset_id as records are empty (which should not happen).')
 
         return records[0].asset_id
 
