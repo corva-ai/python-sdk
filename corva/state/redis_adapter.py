@@ -5,7 +5,6 @@ from typing import Optional, List, Dict, Union
 from redis import Redis, from_url, ConnectionError
 
 from corva.logger import DEFAULT_LOGGER
-from corva.types import REDIS_STORED_VALUE_TYPE
 
 REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
 

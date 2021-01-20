@@ -6,7 +6,7 @@ from .state.redis_state import RedisState as Cache
 
 __all__ = [
     'Api',
-    'Cache'
+    'Cache',
     'Corva',
     'ScheduledEvent',
     'StreamEvent'
