@@ -1,11 +1,11 @@
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 from corva.application import Corva
 
 
 def scheduled_app(event, api, state):
     api.session.request = MagicMock()
-    api.post = Mock(wraps=api.post)
+    api.post = Mock(wraps=api.post)  # spy on api.post
     return api
 
 
