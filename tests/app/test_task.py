@@ -4,14 +4,13 @@ from pytest_mock import MockerFixture
 from corva.app.task import TaskApp
 from corva.event import Event
 from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext, UpdateTaskData
-from tests.conftest import APP_KEY, CACHE_URL
 
 TASK_ID = '1'
 
 
 @pytest.fixture(scope='function')
-def task_app(api):
-    return TaskApp(api=api, app_key=APP_KEY, cache_url=CACHE_URL)
+def task_app(api, settings):
+    return TaskApp(api=api, app_key=settings.APP_KEY, cache_url=settings.CACHE_URL)
 
 
 @pytest.fixture(scope='session')

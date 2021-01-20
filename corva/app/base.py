@@ -3,24 +3,24 @@ from itertools import groupby
 from logging import Logger, LoggerAdapter
 from typing import List, Optional, Union
 
-from corva import settings
 from corva.event import Event
 from corva.logger import DEFAULT_LOGGER
 from corva.models.base import BaseContext
 from corva.network.api import Api
+from corva.configuration import SETTINGS
 
 
 class BaseApp(ABC):
     def __init__(
          self,
-         app_key: str = settings.APP_KEY,
-         cache_url: str = settings.CACHE_URL,
+         app_key: str = SETTINGS.APP_KEY,
+         cache_url: str = SETTINGS.CACHE_URL,
          api: Optional[Api] = None,
          logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
     ):
         self.app_key = app_key
         self.cache_url = cache_url
-        self.api = api or Api()
+        self.api = api
         self.logger = logger
 
     @property

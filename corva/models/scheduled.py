@@ -6,15 +6,10 @@ from typing import List, Optional
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseEventData, ListEvent
-from corva.state.redis_state import RedisState
+from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
-class ScheduledContext(BaseContext):
-    state: RedisState
-
-
-class ScheduledEventData(BaseEventData):
+class ScheduledEventData(CorvaBaseModel):
     type: Optional[str] = None
     collection: Optional[str] = None
     cron_string: str
@@ -42,13 +37,17 @@ class ScheduledEventData(BaseEventData):
     day_shift_start: Optional[str] = None
 
 
-class ScheduledEvent(ListEvent[ScheduledEventData]):
+class ScheduledEvent(BaseEvent, ScheduledEventData):
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> ScheduledEvent:
-        parsed = pydantic.parse_raw_as(List[List[ScheduledEventData]], event)
+    def from_raw_event(event: str, **kwargs) -> List[ScheduledEvent]:
+        events = pydantic.parse_raw_as(List[List[ScheduledEvent]], event)
 
-        # raw event from queue comes in from of 2d array of datas
-        # flatten parsed event into 1d array of datas, which is expected by ScheduledEvent
-        parsed = list(itertools.chain(*parsed))
+        # raw event from queue comes in from of 2d array of ScheduledEvent
+        # flatten parsed event into 1d array of ScheduledEvent, which is an expected return type
+        events = list(itertools.chain(*events))
 
-        return ScheduledEvent(parsed)
+        return events
+
+
+class ScheduledContext(BaseContext[ScheduledEvent]):
+    pass

@@ -1,21 +1,8 @@
-from corva import Api, Corva, StreamEvent, State
-
-app = Corva(
-    # 1 api params
-    api_url='api.localhost',
-    api_data_url='api.data.localhost',
-    api_key='api_key',
-    api_app_name='api_app_name',
-
-    # 2 state params
-    state_url='redis://',
-    state_params={'param1': 'val1'}
-)
+from corva import Api, Cache, Corva, StreamEvent
 
 
-@app.stream
-def stream_app(event: StreamEvent, api: Api, state: State):
-    """User's main logic function"""
+def stream_app(event: StreamEvent, api: Api, cache: Cache):
+    """Main logic function"""
 
     pass
 
@@ -23,4 +10,5 @@ def stream_app(event: StreamEvent, api: Api, state: State):
 def lambda_handler(event, context):
     """AWS lambda handler"""
 
-    stream_app(event)
+    app = Corva()
+    app.stream(stream_app, event, filter_by_timestamp=True)

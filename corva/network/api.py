@@ -6,23 +6,23 @@ from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from corva import settings
-
 
 class Api:
     ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
+    DEFAULT_TIMEOUT = 600
+    DEFAULT_MAX_RETRIES = 3
 
     def __init__(
          self,
-         api_url: str = settings.API_ROOT_URL,
-         data_api_url: str = settings.DATA_API_ROOT_URL,
-         api_key: str = settings.API_KEY,
-         app_name: str = settings.APP_NAME,
-         timeout: int = 600,
-         max_retries: int = 3
+         api_url: str,
+         data_api_url: str,
+         api_key: str,
+         app_name: str,
+         timeout: Optional[int] = None,
+         max_retries: Optional[int] = None
     ):
-        self.timeout = timeout
-        self.max_retries = max_retries
+        self.timeout = timeout or self.DEFAULT_TIMEOUT
+        self.max_retries = max_retries or self.DEFAULT_MAX_RETRIES
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key

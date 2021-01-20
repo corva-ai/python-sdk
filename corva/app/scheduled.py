@@ -1,9 +1,6 @@
 from corva.app.base import BaseApp
 from corva.event import Event
 from corva.models.scheduled import ScheduledContext, ScheduledEventData
-from corva.state.redis_adapter import RedisAdapter
-from corva.state.redis_state import RedisState
-from corva.utils import GetStateKey
 
 
 class ScheduledApp(BaseApp):
@@ -14,17 +11,7 @@ class ScheduledApp(BaseApp):
         return
 
     def get_context(self, event: Event) -> ScheduledContext:
-        return ScheduledContext(
-            event=event,
-            state=RedisState(
-                redis=RedisAdapter(
-                    default_name=GetStateKey.from_event(event=event, app_key=self.app_key),
-                    cache_url=self.cache_url,
-                    logger=self.logger
-                ),
-                logger=self.logger
-            )
-        )
+        return ScheduledContext()
 
     def post_process(self, context: ScheduledContext) -> None:
         for data in context.event:  # type: ScheduledEventData
