@@ -38,7 +38,7 @@ class StreamEventData(CorvaBaseModel):
     app_key: Optional[str] = None
     records: List[Record]
     metadata: StreamEventMetadata
-    asset_id: int = None
+    asset_id: int = None  # type hint reason: https://pydantic-docs.helpmanual.io/usage/validators/#validate-always
 
     @pydantic.validator('asset_id', pre=True, always=True)
     def set_asset_id(cls, v, values):
