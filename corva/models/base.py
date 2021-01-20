@@ -58,7 +58,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
 
     @property
     def cache(self) -> RedisState:
-        if self._cache is not None:
+        if self._cache:
             return self._cache
 
         redis_adapter = RedisAdapter(
