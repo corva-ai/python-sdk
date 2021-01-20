@@ -6,8 +6,8 @@ from typing import Any, Generic, List, Optional, TypeVar, Union
 import pydantic
 from pydantic.generics import GenericModel
 
-from corva.network.api import Api
 from corva.configuration import Settings
+from corva.network.api import Api
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -47,8 +47,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
 
     user_result: Any = None
 
-    # cache params
-    cache_kwargs: dict = {}
+    cache_settings: dict = {}
 
     @property
     def cache_key(self) -> str:
@@ -65,7 +64,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
         redis_adapter = RedisAdapter(
             default_name=self.cache_key,
             cache_url=self.settings.CACHE_URL,
-            **self.cache_kwargs
+            **self.cache_settings
         )
 
         self._cache = RedisState(redis=redis_adapter)
