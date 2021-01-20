@@ -1,5 +1,4 @@
 from functools import partial
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -9,8 +8,6 @@ from corva.network.api import Api
 from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
-
-DATA_PATH = Path('tests/test_data')
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -61,7 +58,9 @@ def settings():
 
     return Settings(
         APP_KEY='provider.app-name',
-        CACHE_URL='redis://localhost:6379'
+        CACHE_URL='redis://localhost:6379',
+        API_ROOT_URL='https://api.localhost.ai',
+        DATA_API_ROOT_URL='https://data.localhost.ai'
     )
 
 
@@ -73,8 +72,7 @@ def patch_settings(settings, mocker):
 
     mocker.patch.multiple(
         settings_path,
-        APP_KEY=settings.APP_KEY,
-        CACHE_URL=settings.CACHE_URL
+        **settings.dict()
     )
     yield
 

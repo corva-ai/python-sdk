@@ -1,9 +1,11 @@
 from typing import Any, Callable, List, Optional
 
 from corva.configuration import SETTINGS
+from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
-from corva.stream import stream_runner
+from corva.runners.scheduled import scheduled_runner
+from corva.runners.stream import stream_runner
 
 
 class Corva:
@@ -54,5 +56,22 @@ class Corva:
             )
 
             results.append(stream_runner(fn=fn, context=ctx))
+
+        return results
+
+    def scheduled(self, fn: Callable, event: str):
+        events = ScheduledEvent.from_raw_event(event=event)
+
+        results = []
+
+        for event in events:
+            ctx = ScheduledContext(
+                event=event,
+                settings=SETTINGS.copy(),
+                api=self.api,
+                cache_kwargs=self.cache_settings
+            )
+
+            results.append(scheduled_runner(fn=fn, context=ctx))
 
         return results
