@@ -14,11 +14,6 @@ Corva python-sdk is a framework for building stream, scheduled and task apps.
 
 Python 3.8+
 
-- [Pydantic](https://github.com/samuelcolvin/pydantic)
-- [Redis](https://pypi.org/project/redis/)
-- [Requests](https://pypi.org/project/requests/)
-- [urllib3](https://pypi.org/project/urllib3/)
-
 ## Installation
 
 ```console
