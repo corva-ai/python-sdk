@@ -22,7 +22,7 @@ $ pip install corva-sdk
 
 ## App types
 
-There are three app types, that you can build: `stream`, `scheduled` and `task`.<br>
+There are two app types, that you can build: `stream`, `scheduled` and `task` (will be added soon).<br>
 **Note**: it is recommended to use type hints like in examples below,
 so that editors and tools can give you better support.
 
@@ -65,22 +65,6 @@ def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
 def lambda_handler(event, context):
     corva = Corva()
     corva.scheduled(scheduled_app, event)
-```
-
-#### Task (will be added soon)
-
-```python
-from corva import Api, Corva, TaskEvent
-
-
-# note, that task app doesn't receive cache parameter
-def task_app(event: TaskEvent, api: Api):
-    pass
-
-
-def lambda_handler(event, context):
-    corva = Corva()
-    corva.task(task_app, event)
 ```
 
 ## Event
