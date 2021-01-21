@@ -41,16 +41,16 @@ class Corva:
          filter_by_timestamp: bool = False,
          filter_by_depth: bool = False
     ) -> List[Any]:
-        """Runs stream apps
+        """Runs stream app
 
         params:
          fn: stream app function to run
          event: raw stream event
-         filter_by_timestamp: if set to `True` will take the latest processed `timestamp`
-          from cache and filter out records from event with either smaller or same `timestamp`
-         filter_by_depth: if set to `True` will take the latest processed `measured_depth`
-          from cache and filter out records from event with either smaller or same `measured_depth`
-        returns: list or fn returns
+         filter_by_timestamp: if enabled, will remove records with previously
+          processed `timestamp` from the event
+         filter_by_depth: if enabled, will remove records with previously
+          processed `measured_depth` from the event.
+        returns: list of returned values from fn
         """
 
         events = StreamEvent.from_raw_event(event=event, app_key=SETTINGS.APP_KEY)
@@ -72,12 +72,12 @@ class Corva:
         return results
 
     def scheduled(self, fn: Callable, event: str):
-        """Runs scheduled apps
+        """Runs scheduled app
 
         params:
          fn: scheduled app function to run
          event: raw scheduled event
-        returns: list or fn returns
+        returns: list of returned values from fn
         """
 
         events = ScheduledEvent.from_raw_event(event=event)
