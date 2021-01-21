@@ -62,7 +62,7 @@ class Corva:
                 event=event,
                 settings=SETTINGS.copy(),
                 api=self.api,
-                cache_kwargs=self.cache_settings,
+                cache_settings=self.cache_settings,
                 filter_by_timestamp=filter_by_timestamp,
                 filter_by_depth=filter_by_depth
             )
@@ -89,7 +89,7 @@ class Corva:
                 event=event,
                 settings=SETTINGS.copy(),
                 api=self.api,
-                cache_kwargs=self.cache_settings
+                cache_settings=self.cache_settings
             )
 
             results.append(scheduled_runner(fn=fn, context=ctx))
