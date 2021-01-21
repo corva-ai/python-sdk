@@ -47,12 +47,10 @@ def lambda_handler(event, context):
 
 `Corva.stream` provides two additional parameters:
 
-- `filter_by_timestamp` - if set to `True` will take the latest processed
-  `timestamp` from cache and filter out records from event with 
-  either smaller or same `timestamp`;
-- `filter_by_depth` - if set to `True` will take the latest processed
-  `measured_depth` from cache and filter out records from event with
-  either smaller or same `measured_depth`.
+- `filter_by_timestamp` - if enabled, will remove records with previously
+  processed `timestamp` from the event;
+- `filter_by_depth` - if enabled, will remove records with previously
+  processed `measured_depth` from the event.
 
 #### Scheduled
 
