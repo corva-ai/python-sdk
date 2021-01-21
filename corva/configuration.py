@@ -1,22 +1,21 @@
 from os import getenv
 from typing import Optional
 
-from pydantic import BaseSettings
+import pydantic
 
 
-class CorvaSettings(BaseSettings):
+class Settings(pydantic.BaseSettings):
     # api
-    API_ROOT_URL: Optional[str] = None
-    DATA_API_ROOT_URL: Optional[str] = None
+    API_ROOT_URL: Optional[pydantic.HttpUrl] = None
+    DATA_API_ROOT_URL: Optional[pydantic.HttpUrl] = None
     API_KEY: Optional[str] = None
 
     # cache
-    CACHE_URL: Optional[str] = None
+    CACHE_URL: Optional[pydantic.RedisDsn] = None
 
     # logger
     LOG_LEVEL: str = 'WARN'
 
-    # misc
     APP_KEY: Optional[str] = None  # <provider>.<app-name-with-dashes>
 
     @property
@@ -37,4 +36,4 @@ class CorvaSettings(BaseSettings):
         return self.APP_KEY.split('.')[0]
 
 
-CORVA_SETTINGS = CorvaSettings()
+SETTINGS = Settings()

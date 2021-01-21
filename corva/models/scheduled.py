@@ -49,5 +49,5 @@ class ScheduledEvent(BaseEvent, ScheduledEventData):
         return events
 
 
-class ScheduledContext(BaseContext[ScheduledEvent, CorvaBaseModel]):
+class ScheduledContext(BaseContext[ScheduledEvent]):
     pass
