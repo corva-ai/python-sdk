@@ -90,9 +90,7 @@ def lambda_handler(event, context):
 Event is what triggers app execution.
 It contains necessary data for app to run e.g. `asset_id`, that triggered the event.
 Every app type receives `Event` instance as a first parameter.
-Each app type has its own event type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`. <br>
-**Note**: It is recommended to use event classes as type hints,
-so that editors and tools can give you better support.
+Each app type has its own event type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 #### Example:
 
@@ -115,9 +113,7 @@ The apps might need to communicate with Corva API and Corva Data API.
 The sdk provides an `Api` class - a thin wrapper around `requests`
 library that handles authorization, adds timeouts and retries to request.
 `Api` instance is inserted automatically as a second parameter to each app type.
-`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT` and `DELETE`.<br>
-**Note**: It is recommended to use `Api` class as type hint, 
-so that editors and tools can give you better support.
+`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT` and `DELETE`.
 
 #### Examples:
 
@@ -156,9 +152,7 @@ the data between invokes.<br>
 
 `Cache` uses a dict-like database, so the data is stored as `key:value` pairs.
 `key` should be of `str` type, and `value` can be any of
-the following types: `str`, `int`, `float`, `bytes`.<br>
-**Note**: It is recommended to use `Cache` class as type hint,
-so that editors and tools can give you better support.
+the following types: `str`, `int`, `float`, `bytes`.
 
 #### Examples:
 
