@@ -25,10 +25,10 @@ $ pip install corva-sdk
 
 There are three app types, that you can build:
 
-1. `stream` - used to work with a real-time data
-2. `scheduled` - used to work with data at defined schedules/intervals
+1. `stream` - works with a real-time data
+2. `scheduled` - works with data at defined schedules/intervals
    (e.g. once an hour)
-3. `task` - used to work with data on-demand
+3. `task` - works with data on-demand
 
 **Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
 support.
