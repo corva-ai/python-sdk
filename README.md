@@ -1,4 +1,5 @@
-Corva python-sdk is a framework for building stream, scheduled and task apps.
+Corva python-sdk is a framework for building
+[Corva DevCenter][dev-center-docs] apps.
 
 ## Contents
 
@@ -22,9 +23,15 @@ $ pip install corva-sdk
 
 ## App types
 
-There are two app types, that you can build: `stream`, `scheduled` and `task` (will be added soon).<br>
-**Note**: it is recommended to use type hints like in examples below,
-so that editors and tools can give you better support.
+There are three app types, that you can build:
+
+1. `stream` - used to work with a real-time data
+2. `scheduled` - used to work with data at defined schedules/intervals
+   (e.g. once an hour)
+3. `task` - used to work with data on-demand
+
+**Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
+support.
 
 #### Stream
 
@@ -45,12 +52,10 @@ def lambda_handler(event, context):
     corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
 ```
 
-`Corva.stream` provides two additional parameters:
+`Corva.stream` provides two optional parameters:
 
-- `filter_by_timestamp` - if enabled, will remove records with previously
-  processed `timestamp` from the event;
-- `filter_by_depth` - if enabled, will remove records with previously
-  processed `measured_depth` from the event.
+- `filter_by_timestamp` - enable to clear [event](#event) from data with previously processed `timestamp`;
+- `filter_by_depth` - enable to clear [event](#event) from data with previously processed `measured_depth`.
 
 #### Scheduled
 
@@ -69,33 +74,20 @@ def lambda_handler(event, context):
 
 ## Event
 
-Event is what triggers app execution.
-It contains necessary data for app to run e.g. `asset_id`, that triggered the event.
-Every app type receives `Event` instance as a first parameter.
-Each app type has its own event type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
-
-#### Example:
-
-```python
-from corva import Api, Cache, Corva, StreamEvent
-
-
-def stream_app(event: StreamEvent, api: Api, cache: Cache):
-    event.records[0].measured_depth  # get measured depth of first event record
-
-
-def lambda_handler(event, context):
-    corva = Corva()
-    corva.stream(stream_app, event)
-```
+An event is an object that contains data for an app function to process.
+`event` instance is inserted automatically as a first parameter to each app type. There are different event types for
+every app type: `StreamEvent`,
+`ScheduledEvent` and `TaskEvent`.
 
 ## Api
 
-The apps might need to communicate with Corva API and Corva Data API.
-The sdk provides an `Api` class - a thin wrapper around `requests`
-library that handles authorization, adds timeouts and retries to request.
+The apps might need to communicate with
+[Corva API][corva-api] and [Corva Data API][corva-data-api]. The sdk provides an `Api` class - a thin wrapper
+around `requests`
+library that handles Corva authorization, adds timeouts and retries to request.
 `Api` instance is inserted automatically as a second parameter to each app type.
-`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT` and `DELETE`.
+`Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`
+and `DELETE`.
 
 #### Examples:
 
@@ -124,17 +116,13 @@ def lambda_handler(event, context):
 
 ## Cache
 
-Sometimes apps need to share some data between runs.
-The sdk provides a `Cache` class that allows you to store, load and
-do other operations with data.
-`Cache` instance is inserted automatically as a last parameter
-to `stream` and `scheduled` apps. <br>
-**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store
-the data between invokes.<br>
+Apps might need to share some data between runs. The sdk provides a `Cache` class, that allows you to store, load and do
+other operations with data.
+`Cache` instance is inserted automatically as a third parameter to `stream` and `scheduled` apps. <br>
+**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store data between invokes.<br>
 
 `Cache` uses a dict-like database, so the data is stored as `key:value` pairs.
-`key` should be of `str` type, and `value` can be any of
-the following types: `str`, `int`, `float`, `bytes`.
+`key` should be of `str` type, and `value` can have any of the following types: `str`, `int`, `float` and `bytes`.
 
 #### Examples:
 
@@ -241,3 +229,9 @@ $ venv/bin/python3 -m pytest tests
 ```console
 $ venv/bin/python3 -m flake8
 ```
+
+[dev-center-docs]: https://app.corva.ai/dev-center/docs
+
+[corva-api]: https://api.corva.ai/documentation/index.html
+
+[corva-data-api]: https://data.corva.ai/docs#/
