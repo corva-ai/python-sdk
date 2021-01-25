@@ -36,20 +36,35 @@ support.
 #### Stream
 
 ```python
+import json
+
 from corva import Api, Cache, Corva, StreamEvent
 
 
-# 1 define a function with required parameters, that will be provided by sdk
 def stream_app(event: StreamEvent, api: Api, cache: Cache):
-    """Main logic function"""
-    pass
+    # get some data from api
+    drillstrings = api.get(
+        'api/v1/data/corva/data.drillstring/',
+        params={
+            'query': json.dumps({'asset_id': event.asset_id, }),
+            'sort': json.dumps({'timestamp': 1}),
+            'limit': 1}
+    ).json()  # List[dict]
+
+    # do some calculations/modifications to the data
+    for drillstring in drillstrings:
+        drillstring['id'] = drillstring.pop('_id')
+
+    # save the data to private collection
+    api.post(
+        f'api/v1/data/my_provider/my_collection/',
+        data=drillstrings
+    )
 
 
-# 2 define a function that will be run by AWS lambda
 def lambda_handler(event, context):
-    """AWS lambda handler"""
-    corva = Corva()  # 3 initialize Corva
-    corva.stream(stream_app, event)  # 4 run stream_app by passing it and event to Corva.stream
+    corva = Corva()
+    corva.stream(stream_app, event)
 ```
 
 `Corva.stream` provides two optional parameters:
