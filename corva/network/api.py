@@ -8,6 +8,12 @@ from urllib3 import Retry
 
 
 class Api:
+    """Provides a convenient way to access Corva API and Corva Data API
+
+    Api is a thin wrapper around `requests` library that handles
+     authorization, adds timeouts and retries to request.
+    """
+
     ALLOWED_METHODS = {'GET', 'POST', 'PATCH', 'PUT', 'DELETE'}
     DEFAULT_TIMEOUT = 600
     DEFAULT_MAX_RETRIES = 3
@@ -82,12 +88,25 @@ class Api:
          self,
          method: str,
          path: str,
-         data: Optional[dict] = None,  # request body
-         params: Optional[dict] = None,  # url query string params
-         headers: Optional[dict] = None,  # additional headers to include in request
-         max_retries: Optional[int] = None,  # custom value for max number of retries
-         timeout: Optional[int] = None,  # request timeout in seconds
+         data: Optional[dict] = None,
+         params: Optional[dict] = None,
+         headers: Optional[dict] = None,
+         max_retries: Optional[int] = None,
+         timeout: Optional[int] = None
     ) -> Response:
+        """Executes the request
+
+        params:
+         method: HTTP method
+         path: url to call
+         data: request body
+         params: url query string params
+         headers: additional headers to include in request
+         max_retries: custom value for max number of retries
+         timeout: request timeout in seconds
+        returns: response
+        raises: HTTPError for unsuccessful requests
+        """
 
         if method not in self.ALLOWED_METHODS:
             raise ValueError(f'Invalid HTTP method {method}.')
