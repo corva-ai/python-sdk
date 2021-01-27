@@ -75,7 +75,7 @@ def test_filter_by(filter_by, record_attr, settings):
 )
 def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
     # first invocation
-    event = (
+    event_1 = (
                 '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
@@ -85,12 +85,12 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
 
     app = Corva()
 
-    results = app.stream(stream_app, event, **{filter_by: True})
+    results_1 = app.stream(stream_app, event_1, **{filter_by: True})
 
-    assert len(results[0].records) == 3
+    assert len(results_1[0].records) == 3
 
     # second invocation
-    next_event = (
+    event_2 = (
                      '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                      '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                      '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
@@ -99,10 +99,17 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
                      '"app_version": 0}}}}]'
                  ) % (record_attr, record_attr, record_attr, record_attr, settings.APP_KEY)
 
-    next_results = app.stream(stream_app, next_event, **{filter_by: True})
+    results_2 = app.stream(stream_app, event_2, **{filter_by: True})
 
-    assert len(next_results[0].records) == 1
-    assert getattr(next_results[0].records[0], record_attr) == 3
+    assert len(results_2[0].records) == 1
+    assert getattr(results_2[0].records[0], record_attr) == 3
+
+    # additional invocations
+    # after run event_2 should be filtered and have no records
+    # verify, that in case of empty records, old values are persisted in cache
+    for _ in range(2):
+        results_3 = app.stream(stream_app, event_2, **{filter_by: True})
+        assert len(results_3[0].records) == 0
 
 
 def test_empty_records_error(settings):
