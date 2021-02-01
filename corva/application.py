@@ -1,7 +1,6 @@
 from typing import Any, Callable, List, Optional
 
 from corva.configuration import SETTINGS
-from corva.models.context import CorvaLambdaClientContext
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
@@ -26,9 +25,9 @@ class Corva:
          cache_settings: additional cache settings
         """
 
-        client_context = CorvaLambdaClientContext.from_context(context)
+        api_key = getattr(context.client_context, 'api_key', None) or SETTINGS.API_KEY
 
-        if (api_key := client_context.api_key or SETTINGS.API_KEY) is None:
+        if api_key is None:
             raise Exception('No api_key found.')
 
         self.cache_settings = cache_settings or {}
