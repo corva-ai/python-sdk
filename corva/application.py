@@ -28,7 +28,7 @@ class Corva:
 
         client_context = CorvaLambdaClientContext.from_context(context)
 
-        if not (api_key := client_context.api_key or SETTINGS.API_KEY):
+        if (api_key := client_context.api_key or SETTINGS.API_KEY) is None:
             raise Exception('No api_key found.')
 
         self.cache_settings = cache_settings or {}
