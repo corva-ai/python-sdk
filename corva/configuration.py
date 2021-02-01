@@ -20,7 +20,7 @@ class Settings(pydantic.BaseSettings):
 
     @property
     def APP_NAME(self) -> str:
-        if app_name := getenv('APP_NAME') is not None:
+        if (app_name := getenv('APP_NAME')) is not None:
             return app_name
 
         app_name_with_dashes = self.APP_KEY.split('.')[1]
@@ -30,7 +30,7 @@ class Settings(pydantic.BaseSettings):
 
     @property
     def PROVIDER(self) -> str:
-        if provider := getenv('PROVIDER') is not None:
+        if (provider := getenv('PROVIDER')) is not None:
             return provider
 
         return self.APP_KEY.split('.')[0]
