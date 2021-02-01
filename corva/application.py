@@ -1,6 +1,7 @@
 from typing import Any, Callable, List, Optional
 
 from corva.configuration import SETTINGS
+from corva.models.context import CorvaLambdaClientContext
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
 from corva.network.api import Api
@@ -11,23 +12,31 @@ from corva.runners.stream import stream_runner
 class Corva:
     def __init__(
          self,
+         context: Any,
+         *,
          timeout: Optional[int] = None,
          max_retries: Optional[int] = None,
          cache_settings: Optional[dict] = None
     ):
         """
         params:
+         context: AWS Lambda context object
          timeout: api request timeout, set None to use default value
          max_retries: number or api retries for failed request, set to None to use default value
          cache_settings: additional cache settings
         """
+
+        client_context = CorvaLambdaClientContext.from_context(context)
+
+        if not (api_key := client_context.api_key or SETTINGS.API_KEY):
+            raise Exception('No api_key found.')
 
         self.cache_settings = cache_settings or {}
 
         self.api = Api(
             api_url=SETTINGS.API_ROOT_URL,
             data_api_url=SETTINGS.DATA_API_ROOT_URL,
-            api_key=SETTINGS.API_KEY,
+            api_key=api_key,
             app_name=SETTINGS.APP_NAME,
             timeout=timeout,
             max_retries=max_retries
