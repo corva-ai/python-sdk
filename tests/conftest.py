@@ -60,7 +60,8 @@ def settings():
         APP_KEY='provider.app-name',
         CACHE_URL='redis://localhost:6379',
         API_ROOT_URL='https://api.localhost.ai',
-        DATA_API_ROOT_URL='https://data.localhost.ai'
+        DATA_API_ROOT_URL='https://data.localhost.ai',
+        API_KEY='123'
     )
 
 

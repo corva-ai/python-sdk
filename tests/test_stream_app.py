@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from corva.application import Corva
@@ -19,8 +21,9 @@ def test_is_completed(collection, expected, settings):
                 '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "%s", "data": {}}],'
                 ' "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}}]'
             ) % (collection, settings.APP_KEY)
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     results = app.stream(stream_app, event)
 
@@ -33,8 +36,9 @@ def test_asset_id_persists_after_no_records_left_after_filtering(settings):
                 '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
                 '"app_version": 0}}}}]'
             ) % settings.APP_KEY
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     results = app.stream(stream_app, event)
 
@@ -57,8 +61,9 @@ def test_filter_by(filter_by, record_attr, settings):
                 '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
                 '"app_version": 0}}}}]'
             ) % (record_attr, record_attr, record_attr, settings.APP_KEY)
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     results = app.stream(stream_app, event, **{filter_by: True})
 
@@ -76,14 +81,15 @@ def test_filter_by(filter_by, record_attr, settings):
 def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
     # first invocation
     event_1 = (
-                '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                '"app_version": 0}}}}]'
-            ) % (record_attr, record_attr, record_attr, settings.APP_KEY)
+                  '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                  '"app_version": 0}}}}]'
+              ) % (record_attr, record_attr, record_attr, settings.APP_KEY)
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     results_1 = app.stream(stream_app, event_1, **{filter_by: True})
 
@@ -91,13 +97,13 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
 
     # second invocation
     event_2 = (
-                     '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                     '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                     '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                     '"data": {}}, {"%s": 3, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                     '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                     '"app_version": 0}}}}]'
-                 ) % (record_attr, record_attr, record_attr, record_attr, settings.APP_KEY)
+                  '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}, {"%s": 3, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
+                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
+                  '"app_version": 0}}}}]'
+              ) % (record_attr, record_attr, record_attr, record_attr, settings.APP_KEY)
 
     results_2 = app.stream(stream_app, event_2, **{filter_by: True})
 
@@ -117,8 +123,9 @@ def test_empty_records_error(settings):
                 '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
                 '"app_version": 0}}}}]'
             ) % settings.APP_KEY
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     with pytest.raises(ValueError) as exc:
         app.stream(stream_app, event)
@@ -132,8 +139,9 @@ def test_only_one_filter_allowed_at_a_time(settings):
                 '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "", "data": {}}], '
                 '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}}]'
             ) % settings.APP_KEY
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     with pytest.raises(ValueError) as exc:
         app.stream(stream_app, event, filter_by_timestamp=True, filter_by_depth=True)
