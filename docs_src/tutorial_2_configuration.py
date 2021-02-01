@@ -8,5 +8,5 @@ def stream_app(event: StreamEvent, api: Api, cache: Cache):
 
 def lambda_handler(event, context):
     """AWS lambda handler"""
-    corva = Corva()
+    corva = Corva(context)
     corva.stream(stream_app, event, filter_by_timestamp=True)

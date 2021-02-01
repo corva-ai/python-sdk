@@ -34,7 +34,10 @@ class Api:
         self.api_key = api_key
         self.app_name = app_name
         self.session = self._init_session(
-            api_key=api_key, app_name=app_name, max_retries=max_retries, allowed_methods=list(self.ALLOWED_METHODS)
+            api_key=api_key,
+            app_name=app_name,
+            max_retries=self.max_retries,
+            allowed_methods=list(self.ALLOWED_METHODS)
         )
 
     @staticmethod

@@ -63,7 +63,7 @@ def stream_app(event: StreamEvent, api: Api, cache: Cache):
 
 
 def lambda_handler(event, context):
-    corva = Corva()
+    corva = Corva(context)
     corva.stream(stream_app, event)
 ```
 
@@ -83,7 +83,7 @@ def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
 
 
 def lambda_handler(event, context):
-    corva = Corva()
+    corva = Corva(context)
     corva.scheduled(scheduled_app, event)
 ```
 
@@ -125,7 +125,7 @@ def my_app(event, api: Api, cache):
 
 
 def lambda_handler(event, context):
-    corva = Corva()
+    corva = Corva(context)
     corva.scheduled(my_app, event)
  ```
 
@@ -154,7 +154,7 @@ other operations with data.
    
    
    def lambda_handler(event, context):
-      corva = Corva()
+      corva = Corva(context)
       corva.scheduled(my_app, event)
    ```
 
@@ -171,7 +171,7 @@ other operations with data.
    
    
    def lambda_handler(event, context):
-      corva = Corva()
+      corva = Corva(context)
       corva.scheduled(my_app, event)
    ```
 
@@ -192,7 +192,7 @@ other operations with data.
    
    
    def lambda_handler(event, context):
-      corva = Corva()
+      corva = Corva(context)
       corva.scheduled(my_app, event)
    ```
 4. Expiry, ttl and exists. **Note**: by default `Cache` sets an expiry to 60 days.
@@ -218,7 +218,7 @@ other operations with data.
    
    
    def lambda_handler(event, context):
-      corva = Corva()
+      corva = Corva(context)
       corva.scheduled(my_app, event)
    ```
 

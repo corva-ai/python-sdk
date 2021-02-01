@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
 from corva.application import Corva
@@ -16,8 +17,9 @@ def test_set_completed_status():
         '"schedule_start": "1970-01-01T00:00:00", "schedule_end": "1970-01-01T00:00:00", "asset_id": 0, '
         '"asset_name": "", "asset_type": "", "timezone": "", "log_type": ""}]]'
     )
+    context = SimpleNamespace(client_context=None)
 
-    app = Corva()
+    app = Corva(context)
 
     results = app.scheduled(scheduled_app, event)
 

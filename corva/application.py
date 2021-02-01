@@ -11,23 +11,31 @@ from corva.runners.stream import stream_runner
 class Corva:
     def __init__(
          self,
+         context: Any,
+         *,
          timeout: Optional[int] = None,
          max_retries: Optional[int] = None,
          cache_settings: Optional[dict] = None
     ):
         """
         params:
+         context: AWS Lambda context object
          timeout: api request timeout, set None to use default value
          max_retries: number or api retries for failed request, set to None to use default value
          cache_settings: additional cache settings
         """
+
+        api_key = getattr(context.client_context, 'api_key', None) or SETTINGS.API_KEY
+
+        if api_key is None:
+            raise Exception('No api_key found.')
 
         self.cache_settings = cache_settings or {}
 
         self.api = Api(
             api_url=SETTINGS.API_ROOT_URL,
             data_api_url=SETTINGS.DATA_API_ROOT_URL,
-            api_key=SETTINGS.API_KEY,
+            api_key=api_key,
             app_name=SETTINGS.APP_NAME,
             timeout=timeout,
             max_retries=max_retries
