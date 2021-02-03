@@ -12,13 +12,6 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
-class BaseEvent(ABC):
-    @staticmethod
-    @abstractmethod
-    def from_raw_event(event: str, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
-        pass
-
-
 class CorvaModelConfig:
     allow_population_by_field_name = True
     arbitrary_types_allowed = True
@@ -32,6 +25,13 @@ class CorvaBaseModel(pydantic.BaseModel):
 
 class CorvaGenericModel(GenericModel):
     Config = CorvaModelConfig
+
+
+class BaseEvent(CorvaBaseModel, ABC):
+    @staticmethod
+    @abstractmethod
+    def from_raw_event(event: str, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
+        pass
 
 
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
@@ -64,7 +64,7 @@ class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
         redis_adapter = RedisAdapter(
             default_name=self.cache_key,
             cache_url=self.settings.CACHE_URL,
-            **self.cache_settings
+            **self.cache_settings,
         )
 
         self._cache = RedisState(redis=redis_adapter)
