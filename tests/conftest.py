@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from fakeredis import FakeRedis, FakeServer
 
-from corva.network.api import Api
+from corva.api import Api
 from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState

@@ -3,7 +3,7 @@ from typing import Any, Callable, List, Optional
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
-from corva.network.api import Api
+from corva.api import Api
 from corva.runners.scheduled import scheduled_runner
 from corva.runners.stream import stream_runner
 
