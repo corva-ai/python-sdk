@@ -3,59 +3,48 @@ import re
 from typing import Optional
 
 import requests
-import requests.adapters
-import urllib3
 
 
-class Api(requests.Session):
+class Api:
     """Provides a convenient way to access Corva API and Corva Data API
 
-    Api is a thin wrapper around `requests.Session` that adds
-     authorization, timeouts and retries to requests.
+    Api is a thin wrapper around `requests` library that adds
+     convenient urls, authorization and timeouts to requests.
     """
 
-    MAX_RETRIES = 3
     TIMEOUT = 30  # seconds
 
     def __init__(
         self,
+        *,
         api_url: str,
         data_api_url: str,
         api_key: str,
         app_name: str,
         timeout: Optional[int] = None,
-        max_retries: Optional[int] = None,
     ):
-        super().__init__()
-
-        self.timeout = timeout or self.TIMEOUT
-        self.max_retries = max_retries or self.MAX_RETRIES
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_name = app_name
+        self.timeout = timeout or self.TIMEOUT
 
-        self.headers.update(
-            {
-                'Authorization': f'API {api_key}',
-                'X-Corva-App': app_name,
-            }
-        )
+    def get(self, path: str, **kwargs):
+        return self._request('GET', path, **kwargs)
 
-        self.mount(
-            'https://',
-            requests.adapters.HTTPAdapter(
-                max_retries=urllib3.Retry(
-                    total=self.max_retries,
-                    status_forcelist=[408, 429, 500, 502, 503, 504],
-                    backoff_factor=0.3,
-                    raise_on_redirect=False,
-                    raise_on_status=False,
-                )
-            ),
-        )
+    def post(self, path: str, **kwargs):
+        return self._request('POST', path, **kwargs)
 
-    def _get_url(self, suffix: str) -> str:
+    def patch(self, path: str, **kwargs):
+        return self._request('PATCH', path, **kwargs)
+
+    def put(self, path: str, **kwargs):
+        return self._request('PUT', path, **kwargs)
+
+    def delete(self, path: str, **kwargs):
+        return self._request('DELETE', path, **kwargs)
+
+    def _get_url(self, suffix: str):
         """Builds complete url from base prefix and suffix
 
         returns:
@@ -77,35 +66,49 @@ class Api(requests.Session):
 
         return posixpath.join(self.api_url, suffix)
 
-    def request(
+    @property
+    def _auth_headers(self):
+        return {
+            'Authorization': f'API {self.api_key}',
+            'X-Corva-App': self.app_name,
+        }
+
+    def _request(
         self,
         method: str,
-        url: str,
+        path: str,
+        *,
         data: Optional[dict] = None,
-        max_retries: Optional[int] = None,
-        **kwargs,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        timeout: Optional[int] = None,
     ) -> requests.Response:
         """Executes the request
 
         params:
          method: HTTP method
-         url: url to call
-         data: request body (will be automatically casted to json)
-         max_retries: custom value for max number of retries
-        raises:
-         requests.HTTPError for unsuccessful request without retries
-         urllib3.exceptions.MaxRetryError for unsuccessful request with retries
+         path: url to call
+         data: request body
+         params: url query string params
+         headers: additional headers to include in request
+         timeout: custom request timeout in seconds
+        returns: requests.Response instance
         """
 
-        max_retries = max_retries or self.max_retries
-        kwargs.setdefault('timeout', self.timeout)
+        timeout = timeout or self.timeout
 
-        if data is not None:  # Corva endpoints work only with json data
-            kwargs['json'] = data
+        headers = {
+            **self._auth_headers,
+            **{headers or {}},
+        }
 
-        # not thread safe
-        self.adapters['https://'].max_retries.total = max_retries
-
-        response = super().request(method, self._get_url(url), **kwargs)
+        response = requests.request(
+            method=method,
+            url=self._get_url(path),
+            params=params,
+            json=data,
+            headers=headers,
+            timeout=timeout,
+        )
 
         return response
