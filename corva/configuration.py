@@ -6,8 +6,8 @@ import pydantic
 
 class Settings(pydantic.BaseSettings):
     # api
-    API_ROOT_URL: Optional[str] = None
-    DATA_API_ROOT_URL: Optional[str] = None
+    API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
+    DATA_API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
     API_KEY: Optional[str] = None
 
     # cache
