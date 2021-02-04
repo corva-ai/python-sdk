@@ -29,8 +29,8 @@ class Corva:
         api_key = SETTINGS.API_KEY
         try:
             # When available, use the API key from the client context
-            api_key = context.client_context["env"]["api_key"]
-        except KeyError:
+            api_key = context.client_context.env["API_KEY"]
+        except (AttributeError, KeyError):
             pass
 
         if api_key is None:
