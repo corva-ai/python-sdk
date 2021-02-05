@@ -101,6 +101,7 @@ class Api:
         """
 
         timeout = timeout or self.timeout
+        self._validate_timeout(timeout)
 
         url = self._get_url(path)
 
@@ -115,15 +116,13 @@ class Api:
             params=params,
             json=data,
             headers=headers,
-            timeout=self._validate_timeout(timeout),
+            timeout=timeout,
         )
 
         return response
 
-    def _validate_timeout(self, timeout: int) -> int:
-        if timeout >= self.TIMEOUT_LIMITS[0] and timeout <= self.TIMEOUT_LIMITS[1]:
-            return timeout
-
-        raise ValueError(
-            f'Timeout must be in range from {self.TIMEOUT_LIMITS[0]}sec to {self.TIMEOUT_LIMITS[1]}sec.'
-        )
+    def _validate_timeout(self, timeout: int) -> bool:
+        if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
+            raise ValueError(
+                f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and {self.TIMEOUT_LIMITS[1]} seconds.'
+            )
