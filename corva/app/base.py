@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from corva.event import Event
 from corva.logger import DEFAULT_LOGGER
 from corva.models.base import BaseContext
-from corva.network.api import Api
+from corva.api import Api
 from corva.configuration import SETTINGS
 
 
