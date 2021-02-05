@@ -23,15 +23,14 @@ $ pip install corva-sdk
 
 ## App types
 
-There are three app types, that you can build:
+There are three app types that you can build:
 
-1. `stream` - works with a real-time data
+1. `stream` - works with real-time data
 2. `scheduled` - works with data at defined schedules/intervals
    (e.g. once an hour)
 3. `task` - works with data on-demand
 
-**Note**: it is recommended to use type hints like in examples below, so that editors and tools can give you better
-support.
+**Note**: Use type hints like those in the examples below for better support from editors and tools.
 
 #### Stream
 
@@ -134,7 +133,7 @@ def lambda_handler(event, context):
 Apps might need to share some data between runs. The sdk provides a `Cache` class, that allows you to store, load and do
 other operations with data.
 `Cache` instance is inserted automatically as a third parameter to `stream` and `scheduled` apps. <br>
-**Note**: `task` apps don't get `Cache` parameter as they aren't meant to store data between invokes.<br>
+**Note**: `task` apps don't get a `Cache` parameter as they aren't meant to store data between invokes.<br>
 
 `Cache` uses a dict-like database, so the data is stored as `key:value` pairs.
 `key` should be of `str` type, and `value` can have any of the following types: `str`, `int`, `float` and `bytes`.
