@@ -42,7 +42,7 @@ def test_default_headers(event, mocker: MockerFixture):
     ],
 )
 def test_get_url(
-    event, mocker: MockerFixture, path, url, type_: Literal['data', 'corva']
+    event, mocker: MockerFixture, path, url, type_: Literal['data', 'corva', '']
 ):
     request_patch = mocker.patch('requests.request')
 
