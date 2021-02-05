@@ -30,8 +30,7 @@ There are three app types that you can build:
    (e.g. once an hour)
 3. `task` - works with data on-demand
 
-**Note**: It is recommended to use type hints like those in the examples below. <br>
-This allows for better support from editors and tools.
+**Note**: Use type hints like those in the examples below for better support from editors and tools.
 
 #### Stream
 
