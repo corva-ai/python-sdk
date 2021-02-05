@@ -51,7 +51,7 @@ class Api:
     def delete(self, path: str, **kwargs):
         return self._request('DELETE', path, **kwargs)
 
-    def _get_url(self, suffix: str):
+    def _get_url(self, path: str):
         """Builds complete url.
 
         Args:
@@ -63,18 +63,18 @@ class Api:
           3 corva api url, if above points are False.
         """
 
-        if suffix.startswith('http'):
-            return suffix
+        if path.startswith('http'):
+            return path
 
-        suffix = suffix.lstrip(
+        path = path.lstrip(
             '/'
         )  # delete leading forward slash for posixpath.join to work correctly
 
         # search text like api/v1 or api/v10 in path
-        if bool(re.search(r'api/v\d+', suffix)):
-            return posixpath.join(self.data_api_url, suffix)
+        if bool(re.search(r'api/v\d+', path)):
+            return posixpath.join(self.data_api_url, path)
 
-        return posixpath.join(self.api_url, suffix)
+        return posixpath.join(self.api_url, path)
 
     def _request(
         self,
