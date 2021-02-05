@@ -9,7 +9,7 @@ class Api:
     """Provides a convenient way to access Corva API and Corva Data API
 
     Api is a thin wrapper around `requests` library that adds
-     convenient urls, authorization and timeouts to requests.
+     authorization, convenient url usage  and timeouts to requests.
     """
 
     TIMEOUT = 30  # seconds
@@ -28,6 +28,13 @@ class Api:
         self.api_key = api_key
         self.app_name = app_name
         self.timeout = timeout or self.TIMEOUT
+
+    @property
+    def auth_headers(self):
+        return {
+            'Authorization': f'API {self.api_key}',
+            'X-Corva-App': self.app_name,
+        }
 
     def get(self, path: str, **kwargs):
         return self._request('GET', path, **kwargs)
@@ -50,7 +57,7 @@ class Api:
         returns:
          1 suffix param, if suffix is a complete url
          2 data api url, if suffix contains data api url pattern
-         3 corva api url, if above points are not True
+         3 corva api url, if above points are False
         """
 
         if suffix.startswith('http'):
@@ -65,13 +72,6 @@ class Api:
             return posixpath.join(self.data_api_url, suffix)
 
         return posixpath.join(self.api_url, suffix)
-
-    @property
-    def _auth_headers(self):
-        return {
-            'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_name,
-        }
 
     def _request(
         self,
@@ -98,8 +98,8 @@ class Api:
         timeout = timeout or self.timeout
 
         headers = {
-            **self._auth_headers,
-            **{headers or {}},
+            **self.auth_headers,
+            **(headers or {}),
         }
 
         response = requests.request(
