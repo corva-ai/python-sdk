@@ -1,12 +1,14 @@
 from types import SimpleNamespace
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock, patch
 
 from corva.application import Corva
 
 
 def scheduled_app(event, api, state):
-    api.session.request = MagicMock()
+    patch('requests.request').start()
+
     api.post = Mock(wraps=api.post)  # spy on api.post
+
     return api
 
 
