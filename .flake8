@@ -2,6 +2,7 @@
 exclude =
     __pycache__,
     venv,
+    .env,
     .pytest_cache,
     .git,
     .idea
