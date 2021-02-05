@@ -102,6 +102,8 @@ class Api:
 
         timeout = timeout or self.timeout
 
+        url = self._get_url(path)
+
         headers = {
             **self.default_headers,
             **(headers or {}),
@@ -109,7 +111,7 @@ class Api:
 
         response = requests.request(
             method=method,
-            url=self._get_url(path),
+            url=url,
             params=params,
             json=data,
             headers=headers,
