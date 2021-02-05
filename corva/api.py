@@ -6,10 +6,10 @@ import requests
 
 
 class Api:
-    """Provides a convenient way to access Corva API and Corva Data API
+    """Provides a convenient way to access Corva API and Corva Data API.
 
     Api is a thin wrapper around `requests` library that adds
-     authorization, convenient url usage  and timeouts to requests.
+    authorization, convenient url usage  and timeouts to requests.
     """
 
     TIMEOUT = 30  # seconds
@@ -52,12 +52,15 @@ class Api:
         return self._request('DELETE', path, **kwargs)
 
     def _get_url(self, suffix: str):
-        """Builds complete url from base prefix and suffix
+        """Builds complete url.
 
-        returns:
-         1 suffix param, if suffix is a complete url
-         2 data api url, if suffix contains data api url pattern
-         3 corva api url, if above points are False
+        Args:
+          path: either complete or only path part of the HTTP URL.
+
+        Returns:
+          1 path param, if path is a complete url.
+          2 data api url, if path contains data api url pattern.
+          3 corva api url, if above points are False.
         """
 
         if suffix.startswith('http'):
@@ -83,16 +86,18 @@ class Api:
         headers: Optional[dict] = None,
         timeout: Optional[int] = None,
     ) -> requests.Response:
-        """Executes the request
+        """Executes the request.
 
-        params:
-         method: HTTP method
-         path: url to call
-         data: request body, that will be casted to json
-         params: url query string params
-         headers: additional headers to include in request
-         timeout: custom request timeout in seconds
-        returns: requests.Response instance
+        Args:
+          method: HTTP method.
+          path: url to call.
+          data: request body, that will be casted to json.
+          params: url query string params.
+          headers: additional headers to include in request.
+          timeout: custom request timeout in seconds.
+
+        Returns:
+          requests.Response instance.
         """
 
         timeout = timeout or self.timeout
