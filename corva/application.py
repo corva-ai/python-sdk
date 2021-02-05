@@ -1,27 +1,25 @@
 from typing import Any, Callable, List, Optional
 
+from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
-from corva.api import Api
 from corva.runners.scheduled import scheduled_runner
 from corva.runners.stream import stream_runner
 
 
 class Corva:
     def __init__(
-         self,
-         context: Any,
-         *,
-         timeout: Optional[int] = None,
-         max_retries: Optional[int] = None,
-         cache_settings: Optional[dict] = None
+        self,
+        context: Any,
+        *,
+        timeout: Optional[int] = None,
+        cache_settings: Optional[dict] = None
     ):
         """
         params:
          context: AWS Lambda context object
          timeout: api request timeout, set None to use default value
-         max_retries: number or api retries for failed request, set to None to use default value
          cache_settings: additional cache settings
         """
 
@@ -38,16 +36,15 @@ class Corva:
             api_key=api_key,
             app_name=SETTINGS.APP_NAME,
             timeout=timeout,
-            max_retries=max_retries
         )
 
     def stream(
-         self,
-         fn: Callable,
-         event: str,
-         *,
-         filter_by_timestamp: bool = False,
-         filter_by_depth: bool = False
+        self,
+        fn: Callable,
+        event: str,
+        *,
+        filter_by_timestamp: bool = False,
+        filter_by_depth: bool = False
     ) -> List[Any]:
         """Runs stream app
 
@@ -72,7 +69,7 @@ class Corva:
                 api=self.api,
                 cache_settings=self.cache_settings,
                 filter_by_timestamp=filter_by_timestamp,
-                filter_by_depth=filter_by_depth
+                filter_by_depth=filter_by_depth,
             )
 
             results.append(stream_runner(fn=fn, context=ctx))
@@ -97,7 +94,7 @@ class Corva:
                 event=event,
                 settings=SETTINGS.copy(),
                 api=self.api,
-                cache_settings=self.cache_settings
+                cache_settings=self.cache_settings,
             )
 
             results.append(scheduled_runner(fn=fn, context=ctx))
