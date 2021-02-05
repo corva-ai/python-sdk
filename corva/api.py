@@ -12,7 +12,7 @@ class Api:
     authorization, convenient url usage  and timeouts to requests.
     """
 
-    TIMEOUT = 30  # seconds
+    TIMEOUT_LIMITS = (3, 30)  # seconds
 
     def __init__(
         self,
@@ -27,7 +27,7 @@ class Api:
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_name = app_name
-        self.timeout = timeout or self.TIMEOUT
+        self.timeout = timeout or self.TIMEOUT_LIMITS[1]
 
     @property
     def default_headers(self):
@@ -115,7 +115,15 @@ class Api:
             params=params,
             json=data,
             headers=headers,
-            timeout=timeout,
+            timeout=self._validate_timeout(timeout),
         )
 
         return response
+
+    def _validate_timeout(self, timeout: int) -> int:
+        if timeout >= self.TIMEOUT_LIMITS[0] and timeout <= self.TIMEOUT_LIMITS[1]:
+            return timeout
+
+        raise ValueError(
+            f'Timeout must be in range from {self.TIMEOUT_LIMITS[0]}sec to {self.TIMEOUT_LIMITS[1]}sec.'
+        )

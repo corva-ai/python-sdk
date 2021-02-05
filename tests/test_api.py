@@ -73,7 +73,7 @@ def test_data_passed_as_json(event, mocker: MockerFixture):
     assert request_patch.call_args.kwargs['json'] == {}
 
 
-@pytest.mark.parametrize('timeout', [None, 12345])
+@pytest.mark.parametrize('timeout', [None, 20])
 def test_timeout(event, mocker: MockerFixture, timeout):
     request_patch = mocker.patch('requests.request')
 
@@ -98,3 +98,22 @@ def test_custom_headers(event, mocker: MockerFixture):
 
     request_patch.assert_called_once()
     assert request_patch.call_args.kwargs['headers']['custom'] == 'value'
+
+
+@pytest.mark.parametrize(
+    'timeout, raises',
+    [(3, False), (30, False), (2, True), (31, True)],
+)
+def test_timeout_limits(event, mocker: MockerFixture, timeout, raises):
+    request_patch = mocker.patch('requests.request')
+
+    api = Corva(context=None).stream(app, event)[0]
+
+    if raises:
+        pytest.raises(ValueError, api.post, '', timeout=timeout)
+        return
+
+    api.post('', timeout=timeout)
+
+    request_patch.assert_called_once()
+    assert request_patch.call_args.kwargs['timeout'] == timeout
