@@ -68,9 +68,8 @@ def test_group_by_field():
 def test_get_task_data(mocker: MockerFixture, task_app, task_data_factory):
     task_data = task_data_factory()
 
-    mocker.patch.object(
-        task_app.api.session,
-        'request',
+    mocker.patch(
+        'requests.request',
         return_value=mocker.Mock(**{'json.return_value': task_data.dict()})
     )
     get_spy = mocker.spy(task_app.api, 'get')
@@ -85,7 +84,7 @@ def test_update_task_data(mocker: MockerFixture, task_app):
     status = TaskStatus.fail.value
     data = UpdateTaskData()
 
-    mocker.patch.object(task_app.api.session, 'request')
+    mocker.patch('requests.request')
     put_spy = mocker.spy(task_app.api, 'put')
 
     task_app.update_task_data(task_id=TASK_ID, status=status, data=data)
