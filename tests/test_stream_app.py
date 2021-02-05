@@ -19,7 +19,7 @@ def stream_app(event, api, cache):
 def test_is_completed(collection, expected, settings):
     event = (
                 '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "%s", "data": {}}],'
-                ' "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}}]'
+                ' "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
             ) % (collection, settings.APP_KEY)
     context = SimpleNamespace(client_context=None)
 
@@ -33,8 +33,7 @@ def test_is_completed(collection, expected, settings):
 def test_asset_id_persists_after_no_records_left_after_filtering(settings):
     event = (
                 '[{"records": [{"asset_id": 123, "company_id": 0, "version": 0, "collection": "wits.completed", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                '"app_version": 0}}}}]'
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
             ) % settings.APP_KEY
     context = SimpleNamespace(client_context=None)
 
@@ -58,8 +57,7 @@ def test_filter_by(filter_by, record_attr, settings):
                 '[{"records": [{"%s": -2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": -1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                 '"data": {}}, {"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                '"app_version": 0}}}}]'
+                '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
             ) % (record_attr, record_attr, record_attr, settings.APP_KEY)
     context = SimpleNamespace(client_context=None)
 
@@ -84,8 +82,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
                   '[{"records": [{"%s": 0, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                   '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                   '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                  '"app_version": 0}}}}]'
+                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
               ) % (record_attr, record_attr, record_attr, settings.APP_KEY)
     context = SimpleNamespace(client_context=None)
 
@@ -101,8 +98,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
                   '"data": {}}, {"%s": 1, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                   '"data": {}}, {"%s": 2, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
                   '"data": {}}, {"%s": 3, "asset_id": 0, "company_id": 0, "version": 0, "collection": "", '
-                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                  '"app_version": 0}}}}]'
+                  '"data": {}}], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
               ) % (record_attr, record_attr, record_attr, record_attr, settings.APP_KEY)
 
     results_2 = app.stream(stream_app, event_2, **{filter_by: True})
@@ -120,8 +116,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr, settings):
 
 def test_empty_records_error(settings):
     event = (
-                '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, '
-                '"app_version": 0}}}}]'
+                '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
             ) % settings.APP_KEY
     context = SimpleNamespace(client_context=None)
 
@@ -137,7 +132,7 @@ def test_empty_records_error(settings):
 def test_only_one_filter_allowed_at_a_time(settings):
     event = (
                 '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "", "data": {}}], '
-                '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}}]'
+                '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
             ) % settings.APP_KEY
     context = SimpleNamespace(client_context=None)
 

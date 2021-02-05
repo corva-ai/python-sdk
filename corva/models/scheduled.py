@@ -16,7 +16,6 @@ class ScheduledEventData(CorvaBaseModel):
     environment: str
     app: int
     app_key: str
-    app_version: Optional[int]
     app_connection_id: int = pydantic.Field(alias='app_connection')
     app_stream_id: int = pydantic.Field(alias='app_stream')
     source_type: str

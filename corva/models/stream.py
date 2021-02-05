@@ -25,7 +25,6 @@ class Record(CorvaBaseModel):
 
 class AppMetadata(CorvaBaseModel):
     app_connection_id: int
-    app_version: int
 
 
 class StreamEventMetadata(CorvaBaseModel):
