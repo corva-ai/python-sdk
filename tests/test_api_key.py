@@ -26,6 +26,16 @@ def test_no_env_in_client_context(mocker: MockerFixture):
     assert corva.api.api_key == '456'
 
 
+def test_no_key_in_client_context_env(mocker: MockerFixture):
+    context = SimpleNamespace(client_context=SimpleNamespace(env={}))
+
+    mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
+
+    corva = Corva(context=context)
+
+    assert corva.api.api_key == '456'
+
+
 def test_no_api_key_found(mocker: MockerFixture):
     context = SimpleNamespace(client_context=None)
     mocker.patch('corva.configuration.SETTINGS.API_KEY', None)
