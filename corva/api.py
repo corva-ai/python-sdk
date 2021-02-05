@@ -30,7 +30,7 @@ class Api:
         self.timeout = timeout or self.TIMEOUT
 
     @property
-    def auth_headers(self):
+    def default_headers(self):
         return {
             'Authorization': f'API {self.api_key}',
             'X-Corva-App': self.app_name,
@@ -103,7 +103,7 @@ class Api:
         timeout = timeout or self.timeout
 
         headers = {
-            **self.auth_headers,
+            **self.default_headers,
             **(headers or {}),
         }
 
