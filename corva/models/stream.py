@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pydantic
 
@@ -83,10 +83,14 @@ class StreamEventData(CorvaBaseModel):
 
 class StreamEvent(BaseEvent, StreamEventData):
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> List[StreamEvent]:
+    def from_raw_event(event: Union[str, List], **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        events = pydantic.parse_raw_as(List[StreamEvent], event)  # type: List[StreamEvent]
+        parse = pydantic.parse_obj_as
+        if isinstance(event, str):
+            parse = pydantic.parse_raw_as
+
+        events = parse(List[StreamEvent], event)  # type: List[StreamEvent]
 
         for event in events:
             event.app_key = app_key
