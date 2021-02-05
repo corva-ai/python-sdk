@@ -88,7 +88,7 @@ class Api:
         params:
          method: HTTP method
          path: url to call
-         data: request body
+         data: request body, that will be casted to json
          params: url query string params
          headers: additional headers to include in request
          timeout: custom request timeout in seconds
