@@ -19,7 +19,7 @@ def app(event, api, cache):
     return api
 
 
-def test_default_headers(event, mocker: MockerFixture):
+def test_request_default_headers(event, mocker: MockerFixture):
     request_patch = mocker.patch('requests.request')
 
     api = Corva(context=None).stream(app, event)[0]
@@ -27,8 +27,10 @@ def test_default_headers(event, mocker: MockerFixture):
     api.get('')  # do some api call
 
     request_patch.assert_called_once()
-    assert 'Authorization' in request_patch.call_args.kwargs['headers']
-    assert 'X-Corva-App' in request_patch.call_args.kwargs['headers']
+    assert not (
+        set(request_patch.call_args.kwargs['headers'])
+        - {'Authorization', 'X-Corva-App'}
+    )
 
 
 @pytest.mark.parametrize(
@@ -41,7 +43,7 @@ def test_default_headers(event, mocker: MockerFixture):
         ['/v10/path', '%s/v10/path', 'corva'],
     ],
 )
-def test_get_url(
+def test_request_url(
     event, mocker: MockerFixture, path, url, type_: Literal['data', 'corva', '']
 ):
     request_patch = mocker.patch('requests.request')
@@ -62,7 +64,7 @@ def test_get_url(
     assert request_patch.call_args.kwargs['url'] == expected
 
 
-def test_data_passed_as_json(event, mocker: MockerFixture):
+def test_request_data_param_passed_as_json(event, mocker: MockerFixture):
     request_patch = mocker.patch('requests.request')
 
     api = Corva(context=None).stream(app, event)[0]
@@ -73,7 +75,7 @@ def test_data_passed_as_json(event, mocker: MockerFixture):
     assert request_patch.call_args.kwargs['json'] == {}
 
 
-def test_custom_headers(event, mocker: MockerFixture):
+def test_request_additional_headers(event, mocker: MockerFixture):
     request_patch = mocker.patch('requests.request')
 
     api = Corva(context=None).stream(app, event)[0]
@@ -81,6 +83,7 @@ def test_custom_headers(event, mocker: MockerFixture):
     api.post('', headers={'custom': 'value'})
 
     request_patch.assert_called_once()
+    assert len(request_patch.call_args.kwargs['headers']) == 3
     assert request_patch.call_args.kwargs['headers']['custom'] == 'value'
 
 
@@ -88,7 +91,7 @@ def test_custom_headers(event, mocker: MockerFixture):
     'timeout, raises',
     [(3, False), (30, False), (2, True), (31, True)],
 )
-def test_timeout_limits(event, mocker: MockerFixture, timeout, raises):
+def test_request_timeout_limits(event, mocker: MockerFixture, timeout, raises):
     request_patch = mocker.patch('requests.request')
 
     api = Corva(context=None).stream(app, event)[0]
