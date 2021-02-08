@@ -17,6 +17,8 @@ class ScheduledEvent(BaseEvent):
     schedule_id: int = pydantic.Field(..., alias='schedule')
     schedule_start: datetime
     schedule_end: datetime
+    app_connection_id: int = pydantic.Field(..., alias='app_connection')
+    app_stream_id: int = pydantic.Field(..., alias='app_stream')
 
     # optional fields
     cron_string: Optional[str] = pydantic.Field(
@@ -25,8 +27,6 @@ class ScheduledEvent(BaseEvent):
     environment: Optional[Literal['qa', 'staging', 'production']] = None
     app_id: Optional[int] = pydantic.Field(None, alias='app')
     app_key: Optional[str] = pydantic.Field(None, description='Unique app identifier')
-    app_connection_id: Optional[int] = pydantic.Field(None, alias='app_connection')
-    app_stream_id: Optional[int] = pydantic.Field(None, alias='app_stream')
     source_type: Optional[
         Literal['drilling', 'drillout', 'frac', 'wireline']
     ] = pydantic.Field(None, description='Source Data Type')
