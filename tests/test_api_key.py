@@ -7,7 +7,7 @@ from corva.application import Corva
 
 
 def test_api_key_in_context(mocker: MockerFixture):
-    context = SimpleNamespace(client_context=SimpleNamespace(api_key='123'))
+    context = SimpleNamespace(client_context=SimpleNamespace(env={'API_KEY': '123'}))
 
     mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
 
@@ -16,8 +16,18 @@ def test_api_key_in_context(mocker: MockerFixture):
     assert corva.api.api_key == '123'
 
 
-def test_api_key_in_settings(mocker: MockerFixture):
+def test_no_env_in_client_context(mocker: MockerFixture):
     context = SimpleNamespace(client_context=None)
+
+    mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
+
+    corva = Corva(context=context)
+
+    assert corva.api.api_key == '456'
+
+
+def test_no_key_in_client_context_env(mocker: MockerFixture):
+    context = SimpleNamespace(client_context=SimpleNamespace(env={}))
 
     mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
 
@@ -33,4 +43,4 @@ def test_no_api_key_found(mocker: MockerFixture):
     with pytest.raises(Exception) as exc:
         Corva(context=context)
 
-    assert str(exc.value) == 'No api_key found.'
+    assert str(exc.value) == 'No API Key found.'

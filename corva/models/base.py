@@ -7,7 +7,7 @@ import pydantic
 from pydantic.generics import GenericModel
 
 from corva.configuration import Settings
-from corva.network.api import Api
+from corva.api import Api
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 

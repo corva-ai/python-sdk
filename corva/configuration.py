@@ -6,12 +6,12 @@ import pydantic
 
 class Settings(pydantic.BaseSettings):
     # api
-    API_ROOT_URL: Optional[pydantic.HttpUrl] = None
-    DATA_API_ROOT_URL: Optional[pydantic.HttpUrl] = None
+    API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
+    DATA_API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
     API_KEY: Optional[str] = None
 
     # cache
-    CACHE_URL: Optional[pydantic.RedisDsn] = None
+    CACHE_URL: Optional[str] = None
 
     # logger
     LOG_LEVEL: str = 'WARN'
