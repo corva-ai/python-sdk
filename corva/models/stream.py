@@ -74,7 +74,7 @@ class StreamEvent(BaseEvent):
         return self.metadata.app_stream_id
 
     @property
-    def is_completed(self) -> bool:
+    def _is_completed(self) -> bool:
         """there can only be 1 completed record, always located at the end of the list"""
 
         if self.records:
@@ -156,7 +156,7 @@ class StreamEvent(BaseEvent):
     ) -> StreamEvent:
         records = event.records
 
-        if event.is_completed:
+        if event._is_completed:
             # there can only be 1 completed record, always located at the end of the list
             records = records[:-1]  # remove "completed" record
 
