@@ -42,7 +42,7 @@ class ScheduledEvent(BaseEvent):
     )
     log_identifier: Optional[str] = pydantic.Field(
         None,
-        description='Unique Log Identifier, only available for depth based streams',
+        description='Unique Log Identifier, only available for depth-based streams',
     )
     day_shift_start: Optional[str] = pydantic.Field(
         None, description='Day shift start time'
