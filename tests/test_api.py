@@ -10,8 +10,8 @@ from corva.configuration import SETTINGS
 @pytest.fixture(scope='function')
 def event():
     return (
-        '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "", "data": {}}], '
-        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0, "app_version": 0}}}}]'
+        '[{"records": [{"asset_id": 0, "timestamp": 0}], '
+        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
     ) % SETTINGS.APP_KEY
 
 
