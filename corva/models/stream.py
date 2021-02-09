@@ -110,14 +110,16 @@ class StreamEvent(BaseEvent):
                 'asset_id can\'t be set manually, it is extracted from records automatically.'
             )
 
-        records = values.get('records', [])  # type: List[dict]
+        records = pydantic.parse_obj_as(
+            List[Record], values.get('records', [])
+        )  # type: List[Record]
 
-        if not isinstance(records, list) or len(records) == 0:
+        if len(records) == 0:
             raise ValueError(
                 'Can\'t set asset_id as records are empty (which should not happen).'
             )
 
-        values['asset_id'] = Record.parse_obj(records[0]).asset_id
+        values['asset_id'] = records[0].asset_id
 
         return values
 
