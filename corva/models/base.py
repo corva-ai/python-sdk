@@ -3,11 +3,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-import pydantic
-from pydantic.generics import GenericModel
+import pydantic.generics
 
-from corva.configuration import Settings
 from corva.api import Api
+from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
@@ -23,10 +22,6 @@ class CorvaBaseModel(pydantic.BaseModel):
     Config = CorvaModelConfig
 
 
-class CorvaGenericModel(GenericModel):
-    Config = CorvaModelConfig
-
-
 class BaseEvent(CorvaBaseModel, ABC):
     @staticmethod
     @abstractmethod
@@ -37,8 +32,10 @@ class BaseEvent(CorvaBaseModel, ABC):
 BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
 
 
-class BaseContext(CorvaGenericModel, Generic[BaseEventTV]):
+class BaseContext(pydantic.generics.GenericModel, Generic[BaseEventTV]):
     """Stores common data for running a Corva app."""
+
+    Config = CorvaModelConfig
 
     event: BaseEventTV
     settings: Settings
