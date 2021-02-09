@@ -124,16 +124,10 @@ class StreamEvent(BaseEvent):
         return values
 
     @staticmethod
-    def from_raw_event(event: Union[str, List], **kwargs) -> List[StreamEvent]:
+    def from_raw_event(event: List[dict], **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        parse = pydantic.parse_obj_as
-        if isinstance(event, str):
-            parse = pydantic.parse_raw_as
-
-        event_dicts = parse(List[dict], event)  # type: List[dict]
-
-        for event_dict in event_dicts:
+        for event_dict in event:
             if 'app_key' in event_dict:
                 raise ValueError(
                     'app_key can\'t be set manually, it is extracted from env and set automatically.'
@@ -141,7 +135,7 @@ class StreamEvent(BaseEvent):
 
             event_dict['app_key'] = app_key  # add app_key to each event
 
-        events = pydantic.parse_obj_as(List[StreamEvent], event_dicts)
+        events = pydantic.parse_obj_as(List[StreamEvent], event)
 
         return events
 
