@@ -3,7 +3,13 @@ from pytest_mock import MockerFixture
 
 from corva.app.task import TaskApp
 from corva.event import Event
-from corva.models.task import TaskStatus, TaskData, TaskEventData, TaskContext, UpdateTaskData
+from corva.models.task import (
+    TaskContext,
+    TaskData,
+    TaskEvent,
+    TaskStatus,
+    UpdateTaskData,
+)
 
 TASK_ID = '1'
 
@@ -34,24 +40,24 @@ def task_data_factory():
 
 
 @pytest.fixture(scope='session')
-def task_event_data_factory():
-    def _task_event_data_factory(**kwargs):
+def task_event_factory():
+    def _task_event_factory(**kwargs):
         for key, val in dict(
              task_id=str(),
              version=2
         ).items():
             kwargs.setdefault(key, val)
 
-        return TaskEventData(**kwargs)
+        return TaskEvent(**kwargs)
 
-    return _task_event_data_factory
+    return _task_event_factory
 
 
 @pytest.fixture(scope='session')
-def task_context_factory(task_event_data_factory, task_data_factory):
+def task_context_factory(task_event_factory, task_data_factory):
     def _task_context_factory(**kwargs):
         for key, val in dict(
-             event=Event([task_event_data_factory()]),
+             event=Event([task_event_factory()]),
              task=task_data_factory(),
         ).items():
             kwargs.setdefault(key, val)
