@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+from corva.models.base import BaseContext, BaseEvent
 
 
 class TaskStatus(Enum):
@@ -37,13 +37,11 @@ class UpdateTaskData(pydantic.BaseModel):
     payload: dict = {}
 
 
-class TaskEventData(CorvaBaseModel):
+class TaskEvent(BaseEvent):
     id: Optional[str] = None
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
 
-
-class TaskEvent(BaseEvent, TaskEventData):
     @staticmethod
     def from_raw_event(event: dict, **kwargs) -> TaskEvent:
         return pydantic.parse_obj_as(TaskEvent, event)
