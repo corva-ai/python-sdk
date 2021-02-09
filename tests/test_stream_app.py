@@ -26,7 +26,7 @@ def test_is_completed(collection, expected):
     results = corva.stream(stream_app, event)
 
     assert len(results[0].records) == expected
-    assert not results[0]._is_completed
+    assert not results[0].is_completed
 
 
 @pytest.mark.parametrize(
