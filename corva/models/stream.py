@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Literal, Optional, Union
+import copy
+from typing import Dict, List, Literal, Optional
 
 import pydantic
 
@@ -126,6 +127,8 @@ class StreamEvent(BaseEvent):
     @staticmethod
     def from_raw_event(event: List[dict], **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
+
+        event = copy.deepcopy(event)
 
         for event_dict in event:
             if 'app_key' in event_dict:
