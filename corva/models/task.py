@@ -45,8 +45,8 @@ class TaskEventData(CorvaBaseModel):
 
 class TaskEvent(BaseEvent, TaskEventData):
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> TaskEvent:
-        return pydantic.parse_raw_as(TaskEvent, event)
+    def from_raw_event(event: dict, **kwargs) -> TaskEvent:
+        return pydantic.parse_obj_as(TaskEvent, event)
 
 
 class TaskContext(BaseContext[TaskEvent]):
