@@ -105,7 +105,7 @@ class StreamEvent(BaseEvent):
 
         if 'asset_id' in values:
             raise ValueError(
-                'asset_id can\'t be set manually, it is extracted from records automatically.'
+                "asset_id can't be set manually, it is extracted from records automatically."
             )
 
         records = pydantic.parse_obj_as(
@@ -114,7 +114,7 @@ class StreamEvent(BaseEvent):
 
         if len(records) == 0:
             raise ValueError(
-                'Can\'t set asset_id as records are empty (which should not happen).'
+                "Can't set asset_id as records are empty (which should not happen)."
             )
 
         values['asset_id'] = records[0].asset_id
@@ -134,7 +134,7 @@ class StreamEvent(BaseEvent):
         for event_dict in event_dicts:
             if 'app_key' in event_dict:
                 raise ValueError(
-                    'app_key can\'t be set manually, it is extracted from env and set automatically.'
+                    "app_key can't be set manually, it is extracted from env and set automatically."
                 )
 
             event_dict['app_key'] = app_key  # add app_key to each event
@@ -212,7 +212,7 @@ class StreamContext(BaseContext[StreamEvent]):
     def check_one_active_filter_at_most(cls, values):
         if values['filter_by_timestamp'] and values['filter_by_depth']:
             raise ValueError(
-                'filter_by_timestamp and filter_by_depth can\'t be set to True together.'
+                "filter_by_timestamp and filter_by_depth can't be set to True together."
             )
 
         return values
