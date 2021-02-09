@@ -120,7 +120,7 @@ def test_empty_records_error(settings):
     )
 
 
-def test_only_one_filter_allowed_at_a_time(settings):
+def test_check_one_active_filter_at_most(settings):
     event = (
         '[{"records": [{"asset_id": 0, "company_id": 0, "version": 0, "collection": "", "data": {}}], '
         '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
@@ -163,6 +163,12 @@ def test_only_one_filter_allowed_at_a_time(settings):
             False,
         ),
     ],
+    ids=[
+        'no timestamp and no measured_depth provided exc',
+        'both timestamp and measured_depth provided exc ',
+        'only measured_depth provided (correct event)',
+        'only timestamp provided (correct event)',
+    ],
 )
 def test_require_timestamp_or_measured_depth(event, raises):
     event %= SETTINGS.APP_KEY
@@ -172,6 +178,105 @@ def test_require_timestamp_or_measured_depth(event, raises):
     if raises:
         exc = pytest.raises(ValueError, corva.stream, stream_app, event)
         assert 'Either timestamp or measured_depth is required' in str(exc.value)
+        return
+
+    corva.stream(stream_app, event)
+
+
+@pytest.mark.parametrize(
+    'event,raises,format_event',
+    [
+        (
+            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, "apps": {}}}]',
+            True,
+            False,
+        ),
+        (
+            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, "apps": '
+            '{"%s": {"app_connection_id": 0}}}}]',
+            False,
+            True,
+        ),
+    ],
+    ids=['no app key exc', 'correct event'],
+)
+def test_require_app_key_in_metadata_apps(event, raises, format_event):
+    if format_event:
+        event %= SETTINGS.APP_KEY
+
+    corva = Corva(SimpleNamespace(client_context=None))
+
+    if raises:
+        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
+        assert 'metadata.apps dict must contain an app key.' in str(exc.value)
+        return
+
+    corva.stream(stream_app, event)
+
+
+@pytest.mark.parametrize(
+    'event,raises,exc_msg',
+    [
+        (
+            '[{"asset_id": 0, "records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
+            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            True,
+            'asset_id can\'t be set manually, it is extracted from records automatically.',
+        ),
+        (
+            '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]',
+            True,
+            'Can\'t set asset_id as records are empty (which should not happen).',
+        ),
+        (
+            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
+            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            False,
+            '',
+        ),
+    ],
+    ids=['asset_id set manually exc', 'empty records exc', 'correct event'],
+)
+def test_set_asset_id(event, raises, exc_msg):
+    event %= SETTINGS.APP_KEY
+
+    corva = Corva(SimpleNamespace(client_context=None))
+
+    if raises:
+        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
+        assert exc_msg in str(exc.value)
+        return
+
+    corva.stream(stream_app, event)
+
+
+@pytest.mark.parametrize(
+    'event,raises',
+    [
+        (
+            '[{"app_key": "", "records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
+            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            True,
+        ),
+        (
+            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
+            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            False,
+        ),
+    ],
+    ids=['app key set manually exc', 'correct event'],
+)
+def test_app_key_cant_be_set_manually(event, raises):
+    event %= SETTINGS.APP_KEY
+
+    corva = Corva(SimpleNamespace(client_context=None))
+
+    if raises:
+        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
+        assert (
+            'app_key can\'t be set manually, it is extracted from env and set automatically.'
+            in str(exc.value)
+        )
         return
 
     corva.stream(stream_app, event)
