@@ -112,7 +112,7 @@ class StreamEvent(BaseEvent):
             List[Record], values.get('records', [])
         )  # type: List[Record]
 
-        if len(records) == 0:
+        if not len(records):
             raise ValueError(
                 "Can't set asset_id as records are empty (which should not happen)."
             )
