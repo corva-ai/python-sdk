@@ -30,7 +30,7 @@ class CorvaGenericModel(GenericModel):
 class BaseEvent(CorvaBaseModel, ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: str, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
+    def from_raw_event(event: Any, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
         pass
 
 

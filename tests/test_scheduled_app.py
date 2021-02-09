@@ -13,10 +13,19 @@ def scheduled_app(event, api, state):
 
 
 def test_set_completed_status():
-    event = (
-        '[[{"app_connection": 0, "app_stream": 0, "schedule": 0, "interval": 0, '
-        '"schedule_start": "1970-01-01T00:00:00", "schedule_end": "1970-01-01T00:00:00", "asset_id": 0}]]'
-    )
+    event = [
+        [
+            {
+                "app_connection": 0,
+                "app_stream": 0,
+                "schedule": 0,
+                "interval": 0,
+                "schedule_start": 0,
+                "schedule_end": 0,
+                "asset_id": 0,
+            }
+        ]
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 

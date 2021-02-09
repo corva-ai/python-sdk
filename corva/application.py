@@ -82,7 +82,7 @@ class Corva:
 
         return results
 
-    def scheduled(self, fn: Callable, event: str):
+    def scheduled(self, fn: Callable, event: List[List[dict]]) -> List[Any]:
         """Runs scheduled app
 
         params:

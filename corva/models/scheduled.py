@@ -49,8 +49,8 @@ class ScheduledEvent(BaseEvent):
     )
 
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> List[ScheduledEvent]:
-        events = pydantic.parse_raw_as(List[List[ScheduledEvent]], event)
+    def from_raw_event(event: List[List[dict]], **kwargs) -> List[ScheduledEvent]:
+        events = pydantic.parse_obj_as(List[List[ScheduledEvent]], event)
 
         # raw event from queue comes in from of 2d array of ScheduledEvent
         # flatten parsed event into 1d array of ScheduledEvent, which is an expected return type
