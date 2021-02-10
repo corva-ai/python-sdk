@@ -2,18 +2,19 @@ import pytest
 from pytest_mock import MockerFixture
 
 from corva.app.base import BaseApp
+from corva.configuration import SETTINGS
 from corva.event import Event
 from corva.models.base import CorvaBaseModel
 from tests.conftest import ComparableException
 
 
 @pytest.fixture(scope='function')
-def base_app(mocker: MockerFixture, api, settings):
+def base_app(mocker: MockerFixture, api):
     # as BaseApp is an abstract class, we cannot initialize it without overriding all abstract methods,
     # so in order to initialize and test the class we patch __abstractmethods__
     mocker.patch.object(BaseApp, '__abstractmethods__', set())
 
-    return BaseApp(app_key=settings.APP_KEY, cache_url=settings.CACHE_URL, api=api)
+    return BaseApp(app_key=SETTINGS.APP_KEY, cache_url=SETTINGS.CACHE_URL, api=api)
 
 
 def test_run_exc_in_event_loader_load(mocker: MockerFixture, base_app):
