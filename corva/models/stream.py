@@ -32,6 +32,7 @@ class Record(CorvaBaseModel):
 
     @pydantic.root_validator(pre=True)
     def require_timestamp_or_measured_depth(cls, values):
+        # exactly one of timestamp or measured_depth should be provided
         if len({'timestamp', 'measured_depth'} - set(values)) == 1:
             return values
 
