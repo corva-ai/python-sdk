@@ -6,10 +6,10 @@ import requests
 
 
 class Api:
-    """Provides a convenient way to access Corva API and Corva Data API.
+    """Provides a convenient way to access the Corva Platform API and Corva Data API.
 
-    Api is a thin wrapper around `requests` library that adds
-    authorization, convenient url usage and timeouts to requests.
+    Api wraps the Python `requests` library and adds automatic authorization,
+    convenient URL usage and reasonable timeouts to API requests.
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
