@@ -217,9 +217,9 @@ def test_set_asset_id(event_update, raises, exc_msg):
                 "app_stream_id": 0,
                 "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
             },
+            **event_update
         }
     ]
-    event[0].update(event_update)
 
     corva = Corva(SimpleNamespace(client_context=None))
 
