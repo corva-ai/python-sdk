@@ -68,7 +68,7 @@ def lambda_handler(event, context):
 
 `Corva.stream` provides an optional parameter:
 - `filter_mode` - set to `timestamp` or `depth` to clear [event](#event) 
-  from data with previously processed `timestamp` or `measured_depth`.
+  data with previously processed `timestamp` or `measured_depth`.
 
 #### Scheduled
 
