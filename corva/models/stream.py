@@ -36,13 +36,13 @@ class Record(CorvaBaseModel):
     provider: Optional[str] = None
     collection: Optional[str] = None
 
-    @pydantic.root_validator(pre=True)
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
     def require_timestamp_or_measured_depth(cls, values):
-        # exactly one of timestamp or measured_depth should be provided
-        if len({'timestamp', 'measured_depth'} - set(values)) == 1:
-            return values
+        # at least one of timestamp or measured_depth is required
+        if values.get('timestamp') is None and values.get('measured_depth') is None:
+            raise ValueError('At least one of timestamp or measured_depth is required')
 
-        raise ValueError('Either timestamp or measured_depth is required')
+        return values
 
 
 class AppMetadata(CorvaBaseModel):
