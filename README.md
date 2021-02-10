@@ -96,7 +96,7 @@ every app type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 The apps might need to communicate with
 [Corva API][corva-api] and [Corva Data API][corva-data-api]. The sdk provides an `Api` class - a thin wrapper
 around `requests`
-library that handles Corva authorization, adds timeouts and retries to request.
+library that adds Corva authorization, convenient url usage and timeouts to requests.
 `Api` instance is inserted automatically as a second parameter to each app type.
 `Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`
 and `DELETE`.
