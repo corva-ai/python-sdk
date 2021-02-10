@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Literal, Optional
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -49,18 +49,15 @@ class Corva:
         fn: Callable,
         event: List[dict],
         *,
-        filter_by_timestamp: bool = False,
-        filter_by_depth: bool = False
+        filter_mode: Optional[Literal['timestamp', 'depth']] = None
     ) -> List[Any]:
         """Runs stream app
 
         params:
          fn: stream app function to run
          event: raw stream event
-         filter_by_timestamp: if enabled, will remove records with previously
-          processed `timestamp` from the event
-         filter_by_depth: if enabled, will remove records with previously
-          processed `measured_depth` from the event.
+         filter_mode: remove records with previously processed `timestamp` or `measured_depth`
+           from the event
         returns: list of returned values from fn
         """
 
@@ -74,8 +71,7 @@ class Corva:
                 settings=SETTINGS.copy(),
                 api=self.api,
                 cache_settings=self.cache_settings,
-                filter_by_timestamp=filter_by_timestamp,
-                filter_by_depth=filter_by_depth,
+                filter_mode=filter_mode,
             )
 
             results.append(stream_runner(fn=fn, context=ctx))

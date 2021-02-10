@@ -9,7 +9,7 @@ class Api:
     """Provides a convenient way to access Corva API and Corva Data API.
 
     Api is a thin wrapper around `requests` library that adds
-    authorization, convenient url usage  and timeouts to requests.
+    authorization, convenient url usage and timeouts to requests.
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds

@@ -24,7 +24,7 @@ class ScheduledEvent(BaseEvent):
     cron_string: Optional[str] = pydantic.Field(
         None, description='Cron expression representing the schedule'
     )
-    environment: Optional[Literal['qa', 'staging', 'production']] = None
+    environment: Optional[Literal['localhost', 'qa', 'staging', 'production']] = None
     app_id: Optional[int] = pydantic.Field(None, alias='app')
     app_key: Optional[str] = pydantic.Field(None, description='Unique app identifier')
     source_type: Optional[
@@ -42,7 +42,7 @@ class ScheduledEvent(BaseEvent):
     )
     log_identifier: Optional[str] = pydantic.Field(
         None,
-        description='Unique Log Identifier, only available for depth based streams',
+        description='Unique Log Identifier, only available for depth-based streams',
     )
     day_shift_start: Optional[str] = pydantic.Field(
         None, description='Day shift start time'
