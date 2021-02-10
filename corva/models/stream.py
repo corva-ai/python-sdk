@@ -133,7 +133,9 @@ class StreamEvent(BaseEvent):
     def from_raw_event(event: List[dict], **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        event = copy.deepcopy(event)
+        event = copy.deepcopy(
+            event
+        )  # deepcopy an event as app_key field will be added to each dict
 
         for event_dict in event:
             if 'app_key' in event_dict:
