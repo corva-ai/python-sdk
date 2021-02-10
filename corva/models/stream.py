@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import enum
 from typing import Dict, List, Literal, Optional, Union
 
 import pydantic
 
 from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+
+
+class FilterMode(enum.Enum):
+    timestamp = 'timestamp'
+    depth = 'depth'
 
 
 class Record(CorvaBaseModel):
@@ -148,10 +154,8 @@ class StreamEvent(BaseEvent):
     def filter(
         cls,
         event: StreamEvent,
-        by_timestamp: bool,
-        by_depth: bool,
-        last_timestamp: int,
-        last_depth: float,
+        filter_mode: Optional[FilterMode],
+        last_value: Optional[Union[float, int]],
     ) -> StreamEvent:
         records = event.records
 
@@ -159,31 +163,26 @@ class StreamEvent(BaseEvent):
             # there can only be 1 completed record, always located at the end of the list
             records = records[:-1]  # remove "completed" record
 
-        new_records = list(
-            cls._filter_records(
-                records=records,
-                by_timestamp=by_timestamp,
-                by_depth=by_depth,
-                last_timestamp=last_timestamp,
-                last_depth=last_depth,
+        new_records = records
+
+        if filter_mode is not None and last_value is not None:
+            new_records = list(
+                cls._filter_records(
+                    records=records, filter_mode=filter_mode, last_value=last_value
+                )
             )
-        )
 
         return event.copy(update={'records': new_records}, deep=True)
 
     @staticmethod
     def _filter_records(
-        records: List[Record],
-        by_timestamp: bool,
-        by_depth: bool,
-        last_timestamp: int,
-        last_depth: float,
+        records: List[Record], filter_mode: FilterMode, last_value: Union[float, int]
     ):
         for record in records:
-            if by_timestamp and record.timestamp <= last_timestamp:
+            if filter_mode == FilterMode.timestamp and record.timestamp <= last_value:
                 continue
 
-            if by_depth and record.measured_depth <= last_depth:
+            if filter_mode == FilterMode.depth and record.measured_depth <= last_value:
                 continue
 
             yield record
@@ -195,25 +194,25 @@ class StreamStateData(CorvaBaseModel):
 
 
 class StreamContext(BaseContext[StreamEvent]):
-    filter_by_timestamp: bool = False
-    filter_by_depth: bool = False
+    filter_mode: Optional[FilterMode] = None
 
     @property
     def cache_data(self) -> StreamStateData:
         state_data_dict = self.cache.load_all()
         return StreamStateData(**state_data_dict)
 
+    @property
+    def last_processed_value(self) -> Optional[Union[int, float]]:
+        if self.filter_mode == FilterMode.timestamp:
+            return self.cache_data.last_processed_timestamp
+
+        if self.filter_mode == FilterMode.depth:
+            return self.cache_data.last_processed_depth
+
+        return None
+
     def store_cache_data(self, cache_data: StreamStateData) -> int:
         if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
             return self.cache.store(mapping=cache_data)
 
         return 0
-
-    @pydantic.root_validator(pre=True)
-    def check_one_active_filter_at_most(cls, values):
-        if values['filter_by_timestamp'] and values['filter_by_depth']:
-            raise ValueError(
-                "filter_by_timestamp and filter_by_depth can't be set to True together."
-            )
-
-        return values

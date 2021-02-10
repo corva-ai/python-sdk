@@ -30,30 +30,27 @@ def test_is_completed(collection, expected):
 
 
 @pytest.mark.parametrize(
-    'filter_by,record_attr',
-    [('filter_by_timestamp', 'timestamp'), ('filter_by_depth', 'measured_depth')],
+    'filter_mode,record_attr',
+    [('timestamp', 'timestamp'), ('depth', 'measured_depth')],
 )
-def test_filter_by(filter_by, record_attr):
+def test_filter_mode(filter_mode, record_attr):
     event = (
-        '[{"records": [{"%s": -2, "asset_id": 0}, '
-        '{"%s": -1, "asset_id": 0}, '
-        '{"%s": 0, "asset_id": 0}], '
+        '[{"records": [{"%s": 0, "asset_id": 0}, {"%s": 1, "asset_id": 0}], '
         '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % (record_attr, record_attr, record_attr, SETTINGS.APP_KEY)
+    ) % (record_attr, record_attr, SETTINGS.APP_KEY)
 
     corva = Corva(SimpleNamespace(client_context=None))
 
-    results = corva.stream(stream_app, event, **{filter_by: True})
+    results = corva.stream(stream_app, event, filter_mode=filter_mode)
 
-    assert len(results[0].records) == 1
-    assert getattr(results[0].records[0], record_attr) == 0
+    assert len(results[0].records) == 2
 
 
 @pytest.mark.parametrize(
-    'filter_by,record_attr',
-    [('filter_by_timestamp', 'timestamp'), ('filter_by_depth', 'measured_depth')],
+    'filter_mode,record_attr',
+    [('timestamp', 'timestamp'), ('depth', 'measured_depth')],
 )
-def test_filter_by_value_saved_for_next_run(filter_by, record_attr):
+def test_filter_mode_value_saved_for_next_run(filter_mode, record_attr):
     # first invocation
     event_1 = (
         '[{"records": [{"%s": 0, "asset_id": 0}, '
@@ -64,7 +61,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr):
 
     corva = Corva(SimpleNamespace(client_context=None))
 
-    results_1 = corva.stream(stream_app, event_1, **{filter_by: True})
+    results_1 = corva.stream(stream_app, event_1, filter_mode=filter_mode)
 
     assert len(results_1[0].records) == 3
 
@@ -77,7 +74,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr):
         '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
     ) % (record_attr, record_attr, record_attr, record_attr, SETTINGS.APP_KEY)
 
-    results_2 = corva.stream(stream_app, event_2, **{filter_by: True})
+    results_2 = corva.stream(stream_app, event_2, filter_mode=filter_mode)
 
     assert len(results_2[0].records) == 1
     assert getattr(results_2[0].records[0], record_attr) == 3
@@ -86,7 +83,7 @@ def test_filter_by_value_saved_for_next_run(filter_by, record_attr):
     # after run event_2 should be filtered and have no records
     # verify, that in case of empty records, old values are persisted in cache
     for _ in range(2):
-        results_3 = corva.stream(stream_app, event_2, **{filter_by: True})
+        results_3 = corva.stream(stream_app, event_2, filter_mode=filter_mode)
         assert len(results_3[0].records) == 0
 
 
@@ -119,40 +116,6 @@ def test_empty_records_error(event, raises):
         return
 
     corva.stream(stream_app, event)
-
-
-@pytest.mark.parametrize(
-    'kwargs,raises',
-    [
-        (
-            {'filter_by_timestamp': True, 'filter_by_depth': True},
-            True,
-        ),
-        ({'filter_by_timestamp': True}, False),
-        ({'filter_by_depth': True}, False),
-        ({}, False),
-    ],
-    ids=[
-        'two filters',
-        'one filter (correct)',
-        'one filter (correct)',
-        'no filters (correct)',
-    ],
-)
-def test_check_one_active_filter_at_most(kwargs, raises):
-    event = (
-        '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-        '"apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % SETTINGS.APP_KEY
-
-    corva = Corva(SimpleNamespace(client_context=None))
-
-    if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event, **kwargs)
-        assert (
-            'filter_by_timestamp and filter_by_depth can\'t be set to True together.'
-            in str(exc.value)
-        )
 
 
 @pytest.mark.parametrize(

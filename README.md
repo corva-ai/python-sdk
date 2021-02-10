@@ -66,10 +66,9 @@ def lambda_handler(event, context):
     corva.stream(stream_app, event)
 ```
 
-`Corva.stream` provides two optional parameters:
-
-- `filter_by_timestamp` - enable to clear [event](#event) from data with previously processed `timestamp`;
-- `filter_by_depth` - enable to clear [event](#event) from data with previously processed `measured_depth`.
+`Corva.stream` provides an optional parameter:
+- `filter_mode` - set to `timestamp` or `depth` to clear [event](#event) 
+  from data with previously processed `timestamp` or `measured_depth`.
 
 #### Scheduled
 
@@ -90,8 +89,7 @@ def lambda_handler(event, context):
 
 An event is an object that contains data for an app function to process.
 `event` instance is inserted automatically as a first parameter to each app type. There are different event types for
-every app type: `StreamEvent`,
-`ScheduledEvent` and `TaskEvent`.
+every app type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 ## Api
 
