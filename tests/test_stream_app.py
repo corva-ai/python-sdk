@@ -129,7 +129,7 @@ def test_empty_records_error(event, raises):
         (
             '[{"records": [{"asset_id": 0, "timestamp": 0, "measured_depth": 0}], "metadata": '
             '{"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]',
-            True,
+            False,
         ),
         (
             '[{"records": [{"asset_id": 0, "measured_depth": 0}], "metadata": {"app_stream_id": 0, "apps": '
@@ -156,7 +156,9 @@ def test_require_timestamp_or_measured_depth(event, raises):
 
     if raises:
         exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert 'Either timestamp or measured_depth is required' in str(exc.value)
+        assert 'At least one of timestamp or measured_depth is required' in str(
+            exc.value
+        )
         return
 
     corva.stream(stream_app, event)
