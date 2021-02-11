@@ -188,7 +188,7 @@ def test_default_last_processed_value_taken_from_cache():
             #   last_processed_depth     = 1 - old value persisted
 
             assert len(results[0].records) == 1
-            assert results[0].records[0].timestamp == 1
+            assert results[0].records[0].timestamp == 2
 
 
 @pytest.mark.parametrize(
