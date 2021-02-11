@@ -140,7 +140,7 @@ class StreamEvent(BaseEvent):
         for event_dict in event:
             if 'app_key' in event_dict:
                 raise ValueError(
-                    'app_key can\'t be set manually, it is extracted from env and set automatically.'
+                    "app_key can't be set manually, it is extracted from env and set automatically."
                 )
 
             event_dict['app_key'] = app_key  # add app_key to each event
