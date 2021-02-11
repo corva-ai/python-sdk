@@ -18,15 +18,13 @@ def stream_runner(fn: Callable, context: StreamContext) -> Any:
 
     result = fn(context.event, context.api, context.cache)
 
-    cache_data = context.cache_data
-
     last_processed_timestamp = max(
         [
             record.timestamp
             for record in context.event.records
             if record.timestamp is not None
         ],
-        default=cache_data.last_processed_timestamp,
+        default=None,  # old cache value wont be overwritten
     )
     last_processed_depth = max(
         [
@@ -34,7 +32,7 @@ def stream_runner(fn: Callable, context: StreamContext) -> Any:
             for record in context.event.records
             if record.measured_depth is not None
         ],
-        default=cache_data.last_processed_depth,
+        default=None,  # old cache value wont be overwritten
     )
 
     context.store_cache_data(
