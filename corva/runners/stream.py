@@ -4,15 +4,19 @@ from corva.models.stream import StreamContext, StreamEvent, StreamStateData
 
 
 def stream_runner(fn: Callable, context: StreamContext) -> Any:
-    context.event = StreamEvent.filter(
+    records = StreamEvent.filter_records(
         event=context.event,
         filter_mode=context.filter_mode,
         last_value=context.last_processed_value,
     )
 
-    result = fn(context.event, context.api, context.cache)
+    if not records:
+        # we got a duplicate data if there are no records after filtering
+        return
 
-    cache_data = context.cache_data
+    context.event = context.event.copy(update={'records': records}, deep=True)
+
+    result = fn(context.event, context.api, context.cache)
 
     last_processed_timestamp = max(
         [
@@ -20,7 +24,7 @@ def stream_runner(fn: Callable, context: StreamContext) -> Any:
             for record in context.event.records
             if record.timestamp is not None
         ],
-        default=cache_data.last_processed_timestamp,
+        default=None,  # old cache value wont be overwritten
     )
     last_processed_depth = max(
         [
@@ -28,7 +32,7 @@ def stream_runner(fn: Callable, context: StreamContext) -> Any:
             for record in context.event.records
             if record.measured_depth is not None
         ],
-        default=cache_data.last_processed_depth,
+        default=None,  # old cache value wont be overwritten
     )
 
     context.store_cache_data(
