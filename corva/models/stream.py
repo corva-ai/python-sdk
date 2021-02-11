@@ -66,10 +66,13 @@ class StreamEventMetadata(CorvaBaseModel):
 
 
 class StreamEvent(BaseEvent):
-    asset_id: int
     app_key: str
-    records: List[Record]
+    records: pydantic.conlist(Record, min_items=1)
     metadata: StreamEventMetadata
+
+    @property
+    def asset_id(self) -> int:
+        return self.records[0].asset_id
 
     @property
     def app_connection_id(self) -> int:
@@ -83,49 +86,12 @@ class StreamEvent(BaseEvent):
     def is_completed(self) -> bool:
         """there can only be 1 completed record, always located at the end of the list"""
 
-        if self.records:
-            return self.records[-1].collection == 'wits.completed'
-
-        return False
+        return self.records[-1].collection == 'wits.completed'
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def require_app_key_in_metadata_apps(cls, values):
         if values['app_key'] not in values['metadata'].apps:
             raise ValueError('metadata.apps dict must contain an app key.')
-
-        return values
-
-    @pydantic.root_validator(pre=True)
-    def set_asset_id(cls, values):
-        """Dynamically sets value for asset_id.
-
-        asset_id could've been defined as property like below.
-
-        @property
-        def asset_id(self) -> Optional[int]:
-            return self.records[0].asset_id if self.records else None
-
-        The issue with the above method is:
-          after filtering, we may end up with empty records. Which leads to asset_id becoming None.
-          Using this validator we are able to dynamically set and store value of asset_id,
-          no matter what happens to records.
-        """
-
-        if 'asset_id' in values:
-            raise ValueError(
-                "asset_id can't be set manually, it is extracted from records automatically."
-            )
-
-        records = pydantic.parse_obj_as(
-            List[Record], values.get('records', [])
-        )  # type: List[Record]
-
-        if not len(records):
-            raise ValueError(
-                "Can't set asset_id as records are empty (which should not happen)."
-            )
-
-        values['asset_id'] = records[0].asset_id
 
         return values
 
@@ -148,41 +114,32 @@ class StreamEvent(BaseEvent):
         return result
 
     @classmethod
-    def filter(
+    def filter_records(
         cls,
         event: StreamEvent,
         filter_mode: Optional[FilterMode],
         last_value: Optional[Union[float, int]],
-    ) -> StreamEvent:
-        records = event.records
+    ) -> List[Record]:
+        new_records = copy.deepcopy(event.records)
 
         if event.is_completed:
             # there can only be 1 completed record, always located at the end of the list
-            records = records[:-1]  # remove "completed" record
-
-        new_records = records
+            new_records = new_records[:-1]  # remove "completed" record
 
         if filter_mode is not None and last_value is not None:
-            new_records = list(
-                cls._filter_records(
-                    records=records, filter_mode=filter_mode, last_value=last_value
-                )
-            )
+            if filter_mode == FilterMode.timestamp:
+                record_attr = 'timestamp'
 
-        return event.copy(update={'records': new_records}, deep=True)
+            if filter_mode == FilterMode.depth:
+                record_attr = 'measured_depth'
 
-    @staticmethod
-    def _filter_records(
-        records: List[Record], filter_mode: FilterMode, last_value: Union[float, int]
-    ):
-        for record in records:
-            if filter_mode == FilterMode.timestamp and record.timestamp <= last_value:
-                continue
+            new_records = [
+                record
+                for record in new_records
+                if getattr(record, record_attr) > last_value
+            ]
 
-            if filter_mode == FilterMode.depth and record.measured_depth <= last_value:
-                continue
-
-            yield record
+        return new_records
 
 
 class StreamStateData(CorvaBaseModel):

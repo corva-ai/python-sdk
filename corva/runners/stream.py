@@ -4,11 +4,17 @@ from corva.models.stream import StreamContext, StreamEvent, StreamStateData
 
 
 def stream_runner(fn: Callable, context: StreamContext) -> Any:
-    context.event = StreamEvent.filter(
+    records = StreamEvent.filter_records(
         event=context.event,
         filter_mode=context.filter_mode,
         last_value=context.last_processed_value,
     )
+
+    if not records:
+        # we got a duplicate data if there are no records after filtering
+        return
+
+    context.event = context.event.copy(update={'records': records}, deep=True)
 
     result = fn(context.event, context.api, context.cache)
 
