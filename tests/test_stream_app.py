@@ -51,7 +51,13 @@ def test_is_completed_record_deleted(collection, is_completed, mocker: MockerFix
         (FilterMode.timestamp, 'timestamp', 0, 1),
         (FilterMode.depth, 'measured_depth', 0, 1),
     ],
-    ids=['no filtering', 'no filtering', 'no filtering', 'filtering', 'filtering'],
+    ids=[
+        'filtering skipped',
+        'filtering skipped',
+        'filtering skipped',
+        'filtering done',
+        'filtering done',
+    ],
 )
 def test_filter_records(
     filter_mode, record_attr, last_value, expected, mocker: MockerFixture
@@ -94,7 +100,7 @@ def test_filter_records(
         ('depth', 'measured_depth'),
     ],
 )
-def test_last_processed_value_saved_for_next_run(filter_mode, record_attr):
+def test_last_processed_value_saved_to_cache(filter_mode, record_attr):
     event = [
         {
             "records": [],
@@ -121,14 +127,16 @@ def test_last_processed_value_saved_for_next_run(filter_mode, record_attr):
         results = corva.stream(stream_app, event, filter_mode=filter_mode)
 
         if idx == 0:
+            # cache: record_attr = 1
             continue
 
         if idx == 1:
+            # cache: record_attr = 2
             assert len(results[0].records) == 1
             assert getattr(results[0].records[0], record_attr) == 2
 
 
-def test_default_value_for_last_processed_value():
+def test_default_last_processed_value_taken_from_cache():
     event = [
         {
             "records": [],
@@ -140,9 +148,9 @@ def test_default_value_for_last_processed_value():
     ]
     records_list = [
         [{'timestamp': 0, 'asset_id': 0}, {'measured_depth': 0, 'asset_id': 0}],
-        [{'timestamp': 0, 'asset_id': 0}],
+        [{'timestamp': 1, 'asset_id': 0}],
         [{'measured_depth': 0, 'asset_id': 0}, {'measured_depth': 1, 'asset_id': 0}],
-        [{'timestamp': 0, 'asset_id': 0}, {'timestamp': 1, 'asset_id': 0}],
+        [{'timestamp': 1, 'asset_id': 0}, {'timestamp': 2, 'asset_id': 0}],
     ]
 
     corva = Corva(SimpleNamespace(client_context=None))
@@ -152,25 +160,33 @@ def test_default_value_for_last_processed_value():
 
         if idx == 0:
             corva.stream(stream_app, event, filter_mode=None)
+            # cache: last_processed_timestamp = 0, last_processed_depth = 0
             continue
 
         if idx == 1:
             corva.stream(stream_app, event, filter_mode=None)
+            # cache:
+            #   last_processed_timestamp = 1 - new value
+            #   last_processed_depth     = 0 - old value persisted, although there were
+            #     no measured_depth in records
             continue
 
         if idx == 2:
             results = corva.stream(stream_app, event, filter_mode='depth')
+            # cache:
+            #   last_processed_timestamp = 1 - old value persisted, although there were
+            #     no timestamp in records
+            #   last_processed_depth     = 1 - new value
 
-            # as there was no measured_depth in previous records,
-            # old value of 0 had to be persisted in cache
             assert len(results[0].records) == 1
             assert results[0].records[0].measured_depth == 1
 
         if idx == 3:
             results = corva.stream(stream_app, event, filter_mode='timestamp')
+            # cache:
+            #   last_processed_timestamp = 2 - new value
+            #   last_processed_depth     = 1 - old value persisted
 
-            # as there was no timestamp in previous records,
-            # old value of 0 had to be persisted in cache
             assert len(results[0].records) == 1
             assert results[0].records[0].timestamp == 1
 
