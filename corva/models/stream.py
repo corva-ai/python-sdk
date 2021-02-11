@@ -133,9 +133,7 @@ class StreamEvent(BaseEvent):
     def from_raw_event(event: List[dict], **kwargs) -> List[StreamEvent]:
         app_key = kwargs['app_key']
 
-        event = copy.deepcopy(
-            event
-        )  # deepcopy an event as app_key field will be added to each dict
+        result = []
 
         for event_dict in event:
             if 'app_key' in event_dict:
@@ -143,11 +141,11 @@ class StreamEvent(BaseEvent):
                     "app_key can't be set manually, it is extracted from env and set automatically."
                 )
 
+            event_dict = copy.deepcopy(event_dict)  # copy the dict before modifying
             event_dict['app_key'] = app_key  # add app_key to each event
+            result.append(pydantic.parse_obj_as(StreamEvent, event_dict))
 
-        events = pydantic.parse_obj_as(List[StreamEvent], event)
-
-        return events
+        return result
 
     @classmethod
     def filter(
