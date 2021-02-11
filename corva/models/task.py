@@ -43,8 +43,8 @@ class TaskEvent(BaseEvent):
     version: conint(ge=2, le=2)  # only utils API v2 supported
 
     @staticmethod
-    def from_raw_event(event: str, **kwargs) -> TaskEvent:
-        return pydantic.parse_raw_as(TaskEvent, event)
+    def from_raw_event(event: dict, **kwargs) -> TaskEvent:
+        return pydantic.parse_obj_as(TaskEvent, event)
 
 
 class TaskContext(BaseContext[TaskEvent]):

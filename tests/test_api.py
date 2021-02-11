@@ -8,11 +8,16 @@ from corva.configuration import SETTINGS
 
 
 @pytest.fixture(scope='function')
-def event():
-    return (
-        '[{"records": [{"asset_id": 0, "timestamp": 0}], '
-        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % SETTINGS.APP_KEY
+def event(patch_settings):
+    return [
+        {
+            "records": [{"asset_id": 0, "timestamp": 0}],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
 
 def app(event, api, cache):

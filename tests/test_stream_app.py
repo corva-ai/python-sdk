@@ -16,10 +16,15 @@ def stream_app(event, api, cache):
     ids=['is_completed True', 'is_completed False'],
 )
 def test_is_completed(collection, expected):
-    event = (
-        '[{"records": [{"asset_id": 0, "collection": "%s", "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-        '"apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % (collection, SETTINGS.APP_KEY)
+    event = [
+        {
+            "records": [{"asset_id": 0, "collection": collection, "timestamp": 0}],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -34,10 +39,18 @@ def test_is_completed(collection, expected):
     [('timestamp', 'timestamp'), ('depth', 'measured_depth')],
 )
 def test_filter_mode(filter_mode, record_attr):
-    event = (
-        '[{"records": [{"%s": 0, "asset_id": 0}, {"%s": 1, "asset_id": 0}], '
-        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % (record_attr, record_attr, SETTINGS.APP_KEY)
+    event = [
+        {
+            "records": [
+                {record_attr: 0, "asset_id": 0},
+                {record_attr: 1, "asset_id": 0},
+            ],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -52,12 +65,19 @@ def test_filter_mode(filter_mode, record_attr):
 )
 def test_filter_mode_value_saved_for_next_run(filter_mode, record_attr):
     # first invocation
-    event_1 = (
-        '[{"records": [{"%s": 0, "asset_id": 0}, '
-        '{"%s": 1, "asset_id": 0}, '
-        '{"%s": 2, "asset_id": 0}], '
-        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % (record_attr, record_attr, record_attr, SETTINGS.APP_KEY)
+    event_1 = [
+        {
+            "records": [
+                {record_attr: 0, "asset_id": 0},
+                {record_attr: 1, "asset_id": 0},
+                {record_attr: 2, "asset_id": 0},
+            ],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -66,13 +86,20 @@ def test_filter_mode_value_saved_for_next_run(filter_mode, record_attr):
     assert len(results_1[0].records) == 3
 
     # second invocation
-    event_2 = (
-        '[{"records": [{"%s": 0, "asset_id": 0}, '
-        '{"%s": 1, "asset_id": 0}, '
-        '{"%s": 2, "asset_id": 0}, '
-        '{"%s": 3, "asset_id": 0}], '
-        '"metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]'
-    ) % (record_attr, record_attr, record_attr, record_attr, SETTINGS.APP_KEY)
+    event_2 = [
+        {
+            "records": [
+                {record_attr: 0, "asset_id": 0},
+                {record_attr: 1, "asset_id": 0},
+                {record_attr: 2, "asset_id": 0},
+                {record_attr: 3, "asset_id": 0},
+            ],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
     results_2 = corva.stream(stream_app, event_2, filter_mode=filter_mode)
 
@@ -88,57 +115,22 @@ def test_filter_mode_value_saved_for_next_run(filter_mode, record_attr):
 
 
 @pytest.mark.parametrize(
-    'event,raises',
+    'records,raises',
     [
         (
-            '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]',
+            [{"asset_id": 0}],
             True,
         ),
         (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-            '"apps": {"%s": {"app_connection_id": 0}}}}]',
-            False,
-        ),
-    ],
-    ids=['empty records exc', 'correct event'],
-)
-def test_empty_records_error(event, raises):
-    event %= SETTINGS.APP_KEY
-
-    corva = Corva(SimpleNamespace(client_context=None))
-
-    if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert (
-            'Can\'t set asset_id as records are empty (which should not happen).'
-            in str(exc.value)
-        )
-        return
-
-    corva.stream(stream_app, event)
-
-
-@pytest.mark.parametrize(
-    'event,raises',
-    [
-        (
-            '[{"records": [{"asset_id": 0}], "metadata": {"app_stream_id": 0, "apps": '
-            '{"%s": {"app_connection_id": 0}}}}]',
-            True,
-        ),
-        (
-            '[{"records": [{"asset_id": 0, "timestamp": 0, "measured_depth": 0}], "metadata": '
-            '{"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]',
+            [{"asset_id": 0, "timestamp": 0, "measured_depth": 0}],
             False,
         ),
         (
-            '[{"records": [{"asset_id": 0, "measured_depth": 0}], "metadata": {"app_stream_id": 0, "apps": '
-            '{"%s": {"app_connection_id": 0}}}}]',
+            [{"asset_id": 0, "measured_depth": 0}],
             False,
         ),
         (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, "apps": '
-            '{"%s": {"app_connection_id": 0}}}}]',
+            [{"asset_id": 0, "timestamp": 0}],
             False,
         ),
     ],
@@ -149,8 +141,16 @@ def test_empty_records_error(event, raises):
         'only timestamp provided (correct event)',
     ],
 )
-def test_require_timestamp_or_measured_depth(event, raises):
-    event %= SETTINGS.APP_KEY
+def test_require_timestamp_or_measured_depth(records, raises):
+    event = [
+        {
+            "records": records,
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -165,25 +165,18 @@ def test_require_timestamp_or_measured_depth(event, raises):
 
 
 @pytest.mark.parametrize(
-    'event,raises,format_event',
-    [
-        (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, "apps": {}}}]',
-            True,
-            False,
-        ),
-        (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, "apps": '
-            '{"%s": {"app_connection_id": 0}}}}]',
-            False,
-            True,
-        ),
-    ],
+    'raises',
+    [True, False],
     ids=['no app key exc', 'correct event'],
 )
-def test_require_app_key_in_metadata_apps(event, raises, format_event):
-    if format_event:
-        event %= SETTINGS.APP_KEY
+def test_require_app_key_in_metadata_apps(raises):
+    apps = {} if raises else {SETTINGS.APP_KEY: {"app_connection_id": 0}}
+    event = [
+        {
+            "records": [{"asset_id": 0, "timestamp": 0}],
+            "metadata": {"app_stream_id": 0, "apps": apps},
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -196,30 +189,37 @@ def test_require_app_key_in_metadata_apps(event, raises, format_event):
 
 
 @pytest.mark.parametrize(
-    'event,raises,exc_msg',
+    'event_update,raises,exc_msg',
     [
         (
-            '[{"asset_id": 0, "records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            {'asset_id': 0},
             True,
             'asset_id can\'t be set manually, it is extracted from records automatically.',
         ),
         (
-            '[{"records": [], "metadata": {"app_stream_id": 0, "apps": {"%s": {"app_connection_id": 0}}}}]',
+            {'records': []},
             True,
             'Can\'t set asset_id as records are empty (which should not happen).',
         ),
         (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-            '"apps": {"%s": {"app_connection_id": 0}}}}]',
+            {},
             False,
             '',
         ),
     ],
     ids=['asset_id set manually exc', 'empty records exc', 'correct event'],
 )
-def test_set_asset_id(event, raises, exc_msg):
-    event %= SETTINGS.APP_KEY
+def test_set_asset_id(event_update, raises, exc_msg):
+    event = [
+        {
+            "records": [{"asset_id": 0, "timestamp": 0}],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+            **event_update
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 
@@ -232,23 +232,21 @@ def test_set_asset_id(event, raises, exc_msg):
 
 
 @pytest.mark.parametrize(
-    'event,raises',
-    [
-        (
-            '[{"app_key": "", "records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-            '"apps": {"%s": {"app_connection_id": 0}}}}]',
-            True,
-        ),
-        (
-            '[{"records": [{"asset_id": 0, "timestamp": 0}], "metadata": {"app_stream_id": 0, '
-            '"apps": {"%s": {"app_connection_id": 0}}}}]',
-            False,
-        ),
-    ],
+    'event_update,raises',
+    [({'app_key': ''}, True), ({}, False)],
     ids=['app key set manually exc', 'correct event'],
 )
-def test_app_key_cant_be_set_manually(event, raises):
-    event %= SETTINGS.APP_KEY
+def test_app_key_cant_be_set_manually(event_update, raises):
+    event = [
+        {
+            "records": [{"asset_id": 0, "timestamp": 0}],
+            "metadata": {
+                "app_stream_id": 0,
+                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
+            },
+            **event_update,
+        }
+    ]
 
     corva = Corva(SimpleNamespace(client_context=None))
 

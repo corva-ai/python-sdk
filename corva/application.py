@@ -47,7 +47,7 @@ class Corva:
     def stream(
         self,
         fn: Callable,
-        event: str,
+        event: List[dict],
         *,
         filter_mode: Optional[Literal['timestamp', 'depth']] = None
     ) -> List[Any]:
