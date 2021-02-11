@@ -2,41 +2,52 @@ from __future__ import annotations
 
 import itertools
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+from corva.models.base import BaseContext, BaseEvent
 
 
-class ScheduledEventData(CorvaBaseModel):
-    type: Optional[str] = None
-    collection: Optional[str] = None
-    cron_string: str
-    environment: str
-    app: int
-    app_key: str
-    app_connection_id: int = pydantic.Field(alias='app_connection')
-    app_stream_id: int = pydantic.Field(alias='app_stream')
-    source_type: str
-    company: int
-    provider: str
-    api_url: Optional[str] = None
-    api_key: Optional[str] = None
-    schedule: int
-    interval: int
+class ScheduledEvent(BaseEvent):
+    asset_id: int
+    interval: int = pydantic.Field(
+        ..., description='Scheduled interval (parsed cron string in seconds)'
+    )
+    schedule_id: int = pydantic.Field(..., alias='schedule')
     schedule_start: datetime
     schedule_end: datetime
-    asset_id: int
-    asset_name: str
-    asset_type: str
-    timezone: str
-    log_type: str
-    log_identifier: Optional[str] = None
-    day_shift_start: Optional[str] = None
+    app_connection_id: int = pydantic.Field(..., alias='app_connection')
+    app_stream_id: int = pydantic.Field(..., alias='app_stream')
 
+    # optional fields
+    cron_string: Optional[str] = pydantic.Field(
+        None, description='Cron expression representing the schedule'
+    )
+    environment: Optional[Literal['localhost', 'qa', 'staging', 'production']] = None
+    app_id: Optional[int] = pydantic.Field(None, alias='app')
+    app_key: Optional[str] = pydantic.Field(None, description='Unique app identifier')
+    source_type: Optional[
+        Literal['drilling', 'drillout', 'frac', 'wireline']
+    ] = pydantic.Field(None, description='Source Data Type')
+    company_id: Optional[int] = pydantic.Field(None, alias='company')
+    provider: Optional[str] = pydantic.Field(
+        None, description='Company name identifier'
+    )
+    asset_name: Optional[str] = None
+    asset_type: Optional[Literal['Well']] = None
+    timezone: Optional[str] = pydantic.Field(None, description='Time zone of the asset')
+    log_type: Optional[Literal['time', 'depth']] = pydantic.Field(
+        None, description='Source Log Type'
+    )
+    log_identifier: Optional[str] = pydantic.Field(
+        None,
+        description='Unique Log Identifier, only available for depth-based streams',
+    )
+    day_shift_start: Optional[str] = pydantic.Field(
+        None, description='Day shift start time'
+    )
 
-class ScheduledEvent(BaseEvent, ScheduledEventData):
     @staticmethod
     def from_raw_event(event: List[List[dict]], **kwargs) -> List[ScheduledEvent]:
         events = pydantic.parse_obj_as(List[List[ScheduledEvent]], event)

@@ -66,10 +66,9 @@ def lambda_handler(event, context):
     corva.stream(stream_app, event)
 ```
 
-`Corva.stream` provides two optional parameters:
-
-- `filter_by_timestamp` - enable to clear [event](#event) from data with previously processed `timestamp`;
-- `filter_by_depth` - enable to clear [event](#event) from data with previously processed `measured_depth`.
+`Corva.stream` provides an optional parameter:
+- `filter_mode` - set to `timestamp` or `depth` to clear [event](#event) 
+  data with previously processed `timestamp` or `measured_depth`.
 
 #### Scheduled
 
@@ -90,15 +89,15 @@ def lambda_handler(event, context):
 
 An event is an object that contains data for an app function to process.
 `event` instance is inserted automatically as a first parameter to each app type. There are different event types for
-every app type: `StreamEvent`,
-`ScheduledEvent` and `TaskEvent`.
+every app type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 ## Api
 
-The apps might need to communicate with
-[Corva API][corva-api] and [Corva Data API][corva-data-api]. The sdk provides an `Api` class - a thin wrapper
-around `requests`
-library that handles Corva authorization, adds timeouts and retries to request.
+Apps might need to communicate with the
+[Corva Platform API][corva-api] and [Corva Data API][corva-data-api]. 
+This SDK provides an `Api` class, which wraps the Python `requests`
+library and adds automatic authorization, convenient URL usage and 
+reasonable timeouts to API requests.
 `Api` instance is inserted automatically as a second parameter to each app type.
 `Api` supports following HTTP methods: `GET`, `POST`, `PATCH`, `PUT`
 and `DELETE`.
