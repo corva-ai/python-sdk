@@ -34,6 +34,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
     packages=["corva"],
-    install_requires=["pydantic >= 1.7.3", "redis >= 3.5.3", "requests >= 2.25.0"],
+    install_requires=[
+        "pydantic >=1.7.3, <2.0.0",
+        "redis >=3.5.3, <4.0.0",
+        "requests >=2.25.0, <3.0.0",
+    ],
     license='The Unlicense',
 )
