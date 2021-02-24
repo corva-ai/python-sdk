@@ -34,7 +34,7 @@ setuptools.setup(
     keywords='corva, sdk',
     packages=setuptools.find_packages(exclude=[".*", "data", "test"]),
     install_requires=[
-        "fakeredis >=1.4.5, <2.0.0"
+        "fakeredis >=1.4.5, <2.0.0",
         "pydantic >= 1.7.2",
         "redis >= 3.5.3",
         "requests >= 2.25.0",
