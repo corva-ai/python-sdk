@@ -1,12 +1,13 @@
 import contextlib
 import functools
 import os
+import types
 from unittest import mock
 
 import fakeredis
 import pytest
 
-from corva.configuration import Settings
+from corva.configuration import SETTINGS, Settings
 
 
 @pytest.fixture(scope='function')
@@ -15,6 +16,13 @@ def corva_patch():
 
     with patch_redis_adapter(), patch_settings():
         yield
+
+
+@pytest.fixture(scope='function')
+def corva_context(corva_patch):
+    return types.SimpleNamespace(
+        client_context=types.SimpleNamespace(env={"API_KEY": SETTINGS.API_KEY})
+    )
 
 
 @contextlib.contextmanager
