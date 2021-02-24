@@ -39,5 +39,6 @@ setuptools.setup(
         "redis >=3.5.3, <4.0.0",
         "requests >=2.25.0, <3.0.0",
     ],
+    python_requires='~=3.8',
     license='The Unlicense',
 )
