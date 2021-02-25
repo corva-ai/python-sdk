@@ -28,7 +28,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 @pytest.fixture(scope='function', autouse=True)
 def corva_patch():
-    """Simplifies testing of Corva apps by patching some functionality."""
+    """Simplifies testing of Corva apps by patching essential functionality."""
 
     with patch_redis_adapter(), patch_scheduled():
         yield
@@ -36,6 +36,8 @@ def corva_patch():
 
 @pytest.fixture(scope='function')
 def corva_context(corva_patch):
+    """Imitates AWS lambda context expected by Corva."""
+
     return types.SimpleNamespace(
         client_context=types.SimpleNamespace(env={'API_KEY': '123'})
     )
