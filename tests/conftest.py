@@ -5,8 +5,6 @@ from corva.configuration import SETTINGS
 from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
-pytest_plugins = "corva.testing"
-
 
 @pytest.fixture(scope='function')
 def redis_adapter(corva_patch):
