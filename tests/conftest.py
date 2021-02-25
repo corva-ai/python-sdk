@@ -7,7 +7,7 @@ from corva.state.redis_state import RedisState
 
 
 @pytest.fixture(scope='function')
-def redis_adapter(corva_patch):
+def redis_adapter():
     return RedisAdapter(default_name='default_name', cache_url=SETTINGS.CACHE_URL)
 
 
