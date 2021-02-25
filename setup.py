@@ -42,5 +42,5 @@ setuptools.setup(
         "urllib3 >= 1.26.2"
     ],
     license='The Unlicense',
-    entry_points={"pytest11": ["corva_patch = corva.testing"]},
+    entry_points={"pytest11": ["corva = pytest_plugin.plugin"]},
 )

@@ -9,14 +9,28 @@ import fakeredis
 import pytest
 import requests_mock
 
-from corva.configuration import SETTINGS, Settings
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_load_initial_conftests(args, early_config, parser):
+    """Sets test environment variables."""
+
+    provider = 'test-provider'
+    env = {
+        'API_ROOT_URL': 'https://api.localhost.ai',
+        'DATA_API_ROOT_URL': 'https://data.localhost.ai',
+        'CACHE_URL': 'redis://localhost:6379',
+        'APP_KEY': f'{provider}.test-app-name',
+        'PROVIDER': provider,
+        **os.environ,  # override env values if provided by user
+    }
+    os.environ.update(env)
 
 
 @pytest.fixture(scope='function', autouse=True)
 def corva_patch():
     """Simplifies testing of Corva apps by patching some functionality."""
 
-    with patch_redis_adapter(), patch_env(), patch_scheduled():
+    with patch_redis_adapter(), patch_scheduled():
         yield
 
 
@@ -60,31 +74,6 @@ def patch_redis_adapter():
         redis_adapter_patcher.is_local = True
 
         yield
-
-
-@contextlib.contextmanager
-def patch_env():
-    """Sets test environment variables and updates global Corva settings."""
-
-    provider = 'test-provider'
-    env = {
-        'API_ROOT_URL': 'https://api.localhost.ai',
-        'DATA_API_ROOT_URL': 'https://data.localhost.ai',
-        'CACHE_URL': 'redis://localhost:6379',
-        'APP_KEY': f'{provider}.test-app-name',
-        'PROVIDER': provider,
-        **SETTINGS.dict(
-            exclude_defaults=True, exclude_unset=True
-        ),  # override env values if provided by user
-    }
-
-    # patch global settings
-    with mock.patch.dict(os.environ, env):
-        # load settings that contain new env vars
-        new_settings = Settings()
-
-        with mock.patch.multiple('corva.configuration.SETTINGS', **new_settings.dict()):
-            yield
 
 
 @contextlib.contextmanager
