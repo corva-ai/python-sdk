@@ -39,7 +39,6 @@ setuptools.setup(
         "redis >= 3.5.3",
         "requests >= 2.25.0",
         "requests-mock >=1.8.0, <2.0.0",
-        "urllib3 >= 1.26.2"
     ],
     license='The Unlicense',
     entry_points={"pytest11": ["corva = corva_plugin.plugin"]},
