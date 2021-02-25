@@ -1,11 +1,13 @@
 import contextlib
 import functools
 import os
+import re
 import types
 from unittest import mock
 
 import fakeredis
 import pytest
+import requests_mock
 
 from corva.configuration import SETTINGS, Settings
 
@@ -14,14 +16,14 @@ from corva.configuration import SETTINGS, Settings
 def corva_patch():
     """Simplifies testing of Corva apps by patching some functionality."""
 
-    with patch_redis_adapter(), patch_env():
+    with patch_redis_adapter(), patch_env(), patch_scheduled():
         yield
 
 
 @pytest.fixture(scope='function')
 def corva_context(corva_patch):
     return types.SimpleNamespace(
-        client_context=types.SimpleNamespace(env={"API_KEY": SETTINGS.API_KEY})
+        client_context=types.SimpleNamespace(env={'API_KEY': '123'})
     )
 
 
@@ -83,3 +85,15 @@ def patch_env():
 
         with mock.patch.multiple('corva.configuration.SETTINGS', **new_settings.dict()):
             yield
+
+
+@contextlib.contextmanager
+def patch_scheduled():
+    """Patches scheduled runner."""
+
+    with requests_mock.Mocker() as mocker:
+        # patch post request, that sets scheduled task as completed
+        # matches url like https://dns/scheduler/123/completed
+        mocker.post(re.compile('https:\/\/.+\/scheduler\/\d+\/completed'))
+
+        yield
