@@ -10,7 +10,7 @@ import pytest
 from corva.configuration import SETTINGS, Settings
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='function', autouse=True)
 def corva_patch():
     """Simplifies testing of Corva apps by patching some functionality."""
 
