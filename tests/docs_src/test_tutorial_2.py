@@ -1,10 +1,8 @@
-from types import SimpleNamespace
-
 from corva.configuration import SETTINGS
 from docs_src import tutorial_2_configuration
 
 
-def test_tutorial():
+def test_tutorial(corva_context):
     event = [
         {
             "records": [{"asset_id": 0, "timestamp": 0}],
@@ -15,6 +13,4 @@ def test_tutorial():
         }
     ]
 
-    context = SimpleNamespace(client_context=None)
-
-    tutorial_2_configuration.lambda_handler(event, context)
+    tutorial_2_configuration.lambda_handler(event, corva_context)
