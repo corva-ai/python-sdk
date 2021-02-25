@@ -226,21 +226,21 @@ other operations with data.
 
 ```console
 $ cd ~/YOUR_PATH/python-sdk
-$ python3 -m venv venv
+$ python -m venv venv
 $ source venv/bin/activate
-$ pip install -r requirements.txt
+(venv) $ pip install -r test_requirements.txt
 ```
 
 #### Run tests
 
 ```console
-$ venv/bin/python3 -m pytest tests
+(venv) $ pytest
 ```
 
 #### Run code linter
 
 ```console
-$ venv/bin/python3 -m flake8
+(venv) $ flake8
 ```
 
 [dev-center-docs]: https://app.corva.ai/dev-center/docs
