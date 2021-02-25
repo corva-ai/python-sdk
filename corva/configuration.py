@@ -5,17 +5,18 @@ import pydantic
 
 class Settings(pydantic.BaseSettings):
     # api
-    API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
-    DATA_API_ROOT_URL: Optional[pydantic.AnyHttpUrl] = None
+    API_ROOT_URL: pydantic.AnyHttpUrl
+    DATA_API_ROOT_URL: pydantic.AnyHttpUrl
 
     # cache
-    CACHE_URL: Optional[str] = None
+    CACHE_URL: str
 
     # logger
     LOG_LEVEL: str = 'WARN'
 
-    APP_KEY: Optional[str] = None  # <provider-name-with-dashes>.<app-name-with-dashes>
-    PROVIDER: Optional[str] = None
+    # company and app
+    APP_KEY: str  # <provider-name-with-dashes>.<app-name-with-dashes>
+    PROVIDER: str
 
     @property
     def APP_NAME(self) -> Optional[str]:
