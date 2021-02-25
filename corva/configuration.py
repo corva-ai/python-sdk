@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pydantic
 
 
@@ -19,10 +17,7 @@ class Settings(pydantic.BaseSettings):
     PROVIDER: str
 
     @property
-    def APP_NAME(self) -> Optional[str]:
-        if self.APP_KEY is None:
-            return None
-
+    def APP_NAME(self) -> str:
         app_name_with_dashes = self.APP_KEY.split('.')[1]
         app_name = app_name_with_dashes.replace('-', ' ').title()
 
