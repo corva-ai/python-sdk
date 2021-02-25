@@ -14,7 +14,7 @@ from corva.configuration import SETTINGS, Settings
 def corva_patch():
     """Simplifies testing of Corva apps by patching some functionality."""
 
-    with patch_redis_adapter(), patch_settings():
+    with patch_redis_adapter(), patch_env():
         yield
 
 
@@ -61,20 +61,19 @@ def patch_redis_adapter():
 
 
 @contextlib.contextmanager
-def patch_settings():
-    """Sets test env vars in global Corva settings."""
+def patch_env():
+    """Sets test environment variables and updates global Corva settings."""
 
-    app_name = 'App Name'
-    provider = 'provider'
+    provider = 'test-provider'
     env = {
         'API_ROOT_URL': 'https://api.localhost.ai',
         'DATA_API_ROOT_URL': 'https://data.localhost.ai',
-        'API_KEY': '123',
         'CACHE_URL': 'redis://localhost:6379',
-        'APP_NAME': app_name,
+        'APP_KEY': f'{provider}.test-app-name',
         'PROVIDER': provider,
-        'APP_KEY': f'{provider}.{app_name.lower().replace(" ", "-")}',
-        **os.environ,  # override env values if provided
+        **SETTINGS.dict(
+            exclude_defaults=True, exclude_unset=True
+        ),  # override env values if provided by user
     }
 
     # patch global settings
