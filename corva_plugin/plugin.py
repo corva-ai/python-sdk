@@ -83,6 +83,6 @@ def patch_scheduled():
     with requests_mock.Mocker() as mocker:
         # patch post request, that sets scheduled task as completed
         # matches url like https://dns/scheduler/123/completed
-        mocker.post(re.compile('https:\/\/.+\/scheduler\/\d+\/completed'))
+        mocker.post(re.compile(r'https://.+/scheduler/\d+/completed'))
 
         yield
