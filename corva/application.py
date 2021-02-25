@@ -55,7 +55,7 @@ class Corva:
         returns: list of returned values from fn
         """
 
-        events = StreamEvent.from_raw_event(event=event, app_key=SETTINGS.APP_KEY)
+        events = StreamEvent.from_raw_event(event=event)
 
         results = []
 

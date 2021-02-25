@@ -264,36 +264,6 @@ def test_require_app_key_in_metadata_apps(apps, raises, corva_context):
     corva.stream(stream_app, event)
 
 
-@pytest.mark.parametrize(
-    'event_update,raises',
-    [({'app_key': ''}, True), ({}, False)],
-    ids=['app key set manually exc', 'correct event'],
-)
-def test_app_key_cant_be_set_manually(event_update, raises, corva_context):
-    event = [
-        {
-            "records": [{"asset_id": 0, "timestamp": 0}],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-            **event_update,
-        }
-    ]
-
-    corva = Corva(context=corva_context)
-
-    if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert (
-            'app_key can\'t be set manually, it is extracted from env and set automatically.'
-            in str(exc.value)
-        )
-        return
-
-    corva.stream(stream_app, event)
-
-
 def test_early_return_if_no_records_after_filtering(
     mocker: MockerFixture, corva_context
 ):

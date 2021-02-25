@@ -25,7 +25,7 @@ class CorvaBaseModel(pydantic.BaseModel):
 class BaseEvent(CorvaBaseModel, ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: Any, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
+    def from_raw_event(event: Any) -> Union[List[BaseEvent], BaseEvent]:
         pass
 
 
