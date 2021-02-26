@@ -33,7 +33,9 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
-    packages=["corva", "corva_plugin"],
+    packages=setuptools.find_packages(
+        ".", include=('corva', 'corva.*', 'corva_plugin')
+    ),
     install_requires=[
         "fakeredis >=1.4.5, <2.0.0",
         "pydantic >=1.7.3, <2.0.0",
