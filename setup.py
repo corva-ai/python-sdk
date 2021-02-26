@@ -1,4 +1,5 @@
 import pathlib
+
 import setuptools
 
 root = pathlib.Path(__file__).parent
@@ -32,12 +33,12 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
-    packages=setuptools.find_packages(exclude=[".*", "data", "test"]),
+    packages=["corva"],
     install_requires=[
-        "pydantic >= 1.7.2",
-        "redis >= 3.5.3",
-        "requests >= 2.25.0",
-        "urllib3 >= 1.26.2"
+        "pydantic >=1.7.3, <2.0.0",
+        "redis >=3.5.3, <4.0.0",
+        "requests >=2.25.0, <3.0.0",
     ],
+    python_requires='~=3.8',
     license='The Unlicense',
 )
