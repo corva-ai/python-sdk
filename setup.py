@@ -1,4 +1,5 @@
 import pathlib
+
 import setuptools
 
 root = pathlib.Path(__file__).parent
@@ -32,14 +33,15 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
-    packages=setuptools.find_packages(exclude=[".*", "data", "test"]),
+    packages=["corva", "corva_plugin"],
     install_requires=[
         "fakeredis >=1.4.5, <2.0.0",
-        "pydantic >= 1.7.2",
-        "redis >= 3.5.3",
-        "requests >= 2.25.0",
+        "pydantic >=1.7.3, <2.0.0",
+        "redis >=3.5.3, <4.0.0",
+        "requests >=2.25.0, <3.0.0",
         "requests-mock >=1.8.0, <2.0.0",
     ],
+    python_requires='~=3.8',
     license='The Unlicense',
     entry_points={"pytest11": ["corva = corva_plugin.plugin"]},
 )
