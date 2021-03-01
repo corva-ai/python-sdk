@@ -1,4 +1,5 @@
 import contextlib
+import copy
 import functools
 import os
 import re
@@ -30,7 +31,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 def corva_patch():
     """Simplifies testing of Corva apps by patching essential functionality."""
 
-    with patch_redis_adapter(), patch_scheduled():
+    with patch_redis_adapter(), patch_scheduled(), patch_stream():
         yield
 
 
@@ -75,6 +76,35 @@ def patch_redis_adapter():
         # stops mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
 
+        yield
+
+
+@contextlib.contextmanager
+def patch_stream():
+    """Patches stream runner."""
+
+    from corva.application import Corva
+
+    def decorator(func):
+        def test_stream(self: Corva, fn, event, *args, **kwargs):
+            events = copy.deepcopy(event)
+            if not isinstance(events, list):
+                events = [events]
+
+            for event in events:
+                event.setdefault(
+                    'metadata',
+                    {
+                        'app_stream_id': int(),
+                        'apps': {os.environ['APP_KEY']: {'app_connection_id': int()}},
+                    },
+                )
+
+            return func(self, fn, events, *args, **kwargs)
+
+        return test_stream
+
+    with mock.patch.object(Corva, 'stream', decorator(Corva.stream)):
         yield
 
 
