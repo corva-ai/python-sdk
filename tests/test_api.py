@@ -11,11 +11,7 @@ from corva.configuration import SETTINGS
 def event():
     return [
         {
-            "records": [{"asset_id": 0, "timestamp": 0}],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
+            "records": [{"asset_id": 0, "timestamp": 0}]
         }
     ]
 

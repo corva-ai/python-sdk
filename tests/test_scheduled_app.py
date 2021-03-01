@@ -13,8 +13,6 @@ def test_set_completed_status(corva_context):
     event = [
         [
             {
-                "app_connection": 0,
-                "app_stream": 0,
                 "schedule": 0,
                 "interval": 0,
                 "schedule_start": 0,
