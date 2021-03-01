@@ -112,7 +112,28 @@ def patch_stream():
 def patch_scheduled():
     """Patches scheduled runner."""
 
-    with requests_mock.Mocker() as mocker:
+    from corva.application import Corva
+
+    def decorator(func):
+        def test_scheduled(self: Corva, fn, event, *args, **kwargs):
+            events = copy.deepcopy(event)
+            if not isinstance(events, list):
+                events = [events]
+            if not isinstance(events[0], list):
+                events = [events]
+
+            for i in range(len(events)):
+                for event in events[i]:
+                    event.setdefault('app_connection_id', int())
+                    event.setdefault('app_stream_id', int())
+
+            return func(self, fn, events, *args, **kwargs)
+
+        return test_scheduled
+
+    with mock.patch.object(
+        Corva, 'scheduled', decorator(Corva.scheduled)
+    ), requests_mock.Mocker() as mocker:
         # patch post request, that sets scheduled task as completed
         # matches url like https://dns/scheduler/123/completed
         mocker.post(re.compile(r'https://.+/scheduler/\d+/completed'))
