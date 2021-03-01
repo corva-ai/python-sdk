@@ -10,7 +10,7 @@ import pytest
 import requests_mock
 
 
-@pytest.hookimpl(trylast=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_load_initial_conftests(args, early_config, parser):
     """Sets test environment variables."""
 
