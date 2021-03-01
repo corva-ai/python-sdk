@@ -84,6 +84,7 @@ def patch_stream():
     """Patches stream runner."""
 
     from corva.application import Corva
+    from corva.configuration import SETTINGS
 
     def decorator(func):
         def test_stream(self: Corva, fn, event, *args, **kwargs):
@@ -96,7 +97,7 @@ def patch_stream():
                     'metadata',
                     {
                         'app_stream_id': int(),
-                        'apps': {os.environ['APP_KEY']: {'app_connection_id': int()}},
+                        'apps': {SETTINGS.APP_KEY: {'app_connection_id': int()}},
                     },
                 )
 
@@ -124,8 +125,8 @@ def patch_scheduled():
 
             for i in range(len(events)):
                 for event in events[i]:
-                    event.setdefault('app_connection_id', int())
-                    event.setdefault('app_stream_id', int())
+                    event.setdefault('app_connection', int())
+                    event.setdefault('app_stream', int())
 
             return func(self, fn, events, *args, **kwargs)
 
