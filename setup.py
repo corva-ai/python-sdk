@@ -1,10 +1,14 @@
 import pathlib
+from importlib import machinery
 
 import setuptools
 
 ROOT = pathlib.Path(__file__).parent
 README = (ROOT / "README.md").read_text()
 
+VERSION = str(
+    machinery.SourceFileLoader('version', 'src/version.py').load_module().VERSION
+)
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -21,7 +25,7 @@ setuptools.setup(
     author='Jordan Ambra',
     author_email="jordan.ambra@corva.ai",
     url='https://github.com/corva-ai/python-sdk',
-    version="0.0.12",
+    version=VERSION,
     classifiers=CLASSIFIERS,
     description='SDK for interacting with Corva',
     long_description=README,
