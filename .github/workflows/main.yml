@@ -46,7 +46,7 @@ jobs:
           coverage run --branch -m pytest
 
       - name: Coverage report
-        run: coverage report --include=src/*,docs_src/*
+        run: coverage report
 
   deploy:
     name: Build and Publishing to PyPI
