@@ -1,23 +1,18 @@
-from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from corva.application import Corva
 
 
 def scheduled_app(event, api, state):
-    patch('requests.request').start()
-
     api.post = Mock(wraps=api.post)  # spy on api.post
 
     return api
 
 
-def test_set_completed_status():
+def test_set_completed_status(corva_context):
     event = [
         [
             {
-                "app_connection": 0,
-                "app_stream": 0,
                 "schedule": 0,
                 "interval": 0,
                 "schedule_start": 0,
@@ -27,7 +22,7 @@ def test_set_completed_status():
         ]
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(corva_context)
 
     results = corva.scheduled(scheduled_app, event)
 

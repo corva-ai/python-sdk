@@ -38,14 +38,14 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('test_requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+            ${{ runner.os }}-pip-${{ hashFiles('test_requirements.txt') }}
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
-          pip install --disable-pip-version-check -r requirements.txt
+          pip install --disable-pip-version-check -r test_requirements.txt
 
       - name: Run unit tests
         run: |

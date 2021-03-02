@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 import pytest
 from pytest_mock import MockerFixture
 
@@ -17,18 +15,16 @@ def stream_app(event, api, cache):
     [('wits.completed', True), ('random', False)],
     ids=['is_completed True', 'is_completed False'],
 )
-def test_is_completed_record_deleted(collection, is_completed, mocker: MockerFixture):
+def test_is_completed_record_deleted(
+    collection, is_completed, mocker: MockerFixture, corva_context
+):
     event = [
         {
             "records": [{"asset_id": 0, "collection": collection, "timestamp": 0}],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
         }
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     spy = mocker.Mock(stream_app, wraps=stream_app)
 
@@ -60,7 +56,7 @@ def test_is_completed_record_deleted(collection, is_completed, mocker: MockerFix
     ],
 )
 def test_filter_records(
-    filter_mode, record_attr, last_value, expected, mocker: MockerFixture
+    filter_mode, record_attr, last_value, expected, mocker: MockerFixture, corva_context
 ):
     def filter_records_decor(func):
         def decor(**kwargs):
@@ -75,15 +71,11 @@ def test_filter_records(
             "records": [
                 {record_attr: 0, "asset_id": 0},
                 {record_attr: 1, "asset_id": 0},
-            ],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
+            ]
         }
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     mocker.patch.object(
         StreamEvent, 'filter_records', filter_records_decor(StreamEvent.filter_records)
@@ -100,16 +92,7 @@ def test_filter_records(
         ('depth', 'measured_depth'),
     ],
 )
-def test_last_processed_value_saved_to_cache(filter_mode, record_attr):
-    event = [
-        {
-            "records": [],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-        }
-    ]
+def test_last_processed_value_saved_to_cache(filter_mode, record_attr, corva_context):
     records_list = [
         [{record_attr: 0, 'asset_id': 0}, {record_attr: 1, "asset_id": 0}],
         [
@@ -119,10 +102,10 @@ def test_last_processed_value_saved_to_cache(filter_mode, record_attr):
         ],
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     for idx, records in enumerate(records_list):
-        event[0]['records'] = records
+        event = [{"records": records}]
 
         results = corva.stream(stream_app, event, filter_mode=filter_mode)
 
@@ -136,16 +119,7 @@ def test_last_processed_value_saved_to_cache(filter_mode, record_attr):
             assert getattr(results[0].records[0], record_attr) == 2
 
 
-def test_default_last_processed_value_taken_from_cache():
-    event = [
-        {
-            "records": [],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-        }
-    ]
+def test_default_last_processed_value_taken_from_cache(corva_context):
     records_list = [
         [{'timestamp': 0, 'asset_id': 0}, {'measured_depth': 0, 'asset_id': 0}],
         [{'timestamp': 1, 'asset_id': 0}],
@@ -153,10 +127,10 @@ def test_default_last_processed_value_taken_from_cache():
         [{'timestamp': 1, 'asset_id': 0}, {'timestamp': 2, 'asset_id': 0}],
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     for idx, records in enumerate(records_list):
-        event[0]['records'] = records
+        event = [{"records": records}]
 
         if idx == 0:
             corva.stream(stream_app, event, filter_mode=None)
@@ -218,18 +192,14 @@ def test_default_last_processed_value_taken_from_cache():
         'only timestamp provided',
     ],
 )
-def test_require_timestamp_or_measured_depth(records, raises):
+def test_require_timestamp_or_measured_depth(records, raises, corva_context):
     event = [
         {
             "records": records,
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
         }
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     if raises:
         exc = pytest.raises(ValueError, corva.stream, stream_app, event)
@@ -242,12 +212,11 @@ def test_require_timestamp_or_measured_depth(records, raises):
 
 
 @pytest.mark.parametrize(
-    'raises',
-    [True, False],
+    'apps,raises',
+    ([{}, True], [{SETTINGS.APP_KEY: {"app_connection_id": 0}}, False]),
     ids=['no app key exc', 'correct event'],
 )
-def test_require_app_key_in_metadata_apps(raises):
-    apps = {} if raises else {SETTINGS.APP_KEY: {"app_connection_id": 0}}
+def test_require_app_key_in_metadata_apps(apps, raises, corva_context):
     event = [
         {
             "records": [{"asset_id": 0, "timestamp": 0}],
@@ -255,7 +224,7 @@ def test_require_app_key_in_metadata_apps(raises):
         }
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     if raises:
         exc = pytest.raises(ValueError, corva.stream, stream_app, event)
@@ -265,50 +234,14 @@ def test_require_app_key_in_metadata_apps(raises):
     corva.stream(stream_app, event)
 
 
-@pytest.mark.parametrize(
-    'event_update,raises',
-    [({'app_key': ''}, True), ({}, False)],
-    ids=['app key set manually exc', 'correct event'],
-)
-def test_app_key_cant_be_set_manually(event_update, raises):
+def test_early_return_if_no_records_after_filtering(
+    mocker: MockerFixture, corva_context
+):
     event = [
-        {
-            "records": [{"asset_id": 0, "timestamp": 0}],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-            **event_update,
-        }
+        {"records": [{"asset_id": 0, "collection": 'wits.completed', "timestamp": 0}]}
     ]
 
-    corva = Corva(SimpleNamespace(client_context=None))
-
-    if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert (
-            'app_key can\'t be set manually, it is extracted from env and set automatically.'
-            in str(exc.value)
-        )
-        return
-
-    corva.stream(stream_app, event)
-
-
-def test_early_return_if_no_records_after_filtering(mocker: MockerFixture):
-    event = [
-        {
-            "records": [
-                {"asset_id": 0, "collection": 'wits.completed', "timestamp": 0}
-            ],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-        }
-    ]
-
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     spy = mocker.Mock(stream_app, wraps=stream_app)
 
@@ -317,21 +250,13 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture):
     spy.assert_not_called()
 
 
-def test_store_cache_data_for_empty_cache_data(mocker: MockerFixture):
+def test_store_cache_data_for_empty_cache_data(mocker: MockerFixture, corva_context):
     def stream_runner_mock(fn, context):
         return context
 
-    event = [
-        {
-            "records": [{"asset_id": 0, "timestamp": 0}],
-            "metadata": {
-                "app_stream_id": 0,
-                "apps": {SETTINGS.APP_KEY: {"app_connection_id": 0}},
-            },
-        }
-    ]
+    event = [{"records": [{"asset_id": 0, "timestamp": 0}]}]
 
-    corva = Corva(SimpleNamespace(client_context=None))
+    corva = Corva(context=corva_context)
 
     mocker.patch('corva.application.stream_runner', stream_runner_mock)
 

@@ -6,6 +6,7 @@ from typing import Dict, List, Literal, Optional, Union
 
 import pydantic
 
+from corva.configuration import SETTINGS
 from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
@@ -66,7 +67,7 @@ class StreamEventMetadata(CorvaBaseModel):
 
 
 class StreamEvent(BaseEvent):
-    app_key: str
+    app_key: str = SETTINGS.APP_KEY
     records: pydantic.conlist(Record, min_items=1)
     metadata: StreamEventMetadata
 
@@ -96,20 +97,8 @@ class StreamEvent(BaseEvent):
         return values
 
     @staticmethod
-    def from_raw_event(event: List[dict], **kwargs) -> List[StreamEvent]:
-        app_key = kwargs['app_key']
-
-        result = []
-
-        for event_dict in event:
-            if 'app_key' in event_dict:
-                raise ValueError(
-                    "app_key can't be set manually, it is extracted from env and set automatically."
-                )
-
-            event_dict = copy.deepcopy(event_dict)  # copy the dict before modifying
-            event_dict['app_key'] = app_key  # add app_key to each event
-            result.append(pydantic.parse_obj_as(StreamEvent, event_dict))
+    def from_raw_event(event: List[dict]) -> List[StreamEvent]:
+        result = pydantic.parse_obj_as(List[StreamEvent], event)
 
         return result
 

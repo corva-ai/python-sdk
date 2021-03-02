@@ -12,7 +12,6 @@ from corva.state.redis_state import RedisState
 
 
 class CorvaModelConfig:
-    allow_population_by_field_name = True
     arbitrary_types_allowed = True
     extra = pydantic.Extra.allow
     validate_assignment = True
@@ -25,7 +24,7 @@ class CorvaBaseModel(pydantic.BaseModel):
 class BaseEvent(CorvaBaseModel, ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: Any, **kwargs) -> Union[List[BaseEvent], BaseEvent]:
+    def from_raw_event(event: Any) -> Union[List[BaseEvent], BaseEvent]:
         pass
 
 

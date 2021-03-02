@@ -17,7 +17,7 @@ def test_connect(redis_adapter):
     assert redis_adapter.ping()
 
 
-def test_init_connect_exc(patch_redis_adapter):
+def test_init_connect_exc():
     server = FakeServer()
     server.connected = False
 

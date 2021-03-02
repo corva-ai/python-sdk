@@ -23,15 +23,9 @@ class Corva:
          cache_settings: additional cache settings
         """
 
-        # Default to the API Key configured as a the API_KEY environment variable
-        api_key = SETTINGS.API_KEY
         try:
-            # When available, use the API key from the client context
             api_key = context.client_context.env["API_KEY"]
         except (AttributeError, KeyError):
-            pass
-
-        if api_key is None:
             raise Exception('No API Key found.')
 
         self.cache_settings = cache_settings or {}
@@ -61,7 +55,7 @@ class Corva:
         returns: list of returned values from fn
         """
 
-        events = StreamEvent.from_raw_event(event=event, app_key=SETTINGS.APP_KEY)
+        events = StreamEvent.from_raw_event(event=event)
 
         results = []
 

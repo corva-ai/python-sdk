@@ -1,45 +1,26 @@
 from types import SimpleNamespace
 
 import pytest
-from pytest_mock import MockerFixture
 
 from corva.application import Corva
 
 
-def test_api_key_in_context(mocker: MockerFixture):
-    context = SimpleNamespace(client_context=SimpleNamespace(env={'API_KEY': '123'}))
+def test_api_key_in_context(corva_context):
+    corva = Corva(context=corva_context)
 
-    mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
-
-    corva = Corva(context=context)
-
-    assert corva.api.api_key == '123'
+    assert corva.api.api_key == corva_context.client_context.env['API_KEY']
 
 
-def test_no_env_in_client_context(mocker: MockerFixture):
-    context = SimpleNamespace(client_context=None)
-
-    mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
-
-    corva = Corva(context=context)
-
-    assert corva.api.api_key == '456'
-
-
-def test_no_key_in_client_context_env(mocker: MockerFixture):
-    context = SimpleNamespace(client_context=SimpleNamespace(env={}))
-
-    mocker.patch('corva.configuration.SETTINGS.API_KEY', '456')
-
-    corva = Corva(context=context)
-
-    assert corva.api.api_key == '456'
-
-
-def test_no_api_key_found(mocker: MockerFixture):
-    context = SimpleNamespace(client_context=None)
-    mocker.patch('corva.configuration.SETTINGS.API_KEY', None)
-
+@pytest.mark.parametrize(
+    'context',
+    (
+        SimpleNamespace(),
+        SimpleNamespace(client_context=None),
+        SimpleNamespace(client_context=SimpleNamespace(env={})),
+    ),
+    ids=['no client_context', 'no env', 'empty env'],
+)
+def test_wrong_client_context(context):
     with pytest.raises(Exception) as exc:
         Corva(context=context)
 
