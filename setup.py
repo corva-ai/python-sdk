@@ -2,17 +2,11 @@ import pathlib
 
 import setuptools
 
-root = pathlib.Path(__file__).parent
-readme = (root / "README.md").read_text()
-
-version_path = root / "corva" / "version.py"
-with open(version_path) as version_file:
-    version = ""
-    # Execute the code in version.py.
-    exec(compile(version_file.read(), version_path, 'exec'))
+ROOT = pathlib.Path(__file__).parent
+README = (ROOT / "README.md").read_text()
 
 
-classifiers = [
+CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Operating System :: OS Independent',
@@ -27,15 +21,15 @@ setuptools.setup(
     author='Jordan Ambra',
     author_email="jordan.ambra@corva.ai",
     url='https://github.com/corva-ai/python-sdk',
-    version=version,
-    classifiers=classifiers,
+    version="0.0.12",
+    classifiers=CLASSIFIERS,
     description='SDK for interacting with Corva',
-    long_description=readme,
+    long_description=README,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
-    packages=setuptools.find_packages(
-        ".", include=('corva', 'corva.*', 'corva_plugin')
-    ),
+    py_modules=[file.stem for file in pathlib.Path('src').glob('*.py')],
+    packages=setuptools.find_packages("src"),
+    package_dir={"": "src"},
     install_requires=[
         "fakeredis >=1.4.5, <2.0.0",
         "pydantic >=1.7.3, <2.0.0",
@@ -43,7 +37,16 @@ setuptools.setup(
         "requests >=2.25.0, <3.0.0",
         "requests-mock >=1.8.0, <2.0.0",
     ],
+    extras_require={
+        "dev": [
+            "coverage ==5.3",
+            "flake8 ==3.8.4",
+            "freezegun ==1.0.0",
+            "pytest ==6.1.2",
+            "pytest-mock ==3.3.1",
+        ]
+    },
     python_requires='~=3.8',
     license='The Unlicense',
-    entry_points={"pytest11": ["corva = corva_plugin.plugin"]},
+    entry_points={"pytest11": ["corva = plugin"]},
 )
