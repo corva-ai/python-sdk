@@ -228,7 +228,7 @@ other operations with data.
 $ cd ~/YOUR_PATH/python-sdk
 $ python -m venv venv
 $ source venv/bin/activate
-(venv) $ pip install -r test_requirements.txt
+(venv) $ pip install -e .[dev]
 ```
 
 #### Run tests
