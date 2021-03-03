@@ -12,7 +12,7 @@ from corva.models.base import BaseContext, BaseEvent
 class ScheduledEvent(BaseEvent):
     asset_id: int
     interval: int = pydantic.Field(
-        ..., description='Scheduled interval (parsed cron string in seconds)'
+        ..., description='Time in seconds between two schedule triggers'
     )
     schedule_id: int = pydantic.Field(..., alias='schedule')
     schedule_start: int = pydantic.Field(
