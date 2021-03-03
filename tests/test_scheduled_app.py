@@ -17,7 +17,6 @@ def test_set_completed_status(corva_context):
                 "schedule": 0,
                 "interval": 0,
                 "schedule_start": 0,
-                "schedule_end": 0,
                 "asset_id": 0,
             }
         ]
@@ -47,7 +46,6 @@ def test_schedule_field_casted_from_ms_if_needed(attr, value, expected, corva_co
         "schedule": 0,
         "interval": 0,
         "schedule_start": 0,
-        "schedule_end": 0,
         "asset_id": 0,
         **{attr: value},
     }

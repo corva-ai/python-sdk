@@ -18,11 +18,11 @@ class ScheduledEvent(BaseEvent):
     schedule_start: int = pydantic.Field(
         ..., description='Unix timestamp, when the schedule was triggered'
     )
-    schedule_end: int = pydantic.Field(None, description='Schedule end timestamp')
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
 
     # optional fields
+    schedule_end: Optional[int] = pydantic.Field(None, description='Schedule end timestamp')
     cron_string: Optional[str] = pydantic.Field(
         None, description='Cron expression representing the schedule'
     )
