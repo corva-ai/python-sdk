@@ -15,8 +15,10 @@ class ScheduledEvent(BaseEvent):
         ..., description='Scheduled interval (parsed cron string in seconds)'
     )
     schedule_id: int = pydantic.Field(..., alias='schedule')
-    schedule_start: datetime
-    schedule_end: datetime
+    schedule_start: int = pydantic.Field(
+        ..., description='Unix timestamp, when the schedule was triggered'
+    )
+    schedule_end: int = pydantic.Field(None, description='Schedule end timestamp')
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
 
@@ -47,6 +49,15 @@ class ScheduledEvent(BaseEvent):
     day_shift_start: Optional[str] = pydantic.Field(
         None, description='Day shift start time'
     )
+
+    @pydantic.validator('schedule_start', 'schedule_end')
+    def set_timestamp(cls, v):
+        try:
+            datetime.utcfromtimestamp(v)
+        except ValueError:
+            v /= 1000
+
+        return int(v)
 
     @staticmethod
     def from_raw_event(event: List[List[dict]]) -> List[ScheduledEvent]:
