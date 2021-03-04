@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
@@ -29,34 +28,29 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v1
+      - name: Cache python
+        uses: actions/cache@v2
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('test_requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ hashFiles('test_requirements.txt') }}
-            ${{ runner.os }}-pip-
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}
 
       - name: Install dependencies
-        run: |
-          pip install --disable-pip-version-check -r test_requirements.txt
+        run: pip install --disable-pip-version-check --upgrade --upgrade-strategy eager .[dev]
 
       - name: Run unit tests
         run: |
-          python -m coverage run -m pytest -v
+          coverage run --branch -m pytest -v
 
-      - name: coverage report
-        run: python -m coverage report
+      - name: Coverage report
+        run: coverage report
 
   deploy:
     name: Build and Publishing to PyPI
-    needs: [static, testing]
+    needs: [ static, testing ]
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     steps:
