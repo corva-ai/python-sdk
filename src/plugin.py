@@ -2,7 +2,6 @@ import contextlib
 import copy
 import functools
 import os
-import re
 import types
 from unittest import mock
 
@@ -27,10 +26,10 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def corva_patch(requests_mock):
+def corva_patch():
     """Simplifies testing of Corva apps by patching essential functionality."""
 
-    with patch_redis_adapter(), patch_scheduled(requests_mock), patch_stream():
+    with patch_redis_adapter(), patch_scheduled(), patch_stream():
         yield
 
 
@@ -109,10 +108,10 @@ def patch_stream():
 
 
 @contextlib.contextmanager
-def patch_scheduled(requests_mock):
+def patch_scheduled():
     """Patches scheduled runner."""
 
-    from corva.application import Corva
+    from corva.application import Corva, scheduled_runner
 
     def patch_corva(func):
         def _patch_corva(self: Corva, fn, event, *args, **kwargs):
@@ -131,9 +130,29 @@ def patch_scheduled(requests_mock):
 
         return _patch_corva
 
-    with mock.patch.object(Corva, 'scheduled', patch_corva(Corva.scheduled)):
-        # patch post request, that sets scheduled task as completed
-        # looks for url path like /scheduler/123/completed
-        requests_mock.post(re.compile('/scheduler/\d+/completed'))
+    def patch_runner(func):
+        def _patch_runner(fn, context):
+            # context.api is accessed two times in scheduled_runner:
+            #   1. To pass Api instance to user function.
+            #   2. To make post API call.
+            # Patch context.api to return Mock instance, when accessed the second time.
+            # This is needed for following reasons:
+            #   1. To avoid posting in user tests.
+            #   2. To avoid flooding users Api instance with mocks.
+            type(context).api = mock.PropertyMock(
+                side_effect=[context.api, mock.Mock()]
+            )
+
+            try:
+                return func(fn, context)
+            finally:
+                # type(context).api should not exists
+                delattr(type(context), 'api')
+
+        return _patch_runner
+
+    with mock.patch.object(
+        Corva, 'scheduled', patch_corva(Corva.scheduled)
+    ), mock.patch('corva.application.scheduled_runner', patch_runner(scheduled_runner)):
 
         yield

@@ -1,12 +1,19 @@
+import re
 from unittest.mock import Mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from corva.application import Corva
+from corva.runners.scheduled import scheduled_runner
 
 
-def test_set_completed_status(corva_context):
+def test_set_completed_status(mocker: MockerFixture, corva_context, requests_mock):
     def scheduled_app(event, api, state):
+        # patch post request, that sets scheduled task as completed
+        # looks for url path like /scheduler/123/completed
+        requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+
         api.post = Mock(wraps=api.post)  # spy on api.post
 
         return api
@@ -21,6 +28,10 @@ def test_set_completed_status(corva_context):
             }
         ]
     ]
+
+    # corva_patch fixture patches scheduled_runner for user tests.
+    # return real scheduled runner instead of patched one.
+    mocker.patch('corva.application.scheduled_runner', scheduled_runner)
 
     corva = Corva(corva_context)
 
