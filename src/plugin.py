@@ -8,7 +8,6 @@ from unittest import mock
 
 import fakeredis
 import pytest
-import requests_mock
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -28,10 +27,10 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def corva_patch():
+def corva_patch(requests_mock):
     """Simplifies testing of Corva apps by patching essential functionality."""
 
-    with patch_redis_adapter(), patch_scheduled(), patch_stream():
+    with patch_redis_adapter(), patch_scheduled(requests_mock), patch_stream():
         yield
 
 
@@ -110,7 +109,7 @@ def patch_stream():
 
 
 @contextlib.contextmanager
-def patch_scheduled():
+def patch_scheduled(requests_mock):
     """Patches scheduled runner."""
 
     from corva.application import Corva
@@ -132,11 +131,9 @@ def patch_scheduled():
 
         return test_scheduled
 
-    with mock.patch.object(
-        Corva, 'scheduled', decorator(Corva.scheduled)
-    ), requests_mock.Mocker() as mocker:
+    with mock.patch.object(Corva, 'scheduled', decorator(Corva.scheduled)):
         # patch post request, that sets scheduled task as completed
         # matches url like https://dns/scheduler/123/completed
-        mocker.post(re.compile(r'https://.+/scheduler/\d+/completed'))
+        requests_mock.post(re.compile(r'https://.+/scheduler/\d+/completed'))
 
         yield
