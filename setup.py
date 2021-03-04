@@ -35,10 +35,10 @@ setuptools.setup(
     packages=setuptools.find_packages("src"),
     package_dir={"": "src"},
     install_requires=[
-        "fakeredis >=1.4.5, <2.0.0",
-        "pydantic >=1.7.3, <2.0.0",
-        "redis >=3.5.3, <4.0.0",
-        "requests >=2.25.0, <3.0.0",
+        "fakeredis ~=1.4.5",
+        "pydantic ~=1.7.3",
+        "redis ~=3.5.3",
+        "requests ~=2.25.0",
     ],
     extras_require={
         "dev": [
@@ -47,7 +47,7 @@ setuptools.setup(
             "freezegun ==1.0.0",
             "pytest ==6.1.2",
             "pytest-mock ==3.3.1",
-            "requests-mock >=1.8.0, <2.0.0",
+            "requests-mock ==1.8.0",
         ]
     },
     python_requires='~=3.8',
