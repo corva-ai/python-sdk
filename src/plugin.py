@@ -114,8 +114,8 @@ def patch_scheduled(requests_mock):
 
     from corva.application import Corva
 
-    def decorator(func):
-        def test_scheduled(self: Corva, fn, event, *args, **kwargs):
+    def patch_corva(func):
+        def _patch_corva(self: Corva, fn, event, *args, **kwargs):
             events = copy.deepcopy(event)
             if not isinstance(events, list):
                 events = [events]
@@ -129,11 +129,11 @@ def patch_scheduled(requests_mock):
 
             return func(self, fn, events, *args, **kwargs)
 
-        return test_scheduled
+        return _patch_corva
 
-    with mock.patch.object(Corva, 'scheduled', decorator(Corva.scheduled)):
+    with mock.patch.object(Corva, 'scheduled', patch_corva(Corva.scheduled)):
         # patch post request, that sets scheduled task as completed
-        # matches url like https://dns/scheduler/123/completed
-        requests_mock.post(re.compile(r'https://.+/scheduler/\d+/completed'))
+        # looks for url path like /scheduler/123/completed
+        requests_mock.post(re.compile('/scheduler/\d+/completed'))
 
         yield
