@@ -3,6 +3,7 @@ import copy
 import functools
 import os
 import types
+from typing import Callable, List, Union
 from unittest import mock
 
 import fakeredis
@@ -11,7 +12,18 @@ import pytest
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_load_initial_conftests(args, early_config, parser):
-    """Sets test environment variables."""
+    """Sets test environment variables.
+
+    This hook is triggered before loading the packages being tested.
+    If packages contain global variables, that read from env,
+    they will be able to read env values set by this hook.
+
+    Why does this hook get triggered before loading the packages being tested?
+      Current file, that that contains the hook is registered as pytest plugin through
+      setuptools entry points. Plugins registered like this are loaded before loading
+      the packages being tested.
+      See load order here: https://docs.pytest.org/en/stable/writing_plugins.html#plugin-discovery-order-at-tool-startup
+    """
 
     provider = 'test-provider'
     env = {
@@ -27,7 +39,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 @pytest.fixture(scope='function', autouse=True)
 def corva_patch():
-    """Simplifies testing of Corva apps by patching essential functionality."""
+    """Simplifies testing of Corva apps by patching some internal functionality."""
 
     with patch_redis_adapter(), patch_scheduled(), patch_stream():
         yield
@@ -35,7 +47,7 @@ def corva_patch():
 
 @pytest.fixture(scope='function')
 def corva_context(corva_patch):
-    """Imitates AWS lambda context expected by Corva."""
+    """Imitates AWS Lambda context expected by Corva."""
 
     return types.SimpleNamespace(
         client_context=types.SimpleNamespace(env={'API_KEY': '123'})
@@ -44,14 +56,14 @@ def corva_context(corva_patch):
 
 @contextlib.contextmanager
 def patch_redis_adapter():
-    """Allows testing Corva apps without running real redis server.
+    """Allows testing Corva apps without need to run real Redis server.
 
-    Internally Corva uses Redis as cache. The fixture allows testing Corva apps
-    without running real redis server. It patches RedisAdapter to use fakeredis
-    instead of redis. fakeredis is a library that simulates talking to a real redis
-    server.
+    Internally Corva uses Redis as cache. This function patches RedisAdapter to use
+    fakeredis instead of redis. fakeredis is a library that simulates talking to a
+    real Redis server. This way the function allows testing Corva apps without running
+    real Redis server.
 
-    Fixture patch steps:
+    Patch steps:
       1. patch RedisAdapter.__bases__ to use fakeredis.FakeRedis instead of redis.Redis
       2. patch redis.from_url with fakeredis.FakeRedis.from_url
     """
@@ -81,18 +93,25 @@ def patch_redis_adapter():
 def patch_stream():
     """Patches stream runner."""
 
+    # imports are local to avoid loading packages, on the first plugin run
     from corva.application import Corva
     from corva.configuration import SETTINGS
 
     def patch_corva(func):
-        def _patch_corva(self: Corva, fn, event, *args, **kwargs):
-            """Automatically adds some fields to event in Corva.stream."""
+        def _patch_corva(
+            self: Corva, fn: Callable, event: Union[dict, List[dict]], *args, **kwargs
+        ):
+            """Automatically adds essential fields to event in Corva.stream."""
 
             events = copy.deepcopy(event)
+
+            # cast event to expected type List[dict], if needed
             if not isinstance(events, list):
+                # allow users to send event as dict
                 events = [events]
 
             for event in events:
+                # do not override the values, if provided by user
                 event.setdefault(
                     'metadata',
                     {
@@ -113,20 +132,32 @@ def patch_stream():
 def patch_scheduled():
     """Patches scheduled runner."""
 
+    # imports are local to avoid loading packages, on the first plugin run
     from corva.application import Corva, scheduled_runner
 
     def patch_corva(func):
-        def _patch_corva(self: Corva, fn, event, *args, **kwargs):
-            """Automatically adds some fields to event in Corva.scheduled."""
+        def _patch_corva(
+            self: Corva,
+            fn: Callable,
+            event: Union[dict, List[dict], List[List[dict]]],
+            *args,
+            **kwargs,
+        ):
+            """Automatically adds essential fields to event in Corva.scheduled."""
 
             events = copy.deepcopy(event)
+
+            # cast event to expected type List[List[dict]], if needed
             if not isinstance(events, list):
+                # allow users to send event as dict
                 events = [events]
             if not isinstance(events[0], list):
+                # allow users to send event as List[dict]
                 events = [events]
 
             for i in range(len(events)):
                 for event in events[i]:
+                    # do not override the values, if provided by user
                     event.setdefault('app_connection', int())
                     event.setdefault('app_stream', int())
 
@@ -142,7 +173,7 @@ def patch_scheduled():
             # Patch context.api to return Mock instance, when accessed the second time.
             # This is needed for following reasons:
             #   1. To avoid POSTing in user tests.
-            #   2. To avoid flooding users Api instance with our POST mock.
+            #   2. To avoid adding our POST mock to users Api instance.
             type(context).api = mock.PropertyMock(
                 side_effect=[context.api, mock.Mock()]
             )
