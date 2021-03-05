@@ -1,6 +1,8 @@
+import itertools
+import json
 import posixpath
 import re
-from typing import Optional
+from typing import List, Optional
 
 import requests
 
@@ -126,3 +128,59 @@ class Api:
             raise ValueError(
                 f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and {self.TIMEOUT_LIMITS[1]} seconds.'
             )
+
+    def get_dataset(
+        self,
+        provider: str,
+        dataset: str,
+        query: dict,
+        sort: dict,
+        limit: int,
+        fields: Optional[str] = None,
+    ) -> List[dict]:
+        """Fetches all data from the endpoint '/api/v1/data/{provider}/{dataset}/'.
+
+        Args:
+          provider: company name, that owns the dataset.
+          dataset: dataset name.
+          query: search conditions. Example: {"asset_id": 123} - will fetch data
+            for asset with id 123.
+          sort: sort conditions. Example: {"timestamp": 1} - will sort data
+            in ascending order by timestamp.
+          limit: number of data points to fecth in one request. Example: if limit is 2
+            and there are 3 data points in the dataset - 2 api requests will be made.
+            Recommendation for setting this value:
+              1. The bigger ↑ each data point is - the smaller ↓ the limit;
+              2. The smaller ↓ each data point is - the bigger ↑ the limit.
+          fields: comma separated list of fields to return. Example: "_id,data".
+
+        Raises:
+          requests.HTTPError: if some request was unsuccessful.
+
+        Returns:
+          all data from dataset.
+        """
+
+        dataset = []
+
+        for skip in itertools.count(0, limit):
+            response = self.get(
+                f'/api/v1/data/{provider}/{dataset}/',
+                params={
+                    'query': json.dumps(query),
+                    'sort': json.dumps(sort),
+                    'fields': fields,
+                    'limit': limit,
+                    'skip': skip,
+                },
+            )
+            response.raise_for_status()
+
+            new_data = response.json()
+
+            dataset.extend(new_data)
+
+            if len(new_data) != limit:
+                break
+
+        return dataset
