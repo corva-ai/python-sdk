@@ -50,7 +50,7 @@ setuptools.setup(
             "requests-mock ==1.8.0",
         ]
     },
-    python_requires='~=3.8',
+    python_requires='>=3.8, <4.0',
     license='The Unlicense',
     entry_points={"pytest11": ["corva = plugin"]},
 )
