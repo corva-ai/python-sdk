@@ -161,7 +161,7 @@ class Api:
           all data from dataset.
         """
 
-        dataset = []
+        result = []
 
         for skip in itertools.count(0, limit):
             response = self.get(
@@ -178,9 +178,9 @@ class Api:
 
             new_data = response.json()
 
-            dataset.extend(new_data)
+            result.extend(new_data)
 
             if len(new_data) != limit:
                 break
 
-        return dataset
+        return result
