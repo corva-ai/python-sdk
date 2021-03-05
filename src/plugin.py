@@ -117,6 +117,8 @@ def patch_scheduled():
 
     def patch_corva(func):
         def _patch_corva(self: Corva, fn, event, *args, **kwargs):
+            """Automatically adds some fields to event in Corva.scheduled."""
+
             events = copy.deepcopy(event)
             if not isinstance(events, list):
                 events = [events]
