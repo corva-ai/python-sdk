@@ -84,8 +84,10 @@ def patch_stream():
     from corva.application import Corva
     from corva.configuration import SETTINGS
 
-    def decorator(func):
-        def test_stream(self: Corva, fn, event, *args, **kwargs):
+    def patch_corva(func):
+        def _patch_corva(self: Corva, fn, event, *args, **kwargs):
+            """Automatically adds some fields to event in Corva.stream."""
+
             events = copy.deepcopy(event)
             if not isinstance(events, list):
                 events = [events]
@@ -101,9 +103,9 @@ def patch_stream():
 
             return func(self, fn, events, *args, **kwargs)
 
-        return test_stream
+        return _patch_corva
 
-    with mock.patch.object(Corva, 'stream', decorator(Corva.stream)):
+    with mock.patch.object(Corva, 'stream', patch_corva(Corva.stream)):
         yield
 
 
