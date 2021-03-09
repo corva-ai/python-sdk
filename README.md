@@ -238,6 +238,7 @@ from corva import Corva
 
 
 def app(event, api, cache):
+    print("Hello, World!")
     pass
 
 
@@ -264,6 +265,7 @@ from corva import Corva
 
 
 def app(event, api, cache):
+    print("Hello, World!")
     pass
 
 
