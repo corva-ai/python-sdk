@@ -226,7 +226,8 @@ other operations with data.
 Testing Corva applications is easy and enjoyable.
 
 The SDK provides convenient tools for testing through `pytest` [plugin][pytest-plugin].
-Write your tests using `pytest` to get the access to the plugin.  
+Write your tests using `pytest` to get the access to the plugin. To install the library
+run `pip install pytest`. 
 
 #### Stream example test
 
