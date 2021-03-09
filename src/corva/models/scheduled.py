@@ -22,7 +22,9 @@ class ScheduledEvent(BaseEvent):
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
 
     # optional fields
-    schedule_end: Optional[int] = pydantic.Field(None, description='Schedule end timestamp')
+    schedule_end: Optional[int] = pydantic.Field(
+        None, description='Schedule end timestamp'
+    )
     cron_string: Optional[str] = pydantic.Field(
         None, description='Cron expression representing the schedule'
     )
@@ -51,11 +53,19 @@ class ScheduledEvent(BaseEvent):
     )
 
     @pydantic.validator('schedule_start', 'schedule_end')
-    def set_timestamp(cls, v):
+    def set_timestamp(cls, v) -> int:
+        """Casts Unix timestamp from milliseconds to seconds.
+
+        Casts Unix timestamp from millisecond to seconds, if provided timestamp is in
+          milliseconds.
+        """
+
         try:
+            # the function will raise, if provided timestamp is in milliseconds,
+            # because the year will always be too big to fit into the datetime instance
             datetime.utcfromtimestamp(v)
         except ValueError:
-            v /= 1000
+            v /= 1000  # cast value from milliseconds to seconds
 
         return int(v)
 
