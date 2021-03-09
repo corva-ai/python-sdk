@@ -114,27 +114,36 @@ def test_request_timeout_limits(
     assert request_patch.call_args.kwargs['timeout'] == timeout
 
 
-@pytest.mark.parametrize('fields', (None, '_id'))
+@pytest.mark.parametrize(
+    'fields,skip,limit,query,sort',
+    ([None, 0, 1, {}, {}], ['_id', 1, 2, {'k1': 'v1'}, {'k2': 'v2'}]),
+)
 def test_get_dataset(
-    fields, event, corva_context, requests_mock: RequestsMocker, mocker: MockerFixture
+    fields,
+    skip,
+    limit,
+    query,
+    sort,
+    event,
+    corva_context,
+    requests_mock: RequestsMocker,
+    mocker: MockerFixture,
 ):
     api = Corva(context=corva_context).stream(app, event)[0]
 
     provider = SETTINGS.PROVIDER
     dataset = 'dataset'
-    query = {}
-    sort = {}
-    limit = 1
 
     get_spy = mocker.spy(api, 'get')
-    get_mock = requests_mock.get(f'/api/v1/data/{provider}/{dataset}/', text='[]')
+    get_mock = requests_mock.get(f'/api/v1/data/{provider}/{dataset}/', text='[{}]')
 
-    api.get_dataset(
+    result = api.get_dataset(
         provider=provider,
         dataset=dataset,
         query=query,
         sort=sort,
         limit=limit,
+        skip=skip,
         fields=fields,
     )
 
@@ -145,55 +154,13 @@ def test_get_dataset(
             'sort': json.dumps(sort),
             'fields': fields,
             'limit': limit,
-            'skip': 0,
+            'skip': skip,
         },
     )
 
     assert get_spy.call_args == expected
     assert get_mock.called_once
-
-
-def test_get_dataset_gets_all_data(
-    event, corva_context, requests_mock: RequestsMocker, mocker: MockerFixture
-):
-    """Tests, that all data is received from the API.
-
-    Verifies, that all data is received from the API, if there are more data
-    that the limit.
-    """
-
-    api = Corva(context=corva_context).stream(app, event)[0]
-
-    provider = SETTINGS.PROVIDER
-    dataset = 'dataset'
-    query = {}
-    sort = {}
-    limit = 1
-
-    get_spy = mocker.spy(api, 'get')
-    get_mock = requests_mock.get(
-        f'/api/v1/data/{provider}/{dataset}/',
-        [{'text': '[{}]'}, {'text': '[{}]'}, {'text': '[]'}],
-    )
-
-    result = api.get_dataset(
-        provider=provider, dataset=dataset, query=query, sort=sort, limit=limit
-    )
-
-    for skip, get_call in enumerate(get_spy.mock_calls):
-        params = {
-            'query': json.dumps(query),
-            'sort': json.dumps(sort),
-            'fields': None,
-            'limit': limit,
-            'skip': skip,  # verify, that skip changes with every call
-        }
-        expected = mock.call(f'/api/v1/data/{provider}/{dataset}/', params=params)
-
-        assert get_call == expected
-
-    assert get_mock.call_count == 3
-    assert result == [{}, {}]
+    assert result == [{}]
 
 
 def test_get_dataset_raises(event, corva_context, requests_mock: RequestsMocker):

@@ -1,4 +1,3 @@
-import itertools
 import json
 import posixpath
 import re
@@ -133,12 +132,14 @@ class Api:
         self,
         provider: str,
         dataset: str,
+        *,
         query: dict,
         sort: dict,
         limit: int,
+        skip: int = 0,
         fields: Optional[str] = None,
     ) -> List[dict]:
-        """Fetches all data from the endpoint '/api/v1/data/{provider}/{dataset}/'.
+        """Fetches data from the endpoint '/api/v1/data/{provider}/{dataset}/'.
 
         Args:
           provider: company name, that owns the dataset.
@@ -147,40 +148,32 @@ class Api:
             for asset with id 123.
           sort: sort conditions. Example: {"timestamp": 1} - will sort data
             in ascending order by timestamp.
-          limit: number of data points to fecth in one request. Example: if limit is 2
-            and there are 3 data points in the dataset - 2 api requests will be made.
-            Recommendation for setting this value:
+          limit: number of data points to fecth.
+            Recommendation for setting the limit:
               1. The bigger ↑ each data point is - the smaller ↓ the limit;
               2. The smaller ↓ each data point is - the bigger ↑ the limit.
+          skip: exclude from a response the first N items of a dataset.
           fields: comma separated list of fields to return. Example: "_id,data".
 
         Raises:
-          requests.HTTPError: if some request was unsuccessful.
+          requests.HTTPError: if request was unsuccessful.
 
         Returns:
-          all data from dataset.
+          Data from dataset.
         """
 
-        result = []
+        response = self.get(
+            f'/api/v1/data/{provider}/{dataset}/',
+            params={
+                'query': json.dumps(query),
+                'sort': json.dumps(sort),
+                'fields': fields,
+                'limit': limit,
+                'skip': skip,
+            },
+        )
+        response.raise_for_status()
 
-        for skip in itertools.count(0, limit):
-            response = self.get(
-                f'/api/v1/data/{provider}/{dataset}/',
-                params={
-                    'query': json.dumps(query),
-                    'sort': json.dumps(sort),
-                    'fields': fields,
-                    'limit': limit,
-                    'skip': skip,
-                },
-            )
-            response.raise_for_status()
+        data = list(response.json())
 
-            new_data = response.json()
-
-            result.extend(new_data)
-
-            if len(new_data) != limit:
-                break
-
-        return result
+        return data
