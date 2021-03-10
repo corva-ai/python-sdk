@@ -174,6 +174,8 @@ def patch_scheduled():
             # This is needed for following reasons:
             #   1. To avoid POSTing in user tests.
             #   2. To avoid adding our POST mock to users Api instance.
+            # Using side_effect for mocking in python attributes:
+            #   https://stackoverflow.com/a/54441868
             type(context).api = mock.PropertyMock(
                 side_effect=[context.api, mock.Mock()]
             )
