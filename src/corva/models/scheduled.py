@@ -29,7 +29,7 @@ class ScheduledEvent(BaseEvent):
         None, description='Cron expression representing the schedule'
     )
     environment: Optional[
-        Literal['test', 'localhost', 'qa', 'staging', 'production']
+        Literal['testing', 'localhost', 'qa', 'staging', 'production']
     ] = None
     app_id: Optional[int] = pydantic.Field(None, alias='app')
     app_key: Optional[str] = pydantic.Field(None, description='Unique app identifier')
