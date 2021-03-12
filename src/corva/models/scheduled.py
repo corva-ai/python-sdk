@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-from datetime import datetime
 from typing import List, Literal, Optional
 
 import pydantic
@@ -55,21 +54,18 @@ class ScheduledEvent(BaseEvent):
     )
 
     @pydantic.validator('schedule_start', 'schedule_end')
-    def set_timestamp(cls, v) -> int:
+    def set_timestamp(cls, v: int) -> int:
         """Casts Unix timestamp from milliseconds to seconds.
 
         Casts Unix timestamp from millisecond to seconds, if provided timestamp is in
           milliseconds.
         """
 
-        try:
-            # the function will raise, if provided timestamp is in milliseconds,
-            # because the year will always be too big to fit into the datetime instance
-            datetime.utcfromtimestamp(v)
-        except ValueError:
-            v /= 1000  # cast value from milliseconds to seconds
+        # 1 January 10000 00:00:00 - first date to not fit into the datetime instance
+        if v >= 253402300800:
+            v //= 1000
 
-        return int(v)
+        return v
 
     @staticmethod
     def from_raw_event(event: List[List[dict]]) -> List[ScheduledEvent]:

@@ -53,10 +53,17 @@ def test_set_completed_status(
 @pytest.mark.parametrize(
     'value,expected',
     (
-        [253402300799, 253402300799],  # 31 December 9999 23:59:59
-        [253402300800, 253402300],  # 1 January 10000 00:00:00
+        [253402300799, 253402300799],  # 31 December 9999 23:59:59 in sec
+        [253402300800, 253402300],  # 1 January 10000 00:00:00 in sec
+        [1609459200000, 1609459200],  # 1 January 2021 00:00:00 in ms
+        [1609459200, 1609459200],  # 1 January 2021 00:00:00 in sec
     ),
-    ids=('no cast performed', 'casted from ms to sec'),
+    ids=(
+        'no cast performed',
+        'casted from ms to sec',
+        'casted from ms to sec',
+        'no cast performed',
+    ),
 )
 def test_schedule_field_casted_from_ms_if_needed(attr, value, expected, corva_context):
     def app(event, api, state):
