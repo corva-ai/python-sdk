@@ -6,6 +6,7 @@ from corva.models.scheduled import ScheduledContext
 def scheduled_runner(fn: Callable, context: ScheduledContext) -> Any:
     result = fn(context.event, context.api, context.cache)
 
-    context.api.post(path=f'scheduler/{context.event.schedule_id}/completed')
+    # should never raise
+    context.api._set_schedule_as_completed(schedule_id=context.event.schedule_id)
 
     return result

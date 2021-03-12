@@ -19,7 +19,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
     they will be able to read env values set by this hook.
 
     Why does this hook get triggered before loading the packages being tested?
-      Current file, that that contains the hook is registered as pytest plugin through
+      The current file that contains the hook is registered as a pytest plugin through
       setuptools entry points. Plugins registered like this are loaded before loading
       the packages being tested.
       See load order here: https://docs.pytest.org/en/stable/writing_plugins.html#plugin-discovery-order-at-tool-startup
@@ -56,12 +56,12 @@ def corva_context(corva_patch):
 
 @contextlib.contextmanager
 def patch_redis_adapter():
-    """Allows testing Corva apps without need to run real Redis server.
+    """Allows testing of Corva apps without running a real Redis server.
 
     Internally Corva uses Redis as cache. This function patches RedisAdapter to use
     fakeredis instead of redis. fakeredis is a library that simulates talking to a
     real Redis server. This way the function allows testing Corva apps without running
-    real Redis server.
+    a real Redis server.
 
     Patch steps:
       1. patch RedisAdapter.__bases__ to use fakeredis.FakeRedis instead of redis.Redis
@@ -167,24 +167,9 @@ def patch_scheduled():
 
     def patch_runner(func):
         def _patch_runner(fn, context):
-            # context.api is accessed two times in scheduled_runner:
-            #   1. To pass an Api instance to the user function.
-            #   2. To make a POST API call.
-            # Patch context.api to return Mock instance, when accessed the second time.
-            # This is needed for following reasons:
-            #   1. To avoid POSTing in user tests.
-            #   2. To avoid adding our POST mock to users Api instance.
-            # Using side_effect for mocking in python attributes:
-            #   https://stackoverflow.com/a/54441868
-            type(context).api = mock.PropertyMock(
-                side_effect=[context.api, mock.Mock()]
-            )
-
-            try:
+            # avoid POSTing in user tests
+            with mock.patch.object(context.api, '_set_schedule_as_completed'):
                 return func(fn, context)
-            finally:
-                # type(context).api should not exists
-                delattr(type(context), 'api')
 
         return _patch_runner
 
