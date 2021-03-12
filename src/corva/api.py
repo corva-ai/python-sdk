@@ -177,3 +177,9 @@ class Api:
         data = list(response.json())
 
         return data
+
+    def _set_schedule_as_completed(self, schedule_id: int):
+        """Sets schedule as completed. Should never raise."""
+
+        response = self.post(path=f'scheduler/{schedule_id}/completed')
+        return response
