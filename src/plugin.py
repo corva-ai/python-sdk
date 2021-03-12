@@ -167,24 +167,9 @@ def patch_scheduled():
 
     def patch_runner(func):
         def _patch_runner(fn, context):
-            # context.api is accessed two times in scheduled_runner:
-            #   1. To pass an Api instance to the user function.
-            #   2. To make a POST API call.
-            # Patch context.api to return Mock instance, when accessed the second time.
-            # This is needed for following reasons:
-            #   1. To avoid POSTing in user tests.
-            #   2. To avoid adding our POST mock to users Api instance.
-            # Using side_effect for mocking in python attributes:
-            #   https://stackoverflow.com/a/54441868
-            type(context).api = mock.PropertyMock(
-                side_effect=[context.api, mock.Mock()]
-            )
-
-            try:
+            # avoid POSTing in user tests
+            with mock.patch.object(context.api, '_set_schedule_as_completed'):
                 return func(fn, context)
-            finally:
-                # type(context).api should not exists
-                delattr(type(context), 'api')
 
         return _patch_runner
 

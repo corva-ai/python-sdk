@@ -8,11 +8,20 @@ from corva.application import Corva
 from corva.runners.scheduled import scheduled_runner
 
 
-def test_set_completed_status(mocker: MockerFixture, corva_context, requests_mock):
+@pytest.mark.parametrize(
+    'status_code',
+    (200, 400),
+    ids=('request successful', 'request failed - should not raise'),
+)
+def test_set_completed_status(
+    status_code, mocker: MockerFixture, corva_context, requests_mock
+):
     def scheduled_app(event, api, state):
         # patch post request, that sets scheduled task as completed
         # looks for url path like /scheduler/123/completed
-        requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+        requests_mock.post(
+            re.compile(r'/scheduler/\d+/completed'), status_code=status_code
+        )
 
         api.post = Mock(wraps=api.post)  # spy on api.post
 
@@ -35,9 +44,9 @@ def test_set_completed_status(mocker: MockerFixture, corva_context, requests_moc
 
     corva = Corva(corva_context)
 
-    results = corva.scheduled(scheduled_app, event)
+    api = corva.scheduled(scheduled_app, event)[0]
 
-    results[0].post.assert_called_once_with(path='scheduler/0/completed')
+    api.post.assert_called_once_with(path='scheduler/0/completed')
 
 
 @pytest.mark.parametrize('attr', ('schedule_start', 'schedule_end'))
