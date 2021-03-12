@@ -9,6 +9,7 @@ Corva python-sdk is a framework for building
 - [Event](#event)
 - [Api](#api)
 - [Cache](#cache)
+- [Testing](#testing)  
 - [Contributing](#contributing)
 
 ## Requirements
@@ -220,6 +221,73 @@ other operations with data.
       corva.scheduled(my_app, event)
    ```
 
+## Testing
+
+Testing Corva applications is easy and enjoyable.
+
+The SDK provides convenient tools for testing through `pytest` [plugin][pytest-plugin].
+Write your tests using `pytest` to get the access to the plugin. To install the library
+run `pip install pytest`. 
+
+#### Stream example test
+
+```python3
+# lambda_function.py
+
+from corva import Corva
+
+
+def app(event, api, cache):
+    print("Hello, World!")
+    pass
+
+
+def lambda_handler(event, context):
+    corva = Corva(context)
+    corva.stream(app, event)
+
+
+# tests/test_app.py
+
+# corva_context is provided by the SDK's pytest plugin. No imports required.
+def test_app(corva_context):
+    event = {"records": [{"asset_id": 0, "timestamp": 0}]}
+
+    lambda_handler(event, corva_context)
+```
+
+#### Scheduled example test
+
+```python3
+# lambda_function.py
+
+from corva import Corva
+
+
+def app(event, api, cache):
+    print("Hello, World!")
+    pass
+
+
+def lambda_handler(event, context):
+    corva = Corva(context)
+    corva.scheduled(app, event)
+
+
+# tests/test_app.py
+
+# corva_context is provided by the SDK's pytest plugin. No imports required.
+def test_app(corva_context):
+    event = {
+        "schedule": 0,
+        "interval": 0,
+        "schedule_start": 0,
+        "asset_id": 0,
+    }
+
+    lambda_handler(event, corva_context)
+```
+
 ## Contributing
 
 #### Set up the project
@@ -248,3 +316,5 @@ $ source venv/bin/activate
 [corva-api]: https://api.corva.ai/documentation/index.html
 
 [corva-data-api]: https://data.corva.ai/docs#/
+
+[pytest-plugin]: https://docs.pytest.org/en/stable/writing_plugins.html
