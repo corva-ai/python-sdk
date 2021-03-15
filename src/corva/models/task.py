@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEvent
+from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
 
 
 class TaskStatus(Enum):
@@ -20,32 +20,26 @@ class TaskState(Enum):
     succeeded = 'succeeded'
 
 
-class TaskData(pydantic.BaseModel):
+class TaskEvent(CorvaBaseModel):
     id: str
-    state: TaskState
-    fail_reason: Optional[Any] = None
     asset_id: int
     company_id: int
+    state: TaskState
     app_id: int
     document_bucket: str
-    properties: Dict[str, Any]
-    payload: Dict[str, Any]
-
-
-class UpdateTaskData(pydantic.BaseModel):
-    fail_reason: Optional[str] = None
+    properties: dict = {}
     payload: dict = {}
+    fail_reason: Optional[str] = None
 
 
-class TaskEvent(BaseEvent):
-    id: Optional[str] = None
+class RawTaskEvent(BaseEvent):
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
 
     @staticmethod
-    def from_raw_event(event: dict) -> TaskEvent:
-        return pydantic.parse_obj_as(TaskEvent, event)
+    def from_raw_event(event: dict) -> RawTaskEvent:
+        return pydantic.parse_obj_as(RawTaskEvent, event)
 
 
-class TaskContext(BaseContext[TaskEvent]):
+class TaskContext(BaseContext[RawTaskEvent]):
     pass
