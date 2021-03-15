@@ -1,4 +1,6 @@
 import pytest
+import requests_mock as requests_mock_lib
+from requests_mock import Mocker as RequestsMocker
 
 from corva import Corva
 from corva.configuration import SETTINGS
@@ -202,3 +204,30 @@ def test_patch_scheduled(event, expected, corva_context):
     actual_event = corva.scheduled(app, event)[0]
 
     assert actual_event == ScheduledEvent(**expected)
+
+
+@pytest.mark.parametrize(
+    'patch_scheduled,is_patched',
+    ([True, True], [False, False]),
+    indirect=['patch_scheduled'],
+)
+def test_patch_scheduled_runner_param(
+    patch_scheduled, is_patched, requests_mock: RequestsMocker, corva_context
+):
+    event = {
+        "schedule": 0,
+        "interval": 0,
+        "schedule_start": 0,
+        "asset_id": 0,
+    }
+
+    corva = Corva(corva_context)
+
+    post_mock = requests_mock.post(requests_mock_lib.ANY)
+
+    corva.scheduled(app, event)
+
+    if is_patched:
+        assert not post_mock.called
+    else:
+        assert post_mock.called_once

@@ -41,7 +41,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 def corva_patch():
     """Simplifies testing of Corva apps by patching some internal functionality."""
 
-    with patch_redis_adapter(), patch_scheduled(), patch_stream():
+    with patch_redis_adapter(), patch_stream():
         yield
 
 
@@ -128,12 +128,12 @@ def patch_stream():
         yield
 
 
-@contextlib.contextmanager
-def patch_scheduled():
+@pytest.fixture(scope='function', autouse=True)
+def patch_scheduled(request):
     """Patches scheduled runner."""
 
     # imports are local to avoid loading packages, on the first plugin run
-    from corva.application import Corva, scheduled_runner
+    from corva.application import Corva
 
     def patch_corva(func):
         def _patch_corva(
@@ -165,16 +165,16 @@ def patch_scheduled():
 
         return _patch_corva
 
-    def patch_runner(func):
-        def _patch_runner(fn, context):
-            # avoid POSTing in user tests
-            with mock.patch.object(context.api, '_set_schedule_as_completed'):
-                return func(fn, context)
+    patches = [mock.patch.object(Corva, 'scheduled', patch_corva(Corva.scheduled))]
 
-        return _patch_runner
+    if getattr(request, 'param', True):
+        # avoid POSTing in user tests
+        patches.append(mock.patch('corva.runners.scheduled.set_schedule_as_completed'))
 
-    with mock.patch.object(
-        Corva, 'scheduled', patch_corva(Corva.scheduled)
-    ), mock.patch('corva.application.scheduled_runner', patch_runner(scheduled_runner)):
+    try:
+        for patch in patches:
+            patch.start()
 
         yield
+    finally:
+        mock.patch.stopall()
