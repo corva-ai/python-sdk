@@ -38,7 +38,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def corva_patch():
+def _corva_patch():
     """Simplifies testing of Corva apps by patching some internal functionality."""
 
     with patch_redis_adapter(), patch_stream():
@@ -46,7 +46,7 @@ def corva_patch():
 
 
 @pytest.fixture(scope='function')
-def corva_context(corva_patch):
+def corva_context(_corva_patch):
     """Imitates AWS Lambda context expected by Corva."""
 
     return types.SimpleNamespace(
@@ -129,7 +129,7 @@ def patch_stream():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def patch_scheduled(request):
+def _patch_scheduled(request):
     """Patches scheduled runner."""
 
     # imports are local to avoid loading packages, on the first plugin run

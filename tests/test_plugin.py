@@ -207,12 +207,12 @@ def test_patch_scheduled_changes_event(event, expected, corva_context):
 
 
 @pytest.mark.parametrize(
-    'patch_scheduled,is_patched',
+    '_patch_scheduled,is_patched',
     ([True, True], [False, False]),
-    indirect=['patch_scheduled'],
+    indirect=['_patch_scheduled'],
 )
 def test_patch_scheduled_runner_param(
-    patch_scheduled, is_patched, requests_mock: RequestsMocker, corva_context
+    _patch_scheduled, is_patched, requests_mock: RequestsMocker, corva_context
 ):
     event = {
         "schedule": 0,
