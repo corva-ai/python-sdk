@@ -167,6 +167,9 @@ def patch_scheduled(request):
 
     patches = [mock.patch.object(Corva, 'scheduled', patch_corva(Corva.scheduled))]
 
+    # parametrize patching of set_schedule_as_completed:
+    #   1. must be always on for user tests
+    #   2. must be disabled for some SDK tests
     if getattr(request, 'param', True):
         # avoid POSTing in user tests
         patches.append(mock.patch('corva.runners.scheduled.set_schedule_as_completed'))
