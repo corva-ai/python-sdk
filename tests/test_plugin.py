@@ -76,7 +76,7 @@ def app(event, api, cache):
         'no extra fields added to user metadata',
     ],
 )
-def test_patch_stream(event, expected, raises, corva_context):
+def test_patch_stream_changes_event(event, expected, raises, corva_context):
     corva = Corva(corva_context)
 
     if raises:
@@ -198,7 +198,7 @@ def test_patch_stream(event, expected, raises, corva_context):
         'app_stream can be overwritten by user',
     ],
 )
-def test_patch_scheduled(event, expected, corva_context):
+def test_patch_scheduled_changes_event(event, expected, corva_context):
     corva = Corva(corva_context)
 
     actual_event = corva.scheduled(app, event)[0]
