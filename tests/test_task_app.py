@@ -95,11 +95,7 @@ def test_user_app_raises(
         assert result is True
 
 
-def test_task_runner(
-    corva_context,
-    mocker: MockerFixture,
-    requests_mock: RequestsMocker,
-):
+def test_task_runner(corva_context, requests_mock: RequestsMocker):
     def task_app(event, api):
         return True
 
