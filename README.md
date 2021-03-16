@@ -86,6 +86,21 @@ def lambda_handler(event, context):
     corva.scheduled(scheduled_app, event)
 ```
 
+#### Task
+
+```python
+from corva import Api, Corva, TaskEvent
+
+
+def task_app(event: TaskEvent, api: Api):
+    pass
+
+
+def lambda_handler(event, context):
+    corva = Corva(context)
+    corva.task(task_app, event)
+```
+
 ## Event
 
 An event is an object that contains data for an app function to process.
