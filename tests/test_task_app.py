@@ -116,7 +116,7 @@ def test_task_runner(
             'document_bucket': str(),
         },
     )
-    put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/success'))
+    put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
     result = Corva(corva_context).task(task_app, event)
 
