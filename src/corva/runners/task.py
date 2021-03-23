@@ -23,7 +23,6 @@ def update_task_data(
 
 def task_runner(fn: Callable, context: TaskContext):
     try:
-        # TODO: in case this raises, should exc be added to fail_reason?
         task_data = get_task_data(api=context.api, task_id=context.event.task_id)
 
         result = fn(task_data, context.api)
