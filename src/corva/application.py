@@ -4,8 +4,10 @@ from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledContext, ScheduledEvent
 from corva.models.stream import StreamContext, StreamEvent
+from corva.models.task import RawTaskEvent, TaskContext
 from corva.runners.scheduled import scheduled_runner
 from corva.runners.stream import stream_runner
+from corva.runners.task import task_runner
 
 
 class Corva:
@@ -96,3 +98,25 @@ class Corva:
             results.append(scheduled_runner(fn=fn, context=ctx))
 
         return results
+
+    def task(self, fn: Callable, event: dict) -> Any:
+        """Runs task app
+
+        params:
+         fn: task app function to run
+         event: raw task event
+        returns: returned value from fn
+        """
+
+        event = RawTaskEvent.from_raw_event(event=event)
+
+        ctx = TaskContext(
+            event=event,
+            settings=SETTINGS.copy(),
+            api=self.api,
+            cache_settings=self.cache_settings,
+        )
+
+        result = task_runner(fn=fn, context=ctx)
+
+        return result

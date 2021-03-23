@@ -5,16 +5,16 @@ import pytest
 from pytest_mock import MockerFixture
 
 from corva.application import Corva
-from corva.runners.scheduled import scheduled_runner
 
 
 @pytest.mark.parametrize(
-    'status_code',
-    (200, 400),
+    '_patch_scheduled,status_code',
+    ([False, 200], [False, 400]),
     ids=('request successful', 'request failed - should not raise'),
+    indirect=['_patch_scheduled'],
 )
 def test_set_completed_status(
-    status_code, mocker: MockerFixture, corva_context, requests_mock
+    _patch_scheduled, status_code, mocker: MockerFixture, corva_context, requests_mock
 ):
     def scheduled_app(event, api, state):
         # patch post request, that sets scheduled task as completed
@@ -37,10 +37,6 @@ def test_set_completed_status(
             }
         ]
     ]
-
-    # corva_patch fixture patches scheduled_runner for user tests.
-    # return real scheduled runner instead of patched one.
-    mocker.patch('corva.application.scheduled_runner', scheduled_runner)
 
     corva = Corva(corva_context)
 
