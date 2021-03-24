@@ -18,7 +18,7 @@ def update_task_data(
 ) -> requests.Response:
     """Updates the task. Should never raise."""
 
-    return api.put(path=f'v2/tasks/{task_id}/{status}', data=data)
+    return api.put(path=f'v2/tasks/{task_id}/{status.value}', data=data)
 
 
 def task_runner(fn: Callable, context: TaskContext) -> Any:
@@ -30,7 +30,7 @@ def task_runner(fn: Callable, context: TaskContext) -> Any:
         update_task_data(
             api=context.api,
             task_id=context.event.task_id,
-            status=TaskStatus.fail.value,
+            status=TaskStatus.fail,
             data={'fail_reason': str(exc)},
         )
         return
@@ -39,7 +39,7 @@ def task_runner(fn: Callable, context: TaskContext) -> Any:
     update_task_data(
         api=context.api,
         task_id=context.event.task_id,
-        status=TaskStatus.success.value,
+        status=TaskStatus.success,
         data={'payload': result},
     )
 
