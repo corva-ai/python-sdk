@@ -8,17 +8,6 @@ from pydantic.types import conint
 from corva.models.base import BaseContext, RawBaseEvent
 
 
-class TaskStatus(Enum):
-    fail = 'fail'
-    success = 'success'
-
-
-class TaskState(Enum):
-    running = 'running'
-    failed = 'failed'
-    succeeded = 'succeeded'
-
-
 class TaskEvent(pydantic.BaseModel):
     """Task event data.
 
