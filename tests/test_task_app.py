@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
 from corva.application import Corva
+from corva.models.task import RawTaskEvent, TaskEvent
 
 
 @pytest.mark.parametrize(
@@ -13,14 +14,7 @@ from corva.application import Corva
         [400, None, 'fail'],
         [
             200,
-            {
-                'id': '0',
-                'state': 'running',
-                'asset_id': int(),
-                'company_id': int(),
-                'app_id': int(),
-                'document_bucket': str(),
-            },
+            TaskEvent(asset_id=int(), company_id=int()).dict(),
             'success',
         ],
     ),
@@ -35,7 +29,7 @@ def test_get_task_event_raises(
     def task_app(event, api):
         return True
 
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'), status_code=status_code, json=json
@@ -64,18 +58,11 @@ def test_user_app_raises(
     mocker: MockerFixture,
     requests_mock: RequestsMocker,
 ):
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json={
-            'id': '0',
-            'state': 'running',
-            'asset_id': int(),
-            'company_id': int(),
-            'app_id': int(),
-            'document_bucket': str(),
-        },
+        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
@@ -99,18 +86,11 @@ def test_task_runner(context, requests_mock: RequestsMocker):
     def task_app(event, api):
         return True
 
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json={
-            'id': '0',
-            'state': 'running',
-            'asset_id': int(),
-            'company_id': int(),
-            'app_id': int(),
-            'document_bucket': str(),
-        },
+        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
