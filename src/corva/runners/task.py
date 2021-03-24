@@ -1,9 +1,15 @@
+import enum
 from typing import Any, Callable
 
 import requests
 
 from corva.api import Api
-from corva.models.task import TaskContext, TaskEvent, TaskStatus
+from corva.models.task import TaskContext, TaskEvent
+
+
+class TaskStatus(enum.Enum):
+    fail = 'fail'
+    success = 'success'
 
 
 def get_task_event(api: Api, task_id: str) -> TaskEvent:
