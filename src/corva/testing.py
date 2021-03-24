@@ -34,7 +34,7 @@ class TestClient:
             mock.patch('corva.runners.task.update_task_data'),
         ]
 
-        raw_event = RawTaskEvent(task_id=event.id, version=2).dict()
+        raw_event = RawTaskEvent(task_id=str(), version=2).dict()
 
         try:
             [patch.start() for patch in patches]

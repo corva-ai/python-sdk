@@ -2,7 +2,7 @@ import pytest
 import requests_mock as requests_mock_lib
 from requests_mock import Mocker as RequestsMocker
 
-from corva import Corva
+from corva import Corva, TaskEvent
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledEvent
 from corva.models.stream import StreamEvent
@@ -231,3 +231,14 @@ def test_patch_scheduled_runner_param(
         assert not post_mock.called
     else:
         assert post_mock.called_once
+
+
+def test_task_app_runner(app_runner):
+    """Should not raise."""
+
+    def lambda_handler(event, context):
+        return Corva(context).task(fn=lambda event, api: 'Task app result', event=event)
+
+    event = TaskEvent(asset_id=int(), company_id=int())
+
+    assert app_runner(lambda_handler, event) == 'Task app result'
