@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 import requests
 
@@ -21,7 +21,7 @@ def update_task_data(
     return api.put(path=f'v2/tasks/{task_id}/{status}', data=data)
 
 
-def task_runner(fn: Callable, context: TaskContext):
+def task_runner(fn: Callable, context: TaskContext) -> Any:
     try:
         task_data = get_task_data(api=context.api, task_id=context.event.task_id)
 
