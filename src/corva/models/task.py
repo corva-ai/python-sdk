@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
+from corva.models.base import BaseContext, RawBaseEvent
 
 
 class TaskStatus(Enum):
@@ -20,16 +19,18 @@ class TaskState(Enum):
     succeeded = 'succeeded'
 
 
-class TaskEvent(CorvaBaseModel):
-    id: str
+class TaskEvent(pydantic.BaseModel):
+    """Task event data.
+
+    Attributes:
+        asset_id: asset id
+        company_id: company id
+        properties: custom task data
+    """
+
     asset_id: int
     company_id: int
-    state: TaskState
-    app_id: int
-    document_bucket: str
     properties: dict = {}
-    payload: dict = {}
-    fail_reason: Optional[str] = None
 
 
 class RawTaskEvent(RawBaseEvent):
