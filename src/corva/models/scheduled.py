@@ -5,10 +5,10 @@ from typing import List, Literal, Optional
 
 import pydantic
 
-from corva.models.base import BaseContext, BaseEvent
+from corva.models.base import BaseContext, RawBaseEvent
 
 
-class ScheduledEvent(BaseEvent):
+class ScheduledEvent(RawBaseEvent):
     asset_id: int
     interval: int = pydantic.Field(
         ..., description='Time in seconds between two schedule triggers'

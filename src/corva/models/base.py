@@ -21,22 +21,22 @@ class CorvaBaseModel(pydantic.BaseModel):
     Config = CorvaModelConfig
 
 
-class BaseEvent(CorvaBaseModel, ABC):
+class RawBaseEvent(CorvaBaseModel, ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: Any) -> Union[List[BaseEvent], BaseEvent]:
+    def from_raw_event(event: Any) -> Union[List[RawBaseEvent], RawBaseEvent]:
         pass
 
 
-BaseEventTV = TypeVar('BaseEventTV', bound=BaseEvent)
+RawBaseEventTV = TypeVar('BaseEventTV', bound=RawBaseEvent)
 
 
-class BaseContext(pydantic.generics.GenericModel, Generic[BaseEventTV]):
+class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
     """Stores common data for running a Corva app."""
 
     Config = CorvaModelConfig
 
-    event: BaseEventTV
+    event: RawBaseEventTV
     settings: Settings
     api: Api
     _cache: Optional[RedisState] = None

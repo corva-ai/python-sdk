@@ -6,7 +6,7 @@ from typing import Optional
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
 
 
 class TaskStatus(Enum):
@@ -32,7 +32,7 @@ class TaskEvent(CorvaBaseModel):
     fail_reason: Optional[str] = None
 
 
-class RawTaskEvent(BaseEvent):
+class RawTaskEvent(RawBaseEvent):
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
 

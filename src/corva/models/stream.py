@@ -7,7 +7,7 @@ from typing import Dict, List, Literal, Optional, Union
 import pydantic
 
 from corva.configuration import SETTINGS
-from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
 
 
 class FilterMode(enum.Enum):
@@ -66,7 +66,7 @@ class StreamEventMetadata(CorvaBaseModel):
     )
 
 
-class StreamEvent(BaseEvent):
+class StreamEvent(RawBaseEvent):
     app_key: str = SETTINGS.APP_KEY
     records: pydantic.conlist(Record, min_items=1)
     metadata: StreamEventMetadata
