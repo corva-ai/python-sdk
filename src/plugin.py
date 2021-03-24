@@ -2,12 +2,21 @@ import contextlib
 import copy
 import functools
 import os
-import types
 from typing import Callable, List, Union
 from unittest import mock
 
 import fakeredis
 import pytest
+
+
+@pytest.fixture
+def app_runner():
+    """Returns a function that should be used to run apps in tests."""
+
+    # imports are local to avoid loading packages, on the first plugin run
+    from corva.testing import TestClient
+
+    return TestClient.run
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -43,15 +52,6 @@ def _corva_patch():
 
     with patch_redis_adapter(), patch_stream():
         yield
-
-
-@pytest.fixture(scope='function')
-def corva_context(_corva_patch):
-    """Imitates AWS Lambda context expected by Corva."""
-
-    return types.SimpleNamespace(
-        client_context=types.SimpleNamespace(env={'API_KEY': '123'})
-    )
 
 
 @contextlib.contextmanager
