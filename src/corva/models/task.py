@@ -32,6 +32,10 @@ class TaskEvent(pydantic.BaseModel):
     company_id: int
     properties: dict = {}
 
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_mutation = False
+
 
 class RawTaskEvent(RawBaseEvent):
     task_id: str
