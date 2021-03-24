@@ -29,7 +29,7 @@ def test_get_task_data_raises(
     status_code,
     json,
     status,
-    corva_context,
+    context,
     requests_mock: RequestsMocker,
 ):
     def task_app(event, api):
@@ -42,7 +42,7 @@ def test_get_task_data_raises(
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = Corva(corva_context).task(task_app, event)
+    result = Corva(context).task(task_app, event)
 
     assert get_mock.called_once
     assert put_mock.called_once
@@ -60,7 +60,7 @@ def test_get_task_data_raises(
 def test_user_app_raises(
     status,
     side_effect,
-    corva_context,
+    context,
     mocker: MockerFixture,
     requests_mock: RequestsMocker,
 ):
@@ -79,7 +79,7 @@ def test_user_app_raises(
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = Corva(corva_context).task(
+    result = Corva(context).task(
         mocker.Mock(side_effect=side_effect, return_value=True), event
     )
 
@@ -95,7 +95,7 @@ def test_user_app_raises(
         assert result is True
 
 
-def test_task_runner(corva_context, requests_mock: RequestsMocker):
+def test_task_runner(context, requests_mock: RequestsMocker):
     def task_app(event, api):
         return True
 
@@ -114,7 +114,7 @@ def test_task_runner(corva_context, requests_mock: RequestsMocker):
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
-    result = Corva(corva_context).task(task_app, event)
+    result = Corva(context).task(task_app, event)
 
     assert get_mock.called_once
     assert put_mock.called_once
