@@ -6,7 +6,7 @@ from corva.api import Api
 from corva.models.task import TaskContext, TaskEvent, TaskStatus
 
 
-def get_task_data(api: Api, task_id: str) -> TaskEvent:
+def get_task_event(api: Api, task_id: str) -> TaskEvent:
     response = api.get(path=f'v2/tasks/{task_id}')
     response.raise_for_status()
 
@@ -23,9 +23,9 @@ def update_task_data(
 
 def task_runner(fn: Callable, context: TaskContext) -> Any:
     try:
-        task_data = get_task_data(api=context.api, task_id=context.event.task_id)
+        task_event = get_task_event(api=context.api, task_id=context.event.task_id)
 
-        result = fn(task_data, context.api)
+        result = fn(task_event, context.api)
     except Exception as exc:
         update_task_data(
             api=context.api,

@@ -30,7 +30,7 @@ class TestClient:
         fn: Callable, event: TaskEvent, context: types.SimpleNamespace
     ) -> Any:
         patches = [
-            mock.patch('corva.runners.task.get_task_data', return_value=event),
+            mock.patch('corva.runners.task.get_task_event', return_value=event),
             mock.patch('corva.runners.task.update_task_data'),
         ]
 

@@ -25,7 +25,7 @@ from corva.application import Corva
         ],
     ),
 )
-def test_get_task_data_raises(
+def test_get_task_event_raises(
     status_code,
     json,
     status,
