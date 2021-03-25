@@ -3,10 +3,10 @@ from __future__ import annotations
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, RawBaseEvent
+from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
 
 
-class TaskEvent(pydantic.BaseModel):
+class TaskEvent(CorvaBaseModel):
     """Task event data.
 
     Attributes:
@@ -18,10 +18,6 @@ class TaskEvent(pydantic.BaseModel):
     asset_id: int
     company_id: int
     properties: dict = {}
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        allow_mutation = False
 
 
 class RawTaskEvent(RawBaseEvent):
