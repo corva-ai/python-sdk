@@ -40,7 +40,7 @@ class RawScheduledEvent(RawBaseEvent):
 
     @pydantic.validator('time_from', always=True)
     def set_time_from(cls, v: Optional[int], values) -> int:
-        """Calculated time_from field."""
+        """Calculates time_from field."""
 
         if v is not None:
             return v
