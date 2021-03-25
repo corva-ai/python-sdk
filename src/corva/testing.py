@@ -3,7 +3,6 @@ from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
 from corva import ScheduledEvent, StreamEvent, TaskEvent
-from corva.models.task import RawTaskEvent
 
 
 class TestClient:
@@ -25,23 +24,19 @@ class TestClient:
         if isinstance(event, TaskEvent):
             return TestClient._run_task(fn=fn, event=event, context=TestClient._context)
 
-    @classmethod
+    @staticmethod
     def _run_task(
-        cls, fn: Callable, event: TaskEvent, context: types.SimpleNamespace
+        fn: Callable, event: TaskEvent, context: types.SimpleNamespace
     ) -> Any:
         patches = [
             mock.patch('corva.runners.task.get_task_event', return_value=event),
             mock.patch('corva.runners.task.update_task_data'),
         ]
 
-        raw_event = cls._to_raw_task_event(event=event)
+        raw_event = event.to_raw_event()
 
         try:
             [patch.start() for patch in patches]
             return fn(raw_event, context)
         finally:
             mock.patch.stopall()
-
-    @staticmethod
-    def _to_raw_task_event(event: TaskEvent):
-        return RawTaskEvent(task_id=str(), version=2).dict()
