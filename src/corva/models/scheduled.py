@@ -42,9 +42,6 @@ class RawScheduledEvent(RawBaseEvent):
     def set_time_from(cls, v: Optional[int], values) -> int:
         """Calculates time_from field."""
 
-        if v is not None:
-            return v
-
         if 'schedule_start' in values and 'interval' in values:
             return values['schedule_start'] - values['interval'] + 1
 
