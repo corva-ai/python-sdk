@@ -2,7 +2,7 @@ from typing import Any, Callable, List, Literal, Optional
 
 from corva.api import Api
 from corva.configuration import SETTINGS
-from corva.models.scheduled import ScheduledContext, ScheduledEvent
+from corva.models.scheduled import RawScheduledEvent, ScheduledContext
 from corva.models.stream import StreamContext, StreamEvent
 from corva.models.task import RawTaskEvent, TaskContext
 from corva.runners.scheduled import scheduled_runner
@@ -83,7 +83,7 @@ class Corva:
         returns: list of returned values from fn
         """
 
-        events = ScheduledEvent.from_raw_event(event=event)
+        events = RawScheduledEvent.from_raw_event(event=event)
 
         results = []
 
