@@ -9,7 +9,7 @@ import fakeredis
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def app_runner():
     """Returns a function that should be used to run apps in tests."""
 
