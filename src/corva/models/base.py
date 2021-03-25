@@ -39,9 +39,6 @@ class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
     settings: Settings
     api: Api
     cache_: Optional[RedisState] = None
-
-    user_result: Any = None  # TODO: delete
-
     cache_settings: dict = {}
 
     @property
