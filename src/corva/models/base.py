@@ -11,37 +11,36 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
-class CorvaModelConfig:
-    arbitrary_types_allowed = True
-    extra = pydantic.Extra.allow
-    validate_assignment = True
-
-
 class CorvaBaseModel(pydantic.BaseModel):
-    Config = CorvaModelConfig
+    class Config:
+        extra = pydantic.Extra.ignore
+        allow_mutation = False
 
 
-class RawBaseEvent(CorvaBaseModel, ABC):
+class RawBaseEvent(ABC, CorvaBaseModel):
     @staticmethod
     @abstractmethod
     def from_raw_event(event: Any) -> Union[List[RawBaseEvent], RawBaseEvent]:
         pass
 
 
-RawBaseEventTV = TypeVar('BaseEventTV', bound=RawBaseEvent)
+RawBaseEventTV = TypeVar('RawBaseEventTV', bound=RawBaseEvent)
 
 
 class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
     """Stores common data for running a Corva app."""
 
-    Config = CorvaModelConfig
+    class Config:
+        arbitrary_types_allowed = True
+        extra = pydantic.Extra.ignore
+        validate_assignment = True
 
     event: RawBaseEventTV
     settings: Settings
     api: Api
-    _cache: Optional[RedisState] = None
+    cache_: Optional[RedisState] = None
 
-    user_result: Any = None
+    user_result: Any = None  # TODO: delete
 
     cache_settings: dict = {}
 
@@ -54,8 +53,8 @@ class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
 
     @property
     def cache(self) -> RedisState:
-        if self._cache:
-            return self._cache
+        if self.cache_:
+            return self.cache_
 
         redis_adapter = RedisAdapter(
             default_name=self.cache_key,
@@ -63,6 +62,6 @@ class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
             **self.cache_settings,
         )
 
-        self._cache = RedisState(redis=redis_adapter)
+        self.cache_ = RedisState(redis=redis_adapter)
 
-        return self._cache
+        return self.cache_
