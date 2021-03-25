@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
-
 import pydantic
 from pydantic.types import conint
 
