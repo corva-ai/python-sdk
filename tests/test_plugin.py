@@ -1,5 +1,6 @@
 import pytest
 import requests_mock as requests_mock_lib
+from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
 from corva import Corva, TaskEvent
@@ -261,15 +262,18 @@ def test_task_to_raw_task_event_is_up_to_date():
     assert TaskEvent.schema() == task_event_schema
 
 
-def test_task_to_raw_event(app_runner):
+def test_task_to_raw_event(app_runner, mocker: MockerFixture):
     def lambda_handler(event, context):
         return Corva(context).task(fn=lambda event, api: event, event=event)
 
     event = TaskEvent(asset_id=int(), company_id=int())
 
-    event: TaskEvent = app_runner(lambda_handler, event)
+    # patch task runner to return event from context
+    mocker.patch('corva.application.task_runner', lambda fn, context: context.event)
 
-    assert event.to_raw_event() == RawTaskEvent(task_id=str(), version=2)
+    result_event: RawTaskEvent = app_runner(lambda_handler, event)
+
+    assert result_event == RawTaskEvent(task_id=str(), version=2)
 
 
 def test_task_app_runner(app_runner):
