@@ -1,13 +1,11 @@
 import pytest
 import requests_mock as requests_mock_lib
-from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
 from corva import Corva, TaskEvent
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledEvent
 from corva.models.stream import StreamEvent
-from corva.models.task import RawTaskEvent
 
 
 def app(event, api, cache):
@@ -233,47 +231,6 @@ def test_patch_scheduled_runner_param(
         assert not post_mock.called
     else:
         assert post_mock.called_once
-
-
-def test_task_to_raw_task_event_is_up_to_date():
-    """Verify that TaskEvent.to_raw_event is updated.
-
-    If TaskEvent's schema changes this test will fail.
-    What to do in above case?
-        1. (If needed) Fix logic in TaskEvent.to_raw_event to correspond to schema changes
-            and cover fixed logic with tests.
-        2. Update task_event_schema below with output from TaskEvent.schema().
-    """
-
-    task_event_schema = {
-        'title': 'TaskEvent',
-        'description': 'Task event data.\n\nAttributes:\n    asset_id: asset id\n    '
-        'company_id: company id\n    properties: custom task data',
-        'type': 'object',
-        'properties': {
-            'asset_id': {'title': 'Asset Id', 'type': 'integer'},
-            'company_id': {'title': 'Company Id', 'type': 'integer'},
-            'properties': {'title': 'Properties', 'default': {}, 'type': 'object'},
-        },
-        'required': ['asset_id', 'company_id'],
-        'additionalProperties': False,
-    }
-
-    assert TaskEvent.schema() == task_event_schema
-
-
-def test_task_to_raw_event(app_runner, mocker: MockerFixture):
-    def lambda_handler(event, context):
-        return Corva(context).task(fn=lambda event, api: event, event=event)
-
-    event = TaskEvent(asset_id=int(), company_id=int())
-
-    # patch task runner to return event from context
-    mocker.patch('corva.application.task_runner', lambda fn, context: context.event)
-
-    result_event: RawTaskEvent = app_runner(lambda_handler, event)
-
-    assert result_event == RawTaskEvent(task_id=str(), version=2)
 
 
 def test_task_app_runner(app_runner):

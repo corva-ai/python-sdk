@@ -3,6 +3,7 @@ from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
 from corva import ScheduledEvent, StreamEvent, TaskEvent
+from corva.models.task import RawTaskEvent
 
 
 class TestClient:
@@ -33,7 +34,7 @@ class TestClient:
             mock.patch('corva.runners.task.update_task_data'),
         ]
 
-        raw_event = event.to_raw_event()
+        raw_event = RawTaskEvent(task_id=str(), version=2)
 
         try:
             [patch.start() for patch in patches]

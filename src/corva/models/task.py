@@ -23,9 +23,6 @@ class TaskEvent(pydantic.BaseModel):
         extra = pydantic.Extra.forbid
         allow_mutation = False
 
-    def to_raw_event(self) -> RawTaskEvent:
-        return RawTaskEvent(task_id=str(), version=2)
-
 
 class RawTaskEvent(RawBaseEvent):
     task_id: str
