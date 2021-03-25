@@ -1,14 +1,31 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Literal, Optional
+from typing import List, Optional
 
 import pydantic
 
-from corva.models.base import BaseContext, RawBaseEvent
+from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
 
 
-class ScheduledEvent(RawBaseEvent):
+class ScheduledEvent(CorvaBaseModel):
+    """Scheduled event data.
+
+    Attributes:
+        asset_id: asset id
+        time_from: the first not processed time. Unix timestamp.
+        time_to: the last not processed time. Unix timestamp.
+    """
+
+    asset_id: int
+    time_from: int
+    time_to: int = pydantic.Field(..., alias='schedule_start')
+
+    class Config:
+        allow_mutation = False
+
+
+class RawScheduledEvent(RawBaseEvent):
     asset_id: int
     interval: int = pydantic.Field(
         ..., description='Time in seconds between two schedule triggers'
@@ -19,42 +36,22 @@ class ScheduledEvent(RawBaseEvent):
     )
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
+    time_from: int = None
 
-    # optional fields
-    schedule_end: Optional[int] = pydantic.Field(
-        None, description='Schedule end timestamp'
-    )
-    cron_string: Optional[str] = pydantic.Field(
-        None, description='Cron expression representing the schedule'
-    )
-    environment: Optional[
-        Literal['testing', 'localhost', 'qa', 'staging', 'production']
-    ] = None
-    app_id: Optional[int] = pydantic.Field(None, alias='app')
-    app_key: Optional[str] = pydantic.Field(None, description='Unique app identifier')
-    source_type: Optional[
-        Literal['drilling', 'drillout', 'frac', 'wireline']
-    ] = pydantic.Field(None, description='Source Data Type')
-    company_id: Optional[int] = pydantic.Field(None, alias='company')
-    provider: Optional[str] = pydantic.Field(
-        None, description='Company name identifier'
-    )
-    asset_name: Optional[str] = None
-    asset_type: Optional[Literal['Well']] = None
-    timezone: Optional[str] = pydantic.Field(None, description='Time zone of the asset')
-    log_type: Optional[Literal['time', 'depth']] = pydantic.Field(
-        None, description='Source Log Type'
-    )
-    log_identifier: Optional[str] = pydantic.Field(
-        None,
-        description='Unique Log Identifier, only available for depth-based streams',
-    )
-    day_shift_start: Optional[str] = pydantic.Field(
-        None, description='Day shift start time'
-    )
+    @pydantic.validator('time_from', always=True)
+    def set_time_from(cls, v: Optional[int], values) -> int:
+        """Calculated time_from field."""
 
-    @pydantic.validator('schedule_start', 'schedule_end')
-    def set_timestamp(cls, v: int) -> int:
+        if v is not None:
+            return v
+
+        if 'schedule_start' in values and 'interval' in values:
+            return values['schedule_start'] - values['interval'] + 1
+
+        raise ValueError('Cannot set time_from field.')
+
+    @pydantic.validator('schedule_start')
+    def set_schedule_start(cls, v: int) -> int:
         """Casts Unix timestamp from milliseconds to seconds.
 
         Casts Unix timestamp from millisecond to seconds, if provided timestamp is in
@@ -68,15 +65,14 @@ class ScheduledEvent(RawBaseEvent):
         return v
 
     @staticmethod
-    def from_raw_event(event: List[List[dict]]) -> List[ScheduledEvent]:
-        events = pydantic.parse_obj_as(List[List[ScheduledEvent]], event)
+    def from_raw_event(event: List[List[dict]]) -> List[RawScheduledEvent]:
+        # flatten the event into 1d array
+        event: List[dict] = list(itertools.chain(*event))
 
-        # raw event from queue comes in from of 2d array of ScheduledEvent
-        # flatten parsed event into 1d array of ScheduledEvent, which is an expected return type
-        events = list(itertools.chain(*events))
+        events = pydantic.parse_obj_as(List[RawScheduledEvent], event)
 
         return events
 
 
-class ScheduledContext(BaseContext[ScheduledEvent]):
+class ScheduledContext(BaseContext[RawScheduledEvent]):
     pass
