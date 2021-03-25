@@ -1,11 +1,13 @@
 import pytest
 import requests_mock as requests_mock_lib
+from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
-from corva import Corva, TaskEvent
+from corva.application import Corva
 from corva.configuration import SETTINGS
-from corva.models.scheduled import ScheduledEvent
+from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream import StreamEvent
+from corva.models.task import TaskEvent
 
 
 def app(event, api, cache):
@@ -203,7 +205,7 @@ def test_patch_scheduled_changes_event(event, expected, corva_context):
 
     actual_event = corva.scheduled(app, event)[0]
 
-    assert actual_event == ScheduledEvent(**expected)
+    assert actual_event == RawScheduledEvent(**expected)
 
 
 @pytest.mark.parametrize(
@@ -242,3 +244,41 @@ def test_task_app_runner(app_runner):
     event = TaskEvent(asset_id=int(), company_id=int())
 
     assert app_runner(lambda_handler, event) == 'Task app result'
+
+
+@pytest.mark.parametrize(
+    'asset_id',
+    (
+        1,
+        2,
+    ),
+)
+def test_scheduled_app_runner_sets_correct_asset_id(
+    asset_id, app_runner, mocker: MockerFixture
+):
+    def lambda_handler(event, context):
+        return Corva(context).scheduled(fn=lambda event, api, cache: None, event=event)
+
+    # override scheduled_runner to return event from context
+    mocker.patch(
+        'corva.application.scheduled_runner', lambda fn, context: context.event
+    )
+
+    event = ScheduledEvent(asset_id=asset_id, time_from=int(), time_to=int())
+
+    raw_event = app_runner(lambda_handler, event)
+
+    assert raw_event.asset_id == event.asset_id
+
+
+def test_scheduled_app_runner(app_runner):
+    """Should not raise."""
+
+    def lambda_handler(event, context):
+        return Corva(context).scheduled(
+            fn=lambda event, api, cache: 'Scheduled app result', event=event
+        )
+
+    event = ScheduledEvent(asset_id=int(), time_from=int(), time_to=int())
+
+    assert app_runner(lambda_handler, event) == 'Scheduled app result'

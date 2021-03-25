@@ -22,7 +22,7 @@ class ScheduledEvent(CorvaBaseModel):
     time_to: int = pydantic.Field(..., alias='schedule_start')
 
     class Config:
-        allow_mutation = False
+        allow_population_by_field_name = True
 
 
 class RawScheduledEvent(RawBaseEvent):
