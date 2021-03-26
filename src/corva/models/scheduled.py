@@ -12,7 +12,7 @@ class ScheduledEvent(CorvaBaseModel):
     """Scheduled event data.
 
     Attributes:
-        asset_id: asset id
+        asset_id: asset id.
         time_from: the first not processed time. Unix timestamp.
         time_to: the last not processed time. Unix timestamp.
     """

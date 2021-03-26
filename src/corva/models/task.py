@@ -10,9 +10,9 @@ class TaskEvent(CorvaBaseModel):
     """Task event data.
 
     Attributes:
-        asset_id: asset id
-        company_id: company id
-        properties: custom task data
+        asset_id: asset id.
+        company_id: company id.
+        properties: custom task data.
     """
 
     asset_id: int
