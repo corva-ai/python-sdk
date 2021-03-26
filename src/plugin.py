@@ -1,8 +1,6 @@
 import contextlib
-import copy
 import functools
 import os
-from typing import Callable, List, Union
 from unittest import mock
 
 import fakeredis
@@ -50,7 +48,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 def _corva_patch():
     """Simplifies testing of Corva apps by patching some internal functionality."""
 
-    with patch_redis_adapter(), patch_stream():
+    with patch_redis_adapter():
         yield
 
 
@@ -86,43 +84,4 @@ def patch_redis_adapter():
         # stops mock.patch from trying to call delattr when reversing the patch
         redis_adapter_patcher.is_local = True
 
-        yield
-
-
-@contextlib.contextmanager
-def patch_stream():
-    """Patches stream runner."""
-
-    # imports are local to avoid loading packages, on the first plugin run
-    from corva.application import Corva
-    from corva.configuration import SETTINGS
-
-    def patch_corva(func):
-        def _patch_corva(
-            self: Corva, fn: Callable, event: Union[dict, List[dict]], *args, **kwargs
-        ):
-            """Automatically adds essential fields to event in Corva.stream."""
-
-            events = copy.deepcopy(event)
-
-            # cast event to expected type List[dict], if needed
-            if not isinstance(events, list):
-                # allow users to send event as dict
-                events = [events]
-
-            for event in events:
-                # do not override the values, if provided by user
-                event.setdefault(
-                    'metadata',
-                    {
-                        'app_stream_id': int(),
-                        'apps': {SETTINGS.APP_KEY: {'app_connection_id': int()}},
-                    },
-                )
-
-            return func(self, fn, events, *args, **kwargs)
-
-        return _patch_corva
-
-    with mock.patch.object(Corva, 'stream', patch_corva(Corva.stream)):
         yield
