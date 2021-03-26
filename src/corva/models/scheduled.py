@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Optional
+from typing import List
 
 import pydantic
 
@@ -38,15 +38,6 @@ class RawScheduledEvent(RawBaseEvent):
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
     time_from: int = None
 
-    @pydantic.validator('time_from', always=True)
-    def set_time_from(cls, v: Optional[int], values) -> int:
-        """Calculates time_from field."""
-
-        if 'schedule_start' in values and 'interval' in values:
-            return values['schedule_start'] - values['interval'] + 1
-
-        raise ValueError('Cannot set time_from field.')
-
     @pydantic.validator('schedule_start')
     def set_schedule_start(cls, v: int) -> int:
         """Casts Unix timestamp from milliseconds to seconds.
@@ -60,6 +51,13 @@ class RawScheduledEvent(RawBaseEvent):
             v //= 1000
 
         return v
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def set_time_from(cls, values: dict) -> dict:
+        """Calculates time_from field."""
+
+        values["time_from"] = values["schedule_start"] - values["interval"] + 1
+        return values
 
     @staticmethod
     def from_raw_event(event: List[List[dict]]) -> List[RawScheduledEvent]:
