@@ -280,11 +280,11 @@ class BaseStreamContext(BaseContext[RawStreamEventTV], Generic[RawStreamEventTV]
 
 
 class StreamTimeContext(BaseStreamContext[RawStreamTimeEvent]):
-    last_value_key = 'last_processed_timestamp'
+    last_value_key: ClassVar[str] = 'last_processed_timestamp'
 
 
 class StreamDepthContext(BaseStreamContext[RawStreamDepthEvent]):
-    last_value_key = 'last_processed_depth'
+    last_value_key: ClassVar[str] = 'last_processed_depth'
 
 
 class InitialMetadata(CorvaBaseEvent):
