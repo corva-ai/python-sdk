@@ -1,79 +1,181 @@
 from __future__ import annotations
 
+import abc
 import copy
-import enum
-from typing import Dict, List, Literal, Optional, Union
+from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, Union
 
-import pydantic
+import aenum
+import pydantic.generics
 
 from corva.configuration import SETTINGS
-from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
+from corva.models.base import (
+    BaseContext,
+    CorvaBaseEvent,
+    CorvaBaseGenericEvent,
+    RawBaseEvent,
+)
 
 
-class FilterMode(enum.Enum):
-    timestamp = 'timestamp'
-    depth = 'depth'
+def require_at_least_one_record(records: list) -> list:
+    """Validates, that there is at least one record provided.
+
+    This function exists, because pydantic.conlist doesnt support generics.
+    """
+
+    if not records:
+        raise ValueError('At least one record should be provided.')
+
+    return records
 
 
-class Record(CorvaBaseModel):
+class StreamBaseRecord(CorvaBaseEvent):
+    pass
+
+
+class StreamTimeRecord(StreamBaseRecord):
+    """Stream time record data.
+
+    Attributes:
+        timestamp: Unix timestamp.
+        data: record data.
+        metadata: record metadata.
+    """
+
+    timestamp: int
+    data: dict = {}
+    metadata: dict = {}
+
+
+class StreamDepthRecord(StreamBaseRecord):
+    """Stream depth record data.
+
+    Attributes:
+        measured_depth: measured depth (ft).
+        data: record data.
+        metadata: record metadata.
+    """
+
+    measured_depth: float
+    data: dict = {}
+    metadata: dict = {}
+
+
+StreamBaseRecordTV = TypeVar('StreamBaseRecordTV', bound=StreamBaseRecord)
+
+
+class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
+    """Stream event data.
+
+    Attributes:
+        asset_id: asset id.
+        company_id: company id.
+        records: data records.
+    """
+
     asset_id: int
+    company_id: int
+    records: List[StreamBaseRecordTV]
 
-    data: Optional[dict] = None
-    metadata: Optional[dict] = None
-
-    timestamp: Optional[int] = pydantic.Field(
-        None,
-        description='Timestamp (Unix epoch time). Only present for time based streams',
-    )
-    measured_depth: Optional[float] = pydantic.Field(
-        None,
-        description='Measured depth (ft). Only present for depth based streams',
+    # validators
+    _records = pydantic.validator('records', allow_reuse=True)(
+        require_at_least_one_record
     )
 
-    version: Optional[int] = pydantic.Field(None, description='Version of the record')
-    app: Optional[str] = pydantic.Field(
-        None, description='App which generated the data'
-    )
-    company_id: Optional[int] = None
-    provider: Optional[str] = None
-    collection: Optional[str] = None
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def require_timestamp_or_measured_depth(cls, values):
-        # at least one of timestamp or measured_depth is required
-        if values.get('timestamp') is None and values.get('measured_depth') is None:
-            raise ValueError('At least one of timestamp or measured_depth is required')
-
-        return values
+class StreamTimeEvent(StreamEvent[StreamTimeRecord]):
+    pass
 
 
-class AppMetadata(CorvaBaseModel):
+class StreamDepthEvent(StreamEvent[StreamDepthRecord]):
+    pass
+
+
+RawRecordMainValueTV = TypeVar('RawRecordMainValueTV', int, float)
+
+
+class RawBaseRecord(CorvaBaseGenericEvent, Generic[RawRecordMainValueTV], abc.ABC):
+    asset_id: int
+    company_id: int
+    collection: str
+
+    data: dict = {}
+    metadata: dict = {}
+
+    @property
+    @abc.abstractmethod
+    def main_value(self) -> RawRecordMainValueTV:
+        pass
+
+
+class RawTimeRecord(RawBaseRecord[int]):
+    timestamp: int
+    measured_depth: Optional[float] = None
+
+    @property
+    def main_value(self) -> int:
+        return self.timestamp
+
+
+class RawDepthRecord(RawBaseRecord[float]):
+    timestamp: Optional[int] = None
+    measured_depth: float
+
+    @property
+    def main_value(self) -> float:
+        return self.measured_depth
+
+
+class RawAppMetadata(CorvaBaseEvent):
     app_connection_id: int
 
 
-class StreamEventMetadata(CorvaBaseModel):
+class LogType(aenum.MultiValueEnum):
+    _init_ = "value raw_event context event"
+
+    time = 'time', RawStreamTimeEvent, StreamTimeContext, StreamTimeEvent
+    depth = 'depth', RawStreamDepthEvent, StreamDepthContext, StreamDepthEvent
+
+
+class RawMetadata(CorvaBaseEvent):
     app_stream_id: int
-    apps: Dict[str, AppMetadata]
-
-    source_type: Optional[
-        Literal['drilling', 'drillout', 'frac', 'wireline']
-    ] = pydantic.Field(None, description='Source Data Type')
-    log_type: Optional[Literal['time', 'depth']] = pydantic.Field(
-        None, description='Source Log Type'
-    )
-    log_identifier: Optional[str] = pydantic.Field(
-        None, description='Unique log identifier, only available on depth based streams'
-    )
+    apps: Dict[str, RawAppMetadata]
+    log_type: LogType
 
 
-class StreamEvent(RawBaseEvent):
+RawBaseRecordTV = TypeVar('RawBaseRecordTV', bound=RawBaseRecord)
+
+
+class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEvent):
+    records: List[RawBaseRecordTV]
+    metadata: RawMetadata
     app_key: str = SETTINGS.APP_KEY
-    records: pydantic.conlist(Record, min_items=1)
-    metadata: StreamEventMetadata
+    asset_id: int = None
+    company_id: int = None
 
-    @property
-    def asset_id(self) -> int:
-        return self.records[0].asset_id
+    # validators
+    _records = pydantic.validator('records', allow_reuse=True)(
+        require_at_least_one_record
+    )
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def set_asset_id(cls, values: dict) -> dict:
+        """Calculates asset_id field."""
+
+        records: List[RawRecord] = values['records']
+
+        values["asset_id"] = int(records[0].asset_id)
+
+        return values
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def set_company_id(cls, values: dict) -> dict:
+        """Calculates company_id field."""
+
+        records: List[RawRecord] = values['records']
+
+        values["company_id"] = int(records[0].company_id)
+
+        return values
 
     @property
     def app_connection_id(self) -> int:
@@ -85,77 +187,98 @@ class StreamEvent(RawBaseEvent):
 
     @property
     def is_completed(self) -> bool:
-        """there can only be 1 completed record, always located at the end of the list"""
+        """There can only be 1 completed record, always located at the end of the list."""
 
         return self.records[-1].collection == 'wits.completed'
 
+    @property
+    def last_processed_value(self) -> Union[int, float]:
+        return max(record.main_value for record in self.records)
+
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def require_app_key_in_metadata_apps(cls, values):
-        if values['app_key'] not in values['metadata'].apps:
+        metadata: RawMetadata = values['metadata']
+
+        if values['app_key'] not in metadata.apps:
             raise ValueError('metadata.apps dict must contain an app key.')
 
         return values
 
     @staticmethod
-    def from_raw_event(event: List[dict]) -> List[StreamEvent]:
-        result = pydantic.parse_obj_as(List[StreamEvent], event)
+    def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
+        initial_events: List[InitialStreamEvent] = pydantic.parse_obj_as(
+            List[InitialStreamEvent], event
+        )
+
+        result = [
+            initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
+            for initial_event, sub_event in zip(initial_events, event)
+        ]
 
         return result
 
-    @classmethod
+    @staticmethod
     def filter_records(
-        cls,
-        event: StreamEvent,
-        filter_mode: Optional[FilterMode],
-        last_value: Optional[Union[float, int]],
-    ) -> List[Record]:
-        new_records = copy.deepcopy(event.records)
+        records: List[RawBaseRecord],
+        last_value: Union[float, int, None],
+    ) -> List[RawBaseRecord]:
+        if not records:
+            return records
+
+        new_records = copy.deepcopy(records)
 
         if event.is_completed:
-            # there can only be 1 completed record, always located at the end of the list
+            # there can be only 1 completed record, always located at the end
             new_records = new_records[:-1]  # remove "completed" record
 
-        if filter_mode is not None and last_value is not None:
-            if filter_mode == FilterMode.timestamp:
-                record_attr = 'timestamp'
+        if last_value is None:
+            return new_records
 
-            if filter_mode == FilterMode.depth:
-                record_attr = 'measured_depth'
+        values = [record.main_value for record in new_records]
 
-            new_records = [
-                record
-                for record in new_records
-                if getattr(record, record_attr) > last_value
-            ]
+        new_records = [
+            record for record, value in zip(new_records, values) if value > last_value
+        ]
 
         return new_records
 
 
-class StreamStateData(CorvaBaseModel):
-    last_processed_timestamp: Optional[int] = None
-    last_processed_depth: Optional[float] = None
+class RawStreamTimeEvent(RawStreamEvent[RawTimeRecord]):
+    pass
 
 
-class StreamContext(BaseContext[StreamEvent]):
-    filter_mode: Optional[FilterMode] = None
+class RawStreamDepthEvent(RawStreamEvent[RawDepthRecord]):
+    pass
 
-    @property
-    def cache_data(self) -> StreamStateData:
-        state_data_dict = self.cache.load_all()
-        return StreamStateData(**state_data_dict)
 
-    @property
-    def last_processed_value(self) -> Optional[Union[int, float]]:
-        if self.filter_mode == FilterMode.timestamp:
-            return self.cache_data.last_processed_timestamp
+RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
 
-        if self.filter_mode == FilterMode.depth:
-            return self.cache_data.last_processed_depth
 
-        return None
+class BaseStreamContext(BaseContext[RawStreamEventTV], Generic[RawStreamEventTV]):
+    last_value_key: ClassVar[str]
 
-    def store_cache_data(self, cache_data: StreamStateData) -> int:
-        if cache_data := cache_data.dict(exclude_defaults=True, exclude_none=True):
-            return self.cache.store(mapping=cache_data)
+    def get_last_value(self) -> Union[None, int, float]:
+        return self.cache.load(key=self.last_value_key)
 
-        return 0
+    def set_last_value(self) -> int:
+        return self.cache.store(
+            key=self.last_value_key, value=self.event.last_processed_value
+        )
+
+
+class StreamTimeContext(BaseStreamContext[RawStreamTimeEvent]):
+    last_value_key = 'last_processed_timestamp'
+
+
+class StreamDepthContext(BaseStreamContext[RawStreamDepthEvent]):
+    last_value_key = 'last_processed_depth'
+
+
+class InitialMetadata(CorvaBaseEvent):
+    log_type: LogType
+
+
+class InitialStreamEvent(CorvaBaseEvent):
+    """Stores the most essential data, that is parsed first."""
+
+    metadata: InitialMetadata
