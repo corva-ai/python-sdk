@@ -11,13 +11,22 @@ from corva.state.redis_adapter import RedisAdapter
 from corva.state.redis_state import RedisState
 
 
-class CorvaBaseModel(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.ignore
-        allow_mutation = False
+class EventConfig:
+    extra = pydantic.Extra.ignore
+    allow_mutation = False
 
 
-class RawBaseEvent(ABC, CorvaBaseModel):
+class CorvaBaseEvent(pydantic.BaseModel):
+    class Config(EventConfig):
+        pass
+
+
+class CorvaBaseGenericEvent(pydantic.generics.GenericModel):
+    class Config(EventConfig):
+        pass
+
+
+class RawBaseEvent(ABC):
     @staticmethod
     @abstractmethod
     def from_raw_event(event: Any) -> Union[List[RawBaseEvent], RawBaseEvent]:

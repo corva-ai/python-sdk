@@ -3,10 +3,10 @@ from __future__ import annotations
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
+from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
 
 
-class TaskEvent(CorvaBaseModel):
+class TaskEvent(CorvaBaseEvent):
     """Task event data.
 
     Attributes:
@@ -20,7 +20,7 @@ class TaskEvent(CorvaBaseModel):
     properties: dict = {}
 
 
-class RawTaskEvent(RawBaseEvent):
+class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
 

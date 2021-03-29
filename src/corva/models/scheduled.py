@@ -5,10 +5,10 @@ from typing import List
 
 import pydantic
 
-from corva.models.base import BaseContext, CorvaBaseModel, RawBaseEvent
+from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
 
 
-class ScheduledEvent(CorvaBaseModel):
+class ScheduledEvent(CorvaBaseEvent):
     """Scheduled event data.
 
     Attributes:
@@ -25,7 +25,7 @@ class ScheduledEvent(CorvaBaseModel):
         allow_population_by_field_name = True
 
 
-class RawScheduledEvent(RawBaseEvent):
+class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     asset_id: int
     interval: int = pydantic.Field(
         ..., description='Time in seconds between two schedule triggers'
