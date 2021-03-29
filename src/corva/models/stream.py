@@ -232,13 +232,13 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
     @staticmethod
     def filter_records(
-        records: List[RawBaseRecord],
+        event: RawStreamEvent,
         last_value: Union[float, int, None],
     ) -> List[RawBaseRecord]:
-        if not records:
-            return records
+        if not event.records:
+            return event.records
 
-        new_records = copy.deepcopy(records)
+        new_records = copy.deepcopy(event.records)
 
         if event.is_completed:
             # there can be only 1 completed record, always located at the end
