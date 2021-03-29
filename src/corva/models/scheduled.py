@@ -56,7 +56,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     def set_time_from(cls, values: dict) -> dict:
         """Calculates time_from field."""
 
-        values["time_from"] = values["schedule_start"] - values["interval"] + 1
+        values["time_from"] = int(values["schedule_start"] - values["interval"] + 1)
         return values
 
     @staticmethod
