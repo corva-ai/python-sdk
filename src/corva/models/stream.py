@@ -16,18 +16,6 @@ from corva.models.base import (
 )
 
 
-def require_at_least_one_record(records: list) -> list:
-    """Validates, that there is at least one record provided.
-
-    This function exists, because pydantic.conlist doesnt support generics.
-    """
-
-    if not records:
-        raise ValueError('At least one record should be provided.')
-
-    return records
-
-
 class StreamBaseRecord(CorvaBaseEvent):
     pass
 
@@ -75,11 +63,6 @@ class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
     asset_id: int
     company_id: int
     records: List[StreamBaseRecordTV]
-
-    # validators
-    _records = pydantic.validator('records', allow_reuse=True)(
-        require_at_least_one_record
-    )
 
 
 class StreamTimeEvent(StreamEvent[StreamTimeRecord]):
@@ -165,10 +148,79 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     asset_id: int = None
     company_id: int = None
 
-    # validators
-    _records = pydantic.validator('records', allow_reuse=True)(
-        require_at_least_one_record
-    )
+    @property
+    def app_connection_id(self) -> int:
+        return self.metadata.apps[self.app_key].app_connection_id
+
+    @property
+    def app_stream_id(self) -> int:
+        return self.metadata.app_stream_id
+
+    @property
+    def is_completed(self) -> bool:
+        """There can only be 1 completed record, always located at the end of the list."""
+
+        return self.records[-1].collection == 'wits.completed'
+
+    @property
+    def last_processed_value(self) -> Union[int, float]:
+        return max(record.main_value for record in self.records)
+
+    @staticmethod
+    def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
+        initial_events: List[InitialStreamEvent] = pydantic.parse_obj_as(
+            List[InitialStreamEvent], event
+        )
+
+        result = [
+            initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
+            for initial_event, sub_event in zip(initial_events, event)
+        ]
+
+        return result
+
+    @staticmethod
+    def filter_records(
+        event: RawStreamEvent,
+        last_value: Union[float, int, None],
+    ) -> List[RawBaseRecord]:
+        new_records = copy.deepcopy(event.records)
+
+        if event.is_completed:
+            # there can be only 1 completed record, always located at the end
+            new_records = new_records[:-1]  # remove "completed" record
+
+        if last_value is None:
+            return new_records
+
+        values = [record.main_value for record in new_records]
+
+        new_records = [
+            record for record, value in zip(new_records, values) if value > last_value
+        ]
+
+        return new_records
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def require_at_least_one_record(cls, values):
+        """Validates, that there is at least one record provided.
+
+        This function exists, because pydantic.conlist doesnt support generics.
+        """
+
+        if not values['records']:
+            raise ValueError('At least one record should be provided.')
+
+        return values
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def require_app_key_in_metadata_apps(cls, values):
+        metadata: RawMetadata = values['metadata']
+
+        if values['app_key'] not in metadata.apps:
+            raise ValueError('metadata.apps dict must contain an app key.')
+
+        return values
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def set_asset_id(cls, values: dict) -> dict:
@@ -189,71 +241,6 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         values["company_id"] = int(records[0].company_id)
 
         return values
-
-    @property
-    def app_connection_id(self) -> int:
-        return self.metadata.apps[self.app_key].app_connection_id
-
-    @property
-    def app_stream_id(self) -> int:
-        return self.metadata.app_stream_id
-
-    @property
-    def is_completed(self) -> bool:
-        """There can only be 1 completed record, always located at the end of the list."""
-
-        return self.records[-1].collection == 'wits.completed'
-
-    @property
-    def last_processed_value(self) -> Union[int, float]:
-        return max(record.main_value for record in self.records)
-
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def require_app_key_in_metadata_apps(cls, values):
-        metadata: RawMetadata = values['metadata']
-
-        if values['app_key'] not in metadata.apps:
-            raise ValueError('metadata.apps dict must contain an app key.')
-
-        return values
-
-    @staticmethod
-    def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
-        initial_events: List[InitialStreamEvent] = pydantic.parse_obj_as(
-            List[InitialStreamEvent], event
-        )
-
-        result = [
-            initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
-            for initial_event, sub_event in zip(initial_events, event)
-        ]
-
-        return result
-
-    @staticmethod
-    def filter_records(
-        event: RawStreamEvent,
-        last_value: Union[float, int, None],
-    ) -> List[RawBaseRecord]:
-        if not event.records:
-            return event.records
-
-        new_records = copy.deepcopy(event.records)
-
-        if event.is_completed:
-            # there can be only 1 completed record, always located at the end
-            new_records = new_records[:-1]  # remove "completed" record
-
-        if last_value is None:
-            return new_records
-
-        values = [record.main_value for record in new_records]
-
-        new_records = [
-            record for record, value in zip(new_records, values) if value > last_value
-        ]
-
-        return new_records
 
 
 class RawStreamTimeEvent(RawStreamEvent[RawTimeRecord]):
