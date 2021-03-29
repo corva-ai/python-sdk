@@ -2,9 +2,9 @@ import types
 from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
-from corva import ScheduledEvent, StreamEvent, TaskEvent
-from corva.models.scheduled import RawScheduledEvent
-from corva.models.task import RawTaskEvent
+from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
+from corva.models.stream import StreamEvent
+from corva.models.task import RawTaskEvent, TaskEvent
 
 
 class TestClient:
