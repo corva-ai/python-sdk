@@ -226,7 +226,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     def set_asset_id(cls, values: dict) -> dict:
         """Calculates asset_id field."""
 
-        records: List[RawRecord] = values['records']
+        records: List[RawBaseRecord] = values['records']
 
         values["asset_id"] = int(records[0].asset_id)
 
@@ -236,7 +236,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     def set_company_id(cls, values: dict) -> dict:
         """Calculates company_id field."""
 
-        records: List[RawRecord] = values['records']
+        records: List[RawBaseRecord] = values['records']
 
         values["company_id"] = int(records[0].company_id)
 
