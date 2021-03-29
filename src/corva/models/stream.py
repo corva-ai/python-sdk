@@ -182,7 +182,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     @staticmethod
     def filter_records(
         event: RawStreamEvent,
-        last_value: Union[float, int, None],
+        last_value: Optional[float],
     ) -> List[RawBaseRecord]:
         new_records = copy.deepcopy(event.records)
 
@@ -257,8 +257,13 @@ RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
 class BaseStreamContext(BaseContext[RawStreamEventTV], Generic[RawStreamEventTV]):
     last_value_key: ClassVar[str]
 
-    def get_last_value(self) -> Union[None, int, float]:
-        return self.cache.load(key=self.last_value_key)
+    def get_last_value(self) -> Optional[float]:
+        result = self.cache.load(key=self.last_value_key)
+
+        if result is None:
+            return result
+
+        return float(result)
 
     def set_last_value(self) -> int:
         return self.cache.store(
