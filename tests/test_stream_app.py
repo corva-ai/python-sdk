@@ -1,267 +1,508 @@
+import pydantic
 import pytest
 from pytest_mock import MockerFixture
 
 from corva.application import Corva
 from corva.configuration import SETTINGS
-from corva.models.stream import FilterMode, StreamContext, StreamEvent, StreamStateData
-
-
-def stream_app(event, api, cache):
-    return event
-
-
-@pytest.mark.parametrize(
-    'collection, is_completed',
-    [('wits.completed', True), ('random', False)],
-    ids=['is_completed True', 'is_completed False'],
+from corva.models.stream import (
+    BaseStreamContext,
+    LogType,
+    RawAppMetadata,
+    RawDepthRecord,
+    RawMetadata,
+    RawStreamDepthEvent,
+    RawStreamEvent,
+    RawStreamTimeEvent,
+    RawTimeRecord,
 )
-def test_is_completed_record_deleted(
-    collection, is_completed, mocker: MockerFixture, corva_context
-):
-    event = [
-        {
-            "records": [{"asset_id": 0, "collection": collection, "timestamp": 0}],
-        }
-    ]
-
-    corva = Corva(context=corva_context)
-
-    spy = mocker.Mock(stream_app, wraps=stream_app)
-
-    results = corva.stream(spy, event)
-
-    if is_completed:
-        spy.assert_not_called()
-        return
-
-    assert len(results[0].records) == 1
-    assert not results[0].is_completed
 
 
-@pytest.mark.parametrize(
-    'filter_mode,record_attr,last_value,expected',
-    [
-        (None, 'timestamp', None, 2),
-        (FilterMode.timestamp, 'timestamp', None, 2),
-        (None, 'timestamp', 0, 2),
-        (FilterMode.timestamp, 'timestamp', 0, 1),
-        (FilterMode.depth, 'measured_depth', 0, 1),
-    ],
-    ids=[
-        'filtering skipped',
-        'filtering skipped',
-        'filtering skipped',
-        'filtering done',
-        'filtering done',
-    ],
-)
-def test_filter_records(
-    filter_mode, record_attr, last_value, expected, mocker: MockerFixture, corva_context
-):
-    def filter_records_decor(func):
-        def decor(**kwargs):
-            kwargs['filter_mode'] = filter_mode
-            kwargs['last_value'] = last_value
-            return func(**kwargs)
-
-        return decor
+def test_require_at_least_one_record_in_raw_stream_event(context):
+    def stream_app(event, api, cache):
+        pass
 
     event = [
-        {
-            "records": [
-                {record_attr: 0, "asset_id": 0},
-                {record_attr: 1, "asset_id": 0},
-            ]
-        }
+        RawStreamTimeEvent.construct(
+            records=[],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
     ]
 
-    corva = Corva(context=corva_context)
-
-    mocker.patch.object(
-        StreamEvent, 'filter_records', filter_records_decor(StreamEvent.filter_records)
+    exc = pytest.raises(
+        pydantic.ValidationError,
+        Corva(context=context).stream,
+        stream_app,
+        event,
     )
-    results = corva.stream(stream_app, event, filter_mode=filter_mode)
 
-    assert len(results[0].records) == expected
+    assert len(exc.value.raw_errors) == 1
+    assert str(exc.value.raw_errors[0].exc) == 'At least one record should be provided.'
+
+
+@pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
+@pytest.mark.parametrize('value', (1, 2))
+def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixture):
+    def stream_app(event, api, cache):
+        return event
+
+    event = [
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=int(),
+                    **{'asset_id': int(), 'company_id': int(), **{attr: value}},
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
+    ]
+
+    mocker.patch('corva.application.stream_runner', lambda fn, context: context.event)
+
+    result_event: RawStreamTimeEvent = Corva(context=context).stream(stream_app, event)[
+        0
+    ]
+
+    assert getattr(result_event, attr) == value
 
 
 @pytest.mark.parametrize(
-    'filter_mode,record_attr',
-    [
-        ('timestamp', 'timestamp'),
-        ('depth', 'measured_depth'),
-    ],
-)
-def test_last_processed_value_saved_to_cache(filter_mode, record_attr, corva_context):
-    records_list = [
-        [{record_attr: 0, 'asset_id': 0}, {record_attr: 1, "asset_id": 0}],
-        [
-            {record_attr: 0, 'asset_id': 0},
-            {record_attr: 1, "asset_id": 0},
-            {record_attr: 2, "asset_id": 0},
-        ],
-    ]
-
-    corva = Corva(context=corva_context)
-
-    for idx, records in enumerate(records_list):
-        event = [{"records": records}]
-
-        results = corva.stream(stream_app, event, filter_mode=filter_mode)
-
-        if idx == 0:
-            # cache: record_attr = 1
-            continue
-
-        if idx == 1:
-            # cache: record_attr = 2
-            assert len(results[0].records) == 1
-            assert getattr(results[0].records[0], record_attr) == 2
-
-
-def test_default_last_processed_value_taken_from_cache(corva_context):
-    records_list = [
-        [{'timestamp': 0, 'asset_id': 0}, {'measured_depth': 0, 'asset_id': 0}],
-        [{'timestamp': 1, 'asset_id': 0}],
-        [{'measured_depth': 0, 'asset_id': 0}, {'measured_depth': 1, 'asset_id': 0}],
-        [{'timestamp': 1, 'asset_id': 0}, {'timestamp': 2, 'asset_id': 0}],
-    ]
-
-    corva = Corva(context=corva_context)
-
-    for idx, records in enumerate(records_list):
-        event = [{"records": records}]
-
-        if idx == 0:
-            corva.stream(stream_app, event, filter_mode=None)
-            # cache: last_processed_timestamp = 0, last_processed_depth = 0
-            continue
-
-        if idx == 1:
-            corva.stream(stream_app, event, filter_mode=None)
-            # cache:
-            #   last_processed_timestamp = 1 - new value
-            #   last_processed_depth     = 0 - old value persisted, although there were
-            #     no measured_depth in records
-            continue
-
-        if idx == 2:
-            results = corva.stream(stream_app, event, filter_mode='depth')
-            # cache:
-            #   last_processed_timestamp = 1 - old value persisted, although there were
-            #     no timestamp in records
-            #   last_processed_depth     = 1 - new value
-
-            assert len(results[0].records) == 1
-            assert results[0].records[0].measured_depth == 1
-
-        if idx == 3:
-            results = corva.stream(stream_app, event, filter_mode='timestamp')
-            # cache:
-            #   last_processed_timestamp = 2 - new value
-            #   last_processed_depth     = 1 - old value persisted
-
-            assert len(results[0].records) == 1
-            assert results[0].records[0].timestamp == 2
-
-
-@pytest.mark.parametrize(
-    'records,raises',
+    'last_value,event,expected',
     [
         (
-            [{"asset_id": 0}],
-            True,
+            -1,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=int(),
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection='wits.completed',
+                            timestamp=int(),
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            [
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=int(),
+                )
+            ],
         ),
         (
-            [{"asset_id": 0, "timestamp": 0, "measured_depth": 0}],
-            False,
+            -1,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection='wits.completed',
+                            timestamp=int(),
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=int(),
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            [
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection='wits.completed',
+                    timestamp=int(),
+                ),
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=int(),
+                ),
+            ],
         ),
         (
-            [{"asset_id": 0, "measured_depth": 0}],
-            False,
+            None,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=int(),
+                        )
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            [
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=int(),
+                )
+            ],
         ),
         (
-            [{"asset_id": 0, "timestamp": 0}],
-            False,
+            1,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=0,
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=1,
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=2,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            [
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=2,
+                )
+            ],
+        ),
+        (
+            1,
+            [
+                RawStreamDepthEvent(
+                    records=[
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=0,
+                        ),
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=1,
+                        ),
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=2,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.depth,
+                    ),
+                ).dict()
+            ],
+            [
+                RawDepthRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    measured_depth=2,
+                ),
+            ],
         ),
     ],
     ids=[
-        'no timestamp and no measured_depth provided',
-        'both timestamp and measured_depth provided',
-        'only measured_depth provided',
-        'only timestamp provided',
+        'is completed record last - should be filtered',
+        'is completed record not last - should not be filtered',
+        'last value is None - filtering doesnt fail',
+        'time event filtered',
+        'depth event filtered',
     ],
 )
-def test_require_timestamp_or_measured_depth(records, raises, corva_context):
+def test_filter_records(last_value, event, expected, mocker: MockerFixture, context):
+    def stream_app(event, api, cache):
+        pass
+
+    spy = mocker.spy(RawStreamEvent, 'filter_records')
+    mocker.patch.object(BaseStreamContext, 'get_last_value', return_value=last_value)
+
+    Corva(context=context).stream(stream_app, event)
+
+    assert spy.spy_return == expected
+
+
+@pytest.mark.parametrize(
+    'app_key,raises',
+    (['', True], [SETTINGS.APP_KEY, False]),
+    ids=['no app key exc', 'correct event'],
+)
+def test_require_app_key_in_metadata_apps(app_key: str, raises, context):
+    def stream_app(event, api, cache):
+        pass
+
     event = [
-        {
-            "records": records,
-        }
+        RawStreamTimeEvent.construct(
+            records=[
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=int(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={app_key: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
     ]
 
-    corva = Corva(context=corva_context)
+    corva = Corva(context=context)
 
     if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert 'At least one of timestamp or measured_depth is required' in str(
-            exc.value
+        exc = pytest.raises(pydantic.ValidationError, corva.stream, stream_app, event)
+        assert len(exc.value.raw_errors) == 1
+        assert (
+            str(exc.value.raw_errors[0].exc)
+            == 'metadata.apps dict must contain an app key.'
         )
         return
 
     corva.stream(stream_app, event)
 
 
-@pytest.mark.parametrize(
-    'apps,raises',
-    ([{}, True], [{SETTINGS.APP_KEY: {"app_connection_id": 0}}, False]),
-    ids=['no app key exc', 'correct event'],
-)
-def test_require_app_key_in_metadata_apps(apps, raises, corva_context):
+def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, context):
+    def stream_app(event, api, cache):
+        pass
+
     event = [
-        {
-            "records": [{"asset_id": 0, "timestamp": 0}],
-            "metadata": {"app_stream_id": 0, "apps": apps},
-        }
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    timestamp=int(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
     ]
 
-    corva = Corva(context=corva_context)
-
-    if raises:
-        exc = pytest.raises(ValueError, corva.stream, stream_app, event)
-        assert 'metadata.apps dict must contain an app key.' in str(exc.value)
-        return
-
-    corva.stream(stream_app, event)
-
-
-def test_early_return_if_no_records_after_filtering(
-    mocker: MockerFixture, corva_context
-):
-    event = [
-        {"records": [{"asset_id": 0, "collection": 'wits.completed', "timestamp": 0}]}
-    ]
-
-    corva = Corva(context=corva_context)
-
+    filter_patch = mocker.patch.object(
+        RawStreamEvent, 'filter_records', return_value=[]
+    )
     spy = mocker.Mock(stream_app, wraps=stream_app)
 
-    corva.stream(spy, event)
+    Corva(context=context).stream(stream_app, event)
 
+    filter_patch.assert_called_once()
     spy.assert_not_called()
 
 
-def test_store_cache_data_for_empty_cache_data(mocker: MockerFixture, corva_context):
-    def stream_runner_mock(fn, context):
-        return context
+@pytest.mark.parametrize(
+    'expected,event',
+    [
+        (
+            1,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=0,
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=1,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+        ),
+        (
+            2,
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=0,
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=1,
+                        ),
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=2,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+        ),
+        (
+            1,
+            [
+                RawStreamDepthEvent(
+                    records=[
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=0,
+                        ),
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=1,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.depth,
+                    ),
+                ).dict()
+            ],
+        ),
+        (
+            2,
+            [
+                RawStreamDepthEvent(
+                    records=[
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=0,
+                        ),
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=1,
+                        ),
+                        RawDepthRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            measured_depth=2,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.depth,
+                    ),
+                ).dict()
+            ],
+        ),
+    ],
+)
+def test_last_processed_value_saved_to_cache(
+    expected, event, context, mocker: MockerFixture
+):
+    def stream_app(event, api, cache):
+        pass
 
-    event = [{"records": [{"asset_id": 0, "timestamp": 0}]}]
+    spy = mocker.spy(BaseStreamContext, 'get_last_value')
+    Corva(context=context).stream(stream_app, event)
+    Corva(context=context).stream(stream_app, event)
 
-    corva = Corva(context=corva_context)
-
-    mocker.patch('corva.application.stream_runner', stream_runner_mock)
-
-    results = corva.stream(stream_app, event)
-
-    context = results[0]  # type: StreamContext
-
-    assert context.store_cache_data(cache_data=StreamStateData()) == 0
+    assert spy.call_count == 2
+    assert spy.spy_return == expected
