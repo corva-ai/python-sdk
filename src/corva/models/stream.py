@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import abc
 import copy
+import enum
 from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, Union
 
-import aenum
 import pydantic.generics
 
 from corva.configuration import SETTINGS
@@ -129,11 +129,24 @@ class RawAppMetadata(CorvaBaseEvent):
     app_connection_id: int
 
 
-class LogType(aenum.MultiValueEnum):
-    _init_ = "value raw_event context event"
+class LogType(enum.Enum):
+    time = 'time'
+    depth = 'depth'
 
-    time = 'time', RawStreamTimeEvent, StreamTimeContext, StreamTimeEvent
-    depth = 'depth', RawStreamDepthEvent, StreamDepthContext, StreamDepthEvent
+    @property
+    def raw_event(self):
+        mapping = {self.time: RawStreamTimeEvent, self.depth: RawStreamDepthEvent}
+        return mapping[self]
+
+    @property
+    def context(self):
+        mapping = {self.time: StreamTimeContext, self.depth: StreamDepthContext}
+        return mapping[self]
+
+    @property
+    def event(self):
+        mapping = {self.time: StreamTimeEvent, self.depth: StreamDepthEvent}
+        return mapping[self]
 
 
 class RawMetadata(CorvaBaseEvent):
