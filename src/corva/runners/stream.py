@@ -1,45 +1,25 @@
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
-from corva.models.stream import StreamContext, StreamEvent, StreamStateData
+from corva.models.stream import RawStreamEvent, StreamDepthContext, StreamTimeContext
 
 
-def stream_runner(fn: Callable, context: StreamContext) -> Any:
-    records = StreamEvent.filter_records(
-        event=context.event,
-        filter_mode=context.filter_mode,
-        last_value=context.last_processed_value,
+def stream_runner(
+    fn: Callable, context: Union[StreamDepthContext, StreamTimeContext]
+) -> Any:
+    records = RawStreamEvent.filter_records(
+        records=context.event.records, last_value=context.get_last_value()
     )
 
     if not records:
-        # we got a duplicate data if there are no records after filtering
+        # we've got the duplicate data if there are no records left after filtering
         return
 
-    context.event = context.event.copy(update={'records': records}, deep=True)
-
-    result = fn(context.event, context.api, context.cache)
-
-    last_processed_timestamp = max(
-        [
-            record.timestamp
-            for record in context.event.records
-            if record.timestamp is not None
-        ],
-        default=None,  # old cache value wont be overwritten
-    )
-    last_processed_depth = max(
-        [
-            record.measured_depth
-            for record in context.event.records
-            if record.measured_depth is not None
-        ],
-        default=None,  # old cache value wont be overwritten
+    event = context.event.metadata.log_type.event.parse_obj(
+        context.event.copy(update={'records': records}, deep=True)
     )
 
-    context.store_cache_data(
-        StreamStateData(
-            last_processed_timestamp=last_processed_timestamp,
-            last_processed_depth=last_processed_depth,
-        )
-    )
+    result = fn(event, context.api, context.cache)
+
+    context.set_last_value()
 
     return result
