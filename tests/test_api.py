@@ -1,122 +1,101 @@
+import contextlib
 import json
-from typing import Literal
-from unittest import mock
+import urllib.parse
 
 import pytest
 import requests
-from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
+from corva.api import Api
 from corva.application import Corva
 from corva.configuration import SETTINGS
+from corva.models.task import TaskEvent
+
+
+def lambda_handler(event, context):
+    def app(event, api):
+        return api
+
+    return Corva(context=context).task(fn=app, event=event)
 
 
 @pytest.fixture(scope='function')
-def event():
-    return {"records": [{"asset_id": 0, "timestamp": 0}]}
+def api(app_runner) -> Api:
+    """Returns Api instance from task app."""
+
+    event = TaskEvent(asset_id=int(), company_id=int())
+
+    return app_runner(lambda_handler, event)
 
 
-def app(event, api, cache):
-    return api
-
-
-def test_request_default_headers(event, mocker: MockerFixture, corva_context):
-    request_patch = mocker.patch('requests.request')
-
-    api = Corva(context=corva_context).stream(app, event)[0]
-
-    api.get('')  # do some api call
-
-    request_patch.assert_called_once()
-    assert not (
-        set(request_patch.call_args.kwargs['headers'])
-        - {'Authorization', 'X-Corva-App'}
+def test_request_default_headers(api, requests_mock: RequestsMocker):
+    # do some api call
+    requests_mock.get(
+        '',
+        request_headers={
+            'Authorization': f'API {api.api_key}',
+            'X-Corva-App': api.app_name,
+        },
     )
+    api.get('')
 
 
 @pytest.mark.parametrize(
-    'path,url,type_',
+    'path,expected',
     [
-        ['http://localhost', 'http://localhost', ''],
-        ['api/v10/path', '%s/api/v10/path', 'data'],
-        ['/api/v10/path', '%s/api/v10/path', 'data'],
-        ['v10/path', '%s/v10/path', 'corva'],
-        ['/v10/path', '%s/v10/path', 'corva'],
+        ['http://localhost', 'http://localhost'],
+        ['api/v10/path', f'{SETTINGS.DATA_API_ROOT_URL}/api/v10/path'],
+        ['/api/v10/path', f'{SETTINGS.DATA_API_ROOT_URL}/api/v10/path'],
+        ['v10/path', f'{SETTINGS.API_ROOT_URL}/v10/path'],
+        ['/v10/path', f'{SETTINGS.API_ROOT_URL}/v10/path'],
     ],
 )
-def test_request_url(
-    event,
-    mocker: MockerFixture,
-    path,
-    url,
-    type_: Literal['data', 'corva', ''],
-    corva_context,
-):
-    request_patch = mocker.patch('requests.request')
-
-    api = Corva(context=corva_context).stream(app, event)[0]
-
+def test_request_url(path, expected, api, requests_mock: RequestsMocker):
+    requests_mock.get(expected)
     api.get(path)
 
-    expected = url
 
-    if type_ == 'data':
-        expected = url % SETTINGS.DATA_API_ROOT_URL
-
-    if type_ == 'corva':
-        expected = url % SETTINGS.API_ROOT_URL
-
-    request_patch.assert_called_once()
-    assert request_patch.call_args.kwargs['url'] == expected
-
-
-def test_request_data_param_passed_as_json(event, mocker: MockerFixture, corva_context):
-    request_patch = mocker.patch('requests.request')
-
-    api = Corva(context=corva_context).stream(app, event)[0]
-
+def test_request_data_param_passed_as_json(api, requests_mock: RequestsMocker):
+    post_mock = requests_mock.post('')
     api.post('', data={})
-
-    request_patch.assert_called_once()
-    assert request_patch.call_args.kwargs['json'] == {}
+    assert post_mock.last_request._request.body.decode() == '{}'
 
 
-def test_request_additional_headers(event, mocker: MockerFixture, corva_context):
-    request_patch = mocker.patch('requests.request')
+def test_request_additional_headers(api, requests_mock: RequestsMocker):
+    custom_headers = {'custom': 'value'}
 
-    api = Corva(context=corva_context).stream(app, event)[0]
-
+    requests_mock.post('', request_headers={**api.default_headers, **custom_headers})
     api.post('', headers={'custom': 'value'})
-
-    request_patch.assert_called_once()
-    assert len(request_patch.call_args.kwargs['headers']) == 3
-    assert request_patch.call_args.kwargs['headers']['custom'] == 'value'
 
 
 @pytest.mark.parametrize(
-    'timeout, raises',
-    [(3, False), (30, False), (2, True), (31, True)],
+    'timeout, exc_ctx',
+    [
+        (3, contextlib.nullcontext()),
+        (30, contextlib.nullcontext()),
+        (2, pytest.raises(ValueError)),
+        (31, pytest.raises(ValueError)),
+    ],
 )
-def test_request_timeout_limits(
-    event, mocker: MockerFixture, timeout, raises, corva_context
-):
-    request_patch = mocker.patch('requests.request')
+def test_request_timeout_limits(timeout, exc_ctx, api, requests_mock: RequestsMocker):
+    requests_mock.post('')
 
-    api = Corva(context=corva_context).stream(app, event)[0]
-
-    if raises:
-        pytest.raises(ValueError, api.post, '', timeout=timeout)
-        return
-
-    api.post('', timeout=timeout)
-
-    request_patch.assert_called_once()
-    assert request_patch.call_args.kwargs['timeout'] == timeout
+    with exc_ctx:
+        api.post('', timeout=timeout)
 
 
 @pytest.mark.parametrize(
     'fields,skip,limit,query,sort',
-    ([None, 0, 1, {}, {}], ['_id', 1, 2, {'k1': 'v1'}, {'k2': 'v2'}]),
+    (
+        [None, 0, 1, {}, {}],
+        [
+            '_id',
+            1,
+            2,
+            {'k1': 'v1'},
+            {'k2': 'v2'},
+        ],
+    ),
 )
 def test_get_dataset(
     fields,
@@ -124,18 +103,25 @@ def test_get_dataset(
     limit,
     query,
     sort,
-    event,
-    corva_context,
+    api,
     requests_mock: RequestsMocker,
-    mocker: MockerFixture,
 ):
-    api = Corva(context=corva_context).stream(app, event)[0]
-
     provider = SETTINGS.PROVIDER
     dataset = 'dataset'
 
-    get_spy = mocker.spy(api, 'get')
-    get_mock = requests_mock.get(f'/api/v1/data/{provider}/{dataset}/', text='[{}]')
+    qs = urllib.parse.urlencode(
+        {
+            'query': json.dumps(query),
+            'sort': json.dumps(sort),
+            **({'fields': fields} if fields else {}),
+            'limit': limit,
+            'skip': skip,
+        }
+    )
+
+    requests_mock.get(
+        f'/api/v1/data/{provider}/{dataset}/?{qs}', complete_qs=True, text='[{}]'
+    )
 
     result = api.get_dataset(
         provider=provider,
@@ -147,29 +133,14 @@ def test_get_dataset(
         fields=fields,
     )
 
-    expected = mock.call(
-        f'/api/v1/data/{provider}/{dataset}/',
-        params={
-            'query': json.dumps(query),
-            'sort': json.dumps(sort),
-            'fields': fields,
-            'limit': limit,
-            'skip': skip,
-        },
-    )
-
-    assert get_spy.call_args == expected
-    assert get_mock.called_once
     assert result == [{}]
 
 
-def test_get_dataset_raises(event, corva_context, requests_mock: RequestsMocker):
-    api = Corva(context=corva_context).stream(app, event)[0]
-
+def test_get_dataset_raises(api, requests_mock: RequestsMocker):
     provider = SETTINGS.PROVIDER
     dataset = 'dataset'
 
-    get_mock = requests_mock.get(
+    requests_mock.get(
         f'/api/v1/data/{provider}/{dataset}/',
         status_code=400,
     )
@@ -183,5 +154,3 @@ def test_get_dataset_raises(event, corva_context, requests_mock: RequestsMocker)
         sort={},
         limit=1,
     )
-
-    assert get_mock.called_once
