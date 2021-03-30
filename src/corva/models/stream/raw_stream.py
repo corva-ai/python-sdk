@@ -2,76 +2,14 @@ from __future__ import annotations
 
 import abc
 import copy
-import enum
-from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Dict, Generic, List, Optional, TypeVar, Union
 
 import pydantic.generics
 
 from corva.configuration import SETTINGS
-from corva.models.base import (
-    BaseContext,
-    CorvaBaseEvent,
-    CorvaBaseGenericEvent,
-    RawBaseEvent,
-)
-
-
-class StreamBaseRecord(CorvaBaseEvent):
-    pass
-
-
-class StreamTimeRecord(StreamBaseRecord):
-    """Stream time record data.
-
-    Attributes:
-        timestamp: Unix timestamp.
-        data: record data.
-        metadata: record metadata.
-    """
-
-    timestamp: int
-    data: dict = {}
-    metadata: dict = {}
-
-
-class StreamDepthRecord(StreamBaseRecord):
-    """Stream depth record data.
-
-    Attributes:
-        measured_depth: measured depth (ft).
-        data: record data.
-        metadata: record metadata.
-    """
-
-    measured_depth: float
-    data: dict = {}
-    metadata: dict = {}
-
-
-StreamBaseRecordTV = TypeVar('StreamBaseRecordTV', bound=StreamBaseRecord)
-
-
-class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
-    """Stream event data.
-
-    Attributes:
-        asset_id: asset id.
-        company_id: company id.
-        records: data records.
-    """
-
-    asset_id: int
-    company_id: int
-    records: List[StreamBaseRecordTV]
-
-
-class StreamTimeEvent(StreamEvent[StreamTimeRecord]):
-    pass
-
-
-class StreamDepthEvent(StreamEvent[StreamDepthRecord]):
-    pass
-
+from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEvent
+from corva.models.stream.initial_stream import InitialStreamEvent
+from corva.models.stream.log_type import LogType
 
 RawRecordMainValueTV = TypeVar('RawRecordMainValueTV', int, float)
 
@@ -110,26 +48,6 @@ class RawDepthRecord(RawBaseRecord[float]):
 
 class RawAppMetadata(CorvaBaseEvent):
     app_connection_id: int
-
-
-class LogType(enum.Enum):
-    time = 'time'
-    depth = 'depth'
-
-    @property
-    def raw_event(self):
-        mapping = {self.time: RawStreamTimeEvent, self.depth: RawStreamDepthEvent}
-        return mapping[self]
-
-    @property
-    def context(self):
-        mapping = {self.time: StreamTimeContext, self.depth: StreamDepthContext}
-        return mapping[self]
-
-    @property
-    def event(self):
-        mapping = {self.time: StreamTimeEvent, self.depth: StreamDepthEvent}
-        return mapping[self]
 
 
 class RawMetadata(CorvaBaseEvent):
@@ -252,38 +170,3 @@ class RawStreamDepthEvent(RawStreamEvent[RawDepthRecord]):
 
 
 RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
-
-
-class BaseStreamContext(BaseContext[RawStreamEventTV], Generic[RawStreamEventTV]):
-    last_value_key: ClassVar[str]
-
-    def get_last_value(self) -> Optional[float]:
-        result = self.cache.load(key=self.last_value_key)
-
-        if result is None:
-            return result
-
-        return float(result)
-
-    def set_last_value(self) -> int:
-        return self.cache.store(
-            key=self.last_value_key, value=self.event.last_processed_value
-        )
-
-
-class StreamTimeContext(BaseStreamContext[RawStreamTimeEvent]):
-    last_value_key: ClassVar[str] = 'last_processed_timestamp'
-
-
-class StreamDepthContext(BaseStreamContext[RawStreamDepthEvent]):
-    last_value_key: ClassVar[str] = 'last_processed_depth'
-
-
-class InitialMetadata(CorvaBaseEvent):
-    log_type: LogType
-
-
-class InitialStreamEvent(CorvaBaseEvent):
-    """Stores the most essential data, that is parsed first."""
-
-    metadata: InitialMetadata

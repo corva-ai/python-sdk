@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from corva.application import Corva
 from corva.models.scheduled import ScheduledEvent
-from corva.models.stream import (
+from corva.models.stream.stream import (
     StreamDepthEvent,
     StreamDepthRecord,
     StreamTimeEvent,

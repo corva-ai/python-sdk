@@ -4,8 +4,8 @@ from unittest import mock
 
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
-from corva.models.stream import (
-    LogType,
+from corva.models.stream.log_type import LogType
+from corva.models.stream.raw_stream import (
     RawAppMetadata,
     RawDepthRecord,
     RawMetadata,
@@ -13,10 +13,8 @@ from corva.models.stream import (
     RawStreamEvent,
     RawStreamTimeEvent,
     RawTimeRecord,
-    StreamDepthEvent,
-    StreamEvent,
-    StreamTimeEvent,
 )
+from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
 from corva.models.task import RawTaskEvent, TaskEvent
 
 

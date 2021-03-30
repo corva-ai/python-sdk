@@ -1,7 +1,7 @@
 from .api import Api
 from .application import Corva
 from .models.scheduled import ScheduledEvent
-from .models.stream import (
+from .models.stream.stream import (
     StreamDepthEvent,
     StreamDepthRecord,
     StreamTimeEvent,
