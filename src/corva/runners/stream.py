@@ -1,7 +1,7 @@
 from typing import Any, Callable, Union
 
 from corva.models.stream.context import StreamDepthContext, StreamTimeContext
-from corva.models.stream.raw_stream import RawStreamEvent
+from corva.models.stream.raw import RawStreamEvent
 
 
 def stream_runner(

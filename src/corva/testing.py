@@ -6,7 +6,7 @@ from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream.context import BaseStreamContext
 from corva.models.stream.log_type import LogType
-from corva.models.stream.raw_stream import (
+from corva.models.stream.raw import (
     RawAppMetadata,
     RawDepthRecord,
     RawMetadata,

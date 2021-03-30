@@ -7,7 +7,7 @@ class LogType(enum.Enum):
 
     @property
     def raw_event(self):
-        from corva.models.stream.raw_stream import (
+        from corva.models.stream.raw import (
             RawStreamDepthEvent,
             RawStreamTimeEvent,
         )

@@ -1,7 +1,7 @@
 from typing import ClassVar, Generic, Optional
 
 from corva.models.base import BaseContext
-from corva.models.stream.raw_stream import (
+from corva.models.stream.raw import (
     RawStreamDepthEvent,
     RawStreamEventTV,
     RawStreamTimeEvent,

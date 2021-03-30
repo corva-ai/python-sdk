@@ -8,7 +8,7 @@ import pydantic.generics
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEvent
-from corva.models.stream.initial_stream import InitialStreamEvent
+from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
 
 RawRecordMainValueTV = TypeVar('RawRecordMainValueTV', int, float)
