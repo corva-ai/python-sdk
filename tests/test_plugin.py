@@ -18,8 +18,11 @@ from corva.models.task import TaskEvent
 def test_task_app_runner(app_runner):
     """Should not raise."""
 
+    def task_app(event, api):
+        return 'Task app result'
+
     def lambda_handler(event, context):
-        return Corva(context).task(fn=lambda event, api: 'Task app result', event=event)
+        return Corva(context).task(fn=task_app, event=event)
 
     event = TaskEvent(asset_id=int(), company_id=int())
 
@@ -36,8 +39,11 @@ def test_task_app_runner(app_runner):
 def test_scheduled_app_runner_sets_correct_asset_id(
     asset_id, app_runner, mocker: MockerFixture
 ):
+    def scheduled_app(event, api, cache):
+        pass
+
     def lambda_handler(event, context):
-        return Corva(context).scheduled(fn=lambda event, api, cache: None, event=event)
+        return Corva(context).scheduled(fn=scheduled_app, event=event)
 
     # override scheduled_runner to return event from context
     mocker.patch(
@@ -54,10 +60,11 @@ def test_scheduled_app_runner_sets_correct_asset_id(
 def test_scheduled_app_runner(app_runner):
     """Should not raise."""
 
+    def scheduled_app(event, api, cache):
+        return 'Scheduled app result'
+
     def lambda_handler(event, context):
-        return Corva(context).scheduled(
-            fn=lambda event, api, cache: 'Scheduled app result', event=event
-        )
+        return Corva(context).scheduled(fn=scheduled_app, event=event)
 
     event = ScheduledEvent(asset_id=int(), time_from=int(), time_to=int())
 
@@ -82,10 +89,11 @@ def test_scheduled_app_runner(app_runner):
 def test_stream_app_runner(event, app_runner):
     """Should not raise."""
 
+    def stream_app(event, api, cache):
+        return 'Stream app result'
+
     def lambda_handler(event, context):
-        return Corva(context).stream(
-            fn=lambda event, api, cache: 'Stream app result', event=event
-        )
+        return Corva(context).stream(fn=stream_app, event=event)
 
     assert app_runner(lambda_handler, event) == 'Stream app result'
 
@@ -118,8 +126,11 @@ def test_stream_app_runner(event, app_runner):
 def test_stream_app_runner_sets_correct_asset_id(
     event, app_runner, mocker: MockerFixture
 ):
+    def stream_app(event, api, cache):
+        pass
+
     def lambda_handler(event, context):
-        return Corva(context).stream(fn=lambda event, api, cache: None, event=event)
+        return Corva(context).stream(fn=stream_app, event=event)
 
     # override stream_runner to return event from context
     mocker.patch('corva.application.stream_runner', lambda fn, context: context.event)
@@ -155,8 +166,11 @@ def test_stream_app_runner_sets_correct_asset_id(
     ids=('raises', 'not raises'),
 )
 def test_stream_app_runner_raises_for_empty_records(event, exc_ctx, app_runner):
+    def stream_app(event, api, cache):
+        pass
+
     def lambda_handler(event, context):
-        return Corva(context).stream(fn=lambda event, api, cache: None, event=event)
+        return Corva(context).stream(fn=stream_app, event=event)
 
     with exc_ctx:
         app_runner(lambda_handler, event)
