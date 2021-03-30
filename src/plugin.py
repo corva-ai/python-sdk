@@ -1,4 +1,3 @@
-import contextlib
 import functools
 import os
 from unittest import mock
@@ -45,15 +44,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def _corva_patch():
-    """Simplifies testing of Corva apps by patching some internal functionality."""
-
-    with patch_redis_adapter():
-        yield
-
-
-@contextlib.contextmanager
-def patch_redis_adapter():
+def _patch_redis_adapter():
     """Allows testing of Corva apps without running a real Redis server.
 
     Internally Corva uses Redis as cache. This function patches RedisAdapter to use
