@@ -62,7 +62,7 @@ def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):
         drillstring['id'] = drillstring.pop('_id')
 
     # save the data to private collection
-    api.post(path=f'api/v1/data/my_provider/my_collection/', data=drillstrings)
+    api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
 
 
 def lambda_handler(event, context):
@@ -94,7 +94,7 @@ def stream_time_app(event: StreamDepthEvent, api: Api, cache: Cache):
         drillstring['id'] = drillstring.pop('_id')
 
     # save the data to private collection
-    api.post(path=f'api/v1/data/my_provider/my_collection/', data=drillstrings)
+    api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
 
 
 def lambda_handler(event, context):
