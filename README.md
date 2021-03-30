@@ -77,7 +77,7 @@ from typing import List
 from corva import Api, Cache, Corva, StreamDepthEvent
 
 
-def stream_time_app(event: StreamDepthEvent, api: Api, cache: Cache):
+def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):
     # get some data from the api
     drillstrings = api.get_dataset(
         provider='corva',
@@ -98,7 +98,7 @@ def stream_time_app(event: StreamDepthEvent, api: Api, cache: Cache):
 
 
 def lambda_handler(event, context):
-    Corva(context).stream(stream_time_app, event)
+    Corva(context).stream(stream_depth_app, event)
 ```
 
 #### Scheduled
