@@ -4,6 +4,7 @@ from unittest import mock
 
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
+from corva.models.stream.context import BaseStreamContext
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw_stream import (
     RawAppMetadata,
@@ -107,6 +108,12 @@ class TestClient:
             ),
             mock.patch.object(StreamTimeEvent, 'parse_obj', return_value=event),
             mock.patch.object(StreamDepthEvent, 'parse_obj', return_value=event),
+            mock.patch.object(
+                BaseStreamContext, 'get_last_value'
+            ),  # avoid calls to cache instance
+            mock.patch.object(
+                BaseStreamContext, 'set_last_value'
+            ),  # avoid calls to cache instance
         ]
 
         if isinstance(event, StreamTimeEvent):
