@@ -1,3 +1,6 @@
+import contextlib
+from typing import List
+
 import pydantic
 import pytest
 from pytest_mock import MockerFixture
@@ -17,30 +20,60 @@ from corva.models.stream.raw import (
 )
 
 
-def test_require_at_least_one_record_in_raw_stream_event(context):
+@pytest.mark.parametrize(
+    'event,exc_ctx',
+    (
+        [
+            [
+                RawStreamTimeEvent.construct(
+                    records=[],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            pytest.raises(
+                pydantic.ValidationError,
+                match=r'1 validation error [\s\S]* At least one record should be provided\.',
+            ),
+        ],
+        [
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            asset_id=int(),
+                            company_id=int(),
+                            collection=str(),
+                            timestamp=int(),
+                        )
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=int(),
+                        apps={
+                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                        },
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ],
+            contextlib.nullcontext(),
+        ],
+    ),
+    ids=('raises', 'not raises'),
+)
+def test_require_at_least_one_record_in_raw_stream_event(
+    event: List[dict], exc_ctx, context
+):
     def stream_app(event, api, cache):
         pass
 
-    event = [
-        RawStreamTimeEvent.construct(
-            records=[],
-            metadata=RawMetadata(
-                app_stream_id=int(),
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
-                log_type=LogType.time,
-            ),
-        ).dict()
-    ]
-
-    exc = pytest.raises(
-        pydantic.ValidationError,
-        Corva(context=context).stream,
-        stream_app,
-        event,
-    )
-
-    assert len(exc.value.raw_errors) == 1
-    assert str(exc.value.raw_errors[0].exc) == 'At least one record should be provided.'
+    with exc_ctx:
+        Corva(context=context).stream(stream_app, event)
 
 
 @pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
