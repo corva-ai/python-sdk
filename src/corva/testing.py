@@ -31,32 +31,24 @@ class TestClient:
     ) -> Any:
 
         if isinstance(event, TaskEvent):
-            return TestClient._run_task(fn=fn, event=event, context=TestClient._context)
+            return TestClient._run_task(fn=fn, event=event)
 
         if isinstance(event, ScheduledEvent):
-            return TestClient._run_scheduled(
-                fn=fn, event=event, context=TestClient._context
-            )
+            return TestClient._run_scheduled(fn=fn, event=event)
 
         if isinstance(event, StreamEvent):
-            return TestClient._run_stream(
-                fn=fn, event=event, context=TestClient._context
-            )
+            return TestClient._run_stream(fn=fn, event=event)
 
     @staticmethod
-    def _run_task(
-        fn: Callable, event: TaskEvent, context: types.SimpleNamespace
-    ) -> Any:
+    def _run_task(fn: Callable, event: TaskEvent) -> Any:
         def override_task(self, fn: Callable, event: TaskEvent):
             return fn(event, TestClient._api)
 
         with mock.patch.object(Corva, 'task', override_task):
-            return fn(event, context)
+            return fn(event, TestClient._context)
 
     @staticmethod
-    def _run_scheduled(
-        fn: Callable, event: ScheduledEvent, context: types.SimpleNamespace
-    ) -> Any:
+    def _run_scheduled(fn: Callable, event: ScheduledEvent) -> Any:
         def override_scheduled(self, fn: Callable, event: ScheduledEvent):
             return fn(
                 event,
@@ -70,13 +62,12 @@ class TestClient:
             )
 
         with mock.patch.object(Corva, 'scheduled', override_scheduled):
-            return fn(event, context)
+            return fn(event, TestClient._context)
 
     @staticmethod
     def _run_stream(
         fn: Callable,
         event: Union[StreamTimeEvent, StreamDepthEvent],
-        context: types.SimpleNamespace,
     ) -> Any:
         def override_stream(self, fn: Callable, event: StreamEvent):
             return fn(
@@ -91,4 +82,4 @@ class TestClient:
             )
 
         with mock.patch.object(Corva, 'stream', override_stream):
-            return fn(event, context)
+            return fn(event, TestClient._context)
