@@ -6,7 +6,7 @@ from corva import utils
 from corva.api import Api
 from corva.application import Corva
 from corva.configuration import SETTINGS
-from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
+from corva.models.scheduled import ScheduledEvent
 from corva.models.stream.context import BaseStreamContext
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
@@ -68,29 +68,20 @@ class TestClient:
     def _run_scheduled(
         fn: Callable, event: ScheduledEvent, context: types.SimpleNamespace
     ) -> Any:
-        patches = [
-            mock.patch(
-                'corva.runners.scheduled.ScheduledEvent.parse_obj', return_value=event
-            ),
-            mock.patch('corva.runners.scheduled.set_schedule_as_completed'),
-        ]
-
-        raw_event = [
-            [
-                RawScheduledEvent.construct(
-                    asset_id=event.asset_id,  # use asset_id from event to build proper cache key
-                    app_connection_id=int(),
+        def override_scheduled(self, fn: Callable, event: ScheduledEvent):
+            return fn(
+                event,
+                TestClient._api,
+                utils.get_cache(
+                    asset_id=event.asset_id,
                     app_stream_id=int(),
-                    schedule_id=int(),
-                )
-            ]
-        ]
+                    app_connection_id=int(),
+                    settings=SETTINGS,
+                ),
+            )
 
-        try:
-            [patch.start() for patch in patches]
-            return fn(raw_event, context)[0]
-        finally:
-            mock.patch.stopall()
+        with mock.patch.object(Corva, 'scheduled', override_scheduled):
+            return fn(event, context)
 
     @staticmethod
     def _run_stream(

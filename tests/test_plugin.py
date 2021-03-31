@@ -29,34 +29,6 @@ def test_task_app_runner(app_runner):
     assert app_runner(lambda_handler, event) == 'Task app result'
 
 
-@pytest.mark.parametrize(
-    'asset_id',
-    (
-        1,
-        2,
-    ),
-)
-def test_scheduled_app_runner_sets_correct_asset_id(
-    asset_id, app_runner, mocker: MockerFixture
-):
-    def scheduled_app(event, api, cache):
-        pass
-
-    def lambda_handler(event, context):
-        return Corva(context).scheduled(fn=scheduled_app, event=event)
-
-    # override scheduled_runner to return event from context
-    mocker.patch(
-        'corva.application.scheduled_runner', lambda fn, context: context.event
-    )
-
-    event = ScheduledEvent(asset_id=asset_id, time_from=int(), time_to=int())
-
-    raw_event = app_runner(lambda_handler, event)
-
-    assert raw_event.asset_id == event.asset_id
-
-
 def test_scheduled_app_runner(app_runner):
     """Should not raise."""
 
