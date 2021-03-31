@@ -37,6 +37,13 @@ def get_api(context: Any, settings: Settings, timeout: Optional[int] = None) -> 
 
 
 class Corva:
+    """Provides functionality to run apps.
+
+    Attributes:
+        cache_settings: custom cache params.
+        api: Api instance.
+    """
+
     def __init__(
         self,
         context: Any,
@@ -45,10 +52,11 @@ class Corva:
         cache_settings: Optional[dict] = None
     ):
         """
-        params:
-         context: AWS Lambda context object
-         timeout: api request timeout, set None to use default value
-         cache_settings: additional cache settings
+
+        Args:
+            context: AWS Lambda context object.
+            timeout: api request timeout, set None to use default value.
+            cache_settings: additional cache settings.
         """
 
         self.api = get_api(context=context, settings=SETTINGS, timeout=timeout)
