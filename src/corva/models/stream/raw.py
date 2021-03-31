@@ -11,10 +11,8 @@ from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEven
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
 
-RawRecordMainValueTV = TypeVar('RawRecordMainValueTV', int, float)
 
-
-class RawBaseRecord(CorvaBaseGenericEvent, Generic[RawRecordMainValueTV], abc.ABC):
+class RawBaseRecord(CorvaBaseEvent, abc.ABC):
     asset_id: int
     company_id: int
     collection: str
@@ -24,11 +22,11 @@ class RawBaseRecord(CorvaBaseGenericEvent, Generic[RawRecordMainValueTV], abc.AB
 
     @property
     @abc.abstractmethod
-    def main_value(self) -> RawRecordMainValueTV:
+    def main_value(self) -> Union[int, float]:
         pass
 
 
-class RawTimeRecord(RawBaseRecord[int]):
+class RawTimeRecord(RawBaseRecord):
     timestamp: int
     measured_depth: Optional[float] = None
 
@@ -37,7 +35,7 @@ class RawTimeRecord(RawBaseRecord[int]):
         return self.timestamp
 
 
-class RawDepthRecord(RawBaseRecord[float]):
+class RawDepthRecord(RawBaseRecord):
     timestamp: Optional[int] = None
     measured_depth: float
 
