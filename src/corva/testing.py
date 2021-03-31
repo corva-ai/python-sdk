@@ -2,8 +2,9 @@ import types
 from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
+from corva import utils
 from corva.api import Api
-from corva.application import Corva, get_api
+from corva.application import Corva
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream.context import BaseStreamContext
@@ -32,7 +33,7 @@ class TestClient:
     _context: ClassVar[types.SimpleNamespace] = types.SimpleNamespace(
         client_context=types.SimpleNamespace(env={'API_KEY': '123'})
     )
-    _api: ClassVar[Api] = get_api(context=_context, settings=SETTINGS)
+    _api: ClassVar[Api] = utils.get_api(context=_context, settings=SETTINGS)
 
     @staticmethod
     def run(
