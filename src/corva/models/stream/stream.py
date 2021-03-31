@@ -1,6 +1,9 @@
 from typing import Generic, List, TypeVar
 
+import pydantic
+
 from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent
+from corva.models.stream import validators
 
 
 class StreamBaseRecord(CorvaBaseEvent):
@@ -50,6 +53,11 @@ class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
     asset_id: int
     company_id: int
     records: List[StreamBaseRecordTV]
+
+    # validators
+    _require_at_least_one_record = pydantic.root_validator(
+        pre=False, skip_on_failure=True, allow_reuse=True
+    )(validators.require_at_least_one_record)
 
 
 class StreamTimeEvent(StreamEvent[StreamTimeRecord]):

@@ -8,6 +8,7 @@ import pydantic.generics
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEvent
+from corva.models.stream import validators
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
 
@@ -117,17 +118,9 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
         return new_records
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def require_at_least_one_record(cls, values):
-        """Validates, that there is at least one record provided.
-
-        This function exists, because pydantic.conlist doesnt support generics.
-        """
-
-        if not values['records']:
-            raise ValueError('At least one record should be provided.')
-
-        return values
+    _require_at_least_one_record = pydantic.root_validator(
+        pre=False, skip_on_failure=True, allow_reuse=True
+    )(validators.require_at_least_one_record)
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def require_app_key_in_metadata_apps(cls, values):
