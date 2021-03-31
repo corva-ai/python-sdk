@@ -2,6 +2,8 @@ import types
 from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
+from corva.api import Api
+from corva.application import Corva, get_api
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream.context import BaseStreamContext
@@ -16,7 +18,7 @@ from corva.models.stream.raw import (
     RawTimeRecord,
 )
 from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
-from corva.models.task import RawTaskEvent, TaskEvent
+from corva.models.task import TaskEvent
 
 
 class TestClient:
@@ -24,11 +26,13 @@ class TestClient:
 
     Attributes:
         _context: AWS Lambda context expected by Corva.
+        _api: Api instance.
     """
 
     _context: ClassVar[types.SimpleNamespace] = types.SimpleNamespace(
         client_context=types.SimpleNamespace(env={'API_KEY': '123'})
     )
+    _api: ClassVar[Api] = get_api(context=_context, settings=SETTINGS)
 
     @staticmethod
     def run(
@@ -53,18 +57,11 @@ class TestClient:
     def _run_task(
         fn: Callable, event: TaskEvent, context: types.SimpleNamespace
     ) -> Any:
-        patches = [
-            mock.patch('corva.runners.task.get_task_event', return_value=event),
-            mock.patch('corva.runners.task.update_task_data'),
-        ]
+        def override_task(self, fn: Callable, event: TaskEvent):
+            return fn(event, TestClient._api)
 
-        raw_event = RawTaskEvent(task_id=str(), version=2)
-
-        try:
-            [patch.start() for patch in patches]
-            return fn(raw_event, context)
-        finally:
-            mock.patch.stopall()
+        with mock.patch.object(Corva, 'task', override_task):
+            return fn(event, context)
 
     @staticmethod
     def _run_scheduled(
@@ -79,13 +76,11 @@ class TestClient:
 
         raw_event = [
             [
-                RawScheduledEvent(
+                RawScheduledEvent.construct(
                     asset_id=event.asset_id,  # use asset_id from event to build proper cache key
-                    interval=int(),
-                    schedule=int(),
-                    schedule_start=int(),
-                    app_connection=int(),
-                    app_stream=int(),
+                    app_connection_id=int(),
+                    app_stream_id=int(),
+                    schedule_id=int(),
                 )
             ]
         ]
@@ -118,16 +113,15 @@ class TestClient:
 
         if isinstance(event, StreamTimeEvent):
             records = [
-                RawTimeRecord(
+                RawTimeRecord.construct(
                     asset_id=event.asset_id,  # use asset_id from event to build proper cache key
                     company_id=int(),
                     collection=str(),
                     timestamp=int(),
                 )
-                for record in event.records
-            ]
+            ] * len(event.records)
 
-            metadata = RawMetadata(
+            metadata = RawMetadata.construct(
                 app_stream_id=int(),
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
                 log_type=LogType.time,
