@@ -1,6 +1,6 @@
 from typing import Any, Callable, List, Optional
 
-from corva import utils
+from corva.api import get_api
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledContext
 from corva.models.stream.raw import RawStreamEvent
@@ -33,7 +33,7 @@ class Corva:
             cache_settings: additional cache settings.
         """
 
-        self.api = utils.get_api(context=context, settings=SETTINGS, timeout=timeout)
+        self.api = get_api(context=context, settings=SETTINGS, timeout=timeout)
         self.cache_settings = cache_settings or {}
 
     def stream(

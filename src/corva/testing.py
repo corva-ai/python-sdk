@@ -2,13 +2,13 @@ import types
 from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
-from corva import utils
-from corva.api import Api
+from corva.api import Api, get_api
 from corva.application import Corva
 from corva.configuration import SETTINGS
 from corva.models.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
 from corva.models.task import TaskEvent
+from corva.state.redis_state import get_cache
 
 
 class TestClient:
@@ -22,7 +22,7 @@ class TestClient:
     _context: ClassVar[types.SimpleNamespace] = types.SimpleNamespace(
         client_context=types.SimpleNamespace(env={'API_KEY': '123'})
     )
-    _api: ClassVar[Api] = utils.get_api(context=_context, settings=SETTINGS)
+    _api: ClassVar[Api] = get_api(context=_context, settings=SETTINGS)
 
     @staticmethod
     def run(
@@ -53,7 +53,7 @@ class TestClient:
             return fn(
                 event,
                 TestClient._api,
-                utils.get_cache(
+                get_cache(
                     asset_id=event.asset_id,
                     app_stream_id=int(),
                     app_connection_id=int(),
@@ -73,7 +73,7 @@ class TestClient:
             return fn(
                 event,
                 TestClient._api,
-                utils.get_cache(
+                get_cache(
                     asset_id=event.asset_id,
                     app_stream_id=int(),
                     app_connection_id=int(),
