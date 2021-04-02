@@ -37,7 +37,7 @@ def test_scheduled_app_runner(app_runner):
     def lambda_handler(event, context):
         return Corva(context).scheduled(fn=scheduled_app, event=event)
 
-    event = ScheduledEvent(asset_id=int(), time_from=int(), time_to=int())
+    event = ScheduledEvent(asset_id=int(), start_time=int(), end_time=int())
 
     assert app_runner(lambda_handler, event) == 'Scheduled app result'
 

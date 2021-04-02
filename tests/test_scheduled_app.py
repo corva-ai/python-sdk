@@ -99,7 +99,7 @@ def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
         [2, 2, 1],
     ),
 )
-def test_set_time_from(
+def test_set_start_time(
     schedule_start, interval, expected, context, mocker: MockerFixture
 ):
     def app(event, api, state):
@@ -128,4 +128,4 @@ def test_set_time_from(
 
     event = Corva(context).scheduled(app, event)[0]
 
-    assert event.time_from == expected
+    assert event.start_time == expected

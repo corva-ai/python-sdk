@@ -11,15 +11,25 @@ from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
 class ScheduledEvent(CorvaBaseEvent):
     """Scheduled event data.
 
+    Contains time range data to be processed.
+    E.g., if your app is scheduled to be run every 5 minutes.
+        It will be called with the following events in order:
+                   1st event     2nd event     3rd event
+        Time ->    [-----]       [-----]       [-----]
+                   ↑     ↑       ↑     ↑       ↑     ↑
+                   start end     start end     start end
+        The app may then fetch and process the data
+        for the time range received in event.
+
     Attributes:
         asset_id: asset id.
-        time_from: the first not processed time. Unix timestamp.
-        time_to: the last not processed time. Unix timestamp.
+        start_time: left bound of the time range, covered by this event. Use inclusively.
+        end_time: right bound of the time range, covered by this event. Use inclusively.
     """
 
     asset_id: int
-    time_from: int
-    time_to: int = pydantic.Field(..., alias='schedule_start')
+    start_time: int
+    end_time: int = pydantic.Field(..., alias='schedule_start')
 
     class Config:
         allow_population_by_field_name = True
@@ -36,7 +46,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     )
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
-    time_from: int = None
+    start_time: int = None
 
     @pydantic.validator('schedule_start')
     def set_schedule_start(cls, v: int) -> int:
@@ -53,10 +63,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         return v
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def set_time_from(cls, values: dict) -> dict:
-        """Calculates time_from field."""
+    def set_start_time(cls, values: dict) -> dict:
+        """Calculates start_time field."""
 
-        values["time_from"] = int(values["schedule_start"] - values["interval"] + 1)
+        values["start_time"] = int(values["schedule_start"] - values["interval"] + 1)
         return values
 
     @staticmethod
