@@ -330,19 +330,19 @@ from corva import Corva, ScheduledEvent
 
 
 def scheduled_app(event, api, cache):
-   return 'Hello, World!'
+    return 'Hello, World!'
 
 
 def lambda_handler(event, context):
-   return Corva(context).scheduled(fn=scheduled_app, event=event)
+    return Corva(context).scheduled(fn=scheduled_app, event=event)
 
 
 def test_scheduled_app(app_runner):
-   event = ScheduledEvent(asset_id=0, start_time=0, end_time=0)
+    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0)
 
-   result = app_runner(fn=lambda_handler, event=event)
+    result = app_runner(fn=lambda_handler, event=event)
 
-   assert result == 'Hello, World!'
+    assert result == 'Hello, World!'
 ```
 
 #### Task app example test
