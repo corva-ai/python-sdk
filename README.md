@@ -35,41 +35,71 @@ There are three app types that you can build:
 
 #### Stream
 
+Stream apps can be of two types - time or depth based.
+
+###### Stream time app
+
 ```python
-import json
+from typing import List
 
-from corva import Api, Cache, Corva, StreamEvent
+from corva import Api, Cache, Corva, StreamTimeEvent
 
 
-def stream_app(event: StreamEvent, api: Api, cache: Cache):
-    # get some data from api
-    drillstrings = api.get(
-        'api/v1/data/corva/data.drillstring/',
-        params={
-            'query': json.dumps({'asset_id': event.asset_id, }),
-            'sort': json.dumps({'timestamp': 1}),
-            'limit': 1}
-    ).json()  # List[dict]
+def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):
+    # get some data from the api
+    drillstrings = api.get_dataset(
+        provider='corva',
+        dataset='data.drillstring',
+        query={
+            'asset_id': event.asset_id,
+        },
+        sort={'timestamp': 1},
+        limit=1,
+    )  # type: List[dict]
 
     # do some calculations/modifications to the data
     for drillstring in drillstrings:
         drillstring['id'] = drillstring.pop('_id')
 
     # save the data to private collection
-    api.post(
-        f'api/v1/data/my_provider/my_collection/',
-        data=drillstrings
-    )
+    api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
 
 
 def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.stream(stream_app, event)
+    Corva(context).stream(stream_time_app, event)
 ```
 
-`Corva.stream` provides an optional parameter:
-- `filter_mode` - set to `timestamp` or `depth` to clear [event](#event) 
-  data with previously processed `timestamp` or `measured_depth`.
+###### Stream depth app
+
+```python
+from typing import List
+
+from corva import Api, Cache, Corva, StreamDepthEvent
+
+
+def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):
+    # get some data from the api
+    drillstrings = api.get_dataset(
+        provider='corva',
+        dataset='data.drillstring',
+        query={
+            'asset_id': event.asset_id,
+        },
+        sort={'timestamp': 1},
+        limit=1,
+    )  # type: List[dict]
+
+    # do some calculations/modifications to the data
+    for drillstring in drillstrings:
+        drillstring['id'] = drillstring.pop('_id')
+
+    # save the data to private collection
+    api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
+
+
+def lambda_handler(event, context):
+    Corva(context).stream(stream_depth_app, event)
+```
 
 #### Scheduled
 
@@ -78,12 +108,11 @@ from corva import Api, Cache, Corva, ScheduledEvent
 
 
 def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-    pass
+    print('Hello, World!')
 
 
 def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.scheduled(scheduled_app, event)
+    Corva(context).scheduled(scheduled_app, event)
 ```
 
 #### Task
@@ -93,19 +122,19 @@ from corva import Api, Corva, TaskEvent
 
 
 def task_app(event: TaskEvent, api: Api):
-    pass
+    print('Hello, World!')
 
 
 def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.task(task_app, event)
+    Corva(context).task(task_app, event)
 ```
 
 ## Event
 
 An event is an object that contains data for an app function to process.
-`event` instance is inserted automatically as a first parameter to each app type. There are different event types for
-every app type: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
+`event` instance is inserted automatically as a first parameter to each app type.
+There are different event types for every app type: 
+`StreamTimeEvent`, `StreamDepthEvent`, `ScheduledEvent` and `TaskEvent`.
 
 ## Api
 
@@ -240,67 +269,102 @@ other operations with data.
 
 Testing Corva applications is easy and enjoyable.
 
-The SDK provides convenient tools for testing through `pytest` [plugin][pytest-plugin].
-Write your tests using `pytest` to get the access to the plugin. To install the library
-run `pip install pytest`. 
+The SDK provides convenient tools for testing through 
+`pytest` [plugin][pytest-plugin].
+Write your tests using `pytest` to get the access to the plugin.
+To install the library run `pip install pytest`. 
 
-#### Stream example test
+#### Stream time app example test
 
 ```python3
-# lambda_function.py
-
-from corva import Corva
+from corva import Corva, StreamTimeEvent, StreamTimeRecord
 
 
-def app(event, api, cache):
-    print("Hello, World!")
-    pass
+def stream_app(event, api, cache):
+    return 'Hello, World!'
 
 
 def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.stream(app, event)
+    return Corva(context).stream(fn=stream_app, event=event)
 
 
-# tests/test_app.py
+def test_stream_time_app(app_runner):
+    event = StreamTimeEvent(
+        asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
+    )
 
-# corva_context is provided by the SDK's pytest plugin. No imports required.
-def test_app(corva_context):
-    event = {"records": [{"asset_id": 0, "timestamp": 0}]}
+    result = app_runner(fn=lambda_handler, event=event)
 
-    lambda_handler(event, corva_context)
+    assert result == 'Hello, World!'
+
 ```
 
-#### Scheduled example test
+#### Stream depth app example test
 
-```python3
-# lambda_function.py
-
-from corva import Corva
+```python
+from corva import Corva, StreamDepthEvent, StreamDepthRecord
 
 
-def app(event, api, cache):
-    print("Hello, World!")
-    pass
+def stream_app(event, api, cache):
+    return 'Hello, World!'
 
 
 def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.scheduled(app, event)
+    return Corva(context).stream(fn=stream_app, event=event)
 
 
-# tests/test_app.py
+def test_stream_depth_app(app_runner):
+    event = StreamDepthEvent(
+        asset_id=0, company_id=0, records=[StreamDepthRecord(measured_depth=0)]
+    )
 
-# corva_context is provided by the SDK's pytest plugin. No imports required.
-def test_app(corva_context):
-    event = {
-        "schedule": 0,
-        "interval": 0,
-        "schedule_start": 0,
-        "asset_id": 0,
-    }
+    result = app_runner(fn=lambda_handler, event=event)
 
-    lambda_handler(event, corva_context)
+    assert result == 'Hello, World!'
+```
+
+#### Scheduled app example test
+
+```python3
+from corva import Corva, ScheduledEvent
+
+
+def scheduled_app(event, api, cache):
+    return 'Hello, World!'
+
+
+def lambda_handler(event, context):
+    return Corva(context).scheduled(fn=scheduled_app, event=event)
+
+
+def test_scheduled_app(app_runner):
+    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0)
+
+    result = app_runner(fn=lambda_handler, event=event)
+
+    assert result == 'Hello, World!'
+```
+
+#### Task app example test
+
+```python
+from corva import Corva, TaskEvent
+
+
+def task_app(event, api):
+    return 'Hello, World!'
+
+
+def lambda_handler(event, context):
+    return Corva(context).task(fn=task_app, event=event)
+
+
+def test_task_app(app_runner):
+    event = TaskEvent(asset_id=0, company_id=0)
+
+    result = app_runner(fn=lambda_handler, event=event)
+
+    assert result == 'Hello, World!'
 ```
 
 ## Contributing

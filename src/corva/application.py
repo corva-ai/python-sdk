@@ -1,9 +1,9 @@
-from typing import Any, Callable, List, Literal, Optional
+from typing import Any, Callable, List, Optional
 
-from corva.api import Api
+from corva.api import get_api
 from corva.configuration import SETTINGS
-from corva.models.scheduled import ScheduledContext, ScheduledEvent
-from corva.models.stream import StreamContext, StreamEvent
+from corva.models.scheduled import RawScheduledEvent, ScheduledContext
+from corva.models.stream.raw import RawStreamEvent
 from corva.models.task import RawTaskEvent, TaskContext
 from corva.runners.scheduled import scheduled_runner
 from corva.runners.stream import stream_runner
@@ -11,6 +11,13 @@ from corva.runners.task import task_runner
 
 
 class Corva:
+    """Provides functionality to run apps.
+
+    Attributes:
+        cache_settings: custom cache params.
+        api: Api instance.
+    """
+
     def __init__(
         self,
         context: Any,
@@ -19,55 +26,39 @@ class Corva:
         cache_settings: Optional[dict] = None
     ):
         """
-        params:
-         context: AWS Lambda context object
-         timeout: api request timeout, set None to use default value
-         cache_settings: additional cache settings
+
+        Args:
+            context: AWS Lambda context object.
+            timeout: api request timeout, set None to use default value.
+            cache_settings: additional cache settings.
         """
 
-        try:
-            api_key = context.client_context.env["API_KEY"]
-        except (AttributeError, KeyError):
-            raise Exception('No API Key found.')
-
+        self.api = get_api(context=context, settings=SETTINGS, timeout=timeout)
         self.cache_settings = cache_settings or {}
-
-        self.api = Api(
-            api_url=SETTINGS.API_ROOT_URL,
-            data_api_url=SETTINGS.DATA_API_ROOT_URL,
-            api_key=api_key,
-            app_name=SETTINGS.APP_NAME,
-            timeout=timeout,
-        )
 
     def stream(
         self,
         fn: Callable,
         event: List[dict],
-        *,
-        filter_mode: Optional[Literal['timestamp', 'depth']] = None
     ) -> List[Any]:
-        """Runs stream app
+        """Runs stream app.
 
         params:
          fn: stream app function to run
          event: raw stream event
-         filter_mode: remove records with previously processed `timestamp` or `measured_depth`
-           from the event
         returns: list of returned values from fn
         """
 
-        events = StreamEvent.from_raw_event(event=event)
+        events = RawStreamEvent.from_raw_event(event=event)
 
         results = []
 
         for event in events:
-            ctx = StreamContext(
+            ctx = event.metadata.log_type.context(
                 event=event,
                 settings=SETTINGS.copy(),
                 api=self.api,
                 cache_settings=self.cache_settings,
-                filter_mode=filter_mode,
             )
 
             results.append(stream_runner(fn=fn, context=ctx))
@@ -83,7 +74,7 @@ class Corva:
         returns: list of returned values from fn
         """
 
-        events = ScheduledEvent.from_raw_event(event=event)
+        events = RawScheduledEvent.from_raw_event(event=event)
 
         results = []
 

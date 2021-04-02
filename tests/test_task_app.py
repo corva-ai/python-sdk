@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
 from corva.application import Corva
+from corva.models.task import RawTaskEvent, TaskEvent
 
 
 @pytest.mark.parametrize(
@@ -13,36 +14,29 @@ from corva.application import Corva
         [400, None, 'fail'],
         [
             200,
-            {
-                'id': '0',
-                'state': 'running',
-                'asset_id': int(),
-                'company_id': int(),
-                'app_id': int(),
-                'document_bucket': str(),
-            },
+            TaskEvent(asset_id=int(), company_id=int()).dict(),
             'success',
         ],
     ),
 )
-def test_get_task_data_raises(
+def test_get_task_event_raises(
     status_code,
     json,
     status,
-    corva_context,
+    context,
     requests_mock: RequestsMocker,
 ):
     def task_app(event, api):
         return True
 
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'), status_code=status_code, json=json
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = Corva(corva_context).task(task_app, event)
+    result = Corva(context).task(task_app, event)
 
     assert get_mock.called_once
     assert put_mock.called_once
@@ -60,26 +54,19 @@ def test_get_task_data_raises(
 def test_user_app_raises(
     status,
     side_effect,
-    corva_context,
+    context,
     mocker: MockerFixture,
     requests_mock: RequestsMocker,
 ):
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json={
-            'id': '0',
-            'state': 'running',
-            'asset_id': int(),
-            'company_id': int(),
-            'app_id': int(),
-            'document_bucket': str(),
-        },
+        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = Corva(corva_context).task(
+    result = Corva(context).task(
         mocker.Mock(side_effect=side_effect, return_value=True), event
     )
 
@@ -95,26 +82,19 @@ def test_user_app_raises(
         assert result is True
 
 
-def test_task_runner(corva_context, requests_mock: RequestsMocker):
+def test_task_runner(context, requests_mock: RequestsMocker):
     def task_app(event, api):
         return True
 
-    event = {'task_id': '0', 'version': 2}
+    event = RawTaskEvent(task_id='0', version=2).dict()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json={
-            'id': '0',
-            'state': 'running',
-            'asset_id': int(),
-            'company_id': int(),
-            'app_id': int(),
-            'document_bucket': str(),
-        },
+        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
-    result = Corva(corva_context).task(task_app, event)
+    result = Corva(context).task(task_app, event)
 
     assert get_mock.called_once
     assert put_mock.called_once

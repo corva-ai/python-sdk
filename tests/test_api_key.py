@@ -5,10 +5,10 @@ import pytest
 from corva.application import Corva
 
 
-def test_api_key_in_context(corva_context):
-    corva = Corva(context=corva_context)
+def test_api_key_in_context(context):
+    corva = Corva(context=context)
 
-    assert corva.api.api_key == corva_context.client_context.env['API_KEY']
+    assert corva.api.api_key == context.client_context.env['API_KEY']
 
 
 @pytest.mark.parametrize(

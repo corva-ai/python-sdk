@@ -1,38 +1,26 @@
 from __future__ import annotations
 
-from enum import Enum
-from typing import Optional
-
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, BaseEvent, CorvaBaseModel
+from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
 
 
-class TaskStatus(Enum):
-    fail = 'fail'
-    success = 'success'
+class TaskEvent(CorvaBaseEvent):
+    """Task event data.
 
+    Attributes:
+        asset_id: asset id.
+        company_id: company id.
+        properties: custom task data.
+    """
 
-class TaskState(Enum):
-    running = 'running'
-    failed = 'failed'
-    succeeded = 'succeeded'
-
-
-class TaskEvent(CorvaBaseModel):
-    id: str
     asset_id: int
     company_id: int
-    state: TaskState
-    app_id: int
-    document_bucket: str
     properties: dict = {}
-    payload: dict = {}
-    fail_reason: Optional[str] = None
 
 
-class RawTaskEvent(BaseEvent):
+class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     task_id: str
     version: conint(ge=2, le=2)  # only utils API v2 supported
 

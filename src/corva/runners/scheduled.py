@@ -1,7 +1,7 @@
 from typing import Any, Callable
 
 from corva.api import Api
-from corva.models.scheduled import ScheduledContext
+from corva.models.scheduled import ScheduledContext, ScheduledEvent
 
 
 def set_schedule_as_completed(api: Api, schedule_id: int) -> None:
@@ -11,7 +11,9 @@ def set_schedule_as_completed(api: Api, schedule_id: int) -> None:
 
 
 def scheduled_runner(fn: Callable, context: ScheduledContext) -> Any:
-    result = fn(context.event, context.api, context.cache)
+    event = ScheduledEvent.parse_obj(context.event)
+
+    result = fn(event, context.api, context.cache)
 
     # should never raise
     set_schedule_as_completed(api=context.api, schedule_id=context.event.schedule_id)

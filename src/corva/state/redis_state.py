@@ -1,6 +1,7 @@
 from logging import Logger, LoggerAdapter
-from typing import Union
+from typing import Optional, Union
 
+from corva.configuration import Settings
 from corva.logger import DEFAULT_LOGGER
 from corva.state.redis_adapter import RedisAdapter
 
@@ -13,7 +14,9 @@ class RedisState:
     This class provides and interface to save, load and do other operations with data in redis.
     """
 
-    def __init__(self, redis: RedisAdapter, logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER):
+    def __init__(
+        self, redis: RedisAdapter, logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
+    ):
         self.redis = redis
         self.logger = logger
 
@@ -40,3 +43,40 @@ class RedisState:
 
     def exists(self, *names):
         return self.redis.exists(*names)
+
+
+def get_cache_key(
+    provider: str,
+    asset_id: int,
+    app_stream_id: int,
+    app_key: str,
+    app_connection_id: int,
+) -> str:
+    return (
+        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
+        f'{app_key}/{app_connection_id}'
+    )
+
+
+def get_cache(
+    asset_id: int,
+    app_stream_id: int,
+    app_connection_id: int,
+    settings: Settings,
+    cache_settings: Optional[dict] = None,
+) -> RedisState:
+    cache_settings = cache_settings or {}
+
+    redis_adapter = RedisAdapter(
+        default_name=get_cache_key(
+            provider=settings.PROVIDER,
+            asset_id=asset_id,
+            app_stream_id=app_stream_id,
+            app_key=settings.APP_KEY,
+            app_connection_id=app_connection_id,
+        ),
+        cache_url=settings.CACHE_URL,
+        **cache_settings,
+    )
+
+    return RedisState(redis=redis_adapter)
