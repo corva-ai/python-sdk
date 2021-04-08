@@ -9,13 +9,28 @@ from unittest import mock
 from corva.configuration import SETTINGS
 
 LOGGER_NAME = 'corva'
+DEFAULT_LOGGER = logging.getLogger(LOGGER_NAME)
+
+
+logging.config.dictConfig(
+    {
+        'version': 1,  # schema version - required key
+        'disable_existing_loggers': False,  # do not disable existing non-root loggers
+        'loggers': {
+            LOGGER_NAME: {
+                'level': SETTINGS.LOG_LEVEL,
+                'propagate': False,  # do not pass messages to ancestor loggers
+            }
+        },
+    }
+)
 
 
 @contextlib.contextmanager
 def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optional[int]):
-    logger = logging.getLogger(LOGGER_NAME)
-
-    corva_handler = CorvaLoggerHandler(max_chars=SETTINGS.LOG_MAX_CHARS, logger=logger)
+    corva_handler = CorvaLoggerHandler(
+        max_chars=SETTINGS.LOG_MAX_CHARS, logger=DEFAULT_LOGGER
+    )
 
     corva_handler.setLevel(SETTINGS.LOG_LEVEL)
 
@@ -36,7 +51,7 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
     )
     corva_handler.addFilter(corva_filter)
 
-    with mock.patch.object(logger, 'handlers', [corva_handler]):
+    with mock.patch.object(DEFAULT_LOGGER, 'handlers', [corva_handler]):
         yield
 
 
@@ -98,20 +113,3 @@ class CorvaLoggerHandler(logging.Handler):
             f'Disabling the logging as maximum number of logged characters was reached: '
             f'{self.max_chars}.'
         )
-
-
-logging.config.dictConfig(
-    {
-        'version': 1,  # schema version - required key
-        'disable_existing_loggers': False,  # do not disable existing non-root loggers
-        'loggers': {
-            LOGGER_NAME: {
-                'level': SETTINGS.LOG_LEVEL,
-                'propagate': False,  # do not pass messages to ancestor loggers
-            }
-        },
-    }
-)
-
-
-DEFAULT_LOGGER = logging.getLogger('main')
