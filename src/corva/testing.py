@@ -20,7 +20,8 @@ class TestClient:
     """
 
     _context: ClassVar[types.SimpleNamespace] = types.SimpleNamespace(
-        client_context=types.SimpleNamespace(env={'API_KEY': '123'})
+        aws_request_id='qwerty',
+        client_context=types.SimpleNamespace(env={'API_KEY': '123'}),
     )
     _api: ClassVar[Api] = get_api(context=_context, settings=SETTINGS)
 
