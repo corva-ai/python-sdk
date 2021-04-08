@@ -3,7 +3,7 @@ import logging
 import logging.config
 import sys
 import time
-from typing import Optional
+from typing import IO, Optional
 from unittest import mock
 
 from corva.configuration import SETTINGS
@@ -46,6 +46,8 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
 
 
 class CorvaLoggerFilter(logging.Filter):
+    """Injects fields into logging.LogRecord instance for usage in logging.Formatter."""
+
     def __init__(
         self,
         aws_request_id: str,
@@ -69,9 +71,18 @@ class CorvaLoggerFilter(logging.Filter):
 
 
 class CorvaLoggerHandler(logging.Handler):
+    """Logging handler, that limits number of output characters.
+
+    Logging handler that does the following:
+        1. Logs to sys.stdout.
+        2. Limits number of output characters.
+        3. Logs warning if max number of characters was reached.
+    """
+
     def __init__(self, max_chars: int, logger: logging.Logger):
         logging.Handler.__init__(self)
 
+        self.stream: IO[str] = sys.stdout
         self.max_chars = max_chars
         self.logger = logger
         self.logged_chars = 0
@@ -87,16 +98,17 @@ class CorvaLoggerHandler(logging.Handler):
         self.logged_chars += len(msg)
 
         if self.logged_chars < self.max_chars:
-            sys.stdout.write(msg)
+            self.stream.write(msg)
             return
 
         if self.warning_logged:
             self.logging_enabled = False
-            sys.stdout.write(msg)
+            self.stream.write(msg)
             return
 
+        # cut the message to fit into the limit
         msg = f'{msg[: len(msg) - (self.logged_chars - self.max_chars) - 1]}\n'
-        sys.stdout.write(msg)
+        self.stream.write(msg)
 
         self.warning_logged = True
         self.logger.warning(
