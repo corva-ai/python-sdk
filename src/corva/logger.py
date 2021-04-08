@@ -11,7 +11,7 @@ from corva.configuration import SETTINGS
 LOGGER_NAME = 'corva'
 DEFAULT_LOGGER = logging.getLogger(LOGGER_NAME)
 
-
+logging.Formatter.converter = time.gmtime  # log time as UTC
 logging.config.dictConfig(
     {
         'version': 1,  # schema version - required key
@@ -35,7 +35,6 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
     corva_handler.setLevel(SETTINGS.LOG_LEVEL)
 
     # add formatter
-    logging.Formatter.converter = time.gmtime  # log time as UTC
     corva_formatter = logging.Formatter(
         '%(asctime)s.%(msecs)03dZ %(aws_request_id)s %(levelname)s '
         '%(asset_id)s %(app_connection_id)s | %(message)s\n',
