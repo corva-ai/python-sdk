@@ -104,7 +104,7 @@ class CorvaLoggerHandler(logging.Handler):
             sys.stdout.write(msg)
             return
 
-        msg = f'{msg[: len(msg) - (self.logged_chars - self.max_chars - 1)]}\n'
+        msg = f'{msg[: len(msg) - (self.logged_chars - self.max_chars) - 1]}\n'
         sys.stdout.write(msg)
 
         self.warning_logged = True
