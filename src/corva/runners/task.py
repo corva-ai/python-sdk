@@ -4,6 +4,7 @@ from typing import Any, Callable
 import requests
 
 from corva.api import Api
+from corva.logger import setup_logging
 from corva.models.task import TaskContext, TaskEvent
 
 
@@ -31,7 +32,12 @@ def task_runner(fn: Callable, context: TaskContext) -> Any:
     try:
         task_event = get_task_event(api=context.api, task_id=context.event.task_id)
 
-        result = fn(task_event, context.api)
+        with setup_logging(
+            aws_request_id=context.aws_request_id,
+            asset_id=task_event.asset_id,
+            app_connection_id=None,
+        ):
+            result = fn(task_event, context.api)
     except Exception as exc:
         update_task_data(
             api=context.api,

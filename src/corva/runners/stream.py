@@ -1,5 +1,6 @@
 from typing import Any, Callable, Union
 
+from corva.logger import setup_logging
 from corva.models.stream.context import StreamDepthContext, StreamTimeContext
 from corva.models.stream.raw import RawStreamEvent
 
@@ -19,7 +20,12 @@ def stream_runner(
         context.event.copy(update={'records': records}, deep=True)
     )
 
-    result = fn(event, context.api, context.cache)
+    with setup_logging(
+        aws_request_id=context.aws_request_id,
+        asset_id=context.event.asset_id,
+        app_connection_id=context.event.app_connection_id,
+    ):
+        result = fn(event, context.api, context.cache)
 
     context.set_last_value()
 
