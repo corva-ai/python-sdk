@@ -190,7 +190,7 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
 
 def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixture):
     def app(event, api, cache):
-        Logger.warning(f'Hello, World!')
+        Logger.warning('Hello, World!')
         Logger.warning('This should not be printed as logging is disabled.')
 
     event = RawStreamTimeEvent(
