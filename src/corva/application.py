@@ -16,7 +16,7 @@ class Corva:
     Attributes:
         cache_settings: custom cache params.
         api: Api instance.
-        aws_request_id: aws request id received in context
+        aws_request_id: aws request id from the lambda context
     """
 
     def __init__(
