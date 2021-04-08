@@ -10,24 +10,15 @@ from corva.configuration import SETTINGS
 
 LOGGER_NAME = 'corva'
 DEFAULT_LOGGER = logging.getLogger(LOGGER_NAME)
-
+DEFAULT_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
+DEFAULT_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 logging.Formatter.converter = time.gmtime  # log time as UTC
-logging.config.dictConfig(
-    {
-        'version': 1,  # schema version - required key
-        'disable_existing_loggers': False,  # do not disable existing non-root loggers
-        'loggers': {
-            LOGGER_NAME: {
-                'level': SETTINGS.LOG_LEVEL,
-                'propagate': False,  # do not pass messages to ancestor loggers
-            }
-        },
-    }
-)
 
 
 @contextlib.contextmanager
 def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optional[int]):
+    DEFAULT_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
+
     corva_handler = CorvaLoggerHandler(
         max_chars=SETTINGS.LOG_MAX_CHARS, logger=DEFAULT_LOGGER
     )
