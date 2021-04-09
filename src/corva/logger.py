@@ -81,7 +81,7 @@ class CorvaLoggerHandler(logging.Handler):
     def __init__(self, max_chars: int, logger: logging.Logger):
         logging.Handler.__init__(self)
 
-        self.stream: IO[str] = sys.stdout
+        self.stream = sys.stdout
         self.max_chars = max_chars
         self.logger = logger
         self.logged_chars = 0
