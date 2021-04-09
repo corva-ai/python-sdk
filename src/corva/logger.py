@@ -3,7 +3,7 @@ import logging
 import logging.config
 import sys
 import time
-from typing import IO, Optional
+from typing import Optional
 from unittest import mock
 
 from corva.configuration import SETTINGS
