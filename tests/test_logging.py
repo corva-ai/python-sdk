@@ -106,7 +106,7 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
 
     assert (
         captured.out == f'2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING '
-        f'ASSET={event.asset_id}  | Hello, World!\n'
+        f'ASSET={event.asset_id} | Hello, World!\n'
     )
 
 

@@ -28,7 +28,7 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
     # add formatter
     corva_formatter = logging.Formatter(
         '%(asctime)s.%(msecs)03dZ %(aws_request_id)s %(levelname)s '
-        '%(asset_id)s %(app_connection_id)s | %(message)s\n',
+        '%(asset_id)s %(app_connection_id)s| %(message)s\n',
         '%Y-%m-%dT%H:%M:%S',
     )
     corva_handler.setFormatter(corva_formatter)
@@ -59,7 +59,7 @@ class CorvaLoggerFilter(logging.Filter):
         self.aws_request_id = aws_request_id
         self.asset_id = f'ASSET={asset_id}'
         self.app_connection_id = (
-            '' if app_connection_id is None else f'AC={app_connection_id}'
+            '' if app_connection_id is None else f'AC={app_connection_id} '
         )
 
     def filter(self, record):
