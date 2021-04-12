@@ -4,7 +4,11 @@ from importlib import machinery
 import setuptools
 
 ROOT = pathlib.Path(__file__).parent
-README = (ROOT / "README.md").read_text()
+LONG_DESCRIPTION = (
+    f'{(ROOT / "README.md").read_text()}'
+    f'\n\n'
+    f'{(ROOT / "CHANGELOG.md").read_text()}'
+)
 
 VERSION = str(
     machinery.SourceFileLoader('version', 'src/version.py').load_module().VERSION
@@ -28,7 +32,7 @@ setuptools.setup(
     version=VERSION,
     classifiers=CLASSIFIERS,
     description='SDK for interacting with Corva',
-    long_description=README,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
     py_modules=[file.stem for file in pathlib.Path('src').glob('*.py')],
