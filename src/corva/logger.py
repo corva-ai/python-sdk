@@ -106,7 +106,7 @@ class CorvaLoggerHandler(logging.Handler):
         self.logger = logger
         self.placeholder = placeholder
 
-        self.warning_logged = False
+        self.logging_warning = False
         # one extra message to log the warning
         self.residue_message_count = self.max_message_count + 1
 
@@ -114,18 +114,18 @@ class CorvaLoggerHandler(logging.Handler):
         if self.residue_message_count == 0:
             return
 
-        if self.residue_message_count == 1 and not self.warning_logged:
-            self.warning_logged = True
+        if self.residue_message_count > 1 or self.logging_warning:
+            self.log(message=self.format(record))
+            self.residue_message_count -= 1
+
+        if self.residue_message_count == 1:
+            self.logging_warning = True
             self.logger.warning(
                 f'Disabling the logging as maximum number of logged messages was reached: '
                 f'{self.max_message_count}.'
             )
-            return
 
-        self.log(message=self.format(record))
-        self.residue_message_count -= 1
-
-    def format(self, record: LogRecord) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         message = super().format(record)
 
         extra_chars_count = len(message) - self.max_message_size
