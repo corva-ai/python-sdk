@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `corva.Logger` object, that should be used for app logging.
+- `LOG_THRESHOLD_MESSAGE_SIZE` and `LOG_THRESHOLD_MESSAGE_COUNT`
+env variables, that should be used to configure logging.
+
 
 ## [0.0.16] - 2021-04-02
 ### Added
