@@ -9,18 +9,18 @@ from unittest import mock
 from corva.configuration import SETTINGS
 
 LOGGER_NAME = 'corva'
-DEFAULT_LOGGER = logging.getLogger(LOGGER_NAME)
-DEFAULT_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
-DEFAULT_LOGGER.propagate = False  # do not pass messages to ancestor loggers
+CORVA_LOGGER = logging.getLogger(LOGGER_NAME)
+CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
+CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 logging.Formatter.converter = time.gmtime  # log time as UTC
 
 
 @contextlib.contextmanager
 def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optional[int]):
-    DEFAULT_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
+    CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 
     corva_handler = CorvaLoggerHandler(
-        max_chars=SETTINGS.LOG_MAX_CHARS, logger=DEFAULT_LOGGER
+        max_chars=SETTINGS.LOG_MAX_CHARS, logger=CORVA_LOGGER
     )
 
     corva_handler.setLevel(SETTINGS.LOG_LEVEL)
@@ -43,7 +43,7 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
     )
     corva_handler.addFilter(corva_filter)
 
-    with mock.patch.object(DEFAULT_LOGGER, 'handlers', [corva_handler]):
+    with mock.patch.object(CORVA_LOGGER, 'handlers', [corva_handler]):
         yield
 
 

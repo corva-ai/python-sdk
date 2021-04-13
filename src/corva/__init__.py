@@ -9,7 +9,7 @@ from .models.stream.stream import (
 )
 from .models.task import TaskEvent
 from .state.redis_state import RedisState as Cache
-from .logger import DEFAULT_LOGGER as Logger
+from .logger import CORVA_LOGGER as Logger
 
 __all__ = [
     'Api',
