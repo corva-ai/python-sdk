@@ -54,7 +54,7 @@ class CorvaLoggerFilter(logging.Filter):
         self,
         aws_request_id: str,
         asset_id: int,
-        app_connection_id: Optional[int] = None,
+        app_connection_id: Optional[int],
     ):
         logging.Filter.__init__(self)
 
