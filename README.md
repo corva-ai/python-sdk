@@ -9,6 +9,7 @@ Corva python-sdk is a framework for building
 - [Event](#event)
 - [Api](#api)
 - [Cache](#cache)
+- [Logging](#logging)  
 - [Testing](#testing)  
 - [Contributing](#contributing)
 
@@ -265,6 +266,86 @@ other operations with data.
       corva.scheduled(my_app, event)
    ```
 
+## Logging
+As apps are executed very frequently
+(once a second or so),
+unlimited logging can lead to unexpected huge bills.
+
+The SDK provides a `Logger` object,
+which is a safe way for logging in apps.
+
+The `Logger` is a `logging.Logger` instance
+and so should be used like every Python logger.
+
+The `Logger` protects from huge bills
+by having following features:
+1. Log message length is limited. 
+   Too long messages are truncated to not exceed the limit. 
+   Set by `LOG_THRESHOLD_MESSAGE_SIZE` env variable. 
+   Default value is `1000` symbols or bytes.
+2. Number of log messages is limited.
+   After reaching the limit logging gets disabled.
+   Set by `LOG_THRESHOLD_MESSAGE_COUNT` env variable.
+   Default value is `15`.
+3. Logging level can be set using `LOG_LEVEL` env variable.
+   Default value is `WARN`.
+
+#### Logger usage example
+
+```python3
+from corva import Corva, Logger
+
+
+def stream_app(event, api, cache):
+    Logger.debug('Debug message!')
+    Logger.info('Info message!')
+    Logger.warning('Warning message!')
+    Logger.error('Error message!')
+    try:
+       0/0
+    except ZeroDivisionError:
+       Logger.exception('Exception message!')
+
+
+def lambda_handler(event, context):
+    return Corva(context).stream(fn=stream_app, event=event)
+```
+
+#### How to set the best logging env variables?
+To decide which values for logging env variables
+will be the best for the app you should know
+how logging bill is calculated. 
+
+Generally, the more you log - the more you pay.
+
+Logging bill for one app  can be calculated like this:
+
+Inputs:
+- Logging bill is received once a month
+  and app is triggered once a second
+  ```python3
+  # 60seconds * 60minutes * 24hours * 31days
+  app_triggers_per_month = 2678400
+  ```
+- Max logged GBs per trigger
+  ```python3
+  # LOG_THRESHOLD_MESSAGE_SIZE * LOG_THRESHOLD_MESSAGE_COUNT / (10**9)
+  max_log_gb_per_trigger = 0.000015 
+  ```
+- Price per GB of logged data
+  ```python3
+  # dollars
+  price_per_gb = 0.5
+  ```
+Output:
+```python3
+# app_triggers_per_month * max_log_gb_per_trigger * price_per_gb
+approx_logging_bill = 20  # dollars
+```
+So, using default values
+you will pay 20 dollars a month in the worst case.
+
+
 ## Testing
 
 Testing Corva applications is easy and enjoyable.
@@ -296,7 +377,6 @@ def test_stream_time_app(app_runner):
     result = app_runner(fn=lambda_handler, event=event)
 
     assert result == 'Hello, World!'
-
 ```
 
 #### Stream depth app example test
