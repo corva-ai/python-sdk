@@ -110,45 +110,6 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
     )
 
 
-def test_max_chars_reached(context, capsys, mocker: MockerFixture):
-    def app(event, api, cache):
-        Logger.warning('Hello, World!')
-        Logger.warning('This should not be printed as logging is disabled.')
-
-    event = RawStreamTimeEvent(
-        records=[
-            RawTimeRecord(
-                asset_id=0,
-                company_id=int(),
-                collection=str(),
-                timestamp=int(),
-            ),
-        ],
-        metadata=RawMetadata(
-            app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
-            log_type=LogType.time,
-        ),
-    )
-
-    mocker.patch.object(SETTINGS, 'LOG_MAX_CHARS', 68)
-
-    with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()],
-        )
-
-    # exclamation point was cut from the message
-    expected = (
-        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World\n'
-        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Disabling the '
-        'logging as maximum number of logged characters was reached: 68.\n'
-    )
-
-    assert capsys.readouterr().out == expected
-
-
 @pytest.mark.parametrize(
     'log_level,expected',
     (
@@ -213,7 +174,7 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
     mocker.patch.object(RawStreamEvent, 'filter_records', return_value=event.records)
     # first app invoke will reach the limit.
     # so, if logger is shared, second invoke will log nothing.
-    mocker.patch.object(SETTINGS, 'LOG_MAX_CHARS', 68)
+    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', 1)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         Corva(context).stream(
@@ -222,9 +183,91 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
         )
 
     expected = (
-        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World\n'
+        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
         '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Disabling the '
-        'logging as maximum number of logged characters was reached: 68.\n'
+        'logging as maximum number of logged messages was reached: 1.\n'
     ) * 2
+
+    assert capsys.readouterr().out == expected
+
+
+def test_long_message_gets_truncated(mocker: MockerFixture, context, capsys):
+    def app(event, api, cache):
+        Logger.warning('Hello, World!')
+
+    event = RawStreamTimeEvent(
+        records=[
+            RawTimeRecord(
+                asset_id=0,
+                company_id=int(),
+                collection=str(),
+                timestamp=int(),
+            ),
+        ],
+        metadata=RawMetadata(
+            app_stream_id=int(),
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            log_type=LogType.time,
+        ),
+    )
+
+    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_SIZE', 68)
+
+    with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
+        Corva(context).stream(
+            app,
+            [event.dict()],
+        )
+
+    expected = '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, W ...\n'
+
+    assert capsys.readouterr().out == expected
+
+
+@pytest.mark.parametrize(
+    'max_message_count, expected',
+    [
+        (
+            0,
+            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
+            'Disabling the logging as maximum number of logged messages was reached: 0.\n',
+        ),
+        (
+            1,
+            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
+            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
+            'Disabling the logging as maximum number of logged messages was reached: 1.\n',
+        ),
+    ],
+)
+def test_max_message_count_reached(
+    max_message_count, expected, mocker: MockerFixture, context, capsys
+):
+    def app(event, api, cache):
+        Logger.warning('Hello, World!')
+
+    event = RawStreamTimeEvent(
+        records=[
+            RawTimeRecord(
+                asset_id=0,
+                company_id=int(),
+                collection=str(),
+                timestamp=int(),
+            ),
+        ],
+        metadata=RawMetadata(
+            app_stream_id=int(),
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            log_type=LogType.time,
+        ),
+    )
+
+    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', max_message_count)
+
+    with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
+        Corva(context).stream(
+            app,
+            [event.dict()],
+        )
 
     assert capsys.readouterr().out == expected
