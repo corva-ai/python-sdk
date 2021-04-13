@@ -20,7 +20,10 @@ def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optiona
     CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 
     corva_handler = CorvaLoggerHandler(
-        max_chars=SETTINGS.LOG_MAX_CHARS, logger=CORVA_LOGGER
+        max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
+        max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
+        logger=CORVA_LOGGER,
+        placeholder=' ...\n',
     )
 
     corva_handler.setLevel(SETTINGS.LOG_LEVEL)
@@ -71,47 +74,71 @@ class CorvaLoggerFilter(logging.Filter):
 
 
 class CorvaLoggerHandler(logging.Handler):
-    """Logging handler, that limits number of output characters.
+    """Logging handler with constraints.
 
-    Logging handler that does the following:
-        1. Logs to sys.stdout.
-        2. Limits number of output characters.
-        3. Logs warning if max number of characters was reached.
+    The handler logs to sys.stdout and has following functionality:
+        1. Truncates the message to not exceed max message size.
+        2. Disables the logging after reaching max message count and
+            logs corresponding warning.
+
+    Args:
+        max_message_size: Maximum allowed message size in bytes.
+            Messages that exceed this limit get truncated.
+        max_message_count: Maximum allowed number of logged messages.
+            After reaching this limit logging gets disabled.
+        logger: Logger that is used to log the warning about reaching max
+            message count.
+        placeholder: String that will appear at the end of the message
+            if it has been truncated.
     """
 
-    def __init__(self, max_chars: int, logger: logging.Logger):
+    def __init__(
+        self,
+        max_message_size: int,
+        max_message_count: int,
+        logger: logging.Logger,
+        placeholder: str,
+    ):
         logging.Handler.__init__(self)
 
-        self.stream = sys.stdout
-        self.max_chars = max_chars
+        self.max_message_size = max_message_size
+        self.max_message_count = max_message_count
         self.logger = logger
-        self.logged_chars = 0
-        self.logging_enabled = True
+        self.placeholder = placeholder
+
         self.warning_logged = False
+        # one extra message to log the warning
+        self.residue_message_count = self.max_message_count + 1
 
-    def emit(self, record):
-        if not self.logging_enabled:
+    def emit(self, record) -> None:
+        if self.residue_message_count == 0:
             return
 
-        msg = self.format(record)
-
-        self.logged_chars += len(msg)
-
-        if self.logged_chars < self.max_chars:
-            self.stream.write(msg)
+        if self.residue_message_count == 1 and not self.warning_logged:
+            self.warning_logged = True
+            self.logger.warning(
+                f'Disabling the logging as maximum number of logged messages was reached: '
+                f'{self.max_message_count}.'
+            )
             return
 
-        if self.warning_logged:
-            self.logging_enabled = False
-            self.stream.write(msg)
-            return
+        self.log(message=self.format(record))
+        self.residue_message_count -= 1
 
-        # cut the message to fit into the limit
-        msg = f'{msg[: len(msg) - (self.logged_chars - self.max_chars) - 1]}\n'
-        self.stream.write(msg)
+    def format(self, record: LogRecord) -> str:
+        message = super().format(record)
 
-        self.warning_logged = True
-        self.logger.warning(
-            f'Disabling the logging as maximum number of logged characters was reached: '
-            f'{self.max_chars}.'
+        extra_chars_count = len(message) - self.max_message_size
+
+        if extra_chars_count <= 0:
+            # no need to truncate the message
+            return message
+
+        message = (
+            message[: len(message) - extra_chars_count - len(self.placeholder)]
+            + self.placeholder
         )
+        return message
+
+    def log(self, message: str) -> None:
+        sys.stdout.write(message)
