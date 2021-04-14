@@ -269,16 +269,18 @@ other operations with data.
 ## Logging
 As apps are executed very frequently
 (once a second or so),
-unlimited logging can lead to unexpected huge bills.
+unlimited logging can lead to huge amounts of data.
 
 The SDK provides a `Logger` object,
 which is a safe way for logging in apps.
 
 The `Logger` is a `logging.Logger` instance
-and so should be used like every Python logger.
+and should be used like every other Python logger.
 
-The `Logger` protects from huge bills
-by having following features:
+The `Logger` has following features:
+1. Log messages are injected with contextual information,
+   which makes it easy to filter through logs
+   while debugging issues.
 1. Log message length is limited. 
    Too long messages are truncated to not exceed the limit. 
    Set by `LOG_THRESHOLD_MESSAGE_SIZE` env variable. 
