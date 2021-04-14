@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import Dict, Generic, List, Optional, TypeVar, Union
+from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, Union
 
 import pydantic.generics
 
@@ -64,6 +64,8 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     app_key: str = SETTINGS.APP_KEY
     asset_id: int = None
     company_id: int = None
+
+    _last_processed_value_key: ClassVar[str]
 
     @property
     def app_connection_id(self) -> int:
@@ -152,11 +154,11 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
 
 class RawStreamTimeEvent(RawStreamEvent[RawTimeRecord]):
-    pass
+    _last_processed_value_key: ClassVar[str] = 'last_processed_timestamp'
 
 
 class RawStreamDepthEvent(RawStreamEvent[RawDepthRecord]):
-    pass
+    _last_processed_value_key: ClassVar[str] = 'last_processed_depth'
 
 
 RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
