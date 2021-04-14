@@ -11,6 +11,7 @@ from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEven
 from corva.models.stream import validators
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
+from corva.state.redis_state import RedisState, get_cache
 
 
 class RawBaseRecord(CorvaBaseEvent, abc.ABC):
@@ -65,7 +66,9 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     asset_id: int = None
     company_id: int = None
 
+    # private attributes
     _last_processed_value_key: ClassVar[str]
+    _cache: Optional[RedisState] = pydantic.PrivateAttr(None)
 
     @property
     def app_connection_id(self) -> int:
@@ -84,6 +87,18 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     @property
     def last_processed_value(self) -> Union[int, float]:
         return max(record.main_value for record in self.records)
+
+    @property
+    def cache(self) -> RedisState:
+        if self._cache is None:
+            self._cache = get_cache(
+                asset_id=self.asset_id,
+                app_stream_id=self.app_stream_id,
+                app_connection_id=self.app_connection_id,
+                settings=SETTINGS,
+            )
+
+        return self._cache
 
     @staticmethod
     def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
