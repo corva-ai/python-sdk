@@ -311,40 +311,6 @@ def lambda_handler(event, context):
     return Corva(context).stream(fn=stream_app, event=event)
 ```
 
-#### How to set the best logging env variables?
-To decide which values for logging env variables
-will be the best for the app you should know
-how logging bill is calculated. 
-
-Generally, the more you log - the more you pay.
-
-Logging bill for one app  can be calculated like this:
-
-Inputs:
-- Logging bill is received once a month
-  and app is triggered once a second
-  ```python3
-  # 60seconds * 60minutes * 24hours * 31days
-  app_triggers_per_month = 2678400
-  ```
-- Max logged GBs per trigger
-  ```python3
-  # LOG_THRESHOLD_MESSAGE_SIZE * LOG_THRESHOLD_MESSAGE_COUNT / (10**9)
-  max_log_gb_per_trigger = 0.000015 
-  ```
-- Price per GB of logged data
-  ```python3
-  # dollars
-  price_per_gb = 0.5
-  ```
-Output:
-```python3
-# app_triggers_per_month * max_log_gb_per_trigger * price_per_gb
-approx_logging_bill = 20  # dollars
-```
-So, using default values
-you will pay 20 dollars a month in the worst case.
-
 
 ## Testing
 
