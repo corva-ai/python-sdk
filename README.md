@@ -290,7 +290,7 @@ The `Logger` has following features:
    Set by `LOG_THRESHOLD_MESSAGE_COUNT` env variable.
    Default value is `15`.
 3. Logging level can be set using `LOG_LEVEL` env variable.
-   Default value is `WARN`.
+   Default value is `INFO`.
 
 #### Logger usage example
 
