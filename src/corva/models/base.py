@@ -28,7 +28,7 @@ class CorvaBaseGenericEvent(pydantic.generics.GenericModel):
 class RawBaseEvent(ABC):
     @staticmethod
     @abstractmethod
-    def from_raw_event(event: Any) -> Union[List[RawBaseEvent], RawBaseEvent]:
+    def from_raw_event(event: Any) -> List[RawBaseEvent]:
         pass
 
 
