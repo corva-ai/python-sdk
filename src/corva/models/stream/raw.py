@@ -109,6 +109,9 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
         return float(result)
 
+    def set_cached_max_record_value(self, cache: RedisState) -> None:
+        cache.store(key=self._max_record_value_cache_key, value=self.max_record_value)
+
     def filter_records(
         self,
         old_max_record_value: Optional[float],
