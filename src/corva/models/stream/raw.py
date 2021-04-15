@@ -11,6 +11,7 @@ from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEven
 from corva.models.stream import validators
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
+from corva.state.redis_state import RedisState
 
 
 class RawBaseRecord(CorvaBaseEvent, abc.ABC):
@@ -98,6 +99,15 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         ]
 
         return result
+
+    @classmethod
+    def get_cached_max_record_value(cls, cache: RedisState) -> Optional[float]:
+        result = cache.load(key=cls._max_record_value_cache_key)
+
+        if result is None:
+            return result
+
+        return float(result)
 
     def filter_records(
         self,
