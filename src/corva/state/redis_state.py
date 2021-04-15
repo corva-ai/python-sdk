@@ -1,8 +1,6 @@
-from logging import Logger, LoggerAdapter
-from typing import Optional, Union
+from typing import Optional
 
 from corva.configuration import Settings
-from corva.logger import DEFAULT_LOGGER
 from corva.state.redis_adapter import RedisAdapter
 
 
@@ -14,11 +12,8 @@ class RedisState:
     This class provides and interface to save, load and do other operations with data in redis.
     """
 
-    def __init__(
-        self, redis: RedisAdapter, logger: Union[Logger, LoggerAdapter] = DEFAULT_LOGGER
-    ):
+    def __init__(self, redis: RedisAdapter):
         self.redis = redis
-        self.logger = logger
 
     def store(self, **kwargs):
         return self.redis.hset(**kwargs)

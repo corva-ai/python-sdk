@@ -9,6 +9,7 @@ Corva python-sdk is a framework for building
 - [Event](#event)
 - [Api](#api)
 - [Cache](#cache)
+- [Logging](#logging)  
 - [Testing](#testing)  
 - [Contributing](#contributing)
 
@@ -265,6 +266,54 @@ other operations with data.
       corva.scheduled(my_app, event)
    ```
 
+## Logging
+As apps are executed very frequently
+(once a second or so),
+unlimited logging can lead to huge amounts of data.
+
+The SDK provides a `Logger` object,
+which is a safe way for logging in apps.
+
+The `Logger` is a `logging.Logger` instance
+and should be used like every other Python logger.
+
+The `Logger` has following features:
+1. Log messages are injected with contextual information,
+   which makes it easy to filter through logs
+   while debugging issues.
+1. Log message length is limited. 
+   Too long messages are truncated to not exceed the limit. 
+   Set by `LOG_THRESHOLD_MESSAGE_SIZE` env variable. 
+   Default value is `1000` symbols or bytes.
+2. Number of log messages is limited.
+   After reaching the limit logging gets disabled.
+   Set by `LOG_THRESHOLD_MESSAGE_COUNT` env variable.
+   Default value is `15`.
+3. Logging level can be set using `LOG_LEVEL` env variable.
+   Default value is `INFO`.
+
+#### Logger usage example
+
+```python3
+from corva import Corva, Logger
+
+
+def stream_app(event, api, cache):
+    Logger.debug('Debug message!')
+    Logger.info('Info message!')
+    Logger.warning('Warning message!')
+    Logger.error('Error message!')
+    try:
+       0/0
+    except ZeroDivisionError:
+       Logger.exception('Exception message!')
+
+
+def lambda_handler(event, context):
+    return Corva(context).stream(fn=stream_app, event=event)
+```
+
+
 ## Testing
 
 Testing Corva applications is easy and enjoyable.
@@ -296,7 +345,6 @@ def test_stream_time_app(app_runner):
     result = app_runner(fn=lambda_handler, event=event)
 
     assert result == 'Hello, World!'
-
 ```
 
 #### Stream depth app example test

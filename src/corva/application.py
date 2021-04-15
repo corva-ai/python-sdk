@@ -16,6 +16,7 @@ class Corva:
     Attributes:
         cache_settings: custom cache params.
         api: Api instance.
+        aws_request_id: aws request id from the lambda context
     """
 
     def __init__(
@@ -34,6 +35,7 @@ class Corva:
         """
 
         self.api = get_api(context=context, settings=SETTINGS, timeout=timeout)
+        self.aws_request_id = context.aws_request_id
         self.cache_settings = cache_settings or {}
 
     def stream(
@@ -59,6 +61,7 @@ class Corva:
                 settings=SETTINGS.copy(),
                 api=self.api,
                 cache_settings=self.cache_settings,
+                aws_request_id=self.aws_request_id,
             )
 
             results.append(stream_runner(fn=fn, context=ctx))
@@ -84,6 +87,7 @@ class Corva:
                 settings=SETTINGS.copy(),
                 api=self.api,
                 cache_settings=self.cache_settings,
+                aws_request_id=self.aws_request_id,
             )
 
             results.append(scheduled_runner(fn=fn, context=ctx))
@@ -106,6 +110,7 @@ class Corva:
             settings=SETTINGS.copy(),
             api=self.api,
             cache_settings=self.cache_settings,
+            aws_request_id=self.aws_request_id,
         )
 
         result = task_runner(fn=fn, context=ctx)

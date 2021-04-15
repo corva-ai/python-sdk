@@ -10,7 +10,9 @@ class Settings(pydantic.BaseSettings):
     CACHE_URL: str
 
     # logger
-    LOG_LEVEL: str = 'WARN'
+    LOG_LEVEL: str = 'INFO'
+    LOG_THRESHOLD_MESSAGE_SIZE: int = 1000
+    LOG_THRESHOLD_MESSAGE_COUNT: int = 15
 
     # company and app
     APP_KEY: str  # <provider-name-with-dashes>.<app-name-with-dashes>

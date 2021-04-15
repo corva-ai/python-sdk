@@ -46,6 +46,7 @@ class BaseContext(pydantic.generics.GenericModel, Generic[RawBaseEventTV]):
     event: RawBaseEventTV
     settings: Settings
     api: Api
+    aws_request_id: str
     cache_: Optional[RedisState] = None
     cache_settings: dict = {}
 
