@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import List
+
 import pydantic
 from pydantic.types import conint
 
@@ -30,8 +32,8 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     version: conint(ge=2, le=2)  # only utils API v2 supported
 
     @staticmethod
-    def from_raw_event(event: dict) -> RawTaskEvent:
-        return pydantic.parse_obj_as(RawTaskEvent, event)
+    def from_raw_event(event: dict) -> List[RawTaskEvent]:
+        return [pydantic.parse_obj_as(RawTaskEvent, event)]
 
     def get_task_event(self, api: Api) -> TaskEvent:
         response = api.get(path=f'v2/tasks/{self.task_id}')
