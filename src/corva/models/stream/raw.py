@@ -111,7 +111,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
     def filter_records(
         self,
-        last_value: Optional[float],
+        old_max_record_value: Optional[float],
     ) -> List[RawBaseRecord]:
         new_records = copy.deepcopy(self.records)
 
@@ -119,13 +119,15 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
             # there can be only 1 completed record, always located at the end
             new_records = new_records[:-1]  # remove "completed" record
 
-        if last_value is None:
+        if old_max_record_value is None:
             return new_records
 
         values = [record.record_value for record in new_records]
 
         new_records = [
-            record for record, value in zip(new_records, values) if value > last_value
+            record
+            for record, value in zip(new_records, values)
+            if value > old_max_record_value
         ]
 
         return new_records

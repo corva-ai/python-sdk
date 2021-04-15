@@ -9,7 +9,7 @@ def stream_runner(
     fn: Callable, context: Union[StreamDepthContext, StreamTimeContext]
 ) -> Any:
     records = RawStreamEvent.filter_records(
-        event=context.event, last_value=context.get_last_value()
+        event=context.event, old_max_record_value=context.get_last_value()
     )
 
     if not records:
