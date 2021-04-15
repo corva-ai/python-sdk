@@ -23,7 +23,7 @@ class RawBaseRecord(CorvaBaseEvent, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def main_value(self) -> Union[int, float]:
+    def record_value(self) -> Union[int, float]:
         pass
 
 
@@ -32,7 +32,7 @@ class RawTimeRecord(RawBaseRecord):
     measured_depth: Optional[float] = None
 
     @property
-    def main_value(self) -> int:
+    def record_value(self) -> int:
         return self.timestamp
 
 
@@ -41,7 +41,7 @@ class RawDepthRecord(RawBaseRecord):
     measured_depth: float
 
     @property
-    def main_value(self) -> float:
+    def record_value(self) -> float:
         return self.measured_depth
 
 
@@ -84,7 +84,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
     @property
     def last_processed_value(self) -> Union[int, float]:
-        return max(record.main_value for record in self.records)
+        return max(record.record_value for record in self.records)
 
     @staticmethod
     def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
@@ -112,7 +112,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         if last_value is None:
             return new_records
 
-        values = [record.main_value for record in new_records]
+        values = [record.record_value for record in new_records]
 
         new_records = [
             record for record, value in zip(new_records, values) if value > last_value
