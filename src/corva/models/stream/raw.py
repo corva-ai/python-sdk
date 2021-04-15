@@ -66,7 +66,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     company_id: int = None
 
     # private attributes
-    _last_processed_value_key: ClassVar[str]
+    _max_record_value_cache_key: ClassVar[str]
 
     @property
     def app_connection_id(self) -> int:
@@ -155,11 +155,11 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
 
 class RawStreamTimeEvent(RawStreamEvent[RawTimeRecord]):
-    _last_processed_value_key: ClassVar[str] = 'last_processed_timestamp'
+    _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
 
 
 class RawStreamDepthEvent(RawStreamEvent[RawDepthRecord]):
-    _last_processed_value_key: ClassVar[str] = 'last_processed_depth'
+    _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
 
 
 RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
