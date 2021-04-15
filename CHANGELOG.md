@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 env variables, that should be used to configure logging.
 
 
+## [0.0.17] - 2021-04-15
+
+### Added
+- `corva.Logger` object, that should be used for app logging.
+- `LOG_THRESHOLD_MESSAGE_SIZE` and `LOG_THRESHOLD_MESSAGE_COUNT`
+env variables, that should be used to configure logging.
+
+
 ## [0.0.16] - 2021-04-02
 ### Added
 - `app_runner` fixture for testing apps.
@@ -132,7 +140,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v0.0.16...master
+[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v0.0.17...master
+[0.0.17]: https://github.com/corva-ai/python-sdk/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/corva-ai/python-sdk/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/corva-ai/python-sdk/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/corva-ai/python-sdk/compare/v0.0.13...v0.0.14
