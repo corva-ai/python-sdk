@@ -83,7 +83,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         return self.records[-1].collection == 'wits.completed'
 
     @property
-    def last_processed_value(self) -> Union[int, float]:
+    def max_record_value(self) -> Union[int, float]:
         return max(record.record_value for record in self.records)
 
     @staticmethod

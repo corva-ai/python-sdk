@@ -21,7 +21,7 @@ class BaseStreamContext(BaseContext[RawStreamEventTV], Generic[RawStreamEventTV]
 
     def set_last_value(self) -> int:
         return self.cache.store(
-            key=self.last_value_key, value=self.event.last_processed_value
+            key=self.last_value_key, value=self.event.max_record_value
         )
 
 
