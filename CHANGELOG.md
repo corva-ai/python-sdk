@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Events are allowed to have extra fields.
 
 ## [0.0.17] - 2021-04-15
 

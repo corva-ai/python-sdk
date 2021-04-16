@@ -11,7 +11,7 @@ from corva.state.redis_state import RedisState, get_cache
 
 
 class EventConfig:
-    extra = pydantic.Extra.ignore
+    extra = pydantic.Extra.allow
     allow_mutation = False
 
 
