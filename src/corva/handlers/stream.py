@@ -1,15 +1,30 @@
-import functools
 import contextlib
+import functools
+from typing import Callable
+
 from corva.api import Api
+from corva.configuration import SETTINGS
 from corva.handlers.base import base_handler
+from corva.logger import setup_logging
 from corva.models.stream.raw import RawStreamEvent
-from corva.state.redis_state import RedisState
+from corva.models.stream.stream import StreamEvent
+from corva.state.redis_state import RedisState, get_cache
 
 
-def stream(func):
+def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
     @functools.wraps(func)
-    @base_handler
-    def wrapper(event: RawStreamEvent, api: Api, cache: RedisState):
+    @base_handler(raw_event_type=RawStreamEvent)
+    def wrapper(event: RawStreamEvent, api: Api, aws_request_id: str) -> Any:
+        cache = get_cache(
+            asset_id=event.asset_id,
+            app_stream_id=event.app_stream_id,
+            app_connection_id=event.app_connection_id,
+            provider=SETTINGS.PROVIDER,
+            app_key=SETTINGS.APP_KEY,
+            cache_url=SETTINGS.CACHE_URL,
+            cache_settings=None,
+        )
+
         records = event.filter_records(
             old_max_record_value=event.get_cached_max_record_value(cache=cache)
         )
@@ -18,16 +33,19 @@ def stream(func):
             # we've got the duplicate data if there are no records left after filtering
             return
 
-        result = func(
-            event.metadata.log_type.event.parse_obj(
-                event.copy(update={'records': records}, deep=True)
-            ),
-            api,
-            cache,
+        app_event = event.metadata.log_type.event.parse_obj(
+            event.copy(update={'records': records}, deep=True)
         )
 
+        with setup_logging(
+            aws_request_id=aws_request_id,
+            asset_id=event.asset_id,
+            app_connection_id=event.app_connection_id,
+        ):
+            result = func(app_event, api, cache)
+
         with contextlib.suppress(Exception):
-            # lambda should not fail if we were not able to cache the value
+            # lambda should not fail if are unable to cache the value
             event.set_cached_max_record_value(cache=cache)
 
         return result
