@@ -1,5 +1,4 @@
 import re
-from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -8,23 +7,10 @@ from corva.handlers import scheduled
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 
 
-@pytest.mark.parametrize(
-    'status_code',
-    (200, 400),
-    ids=('request successful', 'request failed - should not raise'),
-)
-def test_set_completed_status(status_code, context, requests_mock):
+def test_set_completed_status(context, requests_mock):
     @scheduled
     def scheduled_app(event, api, state):
-        # patch post request, that sets scheduled task as completed
-        # looks for url path like /scheduler/123/completed
-        requests_mock.post(
-            re.compile(r'/scheduler/\d+/completed'), status_code=status_code
-        )
-
-        api.post = Mock(wraps=api.post)  # spy on api.post
-
-        return api
+        pass
 
     event = [
         [
@@ -42,9 +28,14 @@ def test_set_completed_status(status_code, context, requests_mock):
         ]
     ]
 
-    api = scheduled_app(event, context)[0]
+    # patch post request, that sets scheduled task as completed
+    # looks for url path like /scheduler/123/completed
+    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
 
-    api.post.assert_called_once_with(path='scheduler/0/completed')
+    scheduled_app(event, context)
+
+    assert post_mock.called_once
+    assert post_mock.last_request.path == '/scheduler/0/completed'
 
 
 @pytest.mark.parametrize(
