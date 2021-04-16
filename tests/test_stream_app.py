@@ -439,3 +439,37 @@ def test_last_processed_value_saved_to_cache(
 
     assert spy.call_count == 2
     assert spy.spy_return == expected
+
+
+def test_set_cached_max_record_value_should_not_fail_lambda(
+    mocker: MockerFixture, context
+):
+    @stream
+    def stream_app(event, api, cache):
+        pass
+
+    event = [
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=int(),
+                    asset_id=int(),
+                    company_id=int(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
+    ]
+
+    patch = mocker.patch.object(
+        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception
+    )
+
+    stream_app(event, context)
+
+    patch.assert_called_once()
