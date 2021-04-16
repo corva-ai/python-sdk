@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.0.18] - 2021-04-16
+
 ### Changed
 - Events are allowed to have extra fields.
 
@@ -137,7 +140,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v0.0.17...master
+[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v0.0.18...master
+[0.0.18]: https://github.com/corva-ai/python-sdk/compare/v0.0.17...v0.0.18
 [0.0.17]: https://github.com/corva-ai/python-sdk/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/corva-ai/python-sdk/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/corva-ai/python-sdk/compare/v0.0.14...v0.0.15
