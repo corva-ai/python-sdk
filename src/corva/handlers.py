@@ -2,12 +2,12 @@ import contextlib
 import functools
 from typing import Any, Callable, List, Type
 
-from corva import Api
 from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.logger import setup_logging
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
+from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.state.redis_state import RedisState, get_cache
@@ -76,6 +76,31 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
         with contextlib.suppress(Exception):
             # lambda should not fail if are unable to cache the value
             event.set_cached_max_record_value(cache=cache)
+
+        return result
+
+    return wrapper
+
+
+def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callable:
+    @functools.wraps(func)
+    @base_handler(raw_event_type=RawScheduledEvent)
+    def wrapper(event: RawScheduledEvent, api: Api, aws_request_id: str) -> Any:
+        cache = get_cache(
+            asset_id=event.asset_id,
+            app_stream_id=event.app_stream_id,
+            app_connection_id=event.app_connection_id,
+            provider=SETTINGS.PROVIDER,
+            app_key=SETTINGS.APP_KEY,
+            cache_url=SETTINGS.CACHE_URL,
+            cache_settings=None,
+        )
+
+        result = func(ScheduledEvent.parse_obj(event), api, cache)
+
+        with contextlib.suppress(Exception):
+            # lambda should not fail if we were not able to set completed status
+            event.set_schedule_as_completed(api=api)
 
         return result
 
