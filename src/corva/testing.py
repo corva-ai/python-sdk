@@ -1,10 +1,10 @@
-import types
 from typing import Any, Callable, ClassVar, Union
 from unittest import mock
 
-from corva.api import Api, get_api
+from corva.api import Api
 from corva.application import Corva
 from corva.configuration import SETTINGS
+from corva.models.context import CorvaContext
 from corva.models.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
 from corva.models.task import TaskEvent
@@ -19,11 +19,15 @@ class TestClient:
         _api: Api instance.
     """
 
-    _context: ClassVar[types.SimpleNamespace] = types.SimpleNamespace(
-        aws_request_id='qwerty',
-        client_context=types.SimpleNamespace(env={'API_KEY': '123'}),
+    _context: ClassVar[CorvaContext] = CorvaContext(
+        aws_request_id='qwerty', client_context={'env': {'API_KEY': '123'}}
     )
-    _api: ClassVar[Api] = get_api(context=_context, settings=SETTINGS)
+    _api: ClassVar[Api] = Api(
+        api_url=SETTINGS.API_ROOT_URL,
+        data_api_url=SETTINGS.DATA_API_ROOT_URL,
+        api_key=_context.api_key,
+        app_name=SETTINGS.APP_NAME,
+    )
 
     @staticmethod
     def run(
