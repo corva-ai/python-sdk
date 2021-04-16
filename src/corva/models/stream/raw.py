@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, Union
+from typing import ClassVar, Generic, List, Optional, TypeVar, Union
 
 import pydantic.generics
 
@@ -52,7 +52,15 @@ class RawAppMetadata(CorvaBaseEvent):
 
 class RawMetadata(CorvaBaseEvent):
     app_stream_id: int
-    apps: Dict[str, RawAppMetadata]
+    apps: pydantic.create_model(
+        "Apps",
+        **{
+            SETTINGS.APP_KEY: (
+                RawAppMetadata,
+                ...,
+            )
+        }
+    )
     log_type: LogType
 
 
@@ -71,7 +79,7 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
     @property
     def app_connection_id(self) -> int:
-        return self.metadata.apps[self.app_key].app_connection_id
+        return getattr(self.metadata.apps, SETTINGS.APP_KEY).app_connection_id
 
     @property
     def app_stream_id(self) -> int:
@@ -138,15 +146,6 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
     _require_at_least_one_record = pydantic.root_validator(
         pre=False, skip_on_failure=True, allow_reuse=True
     )(validators.require_at_least_one_record)
-
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def require_app_key_in_metadata_apps(cls, values):
-        metadata: RawMetadata = values['metadata']
-
-        if values['app_key'] not in metadata.apps:
-            raise ValueError('metadata.apps dict must contain an app key.')
-
-        return values
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def set_asset_id(cls, values: dict) -> dict:
