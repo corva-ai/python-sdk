@@ -117,3 +117,33 @@ def test_set_start_time(
     result_event: ScheduledEvent = app(event, context)[0]
 
     assert result_event.start_time == expected
+
+
+def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixture):
+    @scheduled
+    def scheduled_app(event, api, state):
+        pass
+
+    event = [
+        [
+            RawScheduledEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        ]
+    ]
+
+    patch = mocker.patch.object(
+        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception
+    )
+
+    scheduled_app(event, context)
+
+    patch.assert_called_once()
