@@ -104,9 +104,8 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
         return result
 
-    @classmethod
-    def get_cached_max_record_value(cls, cache: RedisState) -> Optional[float]:
-        result = cache.load(key=cls._max_record_value_cache_key)
+    def get_cached_max_record_value(self, cache: RedisState) -> Optional[float]:
+        result = cache.load(key=self._max_record_value_cache_key)
 
         if result is None:
             return result
