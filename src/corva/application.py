@@ -1,6 +1,5 @@
 from typing import Any, Callable, List, Optional
 
-from corva.api import get_api
 from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledContext
 from corva.models.stream.raw import RawStreamEvent
