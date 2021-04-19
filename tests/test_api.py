@@ -7,16 +7,14 @@ import requests
 from requests_mock import Mocker as RequestsMocker
 
 from corva.api import Api
-from corva.application import Corva
 from corva.configuration import SETTINGS
+from corva.handlers import task
 from corva.models.task import TaskEvent
 
 
-def lambda_handler(event, context):
-    def app(event, api):
-        return api
-
-    return Corva(context=context).task(fn=app, event=event)
+@task
+def app(event, api):
+    return api
 
 
 @pytest.fixture(scope='function')
@@ -25,7 +23,7 @@ def api(app_runner) -> Api:
 
     event = TaskEvent(asset_id=int(), company_id=int())
 
-    return app_runner(lambda_handler, event)
+    return app_runner(app, event)
 
 
 def test_request_default_headers(api, requests_mock: RequestsMocker):
