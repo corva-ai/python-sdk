@@ -4,8 +4,9 @@ import freezegun
 import pytest
 from pytest_mock import MockerFixture
 
-from corva import Corva, Logger
+from corva import Logger
 from corva.configuration import SETTINGS
+from corva.handlers import scheduled, stream, task
 from corva.models.scheduled import RawScheduledEvent
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
@@ -19,6 +20,7 @@ from corva.models.task import RawTaskEvent, TaskEvent
 
 
 def test_scheduled_logging(context, capsys, mocker: MockerFixture):
+    @scheduled
     def app(event, api, cache):
         Logger.warning('Hello, World!')
 
@@ -31,11 +33,10 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         app_stream=int(),
     )
 
-    mocker.patch('corva.runners.scheduled.set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).scheduled(
-            app,
+        app(
             [
                 [
                     event.dict(
@@ -44,6 +45,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
                     )
                 ]
             ],
+            context,
         )
 
     assert (
@@ -54,6 +56,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
 
 
 def test_stream_logging(context, capsys):
+    @stream
     def app(event, api, cache):
         Logger.warning('Hello, World!')
 
@@ -74,10 +77,7 @@ def test_stream_logging(context, capsys):
     )
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()],
-        )
+        app([event.dict()], context)
 
     assert (
         capsys.readouterr().out
@@ -87,20 +87,22 @@ def test_stream_logging(context, capsys):
 
 
 def test_task_logging(context, capsys, mocker: MockerFixture):
+    @task
     def app(event, api):
         Logger.warning('Hello, World!')
 
     raw_event = RawTaskEvent(task_id='0', version=2).dict()
     event = TaskEvent(asset_id=0, company_id=int())
 
-    mocker.patch(
-        'corva.runners.task.get_task_event',
+    mocker.patch.object(
+        RawTaskEvent,
+        'get_task_event',
         return_value=TaskEvent(asset_id=0, company_id=int()),
     )
-    mocker.patch('corva.runners.task.update_task_data')
+    mocker.patch.object(RawTaskEvent, 'update_task_data')
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).task(fn=app, event=raw_event)
+        app(raw_event, context)
 
     captured = capsys.readouterr()
 
@@ -118,6 +120,7 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
     ),
 )
 def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFixture):
+    @stream
     def app(event, api, cache):
         Logger.debug('Debug message.')
         Logger.info('Info message.')
@@ -141,15 +144,13 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
     mocker.patch.object(SETTINGS, 'LOG_LEVEL', log_level)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()],
-        )
+        app([event.dict()], context)
 
     assert capsys.readouterr().out == expected
 
 
 def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixture):
+    @stream
     def app(event, api, cache):
         Logger.warning('Hello, World!')
         Logger.warning('This should not be printed as logging is disabled.')
@@ -177,10 +178,7 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', 1)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()] * 2,
-        )
+        app([event.dict()] * 2, context)
 
     expected = (
         '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
@@ -192,6 +190,7 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
 
 
 def test_long_message_gets_truncated(mocker: MockerFixture, context, capsys):
+    @stream
     def app(event, api, cache):
         Logger.warning('Hello, World!')
 
@@ -214,10 +213,7 @@ def test_long_message_gets_truncated(mocker: MockerFixture, context, capsys):
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_SIZE', 68)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()],
-        )
+        app([event.dict()], context)
 
     expected = '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, W ...\n'
 
@@ -243,6 +239,7 @@ def test_long_message_gets_truncated(mocker: MockerFixture, context, capsys):
 def test_max_message_count_reached(
     max_message_count, expected, mocker: MockerFixture, context, capsys
 ):
+    @stream
     def app(event, api, cache):
         Logger.warning('Hello, World!')
 
@@ -265,9 +262,6 @@ def test_max_message_count_reached(
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', max_message_count)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        Corva(context).stream(
-            app,
-            [event.dict()],
-        )
+        app([event.dict()], context)
 
     assert capsys.readouterr().out == expected
