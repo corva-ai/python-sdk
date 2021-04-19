@@ -96,7 +96,12 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
             cache_settings=None,
         )
 
-        result = func(ScheduledEvent.parse_obj(event), api, cache)
+        with setup_logging(
+            aws_request_id=aws_request_id,
+            asset_id=event.asset_id,
+            app_connection_id=event.app_connection_id,
+        ):
+            result = func(ScheduledEvent.parse_obj(event), api, cache)
 
         with contextlib.suppress(Exception):
             # lambda should not fail if we were not able to set completed status
