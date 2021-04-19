@@ -74,7 +74,7 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
             result = func(app_event, api, cache)
 
         with contextlib.suppress(Exception):
-            # lambda should not fail if are unable to cache the value
+            # lambda succeeds if we're unable to cache the value
             event.set_cached_max_record_value(cache=cache)
 
         return result
@@ -104,7 +104,7 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
             result = func(ScheduledEvent.parse_obj(event), api, cache)
 
         with contextlib.suppress(Exception):
-            # lambda should not fail if we were not able to set completed status
+            # lambda succeeds if we're unable to set completed status
             event.set_schedule_as_completed(api=api)
 
         return result
