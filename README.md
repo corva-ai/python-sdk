@@ -41,11 +41,10 @@ Stream apps can be of two types - time or depth based.
 ###### Stream time app
 
 ```python
-from typing import List
-
-from corva import Api, Cache, Corva, StreamTimeEvent
+from corva import Api, Cache, StreamTimeEvent, stream
 
 
+@stream
 def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):
     # get some data from the api
     drillstrings = api.get_dataset(
@@ -56,7 +55,7 @@ def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):
         },
         sort={'timestamp': 1},
         limit=1,
-    )  # type: List[dict]
+    )
 
     # do some calculations/modifications to the data
     for drillstring in drillstrings:
@@ -64,20 +63,15 @@ def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):
 
     # save the data to private collection
     api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
-
-
-def lambda_handler(event, context):
-    Corva(context).stream(stream_time_app, event)
 ```
 
 ###### Stream depth app
 
 ```python
-from typing import List
-
-from corva import Api, Cache, Corva, StreamDepthEvent
+from corva import Api, Cache, StreamDepthEvent, stream
 
 
+@stream
 def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):
     # get some data from the api
     drillstrings = api.get_dataset(
@@ -88,7 +82,7 @@ def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):
         },
         sort={'timestamp': 1},
         limit=1,
-    )  # type: List[dict]
+    )
 
     # do some calculations/modifications to the data
     for drillstring in drillstrings:
@@ -96,38 +90,28 @@ def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):
 
     # save the data to private collection
     api.post(path='api/v1/data/my_provider/my_collection/', data=drillstrings)
-
-
-def lambda_handler(event, context):
-    Corva(context).stream(stream_depth_app, event)
 ```
 
 #### Scheduled
 
 ```python
-from corva import Api, Cache, Corva, ScheduledEvent
+from corva import Api, Cache, ScheduledEvent, scheduled
 
 
+@scheduled
 def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
     print('Hello, World!')
-
-
-def lambda_handler(event, context):
-    Corva(context).scheduled(scheduled_app, event)
 ```
 
 #### Task
 
 ```python
-from corva import Api, Corva, TaskEvent
+from corva import Api, TaskEvent, task
 
 
+@task
 def task_app(event: TaskEvent, api: Api):
     print('Hello, World!')
-
-
-def lambda_handler(event, context):
-    Corva(context).task(task_app, event)
 ```
 
 ## Event
@@ -151,9 +135,10 @@ and `DELETE`.
 #### Examples:
 
 ```python
-from corva import Api, Corva
+from corva import Api, scheduled
 
 
+@scheduled
 def my_app(event, api: Api, cache):
     # Corva API calls
     api.get('/v2/pads', params={'param': 'val'})
@@ -166,11 +151,6 @@ def my_app(event, api: Api, cache):
     api.post('/api/v1/data/provider/dataset/', data={'key': 'val'})
     api.put('/api/v1/data/provider/dataset/', data={'key': 'val'})
     api.delete('/api/v1/data/provider/dataset/')
-
-
-def lambda_handler(event, context):
-    corva = Corva(context)
-    corva.scheduled(my_app, event)
  ```
 
 ## Cache
@@ -187,83 +167,69 @@ other operations with data.
 
 1. Store and load:
    ```python
-   from corva import Cache, Corva
+   from corva import Cache, scheduled
    
    
+   @scheduled
    def my_app(event, api, cache: Cache):
-      cache.store(key='key', value='val')
-      # cache: {'key': 'val'}
-      
-      cache.load(key='key')  # returns 'val'
+       cache.store(key='key', value='val')
+       # cache: {'key': 'val'}
    
-   
-   def lambda_handler(event, context):
-      corva = Corva(context)
-      corva.scheduled(my_app, event)
+       cache.load(key='key')  # returns 'val'
    ```
 
 2. Store and load multiple:
    ```python
-   from corva import Cache, Corva
+   from corva import Cache, scheduled
    
    
+   @scheduled
    def my_app(event, api, cache: Cache):
-      cache.store(mapping={'key1': 'val1', 'key2': 'val2'})
-      # cache: {'key1': 'val1', 'key2': 'val2'}
-      
-      cache.load_all()  # returns {'key1': 'val1', 'key2': 'val2'}
+       cache.store(mapping={'key1': 'val1', 'key2': 'val2'})
+       # cache: {'key1': 'val1', 'key2': 'val2'}
    
-   
-   def lambda_handler(event, context):
-      corva = Corva(context)
-      corva.scheduled(my_app, event)
+       cache.load_all()  # returns {'key1': 'val1', 'key2': 'val2'}
    ```
 
 3. Delete and delete all:
    ```python
-   from corva import Cache, Corva
-
+   from corva import Cache, scheduled
    
+   
+   @scheduled
    def my_app(event, api, cache: Cache):
-      cache.store(mapping={'key1': 'val1', 'key2': 'val2', 'key3': 'val3'})
-      # cache: {'key1': 'val1', 'key2': 'val2', 'key3': 'val3'}
-      
-      cache.delete(keys=['key1'])
-      # cache: {'key2': 'val2', 'key3': 'val3'}
-      
-      cache.delete_all()
-      # cache: {}
+       cache.store(mapping={'key1': 'val1', 'key2': 'val2', 'key3': 'val3'})
+       # cache: {'key1': 'val1', 'key2': 'val2', 'key3': 'val3'}
    
+       cache.delete(keys=['key1'])
+       # cache: {'key2': 'val2', 'key3': 'val3'}
    
-   def lambda_handler(event, context):
-      corva = Corva(context)
-      corva.scheduled(my_app, event)
+       cache.delete_all()
+       # cache: {}
    ```
+   
 4. Expiry, ttl and exists. **Note**: by default `Cache` sets an expiry to 60 days.
    ```python
    import time
-   from corva import Cache, Corva
+
+   from corva import Cache, scheduled
    
    
+   @scheduled
    def my_app(event, api, cache: Cache):
-      cache.store(key='key', value='val', expiry=60)  # 60 seconds
-      # cache: {'key': 'val'}
-      
-      cache.ttl()  # 60 seconds
-      cache.pttl() # 60000 milliseconds
-      cache.exists()  # True
-      
-      time.sleep(60)  # wait 60 seconds
-      # cache: {}
-      
-      cache.exists()  # False
-      cache.ttl()  # -2: doesn't exist
-      cache.pttl() # -2: doesn't exist
+       cache.store(key='key', value='val', expiry=60)  # 60 seconds
+       # cache: {'key': 'val'}
    
+       cache.ttl()  # 60 seconds
+       cache.pttl()  # 60000 milliseconds
+       cache.exists()  # True
    
-   def lambda_handler(event, context):
-      corva = Corva(context)
-      corva.scheduled(my_app, event)
+       time.sleep(60)  # wait 60 seconds
+       # cache: {}
+   
+       cache.exists()  # False
+       cache.ttl()  # -2: doesn't exist
+       cache.pttl()  # -2: doesn't exist
    ```
 
 ## Logging
@@ -295,22 +261,19 @@ The `Logger` has following features:
 #### Logger usage example
 
 ```python3
-from corva import Corva, Logger
+from corva import Logger, stream
 
 
+@stream
 def stream_app(event, api, cache):
     Logger.debug('Debug message!')
     Logger.info('Info message!')
     Logger.warning('Warning message!')
     Logger.error('Error message!')
     try:
-       0/0
+        0 / 0
     except ZeroDivisionError:
-       Logger.exception('Exception message!')
-
-
-def lambda_handler(event, context):
-    return Corva(context).stream(fn=stream_app, event=event)
+        Logger.exception('Exception message!')
 ```
 
 
@@ -326,15 +289,12 @@ To install the library run `pip install pytest`.
 #### Stream time app example test
 
 ```python3
-from corva import Corva, StreamTimeEvent, StreamTimeRecord
+from corva import StreamTimeEvent, StreamTimeRecord, stream
 
 
+@stream
 def stream_app(event, api, cache):
     return 'Hello, World!'
-
-
-def lambda_handler(event, context):
-    return Corva(context).stream(fn=stream_app, event=event)
 
 
 def test_stream_time_app(app_runner):
@@ -342,7 +302,7 @@ def test_stream_time_app(app_runner):
         asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
     )
 
-    result = app_runner(fn=lambda_handler, event=event)
+    result = app_runner(stream_app, event=event)
 
     assert result == 'Hello, World!'
 ```
@@ -350,15 +310,12 @@ def test_stream_time_app(app_runner):
 #### Stream depth app example test
 
 ```python
-from corva import Corva, StreamDepthEvent, StreamDepthRecord
+from corva import StreamDepthEvent, StreamDepthRecord, stream
 
 
+@stream
 def stream_app(event, api, cache):
     return 'Hello, World!'
-
-
-def lambda_handler(event, context):
-    return Corva(context).stream(fn=stream_app, event=event)
 
 
 def test_stream_depth_app(app_runner):
@@ -366,7 +323,7 @@ def test_stream_depth_app(app_runner):
         asset_id=0, company_id=0, records=[StreamDepthRecord(measured_depth=0)]
     )
 
-    result = app_runner(fn=lambda_handler, event=event)
+    result = app_runner(stream_app, event=event)
 
     assert result == 'Hello, World!'
 ```
@@ -374,21 +331,18 @@ def test_stream_depth_app(app_runner):
 #### Scheduled app example test
 
 ```python3
-from corva import Corva, ScheduledEvent
+from corva import ScheduledEvent, scheduled
 
 
+@scheduled
 def scheduled_app(event, api, cache):
     return 'Hello, World!'
-
-
-def lambda_handler(event, context):
-    return Corva(context).scheduled(fn=scheduled_app, event=event)
 
 
 def test_scheduled_app(app_runner):
     event = ScheduledEvent(asset_id=0, start_time=0, end_time=0)
 
-    result = app_runner(fn=lambda_handler, event=event)
+    result = app_runner(scheduled_app, event=event)
 
     assert result == 'Hello, World!'
 ```
@@ -396,21 +350,18 @@ def test_scheduled_app(app_runner):
 #### Task app example test
 
 ```python
-from corva import Corva, TaskEvent
+from corva import TaskEvent, task
 
 
+@task
 def task_app(event, api):
     return 'Hello, World!'
-
-
-def lambda_handler(event, context):
-    return Corva(context).task(fn=task_app, event=event)
 
 
 def test_task_app(app_runner):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    result = app_runner(fn=lambda_handler, event=event)
+    result = app_runner(task_app, event=event)
 
     assert result == 'Hello, World!'
 ```
