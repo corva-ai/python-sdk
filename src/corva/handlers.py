@@ -10,6 +10,7 @@ from corva.models.context import CorvaContext
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
+from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.state.redis_state import RedisState, get_cache
 
 
@@ -108,5 +109,40 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
             event.set_schedule_as_completed(api=api)
 
         return result
+
+    return wrapper
+
+
+def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
+    @base_handler(raw_event_type=RawTaskEvent)
+    @functools.wraps(func)
+    def wrapper(event: RawTaskEvent, api: Api, aws_request_id: str) -> Any:
+        try:
+            app_event = event.get_task_event(api=api)
+
+            with setup_logging(
+                aws_request_id=aws_request_id,
+                asset_id=app_event.asset_id,
+                app_connection_id=None,
+            ):
+                result = func(app_event, api)
+
+            status = TaskStatus.success
+            data = {'payload': result}
+
+            return result
+
+        except Exception as exc:
+            status = TaskStatus.fail
+            data = {'fail_reason': str(exc)}
+
+        finally:
+            with contextlib.suppress(Exception):
+                # lambda succeeds if we're unable to update task data
+                event.update_task_data(
+                    api=api,
+                    status=status,
+                    data=data,
+                )
 
     return wrapper
