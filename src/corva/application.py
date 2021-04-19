@@ -4,9 +4,6 @@ from corva.configuration import SETTINGS
 from corva.models.scheduled import RawScheduledEvent, ScheduledContext
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.task import RawTaskEvent, TaskContext
-from corva.runners.scheduled import scheduled_runner
-from corva.runners.stream import stream_runner
-from corva.runners.task import task_runner
 
 
 class Corva:
