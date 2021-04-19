@@ -2,6 +2,8 @@ import pydantic
 
 
 class CorvaContext(pydantic.BaseModel):
+    """AWS context, expected by Corva."""
+
     aws_request_id: str
     client_context: pydantic.create_model(
         "ClientContext", env=(pydantic.create_model("Env", API_KEY=(str, ...)), ...)
