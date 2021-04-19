@@ -6,7 +6,7 @@ from typing import List
 import pydantic
 
 from corva.api import Api
-from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
+from corva.models.base import CorvaBaseEvent, RawBaseEvent
 
 
 class ScheduledEvent(CorvaBaseEvent):
@@ -82,7 +82,3 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     def set_schedule_as_completed(self, api: Api) -> None:
         """Sets schedule as completed."""
         api.post(path=f'scheduler/{self.schedule_id}/completed')
-
-
-class ScheduledContext(BaseContext[RawScheduledEvent]):
-    pass
