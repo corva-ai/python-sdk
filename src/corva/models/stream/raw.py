@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import ClassVar, List, Optional, TypeVar, Union
+from typing import ClassVar, List, Optional, Union
 
-import pydantic.generics
+import pydantic
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
@@ -167,6 +167,3 @@ class RawStreamTimeEvent(RawStreamEvent):
 class RawStreamDepthEvent(RawStreamEvent):
     records: pydantic.conlist(RawDepthRecord, min_items=1)
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
-
-
-RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
