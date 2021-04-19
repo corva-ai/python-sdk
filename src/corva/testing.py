@@ -1,12 +1,11 @@
+import inspect
 from typing import Any, Callable, ClassVar, Union
-from unittest import mock
 
 from corva.api import Api
-from corva.application import Corva
 from corva.configuration import SETTINGS
 from corva.models.context import CorvaContext
 from corva.models.scheduled import ScheduledEvent
-from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
+from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
 from corva.state.redis_state import get_cache
 
@@ -31,60 +30,23 @@ class TestClient:
 
     @staticmethod
     def run(
-        fn: Callable[[dict, Any], Any],
+        fn: Callable,
         event: Union[TaskEvent, StreamEvent, ScheduledEvent],
     ) -> Any:
 
         if isinstance(event, TaskEvent):
-            return TestClient._run_task(fn=fn, event=event)
+            return inspect.unwrap(fn)(event, TestClient._api)
 
-        if isinstance(event, ScheduledEvent):
-            return TestClient._run_scheduled(fn=fn, event=event)
-
-        if isinstance(event, StreamEvent):
-            return TestClient._run_stream(fn=fn, event=event)
-
-    @staticmethod
-    def _run_task(fn: Callable, event: TaskEvent) -> Any:
-        def override_task(self, fn: Callable, event: TaskEvent):
-            return fn(event, TestClient._api)
-
-        with mock.patch.object(Corva, 'task', override_task):
-            return fn(event, TestClient._context)
-
-    @staticmethod
-    def _run_scheduled(fn: Callable, event: ScheduledEvent) -> Any:
-        def override_scheduled(self, fn: Callable, event: ScheduledEvent):
-            return fn(
+        if isinstance(event, (ScheduledEvent, StreamEvent)):
+            return inspect.unwrap(fn)(
                 event,
                 TestClient._api,
                 get_cache(
                     asset_id=event.asset_id,
                     app_stream_id=int(),
                     app_connection_id=int(),
-                    settings=SETTINGS,
+                    provider=SETTINGS.PROVIDER,
+                    app_key=SETTINGS.APP_KEY,
+                    cache_url=SETTINGS.CACHE_URL,
                 ),
             )
-
-        with mock.patch.object(Corva, 'scheduled', override_scheduled):
-            return fn(event, TestClient._context)
-
-    @staticmethod
-    def _run_stream(
-        fn: Callable,
-        event: Union[StreamTimeEvent, StreamDepthEvent],
-    ) -> Any:
-        def override_stream(self, fn: Callable, event: StreamEvent):
-            return fn(
-                event,
-                TestClient._api,
-                get_cache(
-                    asset_id=event.asset_id,
-                    app_stream_id=int(),
-                    app_connection_id=int(),
-                    settings=SETTINGS,
-                ),
-            )
-
-        with mock.patch.object(Corva, 'stream', override_stream):
-            return fn(event, TestClient._context)
