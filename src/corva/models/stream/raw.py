@@ -66,7 +66,6 @@ class RawMetadata(CorvaBaseEvent):
 class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     records: pydantic.conlist(RawBaseRecord, min_items=1)
     metadata: RawMetadata
-    app_key: str = SETTINGS.APP_KEY
     asset_id: int = None
     company_id: int = None
 
