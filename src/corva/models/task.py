@@ -6,7 +6,7 @@ from typing import List
 import pydantic
 from pydantic.types import conint
 
-from corva.models.base import BaseContext, CorvaBaseEvent, RawBaseEvent
+from corva.models.base import CorvaBaseEvent, RawBaseEvent
 
 
 class TaskStatus(enum.Enum):
@@ -48,7 +48,3 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
         """Updates the task."""
 
         return api.put(path=f'v2/tasks/{self.task_id}/{status.value}', data=data)
-
-
-class TaskContext(BaseContext[RawTaskEvent]):
-    pass
