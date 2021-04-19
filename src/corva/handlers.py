@@ -42,6 +42,8 @@ def base_handler(raw_event_type: Type[RawBaseEvent]) -> Callable:
 
 
 def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
+    """Runs stream app."""
+
     @functools.wraps(func)
     @base_handler(raw_event_type=RawStreamEvent)
     def wrapper(event: RawStreamEvent, api: Api, aws_request_id: str) -> Any:
@@ -84,6 +86,8 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
 
 
 def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callable:
+    """Runs scheduled app."""
+
     @functools.wraps(func)
     @base_handler(raw_event_type=RawScheduledEvent)
     def wrapper(event: RawScheduledEvent, api: Api, aws_request_id: str) -> Any:
@@ -114,6 +118,8 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
 
 
 def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
+    """Runs task app."""
+
     @base_handler(raw_event_type=RawTaskEvent)
     @functools.wraps(func)
     def wrapper(event: RawTaskEvent, api: Api, aws_request_id: str) -> Any:
