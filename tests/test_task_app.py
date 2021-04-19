@@ -69,7 +69,7 @@ def test_lambda_succeeds_if_unable_to_setup_logging(
         'corva.handlers.setup_logging',
         side_effect=Exception('test_setup_logging_raises'),
     )
-    put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/fail'))
+    put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
 
     task_app(event, context)
 

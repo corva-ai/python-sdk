@@ -52,7 +52,7 @@ class RawAppMetadata(CorvaBaseEvent):
 class RawMetadata(CorvaBaseEvent):
     app_stream_id: int
     apps: pydantic.create_model(
-        "Apps",
+        "Apps",  # noqa: F821
         **{
             SETTINGS.APP_KEY: (
                 RawAppMetadata,

@@ -6,7 +6,8 @@ class CorvaContext(pydantic.BaseModel):
 
     aws_request_id: str
     client_context: pydantic.create_model(
-        "ClientContext", env=(pydantic.create_model("Env", API_KEY=(str, ...)), ...)
+        "ClientContext",  # noqa: F821
+        env=(pydantic.create_model("Env", API_KEY=(str, ...)), ...),  # noqa: F821
     )
 
     @property

@@ -4,8 +4,10 @@ import enum
 from typing import List
 
 import pydantic
+import requests
 from pydantic.types import conint
 
+from corva.api import Api
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
 
 
