@@ -24,7 +24,7 @@ def base_handler(raw_event_type: Type[RawBaseEvent]) -> Callable:
                 api_url=SETTINGS.API_ROOT_URL,
                 data_api_url=SETTINGS.DATA_API_ROOT_URL,
                 api_key=context.api_key,
-                app_name=SETTINGS.APP_NAME,
+                app_key=SETTINGS.APP_KEY,
                 timeout=None,
             )
 

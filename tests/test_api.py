@@ -32,7 +32,7 @@ def test_request_default_headers(api, requests_mock: RequestsMocker):
         '',
         request_headers={
             'Authorization': f'API {api.api_key}',
-            'X-Corva-App': api.app_name,
+            'X-Corva-App': api.app_key,
         },
     )
     api.get('')
