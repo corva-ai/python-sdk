@@ -1,9 +1,6 @@
-from typing import Generic, List, TypeVar
-
 import pydantic
 
-from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent
-from corva.models.stream import validators
+from corva.models.base import CorvaBaseEvent
 
 
 class StreamBaseRecord(CorvaBaseEvent):
@@ -38,10 +35,7 @@ class StreamDepthRecord(StreamBaseRecord):
     metadata: dict = {}
 
 
-StreamBaseRecordTV = TypeVar('StreamBaseRecordTV', bound=StreamBaseRecord)
-
-
-class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
+class StreamEvent(CorvaBaseEvent):
     """Stream event data.
 
     Attributes:
@@ -52,17 +46,16 @@ class StreamEvent(CorvaBaseGenericEvent, Generic[StreamBaseRecordTV]):
 
     asset_id: int
     company_id: int
-    records: List[StreamBaseRecordTV]
-
-    # validators
-    _require_at_least_one_record = pydantic.root_validator(
-        pre=False, skip_on_failure=True, allow_reuse=True
-    )(validators.require_at_least_one_record)
+    records: pydantic.conlist(StreamBaseRecord, min_items=1)
 
 
-class StreamTimeEvent(StreamEvent[StreamTimeRecord]):
+class StreamTimeEvent(StreamEvent):
     """Stream time event data."""
 
+    records: pydantic.conlist(StreamTimeRecord, min_items=1)
 
-class StreamDepthEvent(StreamEvent[StreamDepthRecord]):
+
+class StreamDepthEvent(StreamEvent):
     """Stream depth event data."""
+
+    records: pydantic.conlist(StreamDepthRecord, min_items=1)

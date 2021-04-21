@@ -1,13 +1,8 @@
-import contextlib
-from typing import List
-
-import pydantic
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.application import Corva
 from corva.configuration import SETTINGS
-from corva.models.stream.context import BaseStreamContext
+from corva.handlers import stream
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
     RawAppMetadata,
@@ -18,67 +13,13 @@ from corva.models.stream.raw import (
     RawStreamTimeEvent,
     RawTimeRecord,
 )
-
-
-@pytest.mark.parametrize(
-    'event,exc_ctx',
-    (
-        [
-            [
-                RawStreamTimeEvent.construct(
-                    records=[],
-                    metadata=RawMetadata(
-                        app_stream_id=int(),
-                        apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
-                        },
-                        log_type=LogType.time,
-                    ),
-                ).dict()
-            ],
-            pytest.raises(
-                pydantic.ValidationError,
-                match=r'1 validation error [\s\S]* At least one record should be provided\.',
-            ),
-        ],
-        [
-            [
-                RawStreamTimeEvent(
-                    records=[
-                        RawTimeRecord(
-                            asset_id=int(),
-                            company_id=int(),
-                            collection=str(),
-                            timestamp=int(),
-                        )
-                    ],
-                    metadata=RawMetadata(
-                        app_stream_id=int(),
-                        apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
-                        },
-                        log_type=LogType.time,
-                    ),
-                ).dict()
-            ],
-            contextlib.nullcontext(),
-        ],
-    ),
-    ids=('raises', 'not raises'),
-)
-def test_require_at_least_one_record_in_raw_stream_event(
-    event: List[dict], exc_ctx, context
-):
-    def stream_app(event, api, cache):
-        pass
-
-    with exc_ctx:
-        Corva(context=context).stream(stream_app, event)
+from corva.models.stream.stream import StreamEvent
 
 
 @pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
 @pytest.mark.parametrize('value', (1, 2))
 def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixture):
+    @stream
     def stream_app(event, api, cache):
         return event
 
@@ -99,11 +40,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
         ).dict()
     ]
 
-    mocker.patch('corva.application.stream_runner', lambda fn, context: context.event)
-
-    result_event: RawStreamTimeEvent = Corva(context=context).stream(stream_app, event)[
-        0
-    ]
+    result_event: StreamEvent = stream_app(event, context)[0]
 
     assert getattr(result_event, attr) == value
 
@@ -313,59 +250,22 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
     ],
 )
 def test_filter_records(last_value, event, expected, mocker: MockerFixture, context):
+    @stream
     def stream_app(event, api, cache):
         pass
 
     spy = mocker.spy(RawStreamEvent, 'filter_records')
-    mocker.patch.object(BaseStreamContext, 'get_last_value', return_value=last_value)
+    mocker.patch.object(
+        RawStreamEvent, 'get_cached_max_record_value', return_value=last_value
+    )
 
-    Corva(context=context).stream(stream_app, event)
+    stream_app(event, context)
 
     assert spy.spy_return == expected
 
 
-@pytest.mark.parametrize(
-    'app_key,raises',
-    (['', True], [SETTINGS.APP_KEY, False]),
-    ids=['no app key exc', 'correct event'],
-)
-def test_require_app_key_in_metadata_apps(app_key: str, raises, context):
-    def stream_app(event, api, cache):
-        pass
-
-    event = [
-        RawStreamTimeEvent.construct(
-            records=[
-                RawTimeRecord(
-                    asset_id=int(),
-                    company_id=int(),
-                    collection=str(),
-                    timestamp=int(),
-                )
-            ],
-            metadata=RawMetadata(
-                app_stream_id=int(),
-                apps={app_key: RawAppMetadata(app_connection_id=int())},
-                log_type=LogType.time,
-            ),
-        ).dict()
-    ]
-
-    corva = Corva(context=context)
-
-    if raises:
-        exc = pytest.raises(pydantic.ValidationError, corva.stream, stream_app, event)
-        assert len(exc.value.raw_errors) == 1
-        assert (
-            str(exc.value.raw_errors[0].exc)
-            == 'metadata.apps dict must contain an app key.'
-        )
-        return
-
-    corva.stream(stream_app, event)
-
-
 def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, context):
+    @stream
     def stream_app(event, api, cache):
         pass
 
@@ -392,7 +292,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
     )
     spy = mocker.Mock(stream_app, wraps=stream_app)
 
-    Corva(context=context).stream(stream_app, event)
+    stream_app(event, context)
 
     filter_patch.assert_called_once()
     spy.assert_not_called()
@@ -530,12 +430,46 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
 def test_last_processed_value_saved_to_cache(
     expected, event, context, mocker: MockerFixture
 ):
+    @stream
     def stream_app(event, api, cache):
         pass
 
-    spy = mocker.spy(BaseStreamContext, 'get_last_value')
-    Corva(context=context).stream(stream_app, event)
-    Corva(context=context).stream(stream_app, event)
+    spy = mocker.spy(RawStreamEvent, 'get_cached_max_record_value')
+    stream_app(event * 2, context)
 
     assert spy.call_count == 2
     assert spy.spy_return == expected
+
+
+def test_set_cached_max_record_value_should_not_fail_lambda(
+    mocker: MockerFixture, context
+):
+    @stream
+    def stream_app(event, api, cache):
+        pass
+
+    event = [
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=int(),
+                    asset_id=int(),
+                    company_id=int(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
+    ]
+
+    patch = mocker.patch.object(
+        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception
+    )
+
+    stream_app(event, context)
+
+    patch.assert_called_once()

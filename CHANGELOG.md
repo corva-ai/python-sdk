@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `corva.stream`, `corva.scheduled` and `corva.task` app decorators. 
+  See readme for usage examples.
+
+### Removed
+- `corva.Corva` class.
+
 
 ## [0.0.18] - 2021-04-16
 

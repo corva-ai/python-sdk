@@ -1,29 +1,16 @@
 import re
-from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
 
-from corva.application import Corva
-from corva.models.scheduled import RawScheduledEvent
+from corva.handlers import scheduled
+from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 
 
-@pytest.mark.parametrize(
-    'status_code',
-    (200, 400),
-    ids=('request successful', 'request failed - should not raise'),
-)
-def test_set_completed_status(status_code, context, requests_mock):
+def test_set_completed_status(context, requests_mock):
+    @scheduled
     def scheduled_app(event, api, state):
-        # patch post request, that sets scheduled task as completed
-        # looks for url path like /scheduler/123/completed
-        requests_mock.post(
-            re.compile(r'/scheduler/\d+/completed'), status_code=status_code
-        )
-
-        api.post = Mock(wraps=api.post)  # spy on api.post
-
-        return api
+        pass
 
     event = [
         [
@@ -41,9 +28,14 @@ def test_set_completed_status(status_code, context, requests_mock):
         ]
     ]
 
-    api = Corva(context).scheduled(scheduled_app, event)[0]
+    # patch post request, that sets scheduled task as completed
+    # looks for url path like /scheduler/123/completed
+    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
 
-    api.post.assert_called_once_with(path='scheduler/0/completed')
+    scheduled_app(event, context)
+
+    assert post_mock.called_once
+    assert post_mock.last_request.path == '/scheduler/0/completed'
 
 
 @pytest.mark.parametrize(
@@ -66,6 +58,7 @@ def test_set_completed_status(status_code, context, requests_mock):
     ),
 )
 def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
+    @scheduled
     def app(event, api, state):
         return event
 
@@ -82,14 +75,11 @@ def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
         ]
     ]
 
-    # override scheduled_runner to return event from context
-    mocker.patch(
-        'corva.application.scheduled_runner', lambda fn, context: context.event
-    )
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
-    result_event: RawScheduledEvent = Corva(context).scheduled(app, event)[0]
+    result_event: ScheduledEvent = app(event, context)[0]
 
-    assert result_event.schedule_start == expected
+    assert result_event.end_time == expected
 
 
 @pytest.mark.parametrize(
@@ -102,6 +92,7 @@ def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
 def test_set_start_time(
     schedule_start, interval, expected, context, mocker: MockerFixture
 ):
+    @scheduled
     def app(event, api, state):
         return event
 
@@ -121,11 +112,38 @@ def test_set_start_time(
         ]
     ]
 
-    # override scheduled_runner to return event from context
-    mocker.patch(
-        'corva.application.scheduled_runner', lambda fn, context: context.event
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+
+    result_event: ScheduledEvent = app(event, context)[0]
+
+    assert result_event.start_time == expected
+
+
+def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixture):
+    @scheduled
+    def scheduled_app(event, api, state):
+        pass
+
+    event = [
+        [
+            RawScheduledEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        ]
+    ]
+
+    patch = mocker.patch.object(
+        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception
     )
 
-    event = Corva(context).scheduled(app, event)[0]
+    scheduled_app(event, context)
 
-    assert event.start_time == expected
+    patch.assert_called_once()

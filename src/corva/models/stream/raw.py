@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import Dict, Generic, List, Optional, TypeVar, Union
+from typing import ClassVar, List, Optional, Union
 
-import pydantic.generics
+import pydantic
 
 from corva.configuration import SETTINGS
-from corva.models.base import CorvaBaseEvent, CorvaBaseGenericEvent, RawBaseEvent
-from corva.models.stream import validators
+from corva.models.base import CorvaBaseEvent, RawBaseEvent
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
+from corva.state.redis_state import RedisState
 
 
 class RawBaseRecord(CorvaBaseEvent, abc.ABC):
@@ -23,7 +23,7 @@ class RawBaseRecord(CorvaBaseEvent, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def main_value(self) -> Union[int, float]:
+    def record_value(self) -> Union[int, float]:
         pass
 
 
@@ -32,7 +32,7 @@ class RawTimeRecord(RawBaseRecord):
     measured_depth: Optional[float] = None
 
     @property
-    def main_value(self) -> int:
+    def record_value(self) -> int:
         return self.timestamp
 
 
@@ -41,7 +41,7 @@ class RawDepthRecord(RawBaseRecord):
     measured_depth: float
 
     @property
-    def main_value(self) -> float:
+    def record_value(self) -> float:
         return self.measured_depth
 
 
@@ -51,23 +51,30 @@ class RawAppMetadata(CorvaBaseEvent):
 
 class RawMetadata(CorvaBaseEvent):
     app_stream_id: int
-    apps: Dict[str, RawAppMetadata]
+    apps: pydantic.create_model(
+        "Apps",  # noqa: F821
+        **{
+            SETTINGS.APP_KEY: (
+                RawAppMetadata,
+                ...,
+            )
+        }
+    )
     log_type: LogType
 
 
-RawBaseRecordTV = TypeVar('RawBaseRecordTV', bound=RawBaseRecord)
-
-
-class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEvent):
-    records: List[RawBaseRecordTV]
+class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
+    records: pydantic.conlist(RawBaseRecord, min_items=1)
     metadata: RawMetadata
-    app_key: str = SETTINGS.APP_KEY
     asset_id: int = None
     company_id: int = None
 
+    # private attributes
+    _max_record_value_cache_key: ClassVar[str]
+
     @property
     def app_connection_id(self) -> int:
-        return self.metadata.apps[self.app_key].app_connection_id
+        return getattr(self.metadata.apps, SETTINGS.APP_KEY).app_connection_id
 
     @property
     def app_stream_id(self) -> int:
@@ -80,8 +87,8 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         return self.records[-1].collection == 'wits.completed'
 
     @property
-    def last_processed_value(self) -> Union[int, float]:
-        return max(record.main_value for record in self.records)
+    def max_record_value(self) -> Union[int, float]:
+        return max(record.record_value for record in self.records)
 
     @staticmethod
     def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
@@ -96,40 +103,39 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
 
         return result
 
-    @staticmethod
-    def filter_records(
-        event: RawStreamEvent,
-        last_value: Optional[float],
-    ) -> List[RawBaseRecord]:
-        new_records = copy.deepcopy(event.records)
+    def get_cached_max_record_value(self, cache: RedisState) -> Optional[float]:
+        result = cache.load(key=self._max_record_value_cache_key)
 
-        if event.is_completed:
+        if result is None:
+            return result
+
+        return float(result)
+
+    def set_cached_max_record_value(self, cache: RedisState) -> None:
+        cache.store(key=self._max_record_value_cache_key, value=self.max_record_value)
+
+    def filter_records(
+        self,
+        old_max_record_value: Optional[float],
+    ) -> List[RawBaseRecord]:
+        new_records = copy.deepcopy(self.records)
+
+        if self.is_completed:
             # there can be only 1 completed record, always located at the end
             new_records = new_records[:-1]  # remove "completed" record
 
-        if last_value is None:
+        if old_max_record_value is None:
             return new_records
 
-        values = [record.main_value for record in new_records]
+        values = [record.record_value for record in new_records]
 
         new_records = [
-            record for record, value in zip(new_records, values) if value > last_value
+            record
+            for record, value in zip(new_records, values)
+            if value > old_max_record_value
         ]
 
         return new_records
-
-    _require_at_least_one_record = pydantic.root_validator(
-        pre=False, skip_on_failure=True, allow_reuse=True
-    )(validators.require_at_least_one_record)
-
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def require_app_key_in_metadata_apps(cls, values):
-        metadata: RawMetadata = values['metadata']
-
-        if values['app_key'] not in metadata.apps:
-            raise ValueError('metadata.apps dict must contain an app key.')
-
-        return values
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
     def set_asset_id(cls, values: dict) -> dict:
@@ -152,12 +158,11 @@ class RawStreamEvent(CorvaBaseGenericEvent, Generic[RawBaseRecordTV], RawBaseEve
         return values
 
 
-class RawStreamTimeEvent(RawStreamEvent[RawTimeRecord]):
-    pass
+class RawStreamTimeEvent(RawStreamEvent):
+    records: pydantic.conlist(RawTimeRecord, min_items=1)
+    _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
 
 
-class RawStreamDepthEvent(RawStreamEvent[RawDepthRecord]):
-    pass
-
-
-RawStreamEventTV = TypeVar('RawStreamEventTV', bound=RawStreamEvent)
+class RawStreamDepthEvent(RawStreamEvent):
+    records: pydantic.conlist(RawDepthRecord, min_items=1)
+    _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'

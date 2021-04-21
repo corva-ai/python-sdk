@@ -1,11 +1,9 @@
 import json
 import posixpath
 import re
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import requests
-
-from corva.configuration import Settings
 
 
 class Api:
@@ -23,20 +21,20 @@ class Api:
         api_url: str,
         data_api_url: str,
         api_key: str,
-        app_name: str,
+        app_key: str,
         timeout: Optional[int] = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
-        self.app_name = app_name
+        self.app_key = app_key
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
 
     @property
     def default_headers(self):
         return {
             'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_name,
+            'X-Corva-App': self.app_key,
         }
 
     def get(self, path: str, **kwargs):
@@ -179,29 +177,3 @@ class Api:
         data = list(response.json())
 
         return data
-
-
-def get_api(context: Any, settings: Settings, timeout: Optional[int] = None) -> Api:
-    """Returns Api instance.
-
-    Args:
-        context: AWS Lambda context.
-        settings:
-        timeout: custom api timeout.
-
-    Raises:
-          Exception: if cound not find an api key in the context.
-    """
-
-    try:
-        api_key = context.client_context.env["API_KEY"]
-    except (AttributeError, KeyError):
-        raise Exception('No API Key found.')
-
-    return Api(
-        api_url=settings.API_ROOT_URL,
-        data_api_url=settings.DATA_API_ROOT_URL,
-        api_key=api_key,
-        app_name=settings.APP_NAME,
-        timeout=timeout,
-    )

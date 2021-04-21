@@ -1,6 +1,5 @@
 from typing import Optional
 
-from corva.configuration import Settings
 from corva.state.redis_adapter import RedisAdapter
 
 
@@ -57,20 +56,22 @@ def get_cache(
     asset_id: int,
     app_stream_id: int,
     app_connection_id: int,
-    settings: Settings,
+    provider: str,
+    app_key: str,
+    cache_url: str,
     cache_settings: Optional[dict] = None,
 ) -> RedisState:
     cache_settings = cache_settings or {}
 
     redis_adapter = RedisAdapter(
         default_name=get_cache_key(
-            provider=settings.PROVIDER,
+            provider=provider,
             asset_id=asset_id,
             app_stream_id=app_stream_id,
-            app_key=settings.APP_KEY,
+            app_key=app_key,
             app_connection_id=app_connection_id,
         ),
-        cache_url=settings.CACHE_URL,
+        cache_url=cache_url,
         **cache_settings,
     )
 
