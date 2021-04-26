@@ -3,7 +3,7 @@ from corva import Api, TaskEvent, task
 
 @task
 def task_app(event: TaskEvent, api: Api):
-    dataset = api.get_dataset(
+    api.get_dataset(
         provider='corva',
         dataset='wits',
         query={
