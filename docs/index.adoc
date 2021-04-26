@@ -1,0 +1,385 @@
+= corva-sdk
+:toc: left
+:toclevels: 5
+:sectnums:
+:icons: font
+
+// document attributes
+:dev-center: https://app.corva.ai/dev-center/docs[Corva DevCenter]
+:corva-platform-api: https://api.corva.ai/documentation/index.html[Corva Platform API]
+:corva-data-api: https://data.corva.ai/docs#/[Corva Data API]
+:api-v1-data-provider-dataset: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
+:log-levels: https://docs.python.org/3/howto/logging.html[Python log levels]
+:pytest-plugin: https://docs.pytest.org/en/stable/writing_plugins.html
+:corva-sdk: pass:quotes[*corva-sdk*]
+:app-step1: Import required functionality.
+:app-step2: Define your function. \
+     It must receive three argumets: \
+     <<event,event>>, <<api,api>> and <<cache,cache>>. \
+     The arguments serve as building blocks for your app.
+:app-step3: Decorate your function using
+:app-step4: Add app logic here.
+:test-app-step1: Sample app that we want to test.
+:test-app-step2: pass:quotes[Add `app_runner` argument to your test function.]
+:test-app-step3: Define the <<event,event>> that will be passed to the app.
+:test-app-step4: pass:quotes[Use `app_runner` fixture to run the app.]
+:test-app-step5: Verify the result.
+
+{corva-sdk} is a framework for building {dev-center} Python apps.
+
+== Install
+
+{corva-sdk} requires Python 3.8.
+
+Installation is as simple as:
+
+[source,console]
+----
+pip install corva-sdk
+----
+
+[#app_types]
+== App Types
+
+There are three app types that you can build:
+
+1. <<stream,`stream`>> - works with real-time data.
+2. <<scheduled,`scheduled`>> - works with data at defined schedules/intervals
+(e.g., once an hour).
+3. <<task,`task`>> - works with data on-demand.
+
+TIP: Use type hints like those in the examples below
+for better support from editors and tools.
+
+[#stream]
+=== Stream
+
+Stream apps can be
+<<stream_time,time>> or <<stream_depth,depth>> based.
+
+[#stream_time]
+==== Time
+
+[source,python]
+----
+include::src/app_types/tutorial001.py[]
+----
+<.> {app-step1}
+<.> {app-step2}
+<.> {app-step3} `stream`.
+<.> {app-step4}
+
+[#stream_depth]
+==== Depth
+
+[source,python]
+----
+include::src/app_types/tutorial002.py[]
+----
+<.> {app-step1}
+<.> {app-step2}
+<.> {app-step3} `stream`.
+<.> {app-step4}
+
+[#scheduled]
+=== Scheduled
+
+[source,python]
+----
+include::src/app_types/tutorial003.py[]
+----
+<.> {app-step1}
+<.> {app-step2}
+<.> {app-step3} `scheduled`.
+<.> {app-step4}
+
+[#task]
+=== Task
+
+[source,python]
+----
+include::src/app_types/tutorial004.py[]
+----
+<.> {app-step1}
+<.> Define your function.
+It must receive two argumets:
+<<event,event>> and <<api,api>>.
+The arguments serve as building blocks for your app.
+<.> {app-step3} `task`.
+<.> {app-step4}
+
+[#event]
+== Event
+Event is an object that contains essential data for the app.
+Each <<app_types,app type>> has its corresponding event type,
+which only contains fields relevant to that app.
+
+[#api]
+== Api
+Apps should be able to communicate with
+{corva-platform-api} and {corva-data-api}.
+For this {corva-sdk} provides an `Api` object,
+which wraps Python `requests` library
+and adds automatic authorization, convenient URL usage
+and reasonable timeouts to API requests.
+`Api` methods return `requests.Response` objects.
+
+=== Url usage
+
+[source,python]
+----
+include::src/api/tutorial001.py[]
+----
+<.> Use {corva-platform-api} url suffix
+to make the Platform API call.
+<.> Use {corva-data-api} url suffix
+to make the Data API call.
+<.> You can also provide full url.
+
+=== HTTP GET
+
+[source,python]
+----
+include::src/api/tutorial002.py[]
+----
+<.> Simplest GET example.
+<.> Use optional `params` parameter
+to provide URL query string params.
+<.> As all `Api` methods return `requests.Response` objects,
+you can unpack received data like this.
+
+=== HTTP POST, DELETE, PUT and PATCH
+
+[source,python]
+----
+include::src/api/tutorial003.py[]
+----
+<.> Simplest POST example.
+<.> Simplest DELETE example.
+<.> Simplest PUT example.
+<.> Simplest PATCH example.
+<.> Use `data` parameter
+to provide a request body,
+that will be casted to json.
+
+=== Custom headers and timeouts
+
+[source,python]
+----
+include::src/api/tutorial004.py[]
+----
+<.> Use `headers` parameter
+to add custom headers to the request.
+<.> Use `timeout` parameter
+to override default timeout value.
+
+=== Convenience methods
+
+`Api` provides some convenience methods
+for frequently used endpoints.
+
+==== Get dataset
+
+Fetch the data from the
+{api-v1-data-provider-dataset} endpoint
+using `Api.get_dataset` method.
+
+[source,python]
+----
+include::src/api/tutorial005.py[]
+----
+
+[#cache]
+== Cache
+Apps might need to share some data between invokes.
+For this {corva-sdk} provides a `Cache` object.
+`Cache` uses a dict-like database,
+so the data is stored as `key:value` pairs.
+
+A typical example of `Cache` usage could be:
+
+1. Store some data during `app invoke 1`.
+2. Retrieve and use the data during `app invoke 2`.
+
+[TIP]
+====
+To get the most out of `Cache`:
+
+1. Store as small amounts of data as possible.
+2. Try to stay below `100kb`.
+====
+
+NOTE: <<task,Task>> apps don't get a `Cache` parameter
+as they aren't meant to share the data between invokes.
+
+=== Store and load
+
+[source,python]
+----
+include::src/cache/tutorial001.py[]
+----
+<.> `Cache` can store `str` values.
+<.> Load the value using its key.
+<.> `Cache` can store `int` values.
+<.> `Cache` stores the values in binary format.
+The data is decoded while loading,
+but `Cache` can't assume the type of the value.
+That's why the returned type is `str`.
+<.> `Cache` can store `float` values.
+<.> `Cache` can store `bytes` values.
+<.> Store multiple values at once using `mapping` parameter.
+<.> Load all data from cache.
+
+
+=== Delete
+
+[source,python]
+----
+include::src/cache/tutorial002.py[]
+----
+<.> Store some data.
+<.> Delete specific key.
+<.> Deleted key is not present in cache.
+<.> Delete all keys.
+<.> Cache is empty.
+
+=== Expiry, ttl and exists
+
+NOTE: By default `Cache` sets an expiry to `60` days.
+
+[source,python]
+----
+include::src/cache/tutorial003.py[]
+----
+<.> Store the value and set an expiry to `60` seconds
+using `expiry` parameter.
+<.> `expiry` parameter also supports
+`datetime.timedelta` objects.
+<.> Get the remaining time of key expiry in seconds.
+<.> Get the remaining time of key expiry in milliseconds.
+<.> The cache contains some data.
+<.> Wait for 60 seconds for data to expire.
+<.> Cache is empty.
+
+== Logging
+
+As apps are executed very frequently
+(once a second or so),
+unlimited logging can lead to huge amounts of data.
+{corva-sdk} provides a `Logger` object,
+which is a safe way for app logging.
+
+The `Logger` is a `logging.Logger` instance
+and should be used like every other Python logger.
+
+The `Logger` has following features:
+
+* Log messages are injected with contextual information,
+  which makes it easy to filter through logs
+  while debugging issues.
+* Log messages have limited length.
+  Too long messages are truncated to not exceed the limit.
+  Max message size can be controlled by
+  `LOG_THRESHOLD_MESSAGE_SIZE` env variable.
+  Default value is `1000` symbols or bytes.
+* Number of log messages is limited.
+  After reaching the limit logging gets disabled.
+  Number of log messages can be controlled by
+  `LOG_THRESHOLD_MESSAGE_COUNT` env variable.
+  Default value is `15` messages.
+* Logging level can be set using `LOG_LEVEL` env variable.
+  Default value is `INFO`,
+  see {log-levels} for other available options.
+
+[source,python]
+----
+include::src/logging/tutorial001.py[]
+----
+<.> Import `Logger` object.
+<.> Use `Logger` as every other Python logger.
+
+== Testing
+
+Testing apps is easy and enjoyable.
+
+{corva-sdk} provides convenient tools for testing through
+{pytest-plugin}[pytest-plugin].
+
+
+Write your tests using `pytest` to get the access to the plugin.
+
+To install the library run:
+
+[source,console]
+----
+pip install pytest
+----
+
+=== Stream
+
+==== Time
+[source,python]
+----
+include::src/testing/tutorial001.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+==== Depth
+[source,python]
+----
+include::src/testing/tutorial002.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+=== Scheduled
+[source,python]
+----
+include::src/testing/tutorial003.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+=== Task
+[source,python]
+----
+include::src/testing/tutorial004.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+== Development - Contributing
+
+=== Set up the project
+[source,console]
+----
+cd ~/YOUR_PATH/python-sdk
+python -m venv venv
+source venv/bin/activate
+pip install -e .[dev]
+----
+
+=== Run tests
+[source,console]
+----
+pytest
+----
+
+=== Run linter
+[source,console]
+----
+flake8
+----
