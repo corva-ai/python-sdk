@@ -387,3 +387,9 @@ coverage run --branch -m pytest ; coverage html --include=src/*,docs/src/*
 ----
 flake8
 ----
+
+=== Generate docs
+[source,console]
+----
+docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor "*.adoc"
+----
