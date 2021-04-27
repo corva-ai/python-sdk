@@ -24,11 +24,13 @@ class ScheduledEvent(CorvaBaseEvent):
 
     Attributes:
         asset_id: asset id.
+        company_id: company id.
         start_time: left bound of the time range, covered by this event. Use inclusively.
         end_time: right bound of the time range, covered by this event. Use inclusively.
     """
 
     asset_id: int
+    company_id: int
     start_time: int
     end_time: int = pydantic.Field(..., alias='schedule_start')
 
@@ -38,6 +40,7 @@ class ScheduledEvent(CorvaBaseEvent):
 
 class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     asset_id: int
+    company_id: int
     interval: int = pydantic.Field(
         ..., description='Time in seconds between two schedule triggers'
     )
