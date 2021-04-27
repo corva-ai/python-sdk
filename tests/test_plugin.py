@@ -30,7 +30,9 @@ def test_scheduled_app_runner(app_runner):
     def scheduled_app(event, api, cache):
         return 'Scheduled app result'
 
-    event = ScheduledEvent(asset_id=int(), start_time=int(), end_time=int())
+    event = ScheduledEvent(
+        asset_id=int(), start_time=int(), end_time=int(), company_id=int()
+    )
 
     assert app_runner(scheduled_app, event) == 'Scheduled app result'
 
