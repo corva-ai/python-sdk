@@ -6,7 +6,7 @@ from docs.src.cache import tutorial002
 
 
 def test_tutorial002(app_runner, mocker: MockerFixture):
-    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0)
+    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     store_spy = mocker.spy(RedisState, 'store')
     delete_spy = mocker.spy(RedisState, 'delete')
