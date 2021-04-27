@@ -40,7 +40,7 @@ class ScheduledEvent(CorvaBaseEvent):
 
 class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     asset_id: int
-    company_id: int
+    company_id: int = pydantic.Field(..., alias='company')
     interval: int = pydantic.Field(
         ..., description='Time in seconds between two schedule triggers'
     )
