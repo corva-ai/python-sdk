@@ -379,7 +379,7 @@ pip install -e .[dev]
 === Run tests
 [source,console]
 ----
-pytest
+coverage run --branch -m pytest ; coverage html --include=src/*,docs/src/*
 ----
 
 === Run linter
