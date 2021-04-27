@@ -31,6 +31,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         schedule_start=int(),
         app_connection=1,
         app_stream=int(),
+        company=int(),
     )
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')

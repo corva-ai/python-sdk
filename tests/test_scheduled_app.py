@@ -21,6 +21,7 @@ def test_set_completed_status(context, requests_mock):
                 schedule_start=int(),
                 app_connection=int(),
                 app_stream=int(),
+                company=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -71,6 +72,7 @@ def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
                 schedule_start=value,
                 app_connection=int(),
                 app_stream=int(),
+                company=int(),
             ).dict(by_alias=True, exclude_unset=True, exclude_defaults=True)
         ]
     ]
@@ -105,6 +107,7 @@ def test_set_start_time(
                 schedule_start=schedule_start,
                 app_connection=int(),
                 app_stream=int(),
+                company=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -133,6 +136,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
                 schedule_start=int(),
                 app_connection=int(),
                 app_stream=int(),
+                company=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
