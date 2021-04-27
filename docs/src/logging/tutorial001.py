@@ -1,5 +1,4 @@
-from corva import Api  # <.>
-from corva import Logger, TaskEvent, task
+from corva import Api, Logger, TaskEvent, task  # <.>
 
 
 @task

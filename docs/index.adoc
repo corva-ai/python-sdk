@@ -1,16 +1,17 @@
-= corva-sdk
+= https://github.com/corva-ai/python-sdk[corva-sdk]
 :toc: left
 :toclevels: 5
 :sectnums:
+:nofooter:
 :icons: font
 
 // document attributes
-:dev-center: https://app.corva.ai/dev-center/docs[Corva DevCenter]
-:corva-platform-api: https://api.corva.ai/documentation/index.html[Corva Platform API]
-:corva-data-api: https://data.corva.ai/docs#/[Corva Data API]
-:api-v1-data-provider-dataset: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
-:log-levels: https://docs.python.org/3/howto/logging.html[Python log levels]
-:pytest-plugin: https://docs.pytest.org/en/stable/writing_plugins.html
+:dev-center-link: https://app.corva.ai/dev-center/docs[Corva DevCenter]
+:corva-platform-api-link: https://api.corva.ai/documentation/index.html[Corva Platform API]
+:corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
+:api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
+:python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
+:pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
 :corva-sdk: pass:quotes[*corva-sdk*]
 :app-step1: Import required functionality.
 :app-step2: Define your function. \
@@ -27,7 +28,7 @@
 
 Documentation for version: *v0.0.18*.
 
-{corva-sdk} is a framework for building {dev-center} Python apps.
+{corva-sdk} is a framework for building {dev-center-link} Python apps.
 
 == Install
 
@@ -47,10 +48,10 @@ There are three app types that you can build:
 
 1. <<stream,`stream`>> - works with real-time data.
 2. <<scheduled,`scheduled`>> - works with data at defined schedules/intervals
-(e.g., once an hour).
+(e.g., once a minute).
 3. <<task,`task`>> - works with data on-demand.
 
-TIP: Use type hints like those in the examples below
+TIP: Use type hints like in examples below
 for better support from editors and tools.
 
 [#stream]
@@ -119,7 +120,7 @@ which only contains fields relevant to that app.
 [#api]
 == Api
 Apps should be able to communicate with
-{corva-platform-api} and {corva-data-api}.
+{corva-platform-api-link} and {corva-data-api-link}.
 For this {corva-sdk} provides an `Api` object,
 which wraps Python `requests` library
 and adds automatic authorization, convenient URL usage
@@ -132,11 +133,11 @@ and reasonable timeouts to API requests.
 ----
 include::src/api/tutorial001.py[]
 ----
-<.> Use {corva-platform-api} url suffix
-to make the Platform API call.
-<.> Use {corva-data-api} url suffix
-to make the Data API call.
-<.> You can also provide full url.
+<.> Use {corva-platform-api-link} URL suffix
+to make a Platform API call.
+<.> Use {corva-data-api-link} URL suffix
+to make a Data API call.
+<.> You can also provide full URL.
 
 === HTTP GET
 
@@ -147,8 +148,9 @@ include::src/api/tutorial002.py[]
 <.> Simplest GET example.
 <.> Use optional `params` parameter
 to provide URL query string params.
-<.> As all `Api` methods return `requests.Response` objects,
-you can unpack received data like this.
+<.> You can unpack received data like this,
+as all `Api` methods return `requests.Response` objects.
+
 
 === HTTP POST, DELETE, PUT and PATCH
 
@@ -183,7 +185,7 @@ for frequently used endpoints.
 ==== Get dataset
 
 Fetch the data from the
-{api-v1-data-provider-dataset} endpoint
+{api-v1-data-provider-dataset-link} endpoint
 using `Api.get_dataset` method.
 
 [source,python]
@@ -198,7 +200,7 @@ For this {corva-sdk} provides a `Cache` object.
 `Cache` uses a dict-like database,
 so the data is stored as `key:value` pairs.
 
-A typical example of `Cache` usage could be:
+A typical example of `Cache` usage is:
 
 1. Store some data during `app invoke 1`.
 2. Retrieve and use the data during `app invoke 2`.
@@ -259,9 +261,9 @@ using `expiry` parameter.
 `datetime.timedelta` objects.
 <.> Get the remaining time of key expiry in seconds.
 <.> Get the remaining time of key expiry in milliseconds.
-<.> The cache contains some data.
+<.> Verify, that cache contains some data.
 <.> Wait for 60 seconds for data to expire.
-<.> Cache is empty.
+<.> Verify, that cache is empty.
 
 == Logging
 
@@ -291,7 +293,7 @@ The `Logger` has following features:
   Default value is `15` messages.
 * Logging level can be set using `LOG_LEVEL` env variable.
   Default value is `INFO`,
-  see {log-levels} for other available options.
+  see {python-log-levels-link} for other available options.
 
 [source,python]
 ----
@@ -305,7 +307,7 @@ include::src/logging/tutorial001.py[]
 Testing apps is easy and enjoyable.
 
 {corva-sdk} provides convenient tools for testing through
-{pytest-plugin}[pytest-plugin].
+{pytest-plugin-link}.
 
 
 Write your tests using `pytest` to get the access to the plugin.
