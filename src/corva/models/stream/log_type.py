@@ -7,19 +7,9 @@ class LogType(enum.Enum):
 
     @property
     def raw_event(self):
-        from corva.models.stream.raw import (
-            RawStreamDepthEvent,
-            RawStreamTimeEvent,
-        )
+        from corva.models.stream.raw import RawStreamDepthEvent, RawStreamTimeEvent
 
         mapping = {self.time: RawStreamTimeEvent, self.depth: RawStreamDepthEvent}
-        return mapping[self]
-
-    @property
-    def context(self):
-        from corva.models.stream.context import StreamDepthContext, StreamTimeContext
-
-        mapping = {self.time: StreamTimeContext, self.depth: StreamDepthContext}
         return mapping[self]
 
     @property
