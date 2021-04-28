@@ -2,8 +2,7 @@ import logging
 
 from pytest_mock import MockerFixture
 
-from corva import Logger
-from corva.models.task import TaskEvent
+from corva import Logger, TaskEvent
 from docs.src.logging import tutorial001
 
 
