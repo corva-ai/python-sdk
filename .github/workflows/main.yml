@@ -32,12 +32,6 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Cache python
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-1
-
       - name: Install dependencies
         run: pip install --disable-pip-version-check --upgrade --upgrade-strategy eager .[dev]
 
