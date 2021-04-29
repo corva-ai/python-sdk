@@ -26,7 +26,7 @@
 :test-app-step4: pass:quotes[Use `app_runner` fixture to run the app.]
 :test-app-step5: Verify the result.
 
-Documentation for version *v0.0.18*.
+Documentation for version *v1.0.0*.
 
 {corva-sdk} is a framework for building {dev-center-link} Python apps.
 
