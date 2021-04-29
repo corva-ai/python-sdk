@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2021-04-29
+
 ### Added
 - `corva.stream`, `corva.scheduled` and `corva.task` app decorators. 
   See readme for usage examples.
@@ -29,6 +31,7 @@ env variables, that should be used to configure logging.
 
 
 ## [0.0.16] - 2021-04-02
+
 ### Added
 - `app_runner` fixture for testing apps.
 
@@ -148,7 +151,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v0.0.18...master
+[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v1.0.0...master
+[1.0.0]: https://github.com/corva-ai/python-sdk/compare/v0.0.18...v1.0.0
 [0.0.18]: https://github.com/corva-ai/python-sdk/compare/v0.0.17...v0.0.18
 [0.0.17]: https://github.com/corva-ai/python-sdk/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/corva-ai/python-sdk/compare/v0.0.15...v0.0.16
