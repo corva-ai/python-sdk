@@ -4,7 +4,8 @@
 :sectnums:
 :nofooter:
 :icons: font
-
+:source-highlighter: pygments
+:pygments-style: default
 // document attributes
 :dev-center-link: https://app.corva.ai/dev-center/docs[Corva DevCenter]
 :corva-platform-api-link: https://api.corva.ai/documentation/index.html[Corva Platform API]
@@ -36,7 +37,7 @@ Documentation for version *v1.0.0*.
 
 Installation is as simple as:
 
-[source,console]
+[source,bash]
 ----
 pip install corva-sdk
 ----
@@ -314,7 +315,7 @@ Write your tests using `pytest` to get the access to the plugin.
 
 To install the library run:
 
-[source,console]
+[source,bash]
 ----
 pip install pytest
 ----
@@ -368,7 +369,7 @@ include::src/testing/tutorial004.py[]
 == Development - Contributing
 
 === Set up the project
-[source,console]
+[source,bash]
 ----
 cd ~/YOUR_PATH/python-sdk
 python -m venv venv
@@ -377,19 +378,19 @@ pip install -e .[dev]
 ----
 
 === Run tests
-[source,console]
+[source,bash]
 ----
 coverage run --branch -m pytest ; coverage html --include=src/*,docs/src/*
 ----
 
 === Run linter
-[source,console]
+[source,bash]
 ----
 flake8
 ----
 
 === Generate docs
-[source,console]
+[source,bash]
 ----
-docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor "*.adoc"
+docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor -D build '*.adoc'
 ----
