@@ -438,6 +438,82 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #f8f8f8; }
+pre.pygments .tok-c { color: #408080; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #408080; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #BC7A00 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #408080; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #408080; font-style: italic } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #008000 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #B00040 } /* Keyword.Type */
+pre.pygments .tok-m { color: #666666 } /* Literal.Number */
+pre.pygments .tok-s { color: #BA2121 } /* Literal.String */
+pre.pygments .tok-na { color: #7D9029 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #008000 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0000FF; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #880000 } /* Name.Constant */
+pre.pygments .tok-nd { color: #AA22FF } /* Name.Decorator */
+pre.pygments .tok-ni { color: #999999; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+pre.pygments .tok-nf { color: #0000FF } /* Name.Function */
+pre.pygments .tok-nl { color: #A0A000 } /* Name.Label */
+pre.pygments .tok-nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #008000; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #19177C } /* Name.Variable */
+pre.pygments .tok-ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #666666 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #666666 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #666666 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #666666 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #666666 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #BA2121 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #BA2121 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #BA2121 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #BA2121 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #BA2121 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #BA2121 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #008000 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #BB6688 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #BA2121 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #19177C } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #008000 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #0000FF } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #19177C } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #19177C } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #19177C } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #19177C } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
+</style>
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
@@ -525,7 +601,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">pip install corva-sdk</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>pip install corva-sdk</code></pre>
 </div>
 </div>
 </div>
@@ -573,12 +649,12 @@ for better support from editors and tools.
 <h4 id="stream_time">2.1.1. Time</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, StreamTimeEvent, stream  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">stream</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
-@stream  <i class="conum" data-value="3"></i><b>(3)</b>
-def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):  <i class="conum" data-value="2"></i><b>(2)</b>
-    return "Hello, World!"  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+<span class="tok-nd">@stream</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">stream_time_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s2">&quot;Hello, World!&quot;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -606,12 +682,12 @@ def stream_time_app(event: StreamTimeEvent, api: Api, cache: Cache):  <i class="
 <h4 id="stream_depth">2.1.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, StreamDepthEvent, stream  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">stream</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
-@stream  <i class="conum" data-value="3"></i><b>(3)</b>
-def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):  <i class="conum" data-value="2"></i><b>(2)</b>
-    return 'Hello, World!'  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+<span class="tok-nd">@stream</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">stream_depth_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -640,12 +716,12 @@ def stream_depth_app(event: StreamDepthEvent, api: Api, cache: Cache):  <i class
 <h3 id="scheduled">2.2. Scheduled</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, ScheduledEvent, scheduled  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
-@scheduled  <i class="conum" data-value="3"></i><b>(3)</b>
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):  <i class="conum" data-value="2"></i><b>(2)</b>
-    return 'Hello, World!'  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+<span class="tok-nd">@scheduled</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -673,12 +749,12 @@ def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):  <i class="con
 <h3 id="task">2.3. Task</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
-@task  <i class="conum" data-value="3"></i><b>(3)</b>
-def task_app(event: TaskEvent, api: Api):  <i class="conum" data-value="2"></i><b>(2)</b>
-    return 'Hello, World!'  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+<span class="tok-nd">@task</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -733,14 +809,14 @@ and reasonable timeouts to API requests.
 <h3 id="_url_usage">4.1. Url usage</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
-    api.get('/v2/pads')  <i class="conum" data-value="1"></i><b>(1)</b>
-    api.get('/api/v1/data/provider/dataset/')  <i class="conum" data-value="2"></i><b>(2)</b>
-    api.get('https://api.corva.ai/v2/pads')  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/api/v1/data/provider/dataset/&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;https://api.corva.ai/v2/pads&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -766,15 +842,15 @@ to make a Data API call.</td>
 <h3 id="_http_get">4.2. HTTP GET</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
-    response = api.get('/v2/pads')  <i class="conum" data-value="1"></i><b>(1)</b>
-    api.get('/v2/pads', params={'company': 1})  <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">response</span> <span class="tok-o">=</span> <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">,</span> <span class="tok-n">params</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;company&#39;</span><span class="tok-p">:</span> <span class="tok-mi">1</span><span class="tok-p">})</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
-    response.json()  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+    <span class="tok-n">response</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -800,15 +876,15 @@ as all <code>Api</code> methods return <code>requests.Response</code> objects.</
 <h3 id="_http_post_delete_put_and_patch">4.3. HTTP POST, DELETE, PUT and PATCH</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
-    api.post('/v2/pads', data={'key': 'val'})  <i class="conum" data-value="1"></i><b>(1)</b> <i class="conum" data-value="5"></i><b>(5)</b>
-    api.delete('/v2/pads/123')  <i class="conum" data-value="2"></i><b>(2)</b>
-    api.put('/api/v1/data/provider/dataset/', data={'key': 'val'})  <i class="conum" data-value="3"></i><b>(3)</b> <i class="conum" data-value="5"></i><b>(5)</b>
-    api.patch('/v2/pads/123', data={'key': 'val'})  <i class="conum" data-value="4"></i><b>(4)</b> <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">,</span> <span class="tok-n">data</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">})</span>   <i class="conum" data-value="1"></i><b>(1)</b> <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads/123&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">put</span><span class="tok-p">(</span><span class="tok-s1">&#39;/api/v1/data/provider/dataset/&#39;</span><span class="tok-p">,</span> <span class="tok-n">data</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">})</span>   <i class="conum" data-value="3"></i><b>(3)</b> <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">patch</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads/123&#39;</span><span class="tok-p">,</span> <span class="tok-n">data</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">})</span>   <i class="conum" data-value="4"></i><b>(4)</b> <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -842,13 +918,13 @@ that will be casted to json.</td>
 <h3 id="_custom_headers_and_timeouts">4.4. Custom headers and timeouts</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
-    api.get('/v2/pads', headers={'header': 'header-value'})  <i class="conum" data-value="1"></i><b>(1)</b>
-    api.get('/v2/pads', timeout=5)  <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">,</span> <span class="tok-n">headers</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;header&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;header-value&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;/v2/pads&#39;</span><span class="tok-p">,</span> <span class="tok-n">timeout</span><span class="tok-o">=</span><span class="tok-mi">5</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -881,21 +957,21 @@ using <code>Api.get_dataset</code> method.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
-    api.get_dataset(
-        provider='corva',
-        dataset='wits',
-        query={
-            'asset_id': event.asset_id,
-        },
-        sort={'timestamp': 1},
-        limit=1,
-        fields='data,metadata',
-    )</code></pre>
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">api</span><span class="tok-o">.</span><span class="tok-n">get_dataset</span><span class="tok-p">(</span>
+        <span class="tok-n">provider</span><span class="tok-o">=</span><span class="tok-s1">&#39;corva&#39;</span><span class="tok-p">,</span>
+        <span class="tok-n">dataset</span><span class="tok-o">=</span><span class="tok-s1">&#39;wits&#39;</span><span class="tok-p">,</span>
+        <span class="tok-n">query</span><span class="tok-o">=</span><span class="tok-p">{</span>
+            <span class="tok-s1">&#39;asset_id&#39;</span><span class="tok-p">:</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">asset_id</span><span class="tok-p">,</span>
+        <span class="tok-p">},</span>
+        <span class="tok-n">sort</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;timestamp&#39;</span><span class="tok-p">:</span> <span class="tok-mi">1</span><span class="tok-p">},</span>
+        <span class="tok-n">limit</span><span class="tok-o">=</span><span class="tok-mi">1</span><span class="tok-p">,</span>
+        <span class="tok-n">fields</span><span class="tok-o">=</span><span class="tok-s1">&#39;data,metadata&#39;</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -965,25 +1041,25 @@ as they aren&#8217;t meant to share the data between invokes.
 <h3 id="_store_and_load">5.1. Store and load</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, ScheduledEvent, scheduled
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
-@scheduled
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-    cache.store(key='key', value='')  <i class="conum" data-value="1"></i><b>(1)</b>
-    assert cache.load(key='key') == ''  <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
-    cache.store(key='key', value=0)  <i class="conum" data-value="3"></i><b>(3)</b>
-    assert cache.load(key='key') == '0'  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;0&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    cache.store(key='key', value=0.0)  <i class="conum" data-value="5"></i><b>(5)</b>
-    assert cache.load(key='key') == '0.0'  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-mf">0.0</span><span class="tok-p">)</span>  <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;0.0&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    cache.store(key='key', value=b'')  <i class="conum" data-value="6"></i><b>(6)</b>
-    assert cache.load(key='key') == ''  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-sa">b</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="6"></i><b>(6)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    cache.store(mapping={'key': 'val', 'other-key': 'other-val'})  <i class="conum" data-value="7"></i><b>(7)</b>
-    assert cache.load_all() == {'key': 'val', 'other-key': 'other-val'}  <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">mapping</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;other-key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;other-val&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="7"></i><b>(7)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;other-key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;other-val&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1030,18 +1106,18 @@ That&#8217;s why the returned type is <code>str</code>.</td>
 <h3 id="_delete">5.2. Delete</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, ScheduledEvent, scheduled
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
-@scheduled
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-    cache.store(mapping={'key1': 'val1', 'key2': 'val2', 'key3': 'val3'})  <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">mapping</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key2&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val3&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
-    cache.delete(keys=['key1'])  <i class="conum" data-value="2"></i><b>(2)</b>
-    assert cache.load_all() == {'key2': 'val2', 'key3': 'val3'}  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-n">keys</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">])</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key2&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val3&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="3"></i><b>(3)</b>
 
-    cache.delete_all()  <i class="conum" data-value="4"></i><b>(4)</b>
-    assert cache.load_all() == {}  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_all</span><span class="tok-p">()</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{}</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1085,24 +1161,24 @@ By default <code>Cache</code> sets an expiry to <code>60</code> days.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">import datetime
-import time
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">datetime</span>
+<span class="tok-kn">import</span> <span class="tok-nn">time</span>
 
-from corva import Api, Cache, ScheduledEvent, scheduled
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
-@scheduled
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
-    cache.store(key='key', value='val', expiry=60)  <i class="conum" data-value="1"></i><b>(1)</b>
-    cache.store(key='key', value='val', expiry=datetime.timedelta(seconds=60))  <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">timedelta</span><span class="tok-p">(</span><span class="tok-n">seconds</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">))</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
-    assert cache.ttl() == 60  <i class="conum" data-value="3"></i><b>(3)</b>
-    assert cache.pttl() == 60000  <i class="conum" data-value="4"></i><b>(4)</b>
-    assert cache.exists()  <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">ttl</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-mi">60</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">pttl</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-mi">60000</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>  <i class="conum" data-value="5"></i><b>(5)</b>
 
-    time.sleep(60)  <i class="conum" data-value="6"></i><b>(6)</b>
+    <span class="tok-n">time</span><span class="tok-o">.</span><span class="tok-n">sleep</span><span class="tok-p">(</span><span class="tok-mi">60</span><span class="tok-p">)</span>  <i class="conum" data-value="6"></i><b>(6)</b>
 
-    assert not cache.exists()  <i class="conum" data-value="7"></i><b>(7)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-ow">not</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>  <i class="conum" data-value="7"></i><b>(7)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1189,20 +1265,20 @@ see <a href="https://docs.python.org/3/howto/logging.html">Python log levels</a>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Logger, TaskEvent, task  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Logger</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
     <i class="conum" data-value="2"></i><b>(2)</b>
-    Logger.debug('Debug message!')
-    Logger.info('Info message!')
-    Logger.warning('Warning message!')
-    Logger.error('Error message!')
-    try:
-        0 / 0
-    except ZeroDivisionError:
-        Logger.exception('Exception message!')</code></pre>
+    <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">&#39;Debug message!&#39;</span><span class="tok-p">)</span>
+    <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">info</span><span class="tok-p">(</span><span class="tok-s1">&#39;Info message!&#39;</span><span class="tok-p">)</span>
+    <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">warning</span><span class="tok-p">(</span><span class="tok-s1">&#39;Warning message!&#39;</span><span class="tok-p">)</span>
+    <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">error</span><span class="tok-p">(</span><span class="tok-s1">&#39;Error message!&#39;</span><span class="tok-p">)</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-mi">0</span> <span class="tok-o">/</span> <span class="tok-mi">0</span>
+    <span class="tok-k">except</span> <span class="tok-ne">ZeroDivisionError</span><span class="tok-p">:</span>
+        <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">&#39;Exception message!&#39;</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1237,7 +1313,7 @@ def task_app(event: TaskEvent, api: Api):
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">pip install pytest</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>pip install pytest</code></pre>
 </div>
 </div>
 <div class="sect2">
@@ -1246,22 +1322,22 @@ def task_app(event: TaskEvent, api: Api):
 <h4 id="_time">7.1.1. Time</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, StreamTimeEvent, StreamTimeRecord, stream
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">StreamTimeRecord</span><span class="tok-p">,</span> <span class="tok-n">stream</span>
 
 
-@stream
-def stream_app(event: StreamTimeEvent, api: Api, cache: Cache):  <i class="conum" data-value="1"></i><b>(1)</b>
-    return 'Hello, World!'
+<span class="tok-nd">@stream</span>
+<span class="tok-k">def</span> <span class="tok-nf">stream_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
 
 
-def test_stream_time_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
-    event = StreamTimeEvent(  <i class="conum" data-value="3"></i><b>(3)</b>
-        asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
-    )
+<span class="tok-k">def</span> <span class="tok-nf">test_stream_time_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">(</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">records</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-n">StreamTimeRecord</span><span class="tok-p">(</span><span class="tok-n">timestamp</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)]</span>
+    <span class="tok-p">)</span>
 
-    result = app_runner(stream_app, event=event)  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">stream_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    assert result == 'Hello, World!'  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1293,22 +1369,22 @@ def test_stream_time_app(app_runner):  <i class="conum" data-value="2"></i><b>(2
 <h4 id="_depth">7.1.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, StreamDepthEvent, StreamDepthRecord, stream
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">StreamDepthRecord</span><span class="tok-p">,</span> <span class="tok-n">stream</span>
 
 
-@stream
-def stream_app(event: StreamDepthEvent, api: Api, cache: Cache):  <i class="conum" data-value="1"></i><b>(1)</b>
-    return 'Hello, World!'
+<span class="tok-nd">@stream</span>
+<span class="tok-k">def</span> <span class="tok-nf">stream_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
 
 
-def test_stream_depth_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
-    event = StreamDepthEvent(  <i class="conum" data-value="3"></i><b>(3)</b>
-        asset_id=0, company_id=0, records=[StreamDepthRecord(measured_depth=0)]
-    )
+<span class="tok-k">def</span> <span class="tok-nf">test_stream_depth_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">(</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">records</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-n">StreamDepthRecord</span><span class="tok-p">(</span><span class="tok-n">measured_depth</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)]</span>
+    <span class="tok-p">)</span>
 
-    result = app_runner(stream_app, event=event)  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">stream_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    assert result == 'Hello, World!'  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1341,20 +1417,20 @@ def test_stream_depth_app(app_runner):  <i class="conum" data-value="2"></i><b>(
 <h3 id="_scheduled">7.2. Scheduled</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, Cache, ScheduledEvent, scheduled
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
-@scheduled
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):  <i class="conum" data-value="1"></i><b>(1)</b>
-    return 'Hello, World!'
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
 
 
-def test_scheduled_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
-    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0, company_id=0)  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">test_scheduled_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">(</span><span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">start_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">end_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
 
-    result = app_runner(scheduled_app, event=event)  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">scheduled_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    assert result == 'Hello, World!'  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1386,20 +1462,20 @@ def test_scheduled_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)<
 <h3 id="_task">7.3. Task</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">from corva import Api, TaskEvent, task
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
 
 
-@task
-def task_app(event: TaskEvent, api: Api):  <i class="conum" data-value="1"></i><b>(1)</b>
-    return 'Hello, World!'
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
 
 
-def test_task_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
-    event = TaskEvent(asset_id=0, company_id=0)  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">test_task_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">TaskEvent</span><span class="tok-p">(</span><span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
 
-    result = app_runner(task_app, event=event)  <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">task_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
-    assert result == 'Hello, World!'  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1436,10 +1512,10 @@ def test_task_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
 <h3 id="_set_up_the_project">8.1. Set up the project</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">cd ~/YOUR_PATH/python-sdk
+<pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-nb">cd</span> ~/YOUR_PATH/python-sdk
 python -m venv venv
-source venv/bin/activate
-pip install -e .[dev]</code></pre>
+<span class="tok-nb">source</span> venv/bin/activate
+pip install -e .<span class="tok-o">[</span>dev<span class="tok-o">]</span></code></pre>
 </div>
 </div>
 </div>
@@ -1447,7 +1523,7 @@ pip install -e .[dev]</code></pre>
 <h3 id="_run_tests">8.2. Run tests</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">coverage run --branch -m pytest ; coverage html --include=src/*,docs/src/*</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>coverage run --branch -m pytest <span class="tok-p">;</span> coverage html --include<span class="tok-o">=</span>src/*,docs/src/*</code></pre>
 </div>
 </div>
 </div>
@@ -1455,7 +1531,7 @@ pip install -e .[dev]</code></pre>
 <h3 id="_run_linter">8.3. Run linter</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">flake8</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>flake8</code></pre>
 </div>
 </div>
 </div>
@@ -1463,7 +1539,7 @@ pip install -e .[dev]</code></pre>
 <h3 id="_generate_docs">8.4. Generate docs</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor "*.adoc"</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>docker run --rm -v <span class="tok-k">$(</span><span class="tok-nb">pwd</span><span class="tok-k">)</span>/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor -D build <span class="tok-s1">&#39;*.adoc&#39;</span></code></pre>
 </div>
 </div>
 </div>
