@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    __pycache__,
+    venv,
+    .env,
+    .pytest_cache,
+    .git,
+    .idea
+max-line-length = 120
+max-complexity = 10
