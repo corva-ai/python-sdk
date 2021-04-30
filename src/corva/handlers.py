@@ -18,7 +18,9 @@ def base_handler(raw_event_type: Type[RawBaseEvent]) -> Callable:
     def decorator(func: Callable[[RawBaseEvent, Api, str], Any]) -> Callable:
         @functools.wraps(func)
         def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
-            context = CorvaContext.parse_obj(aws_context)
+            context = CorvaContext.from_aws(
+                aws_event=aws_event, aws_context=aws_context
+            )
 
             api = Api(
                 api_url=SETTINGS.API_ROOT_URL,

@@ -1,9 +1,9 @@
 import inspect
+from types import SimpleNamespace
 from typing import Any, Callable, ClassVar, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
-from corva.models.context import CorvaContext
 from corva.models.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
@@ -18,13 +18,13 @@ class TestClient:
         _api: Api instance.
     """
 
-    _context: ClassVar[CorvaContext] = CorvaContext(
-        aws_request_id='qwerty', client_context={'env': {'API_KEY': '123'}}
+    _context: ClassVar[SimpleNamespace] = SimpleNamespace(
+        aws_request_id='qwerty', client_context=SimpleNamespace(env={'API_KEY': '123'})
     )
     _api: ClassVar[Api] = Api(
         api_url=SETTINGS.API_ROOT_URL,
         data_api_url=SETTINGS.DATA_API_ROOT_URL,
-        api_key=_context.api_key,
+        api_key=_context.client_context.env['API_KEY'],
         app_key=SETTINGS.APP_KEY,
     )
 
