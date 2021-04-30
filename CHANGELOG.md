@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2021-04-30
+
+### Fixed
+- AWS Lambda context parsing.
+
 ## [1.0.0] - 2021-04-29
 
 ### Added
@@ -151,7 +156,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased]: https://github.com/corva-ai/python-sdk/compare/v1.0.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.0.1...master
+[1.0.1]: https://github.com/corva-ai/python-sdk/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/corva-ai/python-sdk/compare/v0.0.18...v1.0.0
 [0.0.18]: https://github.com/corva-ai/python-sdk/compare/v0.0.17...v0.0.18
 [0.0.17]: https://github.com/corva-ai/python-sdk/compare/v0.0.16...v0.0.17
