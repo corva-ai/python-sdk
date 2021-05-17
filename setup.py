@@ -31,7 +31,7 @@ setuptools.setup(
     url='https://github.com/corva-ai/python-sdk',
     version=VERSION,
     classifiers=CLASSIFIERS,
-    description='SDK for interacting with Corva',
+    description='SDK for building Corva DevCenter Python apps.',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
