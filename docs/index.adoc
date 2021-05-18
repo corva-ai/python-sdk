@@ -368,29 +368,56 @@ include::src/testing/tutorial004.py[]
 
 == Development - Contributing
 
-=== Set up the project
-[source,bash]
-----
-cd ~/YOUR_PATH/python-sdk
-python -m venv venv
-source venv/bin/activate
-pip install -e .[dev]
-----
+Here are some guidelines to set up your environment.
 
-=== Run tests
-[source,bash]
-----
-coverage run --branch -m pytest ; coverage html --include=src/*,docs/src/*
-----
+=== Create and activate virtual environment
 
-=== Run linter
-[source,bash]
-----
-flake8
-----
+What's needed:
 
-=== Generate docs
+* Python 3.8.
+* Opened terminal inside cloned {corva-sdk} repository.
+
 [source,bash]
 ----
-docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor -D build '*.adoc'
+python -m venv env <.>
+source ./env/bin/activate <.>
 ----
+<.> Create a directory `./env/`
+with isolated Python environment inside.
+You will be able to install needed packages there.
+<.> Activate the new environment.
+
+[TIP]
+====
+From now on
+you must always have activated virtual environment
+when working with the project.
+====
+
+=== Install dependencies and run tests
+
+What's needed:
+
+* Installed `make`.
+
+[source,bash]
+----
+make install <.>
+make all  <.>
+----
+<.> Install all development requirements.
+<.> Run tests and linter
+to verify that the project was set up properly.
+
+=== What's next?
+
+After completing steps above
+you can explore the project
+and make a contribution.
+
+[source,bash]
+----
+make help <.>
+----
+<.> List available `make` targets -
+a good starting point for exploration.
