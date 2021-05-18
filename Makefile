@@ -66,3 +66,14 @@ clean:
 	@-rm -rf htmlcov
 	@-rm .coverage
 	@-sudo rm -rf docs/$(docs_build_dir)
+
+## release: How to release a new version.
+.PHONY: release
+release:
+	@echo "Checkout the master branch."
+	@echo "Update src/version.py with new version."
+	@echo "Update docs/index.adoc with new version."
+	@echo "Update CHANGELOG.md."
+	@echo "Commit the changes."
+	@echo "Create tag like "v1.0.0"."
+	@echo "Push commit and tag."
