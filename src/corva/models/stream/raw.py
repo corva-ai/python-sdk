@@ -82,7 +82,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
     @property
     def is_completed(self) -> bool:
-        """There can only be 1 completed record, always located at the end of the list."""
+        """Indicates whether there is a completed record.
+
+        There can only be 1 completed record always located at the end of the list.
+        """
 
         return self.records[-1].collection == 'wits.completed'
 
@@ -121,7 +124,6 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         new_records = copy.deepcopy(self.records)
 
         if self.is_completed:
-            # there can be only 1 completed record, always located at the end
             new_records = new_records[:-1]  # remove "completed" record
 
         if old_max_record_value is None:

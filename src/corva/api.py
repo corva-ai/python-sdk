@@ -125,7 +125,8 @@ class Api:
     def _validate_timeout(self, timeout: int) -> bool:
         if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
             raise ValueError(
-                f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and {self.TIMEOUT_LIMITS[1]} seconds.'
+                f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and '
+                f'{self.TIMEOUT_LIMITS[1]} seconds.'
             )
 
     def get_dataset(

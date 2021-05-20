@@ -25,8 +25,10 @@ class ScheduledEvent(CorvaBaseEvent):
     Attributes:
         asset_id: asset id.
         company_id: company id.
-        start_time: left bound of the time range, covered by this event. Use inclusively.
-        end_time: right bound of the time range, covered by this event. Use inclusively.
+        start_time: left bound of the time range, covered by this event.
+            Use inclusively.
+        end_time: right bound of the time range, covered by this event.
+            Use inclusively.
     """
 
     asset_id: int

@@ -52,9 +52,11 @@ def task_app(event, api):
         ],
     ),
     ids=(
-        'Lambda context has not None `client_context`. Lambda event has no `client_context`.',
+        'Lambda context has not None `client_context`.'
+        'Lambda event has no `client_context`.',
         'Lambda context has None `client_context`. Lambda event has `client_context`.',
-        'Lambda context has not None `client_context`. Lambda event has `client_context`.',
+        'Lambda context has not None `client_context`. '
+        'Lambda event has `client_context`.',
         'No `client_context` in Lambda context and event.',
     ),
 )
