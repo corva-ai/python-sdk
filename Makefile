@@ -1,6 +1,8 @@
 docs_dir = docs
 docs_build_dir = build
 srcs = src $(docs_dir)/src tests setup.py
+isort = isort --quiet --skip $(docs_dir)/src/app_types --skip $(docs_dir)/src/logging/tutorial001.py $(srcs)
+black = black --skip-string-normalization $(srcs)
 
 ## all: Run linter and tests.
 .PHONY: all
@@ -46,15 +48,16 @@ testcov: test
 .PHONY: lint
 lint:
 	@flake8 $(srcs)
+	@$(black) --check
 
 ## format: Format all files.
 .PHONY: format
 format:
-	@isort --force-single-line-imports --quiet $(srcs)
+	@$(isort) --force-single-line-imports
 	@autoflake --remove-all-unused-imports --recursive --remove-unused-variables \
 		--in-place $(srcs)
-	@black --skip-string-normalization --quiet $(srcs)
-	@isort --quiet $(srcs)
+	@$(black) --quiet
+	@$(isort)
 
 ## docs: Generate docs.
 .PHONY: docs
