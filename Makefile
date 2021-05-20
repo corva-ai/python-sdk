@@ -1,5 +1,6 @@
 docs_dir = docs
 docs_build_dir = build
+srcs = src $(docs_dir)/src tests setup.py
 
 ## all: Run linter and tests.
 .PHONY: all
@@ -44,7 +45,16 @@ testcov: test
 ## lint: Run linter.
 .PHONY: lint
 lint:
-	@flake8 src $(docs_dir)/src tests setup.py
+	@flake8 $(srcs)
+
+## format: Format all files.
+.PHONY: format
+format:
+	@isort --force-single-line-imports --quiet $(srcs)
+	@autoflake --remove-all-unused-imports --recursive --remove-unused-variables \
+		--in-place $(srcs)
+	@black --skip-string-normalization --quiet $(srcs)
+	@isort --quiet $(srcs)
 
 ## docs: Generate docs.
 .PHONY: docs
