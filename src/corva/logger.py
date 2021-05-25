@@ -121,8 +121,8 @@ class CorvaLoggerHandler(logging.Handler):
         if self.residue_message_count == 1:
             self.logging_warning = True
             self.logger.warning(
-                f'Disabling the logging as maximum number of logged messages was reached: '
-                f'{self.max_message_count}.'
+                f'Disabling the logging as maximum number of logged messages '
+                f'was reached: {self.max_message_count}.'
             )
 
     def format(self, record: logging.LogRecord) -> str:

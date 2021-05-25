@@ -6,14 +6,17 @@ KWARGS = {'key1': 'val1'}
 NAMES = ['1', '2']
 
 
-@pytest.mark.parametrize('call_func_name,mock_func_name', (
-     ('store', 'hset'),
-     ('load', 'hget'),
-     ('load_all', 'hgetall'),
-     ('delete', 'hdel'),
-     ('ttl', 'ttl'),
-     ('pttl', 'pttl'),
-))
+@pytest.mark.parametrize(
+    'call_func_name,mock_func_name',
+    (
+        ('store', 'hset'),
+        ('load', 'hget'),
+        ('load_all', 'hgetall'),
+        ('delete', 'hdel'),
+        ('ttl', 'ttl'),
+        ('pttl', 'pttl'),
+    ),
+)
 def test_all(redis, call_func_name, mock_func_name):
     with patch.object(redis.redis, mock_func_name) as mock_func:
         call_func = getattr(redis, call_func_name)

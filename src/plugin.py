@@ -28,7 +28,8 @@ def pytest_load_initial_conftests(args, early_config, parser):
       The current file that contains the hook is registered as a pytest plugin through
       setuptools entry points. Plugins registered like this are loaded before loading
       the packages being tested.
-      See load order here: https://docs.pytest.org/en/stable/writing_plugins.html#plugin-discovery-order-at-tool-startup
+      See load order here:
+        https://docs.pytest.org/en/stable/writing_plugins.html#plugin-discovery-order-at-tool-startup
     """
 
     provider = 'test-provider'

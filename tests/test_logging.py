@@ -227,13 +227,15 @@ def test_long_message_gets_truncated(mocker: MockerFixture, context, capsys):
         (
             0,
             '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
-            'Disabling the logging as maximum number of logged messages was reached: 0.\n',
+            'Disabling the logging as maximum number of logged messages '
+            'was reached: 0.\n',
         ),
         (
             1,
             '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
             '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
-            'Disabling the logging as maximum number of logged messages was reached: 1.\n',
+            'Disabling the logging as maximum number of logged messages '
+            'was reached: 1.\n',
         ),
     ],
 )

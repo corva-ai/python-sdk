@@ -76,14 +76,19 @@ def test_delete_and_exists(redis_adapter, name):
 def test_ttl(redis_adapter, name):
     with freeze_time('2020'):
         assert redis_adapter.hset(name=name, key=KEY, value=VAL) == 1
-        assert redis_adapter.ttl(name=name) == redis_adapter.DEFAULT_EXPIRY.total_seconds()
+        assert (
+            redis_adapter.ttl(name=name) == redis_adapter.DEFAULT_EXPIRY.total_seconds()
+        )
 
 
 @pytest.mark.parametrize('name', (None, NAME))
 def test_pttl(redis_adapter, name):
     with freeze_time('2020'):
         assert redis_adapter.hset(name=name, key=KEY, value=VAL) == 1
-        assert redis_adapter.pttl(name=name) == redis_adapter.DEFAULT_EXPIRY.total_seconds() * 1000
+        assert (
+            redis_adapter.pttl(name=name)
+            == redis_adapter.DEFAULT_EXPIRY.total_seconds() * 1000
+        )
 
 
 def test_hset_default_expiry(redis_adapter):
