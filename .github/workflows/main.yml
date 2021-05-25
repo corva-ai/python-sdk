@@ -4,27 +4,50 @@ on: push
 
 jobs:
   static:
-    name: Static Analysis
+    name: Static analysis
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Install flake8
-        run: pip install flake8
+      - name: Install
+        run: make install-lint
 
-      - name: Run flake8
-        uses: suo/flake8-github-action@releases/v1
-        with:
-          checkName: 'static'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run
+        run: make lint
 
-  testing:
-    name: Automated Testing
+  test:
+    name: Automated testing
+
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install
+        run: make install-test
+
+      - name: Run
+        run: make test
+
+  deploy:
+    name: Build and publish to PyPI
+
+    needs: [ static, test ]
+
+    if: contains(github.ref, 'tags/v')
+
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
@@ -33,49 +56,29 @@ jobs:
           python-version: 3.8
 
       - name: Install dependencies
-        run: pip install --disable-pip-version-check --upgrade --upgrade-strategy eager .[dev]
+        run: pip install -U setuptools wheel
 
-      - name: Run unit tests
-        run: |
-          coverage run --branch -m pytest -v
+      - name: Build the package
+        run: python setup.py sdist bdist_wheel
 
-      - name: Coverage report
-        run: coverage report
-
-  deploy:
-    name: Build and Publishing to PyPI
-    needs: [ static, testing ]
-    if: contains(github.ref, 'tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Build the Package
-        run: |
-          rm -rf dist/*
-          pip install wheel
-          python setup.py sdist bdist_wheel
-
-      - name: Publishing to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.4.2
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
   docs:
-    name: Build and Publish docs
+    name: Build and publish docs
+
     needs: deploy
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
       - name: Build
-        run: docker run --rm -v $(pwd)/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor -D build '*.adoc'
+        run: make docs
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1

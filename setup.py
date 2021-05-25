@@ -31,7 +31,7 @@ setuptools.setup(
     url='https://github.com/corva-ai/python-sdk',
     version=VERSION,
     classifiers=CLASSIFIERS,
-    description='SDK for interacting with Corva',
+    description='SDK for building Corva DevCenter Python apps.',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     keywords='corva, sdk',
@@ -40,20 +40,10 @@ setuptools.setup(
     package_dir={"": "src"},
     install_requires=[
         "fakeredis >=1.4.5, <2.0.0",
-        "pydantic >=1.7.3, <2.0.0",
+        "pydantic >=1.8.2, <2.0.0",
         "redis >=3.5.3, <4.0.0",
         "requests >=2.25.0, <3.0.0",
     ],
-    extras_require={
-        "dev": [
-            "coverage ==5.3",
-            "flake8 ==3.8.4",
-            "freezegun ==1.0.0",
-            "pytest ==6.1.2",
-            "pytest-mock ==3.3.1",
-            "requests-mock ==1.8.0",
-        ]
-    },
     python_requires='>=3.8, <4.0',
     license='The Unlicense',
     entry_points={"pytest11": ["corva = plugin"]},
