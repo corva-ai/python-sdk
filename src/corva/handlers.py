@@ -199,7 +199,7 @@ def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
             return result
 
         except Exception as exc:
-            CORVA_LOGGER.exception('An exception occured while updating task data.')
+            CORVA_LOGGER.exception('An exception occured while running task app.')
 
             status = TaskStatus.fail
             data = {'fail_reason': str(exc)}
