@@ -157,3 +157,26 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
 
     assert 'An exception occured while updating task data.' in captured.out
     update_task_data_patch.assert_called_once()
+
+
+def test_log_if_user_app_fails(
+    context,
+    mocker: MockerFixture,
+    requests_mock: RequestsMocker,
+    capsys,
+):
+    event = RawTaskEvent(task_id='0', version=2).dict()
+
+    mocker.patch.object(
+        RawTaskEvent,
+        'get_task_event',
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
+    )
+    put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
+
+    task(mocker.Mock(side_effect=Exception))(event, context)
+
+    captured = capsys.readouterr()
+
+    assert put_mock.called_once
+    assert 'An exception occured while running task app.' in captured.out
