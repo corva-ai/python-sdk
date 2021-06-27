@@ -51,34 +51,6 @@ def test_lambda_succeeds_if_unable_to_get_task_event(
         assert result is True
 
 
-def test_lambda_succeeds_if_unable_to_setup_logging(
-    context, mocker: MockerFixture, requests_mock: RequestsMocker
-):
-    @task
-    def task_app(event, api):
-        pass
-
-    event = RawTaskEvent(task_id='0', version=2).dict()
-
-    mocker.patch.object(
-        RawTaskEvent,
-        'get_task_event',
-        return_value=TaskEvent(asset_id=int(), company_id=int()),
-    )
-    mocker.patch(
-        'corva.handlers.setup_logging',
-        side_effect=Exception('test_setup_logging_raises'),
-    )
-    put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
-
-    task_app(event, context)
-
-    assert put_mock.called_once
-    assert put_mock.request_history[0].json() == {
-        'fail_reason': 'test_setup_logging_raises'
-    }
-
-
 @pytest.mark.parametrize(
     'status,side_effect',
     (['fail', Exception('test_user_app_raises')], ['success', None]),
@@ -159,3 +131,54 @@ def test_task_app_succeeds(context, requests_mock: RequestsMocker):
 
     assert put_mock.request_history[0].json() == {'payload': True}
     assert result is True
+
+
+def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsys):
+    @task
+    def task_app(event, api):
+        return True
+
+    event = RawTaskEvent(task_id='0', version=2).dict()
+
+    mocker.patch.object(
+        RawTaskEvent,
+        'get_task_event',
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
+    )
+    update_task_data_patch = mocker.patch.object(
+        RawTaskEvent,
+        'update_task_data',
+        side_effect=Exception,
+    )
+
+    task_app(event, context)
+
+    captured = capsys.readouterr()
+
+    assert 'ASSET=0' in captured.out
+    assert 'An exception occured while updating task data.' in captured.out
+    update_task_data_patch.assert_called_once()
+
+
+def test_log_if_user_app_fails(
+    context,
+    mocker: MockerFixture,
+    requests_mock: RequestsMocker,
+    capsys,
+):
+    event = RawTaskEvent(task_id='0', version=2).dict()
+
+    mocker.patch.object(
+        RawTaskEvent,
+        'get_task_event',
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
+    )
+    put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
+
+    task(mocker.Mock(side_effect=Exception))(event, context)
+
+    captured = capsys.readouterr()
+
+    assert put_mock.called_once
+    assert 'ASSET=0' in captured.out
+    assert 'An exception occured while running task app.' in captured.out

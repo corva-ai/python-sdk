@@ -3,51 +3,28 @@ import logging
 import logging.config
 import sys
 import time
+import traceback
 from typing import Optional
-from unittest import mock
 
 from corva.configuration import SETTINGS
 
-LOGGER_NAME = 'corva'
-CORVA_LOGGER = logging.getLogger(LOGGER_NAME)
-CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
-CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 logging.Formatter.converter = time.gmtime  # log time as UTC
 
+CORVA_LOGGER = logging.getLogger('corva')
+CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
+CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 
-@contextlib.contextmanager
-def setup_logging(aws_request_id: str, asset_id: int, app_connection_id: Optional[int]):
-    CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 
-    corva_handler = CorvaLoggerHandler(
-        max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
-        max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
-        logger=CORVA_LOGGER,
-        placeholder=' ...\n',
-    )
-
-    corva_handler.setLevel(SETTINGS.LOG_LEVEL)
-
-    # add formatter
-    corva_formatter = logging.Formatter(
-        f'%(asctime)s.%(msecs)03dZ %(aws_request_id)s %(levelname)s '
-        f'ASSET=%(asset_id)s '
-        f'{"" if app_connection_id is None else "AC=%(app_connection_id)s "}'
+def get_formatter(aws_request_id: bool, asset_id: bool, app_connection_id: bool):
+    return logging.Formatter(
+        f'%(asctime)s.%(msecs)03dZ '
+        f'{"%(aws_request_id)s " if aws_request_id else ""}'
+        f'%(levelname)s '
+        f'{"ASSET=%(asset_id)s " if asset_id else ""}'
+        f'{"AC=%(app_connection_id)s " if app_connection_id else ""}'
         f'| %(message)s\n',
         '%Y-%m-%dT%H:%M:%S',
     )
-    corva_handler.setFormatter(corva_formatter)
-
-    # add filter
-    corva_filter = CorvaLoggerFilter(
-        aws_request_id=aws_request_id,
-        asset_id=asset_id,
-        app_connection_id=app_connection_id,
-    )
-    corva_handler.addFilter(corva_filter)
-
-    with mock.patch.object(CORVA_LOGGER, 'handlers', [corva_handler]):
-        yield
 
 
 class CorvaLoggerFilter(logging.Filter):
@@ -56,7 +33,7 @@ class CorvaLoggerFilter(logging.Filter):
     def __init__(
         self,
         aws_request_id: str,
-        asset_id: int,
+        asset_id: Optional[int],
         app_connection_id: Optional[int],
     ):
         logging.Filter.__init__(self)
@@ -142,3 +119,72 @@ class CorvaLoggerHandler(logging.Handler):
 
     def log(self, message: str) -> None:
         sys.stdout.write(message)
+
+
+class LoggingContext(contextlib.ContextDecorator):
+    def __init__(
+        self,
+        aws_request_id: str,
+        asset_id: Optional[int],
+        app_connection_id: Optional[int],
+        handler: logging.Handler,
+        logger: logging.Logger,
+    ):
+        self.filter = CorvaLoggerFilter(
+            aws_request_id=aws_request_id,
+            asset_id=asset_id,
+            app_connection_id=app_connection_id,
+        )
+
+        self.handler = handler
+        self.handler.setLevel(SETTINGS.LOG_LEVEL)
+        self.handler.addFilter(self.filter)
+        self.set_formatter()
+
+        self.logger = logger
+
+        self.old_handlers = None
+
+    @property
+    def asset_id(self) -> Optional[int]:
+        return self.filter.asset_id
+
+    @asset_id.setter
+    def asset_id(self, value: Optional[int]) -> None:
+        self.filter.asset_id = value
+        self.set_formatter()
+
+    @property
+    def app_connection_id(self) -> Optional[int]:
+        return self.filter.app_connection_id
+
+    @app_connection_id.setter
+    def app_connection_id(self, value: Optional[int]) -> None:
+        self.filter.app_connection_id = value
+        self.set_formatter()
+
+    def set_formatter(self):
+        self.handler.setFormatter(
+            get_formatter(
+                aws_request_id=True,
+                asset_id=self.asset_id is not None,
+                app_connection_id=self.app_connection_id is not None,
+            )
+        )
+
+    def __enter__(self):
+        self.old_handlers = self.logger.handlers
+        self.logger.handlers = [self.handler]
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            err_msg = "".join(
+                traceback.TracebackException.from_exception(exc_val).format()
+            )
+            self.logger.error(f'An exception occured: {err_msg}')
+
+        self.logger.handlers = self.old_handlers
+
+        return False  # exception will be propagated

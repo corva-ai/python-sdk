@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from corva import Logger
 from corva.configuration import SETTINGS
 from corva.handlers import scheduled, stream, task
+from corva.models.context import CorvaContext
 from corva.models.scheduled import RawScheduledEvent
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
@@ -268,3 +269,24 @@ def test_max_message_count_reached(
         app([event.dict()], context)
 
     assert capsys.readouterr().out == expected
+
+
+def test_lambda_exceptions_are_logged(context, capsys, mocker: MockerFixture):
+    @task
+    def app(event, api):
+        pass
+
+    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+
+    mocker.patch.object(
+        CorvaContext,
+        'from_aws',
+        side_effect=Exception('test_task_logging2'),
+    )
+
+    with pytest.raises(Exception, match=r'^test_task_logging2$'):
+        app(raw_event, context)
+
+    captured = capsys.readouterr()
+
+    assert 'An exception occured: ' in captured.out

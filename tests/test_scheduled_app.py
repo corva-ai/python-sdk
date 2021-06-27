@@ -151,3 +151,38 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
     scheduled_app(event, context)
 
     patch.assert_called_once()
+
+
+def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, capsys):
+    @scheduled
+    def scheduled_app(event, api, state):
+        pass
+
+    event = [
+        [
+            RawScheduledEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        ]
+    ]
+
+    patch = mocker.patch.object(
+        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception
+    )
+
+    scheduled_app(event, context)
+
+    captured = capsys.readouterr()
+
+    assert 'ASSET=0 AC=0' in captured.out
+    assert 'An exception occured while setting schedule as completed.' in captured.out
+    patch.assert_called_once()
