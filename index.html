@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.12">
+<meta name="generator" content="Asciidoctor 2.0.15">
 <title>corva-sdk</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -94,9 +94,6 @@ dl dd{margin-bottom:1.25em}
 abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
 abbr{text-transform:none}
 blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
-blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
-blockquote cite::before{content:"\2014 \0020"}
-blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
 blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
 @media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
 h1{font-size:2.75em}
@@ -261,7 +258,7 @@ pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
 .quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
 .quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
-.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
 p.tableblock:last-child{margin-bottom:0}
 td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
 td.tableblock>.content>:last-child{margin-bottom:-1.25em}
@@ -570,10 +567,9 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 <li><a href="#_development_contributing">8. Development - Contributing</a>
 <ul class="sectlevel2">
-<li><a href="#_set_up_the_project">8.1. Set up the project</a></li>
-<li><a href="#_run_tests">8.2. Run tests</a></li>
-<li><a href="#_run_linter">8.3. Run linter</a></li>
-<li><a href="#_generate_docs">8.4. Generate docs</a></li>
+<li><a href="#_create_and_activate_virtual_environment">8.1. Create and activate virtual environment</a></li>
+<li><a href="#_install_dependencies_and_run_tests">8.2. Install dependencies and run tests</a></li>
+<li><a href="#_whats_next">8.3. What&#8217;s next?</a></li>
 </ul>
 </li>
 </ul>
@@ -583,7 +579,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>v1.0.1</strong>.</p>
+<p>Documentation for version <strong>v1.0.2</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -1508,39 +1504,113 @@ see <a href="https://docs.python.org/3/howto/logging.html">Python log levels</a>
 <div class="sect1">
 <h2 id="_development_contributing">8. Development - Contributing</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_set_up_the_project">8.1. Set up the project</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-nb">cd</span> ~/YOUR_PATH/python-sdk
-python -m venv venv
-<span class="tok-nb">source</span> venv/bin/activate
-pip install -e .<span class="tok-o">[</span>dev<span class="tok-o">]</span></code></pre>
-</div>
-</div>
+<div class="paragraph">
+<p>Here are some guidelines to set up your environment.</p>
 </div>
 <div class="sect2">
-<h3 id="_run_tests">8.2. Run tests</h3>
+<h3 id="_create_and_activate_virtual_environment">8.1. Create and activate virtual environment</h3>
+<div class="paragraph">
+<p>What&#8217;s needed:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Python 3.8.</p>
+</li>
+<li>
+<p>Opened terminal inside cloned <strong>corva-sdk</strong> repository.</p>
+</li>
+</ul>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span>coverage run --branch -m pytest <span class="tok-p">;</span> coverage html --include<span class="tok-o">=</span>src/*,docs/src/*</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>python -m venv env <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="tok-nb">source</span> ./env/bin/activate <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create a directory <code>./env/</code>
+with isolated Python environment inside.
+You will be able to install needed packages there.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Activate the new environment.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>From now on
+you must always have activated virtual environment
+when working with the project.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_run_linter">8.3. Run linter</h3>
+<h3 id="_install_dependencies_and_run_tests">8.2. Install dependencies and run tests</h3>
+<div class="paragraph">
+<p>What&#8217;s needed:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Installed <code>make</code>.</p>
+</li>
+</ul>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span>flake8</code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>make install <i class="conum" data-value="1"></i><b>(1)</b>
+make all  <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Install all development requirements.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Run tests and linter
+to verify that the project was set up properly.</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_generate_docs">8.4. Generate docs</h3>
+<h3 id="_whats_next">8.3. What&#8217;s next?</h3>
+<div class="paragraph">
+<p>After completing steps above
+you can explore the project
+and make a contribution.</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span>docker run --rm -v <span class="tok-k">$(</span><span class="tok-nb">pwd</span><span class="tok-k">)</span>/docs/:/documents/ asciidoctor/docker-asciidoctor asciidoctor -D build <span class="tok-s1">&#39;*.adoc&#39;</span></code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>make <span class="tok-nb">help</span> <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>List available <code>make</code> targets -
+a good starting point for exploration.</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
