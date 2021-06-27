@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Logging of internal errors.
 
+
 ## [1.0.1] - 2021-04-30
 
 ### Fixed
 - AWS Lambda context parsing.
+
 
 ## [1.0.0] - 2021-04-29
 
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Events are allowed to have extra fields.
+
 
 ## [0.0.17] - 2021-04-15
 
