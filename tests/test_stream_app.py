@@ -473,3 +473,40 @@ def test_set_cached_max_record_value_should_not_fail_lambda(
     stream_app(event, context)
 
     patch.assert_called_once()
+
+
+def test_log_if_unable_to_set_cached_max_record_value(
+    mocker: MockerFixture, context, capsys
+):
+    @stream
+    def stream_app(event, api, cache):
+        pass
+
+    event = [
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=int(),
+                    asset_id=int(),
+                    company_id=int(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.time,
+            ),
+        ).dict()
+    ]
+
+    patch = mocker.patch.object(
+        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception
+    )
+
+    stream_app(event, context)
+
+    captured = capsys.readouterr()
+
+    assert 'An exception occured while saving data to cache.' in captured.out
+    patch.assert_called_once()
