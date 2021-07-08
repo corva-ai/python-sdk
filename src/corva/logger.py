@@ -122,6 +122,22 @@ class CorvaLoggerHandler(logging.Handler):
 
 
 class LoggingContext(contextlib.ContextDecorator):
+    """Context manager to configure logger to use specified handler.
+
+    Hanlder is configured to use CorvaLoggerFilter and log level from settings.
+
+    Context allows setting some filter's fields dynamically. It will update logging
+    formatter as needed.
+
+    Logger gets its old handlers back at the end of the context.
+
+    Attributes:
+        filter: Logging filter that gets set in the handler.
+        handler: Logging handler that gets set in the logger.
+        logger: Logger to configure.
+        old_handlers: Logger's own handlers before the update.
+    """
+
     def __init__(
         self,
         aws_request_id: str,
@@ -147,6 +163,8 @@ class LoggingContext(contextlib.ContextDecorator):
 
     @property
     def asset_id(self) -> Optional[int]:
+        """Asset id used in the logging filter."""
+
         return self.filter.asset_id
 
     @asset_id.setter
@@ -156,6 +174,8 @@ class LoggingContext(contextlib.ContextDecorator):
 
     @property
     def app_connection_id(self) -> Optional[int]:
+        """App connection id used in the logging filter."""
+
         return self.filter.app_connection_id
 
     @app_connection_id.setter
