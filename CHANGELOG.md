@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Multiple logging of the same exception in stream and scheduled apps.
+
 
 ## [1.0.3] - 2021-06-27
 
