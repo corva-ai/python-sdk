@@ -3,7 +3,6 @@ import logging
 import logging.config
 import sys
 import time
-import traceback
 from typing import Optional
 
 from corva.configuration import SETTINGS
@@ -199,12 +198,6 @@ class LoggingContext(contextlib.ContextDecorator):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type:
-            err_msg = "".join(
-                traceback.TracebackException.from_exception(exc_val).format()
-            )
-            self.logger.error(f'An exception occured: {err_msg}')
-
         self.logger.handlers = self.old_handlers
 
         return False  # exception will be propagated
