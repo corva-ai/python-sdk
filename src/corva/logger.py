@@ -14,7 +14,9 @@ CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 
 
-def get_formatter(aws_request_id: bool, asset_id: bool, app_connection_id: bool):
+def get_formatter(
+    aws_request_id: bool, asset_id: bool, app_connection_id: bool
+) -> logging.Formatter:
     return logging.Formatter(
         f'%(asctime)s.%(msecs)03dZ '
         f'{"%(aws_request_id)s " if aws_request_id else ""}'
