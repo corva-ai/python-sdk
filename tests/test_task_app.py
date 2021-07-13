@@ -156,7 +156,7 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
     captured = capsys.readouterr()
 
     assert 'ASSET=0' in captured.out
-    assert 'An exception occured while updating task data.' in captured.out
+    assert 'Could not update task data.' in captured.out
     update_task_data_patch.assert_called_once()
 
 
@@ -181,4 +181,4 @@ def test_log_if_user_app_fails(
 
     assert put_mock.called_once
     assert 'ASSET=0' in captured.out
-    assert 'An exception occured while running task app.' in captured.out
+    assert 'Task app failed to execute.' in captured.out

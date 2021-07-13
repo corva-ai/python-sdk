@@ -289,4 +289,4 @@ def test_lambda_exceptions_are_logged(context, capsys, mocker: MockerFixture):
 
     captured = capsys.readouterr()
 
-    assert 'An exception occured: ' in captured.out
+    assert 'The app failed to execute.' in captured.out

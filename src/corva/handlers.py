@@ -26,26 +26,31 @@ def base_handler(raw_event_type: Type[RawBaseEvent]) -> Callable:
                 handler=logging.StreamHandler(stream=sys.stdout),
                 logger=CORVA_LOGGER,
             ) as logging_ctx:
-                context = CorvaContext.from_aws(
-                    aws_event=aws_event, aws_context=aws_context
-                )
+                try:
+                    context = CorvaContext.from_aws(
+                        aws_event=aws_event, aws_context=aws_context
+                    )
 
-                api = Api(
-                    api_url=SETTINGS.API_ROOT_URL,
-                    data_api_url=SETTINGS.DATA_API_ROOT_URL,
-                    api_key=context.api_key,
-                    app_key=SETTINGS.APP_KEY,
-                    timeout=None,
-                )
+                    api = Api(
+                        api_url=SETTINGS.API_ROOT_URL,
+                        data_api_url=SETTINGS.DATA_API_ROOT_URL,
+                        api_key=context.api_key,
+                        app_key=SETTINGS.APP_KEY,
+                        timeout=None,
+                    )
 
-                raw_events = raw_event_type.from_raw_event(event=aws_event)
+                    raw_events = raw_event_type.from_raw_event(event=aws_event)
 
-                results = [
-                    func(raw_event, api, context.aws_request_id, logging_ctx)
-                    for raw_event in raw_events
-                ]
+                    results = [
+                        func(raw_event, api, context.aws_request_id, logging_ctx)
+                        for raw_event in raw_events
+                    ]
 
-                return results
+                    return results
+
+                except Exception:
+                    CORVA_LOGGER.exception('The app failed to execute.')
+                    raise
 
         return wrapper
 
@@ -105,7 +110,7 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
             event.set_cached_max_record_value(cache=cache)
         except Exception:
             # lambda succeeds if we're unable to cache the value
-            CORVA_LOGGER.exception('An exception occured while saving data to cache.')
+            CORVA_LOGGER.exception('Could not save data to cache.')
 
         return result
 
@@ -154,9 +159,7 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
             event.set_schedule_as_completed(api=api)
         except Exception:
             # lambda succeeds if we're unable to set completed status
-            CORVA_LOGGER.exception(
-                'An exception occured while setting schedule as completed.'
-            )
+            CORVA_LOGGER.exception('Could not set schedule as completed.')
 
         return result
 
@@ -199,7 +202,7 @@ def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
             return result
 
         except Exception as exc:
-            CORVA_LOGGER.exception('An exception occured while running task app.')
+            CORVA_LOGGER.exception('Task app failed to execute.')
 
             status = TaskStatus.fail
             data = {'fail_reason': str(exc)}
@@ -213,6 +216,6 @@ def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
                 )
             except Exception:
                 # lambda succeeds if we're unable to update task data
-                CORVA_LOGGER.exception('An exception occured while updating task data.')
+                CORVA_LOGGER.exception('Could not update task data.')
 
     return wrapper

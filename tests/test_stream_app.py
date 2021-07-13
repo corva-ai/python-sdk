@@ -509,5 +509,5 @@ def test_log_if_unable_to_set_cached_max_record_value(
     captured = capsys.readouterr()
 
     assert 'ASSET=0 AC=0' in captured.out
-    assert 'An exception occured while saving data to cache.' in captured.out
+    assert 'Could not save data to cache.' in captured.out
     patch.assert_called_once()

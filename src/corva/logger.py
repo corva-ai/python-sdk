@@ -3,7 +3,6 @@ import logging
 import logging.config
 import sys
 import time
-import traceback
 from typing import Optional
 
 from corva.configuration import SETTINGS
@@ -15,7 +14,9 @@ CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 
 
-def get_formatter(aws_request_id: bool, asset_id: bool, app_connection_id: bool):
+def get_formatter(
+    aws_request_id: bool, asset_id: bool, app_connection_id: bool
+) -> logging.Formatter:
     return logging.Formatter(
         f'%(asctime)s.%(msecs)03dZ '
         f'{"%(aws_request_id)s " if aws_request_id else ""}'
@@ -122,6 +123,22 @@ class CorvaLoggerHandler(logging.Handler):
 
 
 class LoggingContext(contextlib.ContextDecorator):
+    """Context manager to configure logger to use specified handler.
+
+    Hanlder is configured to use CorvaLoggerFilter and log level from settings.
+
+    Context allows setting some filter's fields dynamically. It will update logging
+    formatter as needed.
+
+    Logger gets its old handlers back at the end of the context.
+
+    Attributes:
+        filter: Logging filter that gets set in the handler.
+        handler: Logging handler that gets set in the logger.
+        logger: Logger to configure.
+        old_handlers: Logger's own handlers before the update.
+    """
+
     def __init__(
         self,
         aws_request_id: str,
@@ -147,6 +164,8 @@ class LoggingContext(contextlib.ContextDecorator):
 
     @property
     def asset_id(self) -> Optional[int]:
+        """Asset id used in the logging filter."""
+
         return self.filter.asset_id
 
     @asset_id.setter
@@ -156,6 +175,8 @@ class LoggingContext(contextlib.ContextDecorator):
 
     @property
     def app_connection_id(self) -> Optional[int]:
+        """App connection id used in the logging filter."""
+
         return self.filter.app_connection_id
 
     @app_connection_id.setter
@@ -179,12 +200,6 @@ class LoggingContext(contextlib.ContextDecorator):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type:
-            err_msg = "".join(
-                traceback.TracebackException.from_exception(exc_val).format()
-            )
-            self.logger.error(f'An exception occured: {err_msg}')
-
         self.logger.handlers = self.old_handlers
 
         return False  # exception will be propagated
