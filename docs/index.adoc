@@ -12,6 +12,7 @@
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
+:python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
 :corva-sdk: pass:quotes[*corva-sdk*]
 :app-step1: Import required functionality.
@@ -302,6 +303,25 @@ include::src/logging/tutorial001.py[]
 ----
 <.> Import `Logger` object.
 <.> Use `Logger` as every other Python logger.
+
+=== Customizations
+You might want to send logs to other places
+(e.g., to error reporting systems like `Setry` or `Rollbar`).
+This can be achieved by providing an instance of
+{python-log-handlers-link}[logging handler]
+as an argument to app decorator.
+Custom handler will be used alongside {corva-sdk}'s default one.
+
+[source,python]
+----
+include::src/logging/tutorial002.py[]
+----
+<.> Import the module which contains the handler
+that we want to use.
+<.> Initialize the handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> Logs will be sent to both `stream_handler`
+and {corva-sdk}'s default one.
 
 == Testing
 
