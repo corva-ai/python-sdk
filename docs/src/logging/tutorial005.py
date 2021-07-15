@@ -1,4 +1,5 @@
 import raygun4py.raygunprovider  # <.>
+
 from corva import Api, TaskEvent, task
 
 raygun_handler = raygun4py.raygunprovider.RaygunHandler('YOUR_RAYGUN_API_KEY')  # <.>
