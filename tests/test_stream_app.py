@@ -1,6 +1,9 @@
+import logging
+
 import pytest
 from pytest_mock import MockerFixture
 
+from corva import Logger
 from corva.configuration import SETTINGS
 from corva.handlers import stream
 from corva.models.stream.log_type import LogType
@@ -511,3 +514,32 @@ def test_log_if_unable_to_set_cached_max_record_value(
     assert 'ASSET=0 AC=0' in captured.out
     assert 'Could not save data to cache.' in captured.out
     patch.assert_called_once()
+
+
+def test_custom_log_handler(context, capsys):
+    @stream(handler=logging.StreamHandler())
+    def app(event, api, cache):
+        Logger.info('Info message!')
+
+    event = RawStreamTimeEvent(
+        records=[
+            RawTimeRecord(
+                asset_id=0,
+                company_id=int(),
+                collection=str(),
+                timestamp=int(),
+            ),
+        ],
+        metadata=RawMetadata(
+            app_stream_id=int(),
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            log_type=LogType.time,
+        ),
+    )
+
+    app([event.dict()], context)
+
+    captured = capsys.readouterr()
+
+    assert captured.out.endswith('Info message!\n')
+    assert captured.err == 'Info message!\n'

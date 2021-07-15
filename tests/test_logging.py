@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import freezegun
 import pytest
@@ -290,3 +291,27 @@ def test_lambda_exceptions_are_logged(context, capsys, mocker: MockerFixture):
     captured = capsys.readouterr()
 
     assert 'The app failed to execute.' in captured.out
+
+
+def test_lambda_exceptions_are_logged_using_custom_log_handler(
+    context, capsys, mocker: MockerFixture
+):
+    @task(handler=logging.StreamHandler())
+    def app(event, api):
+        pass
+
+    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+
+    mocker.patch.object(
+        CorvaContext,
+        'from_aws',
+        side_effect=Exception('test_task_logging2'),
+    )
+
+    with pytest.raises(Exception, match=r'^test_task_logging2$'):
+        app(raw_event, context)
+
+    captured = capsys.readouterr()
+
+    assert 'The app failed to execute.' in captured.out
+    assert 'The app failed to execute.' in captured.err

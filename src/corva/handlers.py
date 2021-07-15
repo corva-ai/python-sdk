@@ -1,7 +1,7 @@
 import functools
 import logging
 import sys
-from typing import Any, Callable, List, Type
+from typing import Any, Callable, List, Optional, Type
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -15,53 +15,66 @@ from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.state.redis_state import RedisState, get_cache
 
 
-def base_handler(raw_event_type: Type[RawBaseEvent]) -> Callable:
-    def decorator(func: Callable[[RawBaseEvent, Api, str], Any]) -> Callable:
-        @functools.wraps(func)
-        def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
-            with LoggingContext(
-                aws_request_id=aws_context.aws_request_id,
-                asset_id=None,
-                app_connection_id=None,
-                handler=logging.StreamHandler(stream=sys.stdout),
-                logger=CORVA_LOGGER,
-            ) as logging_ctx:
-                try:
-                    context = CorvaContext.from_aws(
-                        aws_event=aws_event, aws_context=aws_context
-                    )
+def base_handler(
+    func: Callable,
+    raw_event_type: Type[RawBaseEvent],
+    handler: Optional[logging.Handler],
+) -> Callable[[Any, Any], List[Any]]:
+    @functools.wraps(func)
+    def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
+        with LoggingContext(
+            aws_request_id=aws_context.aws_request_id,
+            asset_id=None,
+            app_connection_id=None,
+            handler=logging.StreamHandler(stream=sys.stdout),
+            user_handler=handler,
+            logger=CORVA_LOGGER,
+        ) as logging_ctx:
+            try:
+                context = CorvaContext.from_aws(
+                    aws_event=aws_event, aws_context=aws_context
+                )
 
-                    api = Api(
-                        api_url=SETTINGS.API_ROOT_URL,
-                        data_api_url=SETTINGS.DATA_API_ROOT_URL,
-                        api_key=context.api_key,
-                        app_key=SETTINGS.APP_KEY,
-                        timeout=None,
-                    )
+                api = Api(
+                    api_url=SETTINGS.API_ROOT_URL,
+                    data_api_url=SETTINGS.DATA_API_ROOT_URL,
+                    api_key=context.api_key,
+                    app_key=SETTINGS.APP_KEY,
+                    timeout=None,
+                )
 
-                    raw_events = raw_event_type.from_raw_event(event=aws_event)
+                raw_events = raw_event_type.from_raw_event(event=aws_event)
 
-                    results = [
-                        func(raw_event, api, context.aws_request_id, logging_ctx)
-                        for raw_event in raw_events
-                    ]
+                results = [
+                    func(raw_event, api, context.aws_request_id, logging_ctx)
+                    for raw_event in raw_events
+                ]
 
-                    return results
+                return results
 
-                except Exception:
-                    CORVA_LOGGER.exception('The app failed to execute.')
-                    raise
+            except Exception:
+                CORVA_LOGGER.exception('The app failed to execute.')
+                raise
 
-        return wrapper
-
-    return decorator
+    return wrapper
 
 
-def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
-    """Runs stream app."""
+def stream(
+    func: Optional[Callable[[StreamEvent, Api, RedisState], Any]] = None,
+    *,
+    handler: Optional[logging.Handler] = None,
+) -> Callable:
+    """Runs stream app.
+
+    Arguments:
+        handler: logging handler to include in Corva logger.
+    """
+
+    if func is None:
+        return functools.partial(stream, handler=handler)
 
     @functools.wraps(func)
-    @base_handler(raw_event_type=RawStreamEvent)
+    @functools.partial(base_handler, raw_event_type=RawStreamEvent, handler=handler)
     def wrapper(
         event: RawStreamEvent,
         api: Api,
@@ -102,6 +115,7 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
                 logger=CORVA_LOGGER,
                 placeholder=' ...\n',
             ),
+            user_handler=handler,
             logger=CORVA_LOGGER,
         ):
             result = func(app_event, api, cache)
@@ -117,11 +131,22 @@ def stream(func: Callable[[StreamEvent, Api, RedisState], Any]) -> Callable:
     return wrapper
 
 
-def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callable:
-    """Runs scheduled app."""
+def scheduled(
+    func: Optional[Callable[[ScheduledEvent, Api, RedisState], Any]] = None,
+    *,
+    handler: Optional[logging.Handler] = None,
+) -> Callable:
+    """Runs scheduled app.
+
+    Arguments:
+        handler: logging handler to include in Corva logger.
+    """
+
+    if func is None:
+        return functools.partial(scheduled, handler=handler)
 
     @functools.wraps(func)
-    @base_handler(raw_event_type=RawScheduledEvent)
+    @functools.partial(base_handler, raw_event_type=RawScheduledEvent, handler=handler)
     def wrapper(
         event: RawScheduledEvent,
         api: Api,
@@ -151,6 +176,7 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
                 logger=CORVA_LOGGER,
                 placeholder=' ...\n',
             ),
+            user_handler=handler,
             logger=CORVA_LOGGER,
         ):
             result = func(ScheduledEvent.parse_obj(event), api, cache)
@@ -166,11 +192,22 @@ def scheduled(func: Callable[[ScheduledEvent, Api, RedisState], Any]) -> Callabl
     return wrapper
 
 
-def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
-    """Runs task app."""
+def task(
+    func: Optional[Callable[[TaskEvent, Api], Any]] = None,
+    *,
+    handler: Optional[logging.Handler] = None,
+) -> Callable:
+    """Runs task app.
 
-    @base_handler(raw_event_type=RawTaskEvent)
+    Arguments:
+        handler: logging handler to include in Corva logger.
+    """
+
+    if func is None:
+        return functools.partial(task, handler=handler)
+
     @functools.wraps(func)
+    @functools.partial(base_handler, raw_event_type=RawTaskEvent, handler=handler)
     def wrapper(
         event: RawTaskEvent,
         api: Api,
@@ -192,6 +229,7 @@ def task(func: Callable[[TaskEvent, Api], Any]) -> Callable:
                     logger=CORVA_LOGGER,
                     placeholder=' ...\n',
                 ),
+                user_handler=handler,
                 logger=CORVA_LOGGER,
             ):
                 result = func(app_event, api)
