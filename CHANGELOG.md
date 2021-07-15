@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Ability to pass custom logging handlers
+to app decorators using `handler` keyword argument.
+
 ### Fixed
 - Multiple logging of the same exception in stream and scheduled apps.
 
