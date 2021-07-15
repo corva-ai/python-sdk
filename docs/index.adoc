@@ -306,7 +306,8 @@ include::src/logging/tutorial001.py[]
 
 === Customizations
 You might want to send logs to other places
-(e.g., to error reporting systems like `Setry` or `Rollbar`).
+(e.g., to error reporting systems like
+<<sentry, `Sentry`>> or <<rollbar, `Rollbar`>>).
 This can be achieved by providing an instance of
 {python-log-handlers-link}[logging handler]
 as an argument to app decorator.
@@ -322,6 +323,79 @@ that we want to use.
 <.> Pass the handler as a keyword argument to the app decorator.
 <.> Logs will be sent to both `stream_handler`
 and {corva-sdk}'s default one.
+
+=== Error logging systems
+
+[#sentry]
+==== Sentry
+
+https://docs.sentry.io/platforms/python/[
+Sentry for Python documentation.
+]
+
+[source,bash]
+----
+pip install sentry-sdk <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial003.py[]
+----
+<.> Import Sentry SDK.
+<.> Initialize the library.
+<.> All errors will be reported to Sentry now.
+
+[#rollbar]
+==== Rollbar
+
+https://docs.rollbar.com/docs/python[
+Rollbar for Python documentation.
+]
+
+[source,bash]
+----
+pip install rollbar <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial004.py[]
+----
+<.> Import Rollbar SDK.
+<.> Initialize Rollbar handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> All errors will be reported to Rollbar now.
+
+==== Raygun
+https://raygun.com/documentation/language-guides/python/crash-reporting/installation/[
+Raygun for Python documentation.
+]
+
+[source,bash]
+----
+pip install raygun4py <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial005.py[]
+----
+<.> Import Raygun SDK.
+<.> Initialize Raygun handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> All errors will be reported to Raygun now.
+
+==== Other libraries
+You can use any other error logging libraries.
+Just initialize
+and pass corresponding logging handler
+as a keyword argument to the app decorator.
+Use code samples above as the examples.
+
 
 == Testing
 
