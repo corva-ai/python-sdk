@@ -2,7 +2,9 @@ import logging
 import re
 
 import pytest
+import requests_mock as requests_mock_lib
 from pytest_mock import MockerFixture
+from requests_mock import Mocker as RequestsMocker
 
 from corva import Logger
 from corva.handlers import scheduled
@@ -39,6 +41,33 @@ def test_set_completed_status(context, requests_mock):
 
     assert post_mock.called_once
     assert post_mock.last_request.path == '/scheduler/0/completed'
+
+
+@pytest.mark.parametrize('is_dict', (True, False))
+def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
+    @scheduled
+    def scheduled_app(event, api, state):
+        pass
+
+    event = RawScheduledEvent(
+        asset_id=int(),
+        interval=int(),
+        schedule=int(),
+        schedule_start=int(),
+        app_connection=int(),
+        app_stream=int(),
+        company=int(),
+    ).dict(
+        by_alias=True,
+        exclude_unset=True,
+    )
+
+    if not is_dict:
+        event = [[event]]
+
+    requests_mock.post(requests_mock_lib.ANY)
+
+    scheduled_app(event, context)
 
 
 @pytest.mark.parametrize(

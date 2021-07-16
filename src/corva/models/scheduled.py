@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import List
+from typing import List, Union
 
 import pydantic
 
@@ -76,7 +76,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         return values
 
     @staticmethod
-    def from_raw_event(event: List[List[dict]]) -> List[RawScheduledEvent]:
+    def from_raw_event(event: Union[dict, List[List[dict]]]) -> List[RawScheduledEvent]:
+        if isinstance(event, dict):
+            return [pydantic.parse_obj_as(RawScheduledEvent, event)]
+
         # flatten the event into 1d array
         event: List[dict] = list(itertools.chain(*event))
 
