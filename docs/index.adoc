@@ -324,8 +324,6 @@ that we want to use.
 <.> Logs will be sent to both `stream_handler`
 and {corva-sdk}'s default one.
 
-=== Error logging systems
-
 [#sentry]
 ==== Sentry
 
