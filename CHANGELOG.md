@@ -13,7 +13,7 @@ to app decorators using `handler` keyword argument.
 
 ### Fixed
 - Multiple logging of the same exception in stream and scheduled apps.
-- Log message trucation for low `LOG_THRESHOLD_MESSAGE_SIZE` values.
+- Log message truncation for low `LOG_THRESHOLD_MESSAGE_SIZE` values.
 
 
 ## [1.0.3] - 2021-06-27
