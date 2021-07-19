@@ -112,10 +112,13 @@ class CorvaLoggerHandler(logging.Handler):
             # no need to truncate the message
             return message
 
-        message = (
-            message[: len(message) - extra_chars_count - len(self.placeholder)]
-            + self.placeholder
-        )
+        message_end_idx = len(message) - (extra_chars_count + len(self.placeholder))
+
+        if message_end_idx <= 0:
+            return ''
+
+        message = message[:message_end_idx] + self.placeholder
+
         return message
 
     def log(self, message: str) -> None:
