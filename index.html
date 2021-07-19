@@ -552,7 +552,18 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#_expiry_ttl_and_exists">5.3. Expiry, ttl and exists</a></li>
 </ul>
 </li>
-<li><a href="#_logging">6. Logging</a></li>
+<li><a href="#_logging">6. Logging</a>
+<ul class="sectlevel2">
+<li><a href="#_customizations">6.1. Customizations</a>
+<ul class="sectlevel3">
+<li><a href="#sentry">6.1.1. Sentry</a></li>
+<li><a href="#rollbar">6.1.2. Rollbar</a></li>
+<li><a href="#_raygun">6.1.3. Raygun</a></li>
+<li><a href="#_other_libraries">6.1.4. Other libraries</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a href="#_testing">7. Testing</a>
 <ul class="sectlevel2">
 <li><a href="#_stream">7.1. Stream</a>
@@ -579,7 +590,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>v1.0.3</strong>.</p>
+<p>Documentation for version <strong>v1.1.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -1288,6 +1299,225 @@ see <a href="https://docs.python.org/3/howto/logging.html">Python log levels</a>
 <td>Use <code>Logger</code> as every other Python logger.</td>
 </tr>
 </table>
+</div>
+<div class="sect2">
+<h3 id="_customizations">6.1. Customizations</h3>
+<div class="paragraph">
+<p>You might want to send logs to other places
+(e.g., to error reporting systems like
+<a href="#sentry"><code>Sentry</code></a> or <a href="#rollbar"><code>Rollbar</code></a>).
+This can be achieved by providing an instance of
+<a href="https://docs.python.org/3/howto/logging.html#handlers">logging handler</a>
+as an argument to app decorator.
+Custom handler will be used alongside <strong>corva-sdk</strong>'s default one.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">logging</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Logger</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
+
+<span class="tok-n">stream_handler</span> <span class="tok-o">=</span> <span class="tok-n">logging</span><span class="tok-o">.</span><span class="tok-n">StreamHandler</span><span class="tok-p">()</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+
+
+<span class="tok-nd">@task</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-o">=</span><span class="tok-n">stream_handler</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">Logger</span><span class="tok-o">.</span><span class="tok-n">info</span><span class="tok-p">(</span><span class="tok-s1">&#39;Info message!&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import the module which contains the handler
+that we want to use.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initialize the handler.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Pass the handler as a keyword argument to the app decorator.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Logs will be sent to both <code>stream_handler</code>
+and <strong>corva-sdk</strong>'s default one.</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="sentry">6.1.1. Sentry</h4>
+<div class="paragraph">
+<p><a href="https://docs.sentry.io/platforms/python/">
+Sentry for Python documentation.
+</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span>pip install sentry-sdk <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Install the library.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">sentry_sdk</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
+
+<span class="tok-n">sentry_sdk</span><span class="tok-o">.</span><span class="tok-n">init</span><span class="tok-p">(</span><span class="tok-s2">&quot;YOUR_SENTRY_DSN&quot;</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+
+
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
+    <span class="tok-mi">1</span> <span class="tok-o">/</span> <span class="tok-mi">0</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import Sentry SDK.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initialize the library.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>All errors will be reported to Sentry now.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="rollbar">6.1.2. Rollbar</h4>
+<div class="paragraph">
+<p><a href="https://docs.rollbar.com/docs/python">
+Rollbar for Python documentation.
+</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span>pip install rollbar <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Install the library.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">rollbar.logger</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
+
+<span class="tok-n">rollbar_handler</span> <span class="tok-o">=</span> <span class="tok-n">rollbar</span><span class="tok-o">.</span><span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">RollbarHandler</span><span class="tok-p">(</span><span class="tok-s1">&#39;YOUR_ROLLBAR_ACCESS_TOKEN&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+
+
+<span class="tok-nd">@task</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-o">=</span><span class="tok-n">rollbar_handler</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
+    <span class="tok-mi">1</span> <span class="tok-o">/</span> <span class="tok-mi">0</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import Rollbar SDK.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initialize Rollbar handler.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Pass the handler as a keyword argument to the app decorator.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>All errors will be reported to Rollbar now.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_raygun">6.1.3. Raygun</h4>
+<div class="paragraph">
+<p><a href="https://raygun.com/documentation/language-guides/python/crash-reporting/installation/">
+Raygun for Python documentation.
+</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span>pip install raygun4py <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Install the library.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">raygun4py.raygunprovider</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
+
+<span class="tok-n">raygun_handler</span> <span class="tok-o">=</span> <span class="tok-n">raygun4py</span><span class="tok-o">.</span><span class="tok-n">raygunprovider</span><span class="tok-o">.</span><span class="tok-n">RaygunHandler</span><span class="tok-p">(</span><span class="tok-s1">&#39;YOUR_RAYGUN_API_KEY&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+
+
+<span class="tok-nd">@task</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-o">=</span><span class="tok-n">raygun_handler</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
+    <span class="tok-mi">1</span> <span class="tok-o">/</span> <span class="tok-mi">0</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import Raygun SDK.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initialize Raygun handler.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Pass the handler as a keyword argument to the app decorator.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>All errors will be reported to Raygun now.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_other_libraries">6.1.4. Other libraries</h4>
+<div class="paragraph">
+<p>You can use any other error logging libraries.
+Just initialize
+and pass corresponding logging handler
+as a keyword argument to the app decorator.
+Use code samples above as the examples.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
