@@ -1,9 +1,11 @@
+import logging
 import re
 
 import pytest
 from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
+from corva import Logger
 from corva.handlers import task
 from corva.models.task import RawTaskEvent, TaskEvent
 
@@ -182,3 +184,26 @@ def test_log_if_user_app_fails(
     assert put_mock.called_once
     assert 'ASSET=0' in captured.out
     assert 'Task app failed to execute.' in captured.out
+
+
+def test_custom_log_handler(context, mocker: MockerFixture, capsys):
+    @task(handler=logging.StreamHandler())
+    def app(event, api):
+        Logger.info('Info message!')
+
+    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    event = TaskEvent(asset_id=0, company_id=int())
+
+    mocker.patch.object(
+        RawTaskEvent,
+        'get_task_event',
+        return_value=event,
+    )
+    mocker.patch.object(RawTaskEvent, 'update_task_data')
+
+    app(raw_event, context)
+
+    captured = capsys.readouterr()
+
+    assert captured.out.endswith('Info message!\n')
+    assert captured.err == 'Info message!\n'

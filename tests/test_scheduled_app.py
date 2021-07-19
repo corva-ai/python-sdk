@@ -1,8 +1,10 @@
+import logging
 import re
 
 import pytest
 from pytest_mock import MockerFixture
 
+from corva import Logger
 from corva.handlers import scheduled
 from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
 
@@ -186,3 +188,38 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
     assert 'ASSET=0 AC=0' in captured.out
     assert 'Could not set schedule as completed.' in captured.out
     patch.assert_called_once()
+
+
+def test_custom_log_handler(context, capsys, mocker: MockerFixture):
+    @scheduled(handler=logging.StreamHandler())
+    def app(event, api, cache):
+        Logger.info('Info message!')
+
+    event = RawScheduledEvent(
+        asset_id=0,
+        interval=int(),
+        schedule=int(),
+        schedule_start=int(),
+        app_connection=1,
+        app_stream=int(),
+        company=int(),
+    )
+
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+
+    app(
+        [
+            [
+                event.dict(
+                    by_alias=True,
+                    exclude_unset=True,
+                )
+            ]
+        ],
+        context,
+    )
+
+    captured = capsys.readouterr()
+
+    assert captured.out.endswith('Info message!\n')
+    assert captured.err == 'Info message!\n'

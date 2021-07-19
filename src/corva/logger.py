@@ -123,18 +123,24 @@ class CorvaLoggerHandler(logging.Handler):
 
 
 class LoggingContext(contextlib.ContextDecorator):
-    """Context manager to configure logger to use specified handler.
+    """Context manager to configure logger to use specified handlers.
 
-    Hanlder is configured to use CorvaLoggerFilter and log level from settings.
+    User handler does not get any modifications.
 
-    Context allows setting some filter's fields dynamically. It will update logging
+    Handler gets following modifications:
+        - Added CorvaLoggerFilter to filters.
+        - Set log level from settings.
+        - Set Corva formatter.
+
+    Context allows changing filter's fields dynamically. It will update logging
     formatter as needed.
 
     Logger gets its old handlers back at the end of the context.
 
     Attributes:
         filter: Logging filter that gets set in the handler.
-        handler: Logging handler that gets set in the logger.
+        handler: Logging handler that gets modified and set in the logger.
+        user_handler: Logging handler that gets set in the logger without modifications.
         logger: Logger to configure.
         old_handlers: Logger's own handlers before the update.
     """
@@ -145,6 +151,7 @@ class LoggingContext(contextlib.ContextDecorator):
         asset_id: Optional[int],
         app_connection_id: Optional[int],
         handler: logging.Handler,
+        user_handler: Optional[logging.Handler],
         logger: logging.Logger,
     ):
         self.filter = CorvaLoggerFilter(
@@ -158,8 +165,8 @@ class LoggingContext(contextlib.ContextDecorator):
         self.handler.addFilter(self.filter)
         self.set_formatter()
 
+        self.user_handler = user_handler
         self.logger = logger
-
         self.old_handlers = None
 
     @property
@@ -195,7 +202,9 @@ class LoggingContext(contextlib.ContextDecorator):
 
     def __enter__(self):
         self.old_handlers = self.logger.handlers
-        self.logger.handlers = [self.handler]
+        self.logger.handlers = (
+            [self.handler, self.user_handler] if self.user_handler else [self.handler]
+        )
 
         return self
 

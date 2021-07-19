@@ -12,6 +12,7 @@
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
+:python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
 :corva-sdk: pass:quotes[*corva-sdk*]
 :app-step1: Import required functionality.
@@ -302,6 +303,97 @@ include::src/logging/tutorial001.py[]
 ----
 <.> Import `Logger` object.
 <.> Use `Logger` as every other Python logger.
+
+=== Customizations
+You might want to send logs to other places
+(e.g., to error reporting systems like
+<<sentry, `Sentry`>> or <<rollbar, `Rollbar`>>).
+This can be achieved by providing an instance of
+{python-log-handlers-link}[logging handler]
+as an argument to app decorator.
+Custom handler will be used alongside {corva-sdk}'s default one.
+
+[source,python]
+----
+include::src/logging/tutorial002.py[]
+----
+<.> Import the module which contains the handler
+that we want to use.
+<.> Initialize the handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> Logs will be sent to both `stream_handler`
+and {corva-sdk}'s default one.
+
+[#sentry]
+==== Sentry
+
+https://docs.sentry.io/platforms/python/[
+Sentry for Python documentation.
+]
+
+[source,bash]
+----
+pip install sentry-sdk <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial003.py[]
+----
+<.> Import Sentry SDK.
+<.> Initialize the library.
+<.> All errors will be reported to Sentry now.
+
+[#rollbar]
+==== Rollbar
+
+https://docs.rollbar.com/docs/python[
+Rollbar for Python documentation.
+]
+
+[source,bash]
+----
+pip install rollbar <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial004.py[]
+----
+<.> Import Rollbar SDK.
+<.> Initialize Rollbar handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> All errors will be reported to Rollbar now.
+
+==== Raygun
+https://raygun.com/documentation/language-guides/python/crash-reporting/installation/[
+Raygun for Python documentation.
+]
+
+[source,bash]
+----
+pip install raygun4py <.>
+----
+<.> Install the library.
+
+[source,python]
+----
+include::src/logging/tutorial005.py[]
+----
+<.> Import Raygun SDK.
+<.> Initialize Raygun handler.
+<.> Pass the handler as a keyword argument to the app decorator.
+<.> All errors will be reported to Raygun now.
+
+==== Other libraries
+You can use any other error logging libraries.
+Just initialize
+and pass corresponding logging handler
+as a keyword argument to the app decorator.
+Use code samples above as the examples.
+
 
 == Testing
 
