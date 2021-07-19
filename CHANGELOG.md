@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Ability to pass custom logging handlers
 to app decorators using `handler` keyword argument.
+- Natural time event (single dict) parsing in `scheduled` apps.
 
 ### Fixed
 - Multiple logging of the same exception in stream and scheduled apps.
