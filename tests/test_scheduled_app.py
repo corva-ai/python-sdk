@@ -9,6 +9,7 @@ from requests_mock import Mocker as RequestsMocker
 from corva import Logger
 from corva.handlers import scheduled
 from corva.models.scheduled.raw import (
+    RawScheduledDepthEvent,
     RawScheduledEvent,
     RawScheduledNaturalEvent,
     RawScheduledTimeEvent,
@@ -50,25 +51,57 @@ def test_set_completed_status(context, requests_mock):
     assert post_mock.last_request.path == '/scheduler/0/completed'
 
 
+@pytest.mark.parametrize(
+    'event',
+    (
+        RawScheduledTimeEvent(
+            asset_id=int(),
+            interval=int(),
+            schedule=int(),
+            schedule_start=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.data_time,
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
+        RawScheduledDepthEvent(
+            asset_id=int(),
+            interval=int(),
+            schedule=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.data_depth_milestone,
+            top_depth=0.0,
+            bottom_depth=1.0,
+            log_identifier='',
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
+        RawScheduledNaturalEvent(
+            asset_id=int(),
+            interval=int(),
+            schedule=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.natural_time,
+            schedule_start=int(),
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
+    ),
+)
 @pytest.mark.parametrize('is_dict', (True, False))
-def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
+def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
     @scheduled
     def scheduled_app(event, api, state):
         pass
-
-    event = RawScheduledTimeEvent(
-        asset_id=int(),
-        interval=int(),
-        schedule=int(),
-        schedule_start=int(),
-        app_connection=int(),
-        app_stream=int(),
-        company=int(),
-        scheduler_type=SchedulerType.data_time,
-    ).dict(
-        by_alias=True,
-        exclude_unset=True,
-    )
 
     if not is_dict:
         event = [[event]]
