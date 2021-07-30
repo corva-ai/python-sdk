@@ -1,11 +1,11 @@
 import datetime
 import time
 
-from corva import Api, Cache, ScheduledEvent, scheduled
+from corva import Api, Cache, ScheduledTimeEvent, scheduled
 
 
 @scheduled
-def scheduled_app(event: ScheduledEvent, api: Api, cache: Cache):
+def scheduled_app(event: ScheduledTimeEvent, api: Api, cache: Cache):
     cache.store(key='key', value='val', expiry=60)  # <.>
     cache.store(key='key', value='val', expiry=datetime.timedelta(seconds=60))  # <.>
 

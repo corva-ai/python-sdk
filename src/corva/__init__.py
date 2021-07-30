@@ -15,8 +15,6 @@ from .models.stream.stream import (
 from .models.task import TaskEvent
 from .state.redis_state import RedisState as Cache
 
-ScheduledEvent = ScheduledTimeEvent  # for backward compatibility
-
 __all__ = [
     'Api',
     'Cache',

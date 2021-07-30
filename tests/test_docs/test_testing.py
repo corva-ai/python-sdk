@@ -1,4 +1,11 @@
-from docs.src.testing import tutorial001, tutorial002, tutorial003, tutorial004
+from docs.src.testing import (
+    tutorial001,
+    tutorial002,
+    tutorial003,
+    tutorial004,
+    tutorial005,
+    tutorial006,
+)
 
 
 def test_tutorial001(app_runner):
@@ -15,3 +22,11 @@ def test_tutorial003(app_runner):
 
 def test_tutorial004(app_runner):
     tutorial004.test_task_app(app_runner)
+
+
+def test_tutorial005(app_runner):
+    tutorial005.test_scheduled_app(app_runner)
+
+
+def test_tutorial006(app_runner):
+    tutorial006.test_scheduled_app(app_runner)

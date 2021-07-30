@@ -50,7 +50,7 @@ There are three app types that you can build:
 
 1. <<stream,`stream`>> - works with real-time data.
 2. <<scheduled,`scheduled`>> - works with data at defined schedules/intervals
-(e.g., once a minute).
+(e.g., once a minute, once every 3 ft.).
 3. <<task,`task`>> - works with data on-demand.
 
 TIP: Use type hints like in examples below
@@ -89,9 +89,41 @@ include::src/app_types/tutorial002.py[]
 [#scheduled]
 === Scheduled
 
+Scheduled apps can be
+<<scheduled_time,time>>,
+<<scheduled_depth,depth>>
+or <<scheduled_natural,natural>> based.
+
+[#scheduled_time]
+==== Time
+
 [source,python]
 ----
 include::src/app_types/tutorial003.py[]
+----
+<.> {app-step1}
+<.> {app-step2}
+<.> {app-step3} `scheduled`.
+<.> {app-step4}
+
+[#scheduled_depth]
+==== Depth
+
+[source,python]
+----
+include::src/app_types/tutorial005.py[]
+----
+<.> {app-step1}
+<.> {app-step2}
+<.> {app-step3} `scheduled`.
+<.> {app-step4}
+
+[#scheduled_natural]
+==== Natural
+
+[source,python]
+----
+include::src/app_types/tutorial006.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -437,9 +469,33 @@ include::src/testing/tutorial002.py[]
 <.> {test-app-step5}
 
 === Scheduled
+
+==== Time
 [source,python]
 ----
 include::src/testing/tutorial003.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+==== Depth
+[source,python]
+----
+include::src/testing/tutorial005.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+<.> {test-app-step5}
+
+==== Natural
+[source,python]
+----
+include::src/testing/tutorial006.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
