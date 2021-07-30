@@ -1,7 +1,11 @@
 import pytest
 
 from corva.handlers import scheduled, stream, task
-from corva.models.scheduled import ScheduledEvent
+from corva.models.scheduled.scheduled import (
+    ScheduledDepthEvent,
+    ScheduledNaturalEvent,
+    ScheduledTimeEvent,
+)
 from corva.models.stream.stream import (
     StreamDepthEvent,
     StreamDepthRecord,
@@ -23,16 +27,37 @@ def test_task_app_runner(app_runner):
     assert app_runner(task_app, event) == 'Task app result'
 
 
-def test_scheduled_app_runner(app_runner):
+@pytest.mark.parametrize(
+    'event',
+    (
+        ScheduledTimeEvent(
+            asset_id=0,
+            company_id=0,
+            start_time=0,
+            end_time=0,
+        ),
+        ScheduledDepthEvent(
+            asset_id=0,
+            company_id=0,
+            top_depth=0.0,
+            bottom_depth=0.0,
+            log_identifier='',
+            interval=0.0,
+        ),
+        ScheduledNaturalEvent(
+            asset_id=0,
+            company_id=0,
+            schedule_start=0,
+            interval=0.0,
+        ),
+    ),
+)
+def test_scheduled_app_runner(event, app_runner):
     """Should not raise."""
 
     @scheduled
     def scheduled_app(event, api, cache):
         return 'Scheduled app result'
-
-    event = ScheduledEvent(
-        asset_id=int(), start_time=int(), end_time=int(), company_id=int()
-    )
 
     assert app_runner(scheduled_app, event) == 'Scheduled app result'
 

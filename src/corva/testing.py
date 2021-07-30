@@ -4,7 +4,7 @@ from typing import Any, Callable, ClassVar, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
-from corva.models.scheduled import ScheduledEvent
+from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
 from corva.state.redis_state import get_cache

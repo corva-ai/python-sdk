@@ -8,7 +8,13 @@ from requests_mock import Mocker as RequestsMocker
 
 from corva import Logger
 from corva.handlers import scheduled
-from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
+from corva.models.scheduled.raw import (
+    RawScheduledEvent,
+    RawScheduledNaturalEvent,
+    RawScheduledTimeEvent,
+)
+from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledTimeEvent
+from corva.models.scheduled.scheduler_type import SchedulerType
 
 
 def test_set_completed_status(context, requests_mock):
@@ -18,7 +24,7 @@ def test_set_completed_status(context, requests_mock):
 
     event = [
         [
-            RawScheduledEvent(
+            RawScheduledTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -26,6 +32,7 @@ def test_set_completed_status(context, requests_mock):
                 app_connection=int(),
                 app_stream=int(),
                 company=int(),
+                scheduler_type=SchedulerType.data_time,
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -49,7 +56,7 @@ def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
     def scheduled_app(event, api, state):
         pass
 
-    event = RawScheduledEvent(
+    event = RawScheduledTimeEvent(
         asset_id=int(),
         interval=int(),
         schedule=int(),
@@ -57,6 +64,7 @@ def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
         app_connection=int(),
         app_stream=int(),
         company=int(),
+        scheduler_type=SchedulerType.data_time,
     ).dict(
         by_alias=True,
         exclude_unset=True,
@@ -70,6 +78,37 @@ def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
     scheduled_app(event, context)
 
 
+@pytest.mark.parametrize(
+    'event,attr',
+    (
+        [
+            RawScheduledTimeEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ),
+            'end_time',
+        ],
+        [
+            RawScheduledNaturalEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.natural_time,
+            ),
+            'schedule_start',
+        ],
+    ),
+)
 @pytest.mark.parametrize(
     'value,expected',
     (
@@ -89,30 +128,33 @@ def test_event_parsing(is_dict, requests_mock: RequestsMocker, context):
         'no cast performed',
     ),
 )
-def test_set_schedule_start(value, expected, context, mocker: MockerFixture):
+def test_set_schedule_start(
+    event: RawScheduledEvent, attr: str, value, expected, context, mocker: MockerFixture
+):
     @scheduled
-    def app(event, api, state):
-        return event
+    def app(e, api, state):
+        return e
 
-    event = [
-        [
-            RawScheduledEvent(
-                asset_id=int(),
-                interval=int(),
-                schedule=int(),
-                schedule_start=value,
-                app_connection=int(),
-                app_stream=int(),
-                company=int(),
-            ).dict(by_alias=True, exclude_unset=True, exclude_defaults=True)
-        ]
-    ]
+    event = event.copy(update={'schedule_start': value})
+    event = (
+        type(event)
+        .parse_obj(
+            event.dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        )
+        .dict(
+            by_alias=True,
+            exclude_unset=True,
+        )
+    )
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
     result_event: ScheduledEvent = app(event, context)[0]
 
-    assert result_event.end_time == expected
+    assert getattr(result_event, attr) == expected
 
 
 @pytest.mark.parametrize(
@@ -131,7 +173,7 @@ def test_set_start_time(
 
     event = [
         [
-            RawScheduledEvent(
+            RawScheduledTimeEvent(
                 asset_id=int(),
                 interval=interval,
                 schedule=int(),
@@ -139,6 +181,7 @@ def test_set_start_time(
                 app_connection=int(),
                 app_stream=int(),
                 company=int(),
+                scheduler_type=SchedulerType.data_time,
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -148,7 +191,7 @@ def test_set_start_time(
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
-    result_event: ScheduledEvent = app(event, context)[0]
+    result_event: ScheduledTimeEvent = app(event, context)[0]
 
     assert result_event.start_time == expected
 
@@ -160,7 +203,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
 
     event = [
         [
-            RawScheduledEvent(
+            RawScheduledTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -168,6 +211,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
                 app_connection=int(),
                 app_stream=int(),
                 company=int(),
+                scheduler_type=SchedulerType.data_time,
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -191,7 +235,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
 
     event = [
         [
-            RawScheduledEvent(
+            RawScheduledTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -199,6 +243,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
                 app_connection=int(),
                 app_stream=int(),
                 company=int(),
+                scheduler_type=SchedulerType.data_time,
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -224,7 +269,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
     def app(event, api, cache):
         Logger.info('Info message!')
 
-    event = RawScheduledEvent(
+    event = RawScheduledTimeEvent(
         asset_id=0,
         interval=int(),
         schedule=int(),
@@ -232,6 +277,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
         app_connection=1,
         app_stream=int(),
         company=int(),
+        scheduler_type=SchedulerType.data_time,
     )
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
