@@ -20,7 +20,6 @@ __all__ = [
     'Cache',
     'Logger',
     'ScheduledDepthEvent',
-    'ScheduledEvent',
     'ScheduledNaturalEvent',
     'ScheduledTimeEvent',
     'StreamDepthEvent',
