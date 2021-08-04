@@ -2,9 +2,9 @@ import pytest
 
 from corva.handlers import scheduled, stream, task
 from corva.models.scheduled.scheduled import (
+    ScheduledDataTimeEvent,
     ScheduledDepthEvent,
-    ScheduledNaturalEvent,
-    ScheduledTimeEvent,
+    ScheduledNaturalTimeEvent,
 )
 from corva.models.stream.stream import (
     StreamDepthEvent,
@@ -30,7 +30,7 @@ def test_task_app_runner(app_runner):
 @pytest.mark.parametrize(
     'event',
     (
-        ScheduledTimeEvent(
+        ScheduledDataTimeEvent(
             asset_id=0,
             company_id=0,
             start_time=0,
@@ -44,7 +44,7 @@ def test_task_app_runner(app_runner):
             log_identifier='',
             interval=0.0,
         ),
-        ScheduledNaturalEvent(
+        ScheduledNaturalTimeEvent(
             asset_id=0,
             company_id=0,
             schedule_start=0,

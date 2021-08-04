@@ -2,9 +2,9 @@ from .api import Api
 from .handlers import scheduled, stream, task
 from .logger import CORVA_LOGGER as Logger
 from .models.scheduled.scheduled import (
+    ScheduledDataTimeEvent,
     ScheduledDepthEvent,
-    ScheduledNaturalEvent,
-    ScheduledTimeEvent,
+    ScheduledNaturalTimeEvent,
 )
 from .models.stream.stream import (
     StreamDepthEvent,
@@ -20,8 +20,8 @@ __all__ = [
     'Cache',
     'Logger',
     'ScheduledDepthEvent',
-    'ScheduledNaturalEvent',
-    'ScheduledTimeEvent',
+    'ScheduledNaturalTimeEvent',
+    'ScheduledDataTimeEvent',
     'StreamDepthEvent',
     'StreamDepthRecord',
     'StreamTimeEvent',

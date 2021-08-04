@@ -12,14 +12,14 @@ class SchedulerType(enum.Enum):
     @property
     def raw_event(self) -> Type[pydantic.BaseModel]:
         from corva.models.scheduled.raw import (
+            RawScheduledDataTimeEvent,
             RawScheduledDepthEvent,
-            RawScheduledNaturalEvent,
-            RawScheduledTimeEvent,
+            RawScheduledNaturalTimeEvent,
         )
 
         mapping = {
-            self.natural_time: RawScheduledNaturalEvent,
-            self.data_time: RawScheduledTimeEvent,
+            self.natural_time: RawScheduledNaturalTimeEvent,
+            self.data_time: RawScheduledDataTimeEvent,
             self.data_depth_milestone: RawScheduledDepthEvent,
         }
         return mapping[self]
@@ -27,14 +27,14 @@ class SchedulerType(enum.Enum):
     @property
     def event(self) -> Type[pydantic.BaseModel]:
         from corva.models.scheduled.scheduled import (
+            ScheduledDataTimeEvent,
             ScheduledDepthEvent,
-            ScheduledNaturalEvent,
-            ScheduledTimeEvent,
+            ScheduledNaturalTimeEvent,
         )
 
         mapping = {
-            self.natural_time: ScheduledNaturalEvent,
-            self.data_time: ScheduledTimeEvent,
+            self.natural_time: ScheduledNaturalTimeEvent,
+            self.data_time: ScheduledDataTimeEvent,
             self.data_depth_milestone: ScheduledDepthEvent,
         }
         return mapping[self]

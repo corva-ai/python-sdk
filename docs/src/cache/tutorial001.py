@@ -1,8 +1,8 @@
-from corva import Api, Cache, ScheduledTimeEvent, scheduled
+from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled
-def scheduled_app(event: ScheduledTimeEvent, api: Api, cache: Cache):
+def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
     cache.store(key='key', value='')  # <1>
     assert cache.load(key='key') == ''  # <2>
 

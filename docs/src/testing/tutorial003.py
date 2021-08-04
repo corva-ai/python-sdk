@@ -1,13 +1,13 @@
-from corva import Api, Cache, ScheduledTimeEvent, scheduled
+from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled
-def scheduled_app(event: ScheduledTimeEvent, api: Api, cache: Cache):  # <.>
+def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):  # <.>
     return 'Hello, World!'
 
 
 def test_scheduled_app(app_runner):  # <.>
-    event = ScheduledTimeEvent(
+    event = ScheduledDataTimeEvent(
         asset_id=0, start_time=0, end_time=0, company_id=0
     )  # <.>
 

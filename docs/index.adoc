@@ -90,12 +90,12 @@ include::src/app_types/tutorial002.py[]
 === Scheduled
 
 Scheduled apps can be
-<<scheduled_time,time>>,
+<<scheduled_time,data time>>,
 <<scheduled_depth,depth>>
-or <<scheduled_natural,natural>> based.
+or <<scheduled_natural,natural time>> based.
 
 [#scheduled_time]
-==== Time
+==== Data Time
 
 [source,python]
 ----
@@ -119,7 +119,7 @@ include::src/app_types/tutorial005.py[]
 <.> {app-step4}
 
 [#scheduled_natural]
-==== Natural
+==== Natural Time
 
 [source,python]
 ----
@@ -470,7 +470,7 @@ include::src/testing/tutorial002.py[]
 
 === Scheduled
 
-==== Time
+==== Data Time
 [source,python]
 ----
 include::src/testing/tutorial003.py[]
@@ -492,7 +492,7 @@ include::src/testing/tutorial005.py[]
 <.> {test-app-step4}
 <.> {test-app-step5}
 
-==== Natural
+==== Natural Time
 [source,python]
 ----
 include::src/testing/tutorial006.py[]

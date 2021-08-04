@@ -1,8 +1,8 @@
-from corva import Api, Cache, ScheduledTimeEvent, scheduled
+from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled
-def scheduled_app(event: ScheduledTimeEvent, api: Api, cache: Cache):
+def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
     cache.store(mapping={'key1': 'val1', 'key2': 'val2', 'key3': 'val3'})  # <1>
 
     cache.delete(keys=['key1'])  # <2>

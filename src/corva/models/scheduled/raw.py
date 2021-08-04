@@ -68,8 +68,8 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         api.post(path=f'scheduler/{self.schedule_id}/completed')
 
 
-class RawScheduledTimeEvent(RawScheduledEvent):
-    """Raw time scheduled event data.
+class RawScheduledDataTimeEvent(RawScheduledEvent):
+    """Raw data time scheduled event data.
 
     Attributes:
         schedule_start: Unix timestamp, when the schedule was triggered.
@@ -99,7 +99,8 @@ class RawScheduledDepthEvent(RawScheduledEvent):
     Attributes:
         top_depth: start depth in ft., covered by this event. Use exclusively.
         bottom_depth: end depth in ft., covered by this event. Use inclusively.
-        log_identifier: TODO
+        log_identifier: app stream log identifier. Used to scope data by stream,
+            asset might be connected to multiple depth based logs.
     """
 
     top_depth: float
@@ -107,7 +108,7 @@ class RawScheduledDepthEvent(RawScheduledEvent):
     log_identifier: str
 
 
-class RawScheduledNaturalEvent(RawScheduledEvent):
+class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     """Raw natural scheduled event data.
 
     Attributes:

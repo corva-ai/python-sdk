@@ -7,20 +7,13 @@ class ScheduledEvent(CorvaBaseEvent):
     """Base class for scheduled event data."""
 
 
-class ScheduledTimeEvent(ScheduledEvent):
-    """Time scheduled event data.
+class ScheduledDataTimeEvent(ScheduledEvent):
+    """Data time scheduled event data.
 
-    Time scheduled apps are run with time frequency set up by user
-    (e.g., every 5 seconds, every 1 minute, etc.). The event contains time range
-    (start and end times) that the app should fetch data for.
-
-    Example: if the app is scheduled to run every 3 seconds, it will be called with
-        the following events in order:
-                 1st event   2nd event   3rd event
-        Time ->    - - -       - - -       - - -
-                   ↑   ↑       ↑   ↑       ↑   ↑
-                   0   2       3   5       6   8
-                 start end   start end   start end
+    Data time scheduled apps are run when there is a time span worth of new data.
+    The time span is specified by user (e.g., 1 minute, 5 minutes, etc.). The event
+    contains time range (start and end times) that there is a new data for. The app
+    may then fetch and use that data.
 
     Attributes:
         asset_id: asset id.
@@ -43,29 +36,18 @@ class ScheduledTimeEvent(ScheduledEvent):
 class ScheduledDepthEvent(ScheduledEvent):
     """Depth scheduled event data.
 
-    Depth scheduled apps are run with depth frequency set up by user
-    (e.g., every 5 ft., every 10 ft., etc.). The event contains depth range
-    (top and bottom depths) that the app should fetch data for.
-
-    Example: if the app is scheduled to run every 3 ft., it will be called with
-        the following events in order:
-        Depth ↓  1st event
-              0 ft.  _     top depth
-                     |
-                     |
-              3 ft.  |     bottom depth
-
-                 2nd event
-              3 ft.  |     top depth
-                     |
-              6 ft.  |     bottom depth
+    Depth scheduled apps are run when there is a distance worth of new data.
+    The distance is specified by user (e.g., 5 ft., 10 ft., etc.). The event contains
+    depth range (top and bottom depths) that there is a new data for. The app
+    may then fetch and use that data.
 
     Attributes:
         asset_id: asset id.
         company_id: company id.
         top_depth: start depth in ft., covered by this event. Use exclusively.
         bottom_depth: end depth in ft., covered by this event. Use inclusively.
-        log_identifier: TODO
+        log_identifier: app stream log identifier. Used to scope data by stream,
+            asset might be connected to multiple depth based logs.
         interval: distance between two schedule triggers.
     """
 
@@ -77,15 +59,16 @@ class ScheduledDepthEvent(ScheduledEvent):
     interval: float
 
 
-class ScheduledNaturalEvent(ScheduledEvent):
-    """Natural scheduled event data.
+class ScheduledNaturalTimeEvent(ScheduledEvent):
+    """Natural time scheduled event data.
 
-    TODO
+    Natural time scheduled apps are run with time frequency set up by user based on
+    the actual time instead of data time (e.g., every 1 minute, every 5 minutes, etc.).
 
     Attributes:
         asset_id: asset id.
         company_id: company id.
-        schedule_start: time of the event creation.
+        schedule_start: schedule trigger time.
         interval: time between two schedule triggers.
     """
 

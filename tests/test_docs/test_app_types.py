@@ -1,7 +1,7 @@
 from corva import (
+    ScheduledDataTimeEvent,
     ScheduledDepthEvent,
-    ScheduledNaturalEvent,
-    ScheduledTimeEvent,
+    ScheduledNaturalTimeEvent,
     StreamDepthEvent,
     StreamDepthRecord,
     StreamTimeEvent,
@@ -35,7 +35,7 @@ def test_tutorial002(app_runner):
 
 
 def test_tutorial003(app_runner):
-    event = ScheduledTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
+    event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     assert app_runner(tutorial003.scheduled_app, event) == 'Hello, World!'
 
@@ -60,7 +60,7 @@ def test_tutorial005(app_runner):
 
 
 def test_tutorial006(app_runner):
-    event = ScheduledNaturalEvent(
+    event = ScheduledNaturalTimeEvent(
         asset_id=0, company_id=0, schedule_start=0, interval=1
     )
 

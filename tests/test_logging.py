@@ -9,7 +9,7 @@ from corva import Logger
 from corva.configuration import SETTINGS
 from corva.handlers import scheduled, stream, task
 from corva.models.context import CorvaContext
-from corva.models.scheduled.raw import RawScheduledEvent, RawScheduledTimeEvent
+from corva.models.scheduled.raw import RawScheduledDataTimeEvent, RawScheduledEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
@@ -27,7 +27,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
     def app(event, api, cache):
         Logger.warning('Hello, World!')
 
-    event = RawScheduledTimeEvent(
+    event = RawScheduledDataTimeEvent(
         asset_id=0,
         interval=int(),
         schedule=int(),

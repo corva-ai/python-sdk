@@ -9,12 +9,12 @@ from requests_mock import Mocker as RequestsMocker
 from corva import Logger
 from corva.handlers import scheduled
 from corva.models.scheduled.raw import (
+    RawScheduledDataTimeEvent,
     RawScheduledDepthEvent,
     RawScheduledEvent,
-    RawScheduledNaturalEvent,
-    RawScheduledTimeEvent,
+    RawScheduledNaturalTimeEvent,
 )
-from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledTimeEvent
+from corva.models.scheduled.scheduled import ScheduledDataTimeEvent, ScheduledEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 
 
@@ -25,7 +25,7 @@ def test_set_completed_status(context, requests_mock):
 
     event = [
         [
-            RawScheduledTimeEvent(
+            RawScheduledDataTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -54,7 +54,7 @@ def test_set_completed_status(context, requests_mock):
 @pytest.mark.parametrize(
     'event',
     (
-        RawScheduledTimeEvent(
+        RawScheduledDataTimeEvent(
             asset_id=int(),
             interval=int(),
             schedule=int(),
@@ -82,7 +82,7 @@ def test_set_completed_status(context, requests_mock):
             by_alias=True,
             exclude_unset=True,
         ),
-        RawScheduledNaturalEvent(
+        RawScheduledNaturalTimeEvent(
             asset_id=int(),
             interval=int(),
             schedule=int(),
@@ -115,7 +115,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
     'event,attr',
     (
         [
-            RawScheduledTimeEvent(
+            RawScheduledDataTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -128,7 +128,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
             'end_time',
         ],
         [
-            RawScheduledNaturalEvent(
+            RawScheduledNaturalTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -206,7 +206,7 @@ def test_set_start_time(
 
     event = [
         [
-            RawScheduledTimeEvent(
+            RawScheduledDataTimeEvent(
                 asset_id=int(),
                 interval=interval,
                 schedule=int(),
@@ -224,7 +224,7 @@ def test_set_start_time(
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
-    result_event: ScheduledTimeEvent = app(event, context)[0]
+    result_event: ScheduledDataTimeEvent = app(event, context)[0]
 
     assert result_event.start_time == expected
 
@@ -236,7 +236,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
 
     event = [
         [
-            RawScheduledTimeEvent(
+            RawScheduledDataTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -268,7 +268,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
 
     event = [
         [
-            RawScheduledTimeEvent(
+            RawScheduledDataTimeEvent(
                 asset_id=int(),
                 interval=int(),
                 schedule=int(),
@@ -302,7 +302,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
     def app(event, api, cache):
         Logger.info('Info message!')
 
-    event = RawScheduledTimeEvent(
+    event = RawScheduledDataTimeEvent(
         asset_id=0,
         interval=int(),
         schedule=int(),
