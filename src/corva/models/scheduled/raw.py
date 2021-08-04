@@ -7,7 +7,6 @@ import pydantic
 
 from corva.api import Api
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
-from corva.models.scheduled.initial import InitialScheduledEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 
 
@@ -54,11 +53,11 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         # flatten the event into 1d array
         event: List[dict] = list(itertools.chain(*event))
 
-        initial_events = pydantic.parse_obj_as(List[InitialScheduledEvent], event)
+        parsed_raw_events = pydantic.parse_obj_as(List[RawScheduledEvent], event)
 
         events = [
-            initial_event.scheduler_type.raw_event.parse_obj(sub_event)
-            for initial_event, sub_event in zip(initial_events, event)
+            parsed_raw_event.scheduler_type.raw_event.parse_obj(sub_event)
+            for parsed_raw_event, sub_event in zip(parsed_raw_events, event)
         ]
 
         return events
