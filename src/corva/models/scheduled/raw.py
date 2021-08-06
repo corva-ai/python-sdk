@@ -30,7 +30,6 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     Attributes:
         asset_id: asset id.
         company_id: company id.
-        interval: depth or time between two schedule triggers.
         schedule_id: schedule id.
         app_connection_id: app connection id.
         app_stream_id: app stream id.
@@ -39,7 +38,6 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
 
     asset_id: int
     company_id: int = pydantic.Field(..., alias='company')
-    interval: float
     schedule_id: int = pydantic.Field(..., alias='schedule')
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
@@ -74,10 +72,12 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
         schedule_start: Unix timestamp, when the schedule was triggered.
         start_time: left bound of the time range, covered by this event.
             Use inclusively.
+        interval: time between two schedule triggers.
     """
 
     schedule_start: int
     start_time: int = None
+    interval: float
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
@@ -100,11 +100,13 @@ class RawScheduledDepthEvent(RawScheduledEvent):
         bottom_depth: end depth in ft., covered by this event. Use inclusively.
         log_identifier: app stream log identifier. Used to scope data by stream,
             asset might be connected to multiple depth based logs.
+        interval: distance between two schedule triggers.
     """
 
     top_depth: float
     bottom_depth: float
     log_identifier: str
+    interval: float = pydantic.Field(..., alias='depth_milestone')
 
 
 class RawScheduledNaturalTimeEvent(RawScheduledEvent):
@@ -112,9 +114,11 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
 
     Attributes:
         schedule_start: Unix timestamp, when the schedule was triggered.
+        interval: time between two schedule triggers.
     """
 
     schedule_start: int
+    interval: float
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(

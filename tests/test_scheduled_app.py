@@ -69,7 +69,7 @@ def test_set_completed_status(context, requests_mock):
         ),
         RawScheduledDepthEvent(
             asset_id=int(),
-            interval=int(),
+            depth_milestone=float(),
             schedule=int(),
             app_connection=int(),
             app_stream=int(),
