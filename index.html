@@ -527,7 +527,13 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#stream_depth">2.1.2. Depth</a></li>
 </ul>
 </li>
-<li><a href="#scheduled">2.2. Scheduled</a></li>
+<li><a href="#scheduled">2.2. Scheduled</a>
+<ul class="sectlevel3">
+<li><a href="#scheduled_time">2.2.1. Data Time</a></li>
+<li><a href="#scheduled_depth">2.2.2. Depth</a></li>
+<li><a href="#scheduled_natural">2.2.3. Natural Time</a></li>
+</ul>
+</li>
 <li><a href="#task">2.3. Task</a></li>
 </ul>
 </li>
@@ -572,7 +578,13 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <li><a href="#_depth">7.1.2. Depth</a></li>
 </ul>
 </li>
-<li><a href="#_scheduled">7.2. Scheduled</a></li>
+<li><a href="#_scheduled">7.2. Scheduled</a>
+<ul class="sectlevel3">
+<li><a href="#_data_time">7.2.1. Data Time</a></li>
+<li><a href="#_depth_2">7.2.2. Depth</a></li>
+<li><a href="#_natural_time">7.2.3. Natural Time</a></li>
+</ul>
+</li>
 <li><a href="#_task">7.3. Task</a></li>
 </ul>
 </li>
@@ -590,7 +602,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>v1.1.0</strong>.</p>
+<p>Documentation for version <strong>v1.2.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -626,7 +638,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 <li>
 <p><a href="#scheduled"><code>scheduled</code></a> - works with data at defined schedules/intervals
-(e.g., once a minute).</p>
+(e.g., once a minute, once every 3 ft.).</p>
 </li>
 <li>
 <p><a href="#task"><code>task</code></a> - works with data on-demand.</p>
@@ -721,13 +733,21 @@ for better support from editors and tools.
 </div>
 <div class="sect2">
 <h3 id="scheduled">2.2. Scheduled</h3>
+<div class="paragraph">
+<p>Scheduled apps can be
+<a href="#scheduled_time">data time</a>,
+<a href="#scheduled_depth">depth</a>
+or <a href="#scheduled_natural">natural time</a> based.</p>
+</div>
+<div class="sect3">
+<h4 id="scheduled_time">2.2.1. Data Time</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
 
 <span class="tok-nd">@scheduled</span>  <i class="conum" data-value="3"></i><b>(3)</b>
-<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
     <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
@@ -750,6 +770,74 @@ for better support from editors and tools.
 <td>Add app logic here.</td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="scheduled_depth">2.2.2. Depth</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+
+<span class="tok-nd">@scheduled</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import required functionality.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define your function. It must receive three argumets: <a href="#event">event</a>, <a href="#api">api</a> and <a href="#cache">cache</a>. The arguments serve as building blocks for your app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Decorate your function using <code>scheduled</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Add app logic here.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="scheduled_natural">2.2.3. Natural Time</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import required functionality.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define your function. It must receive three argumets: <a href="#event">event</a>, <a href="#api">api</a> and <a href="#cache">cache</a>. The arguments serve as building blocks for your app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Decorate your function using <code>scheduled</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Add app logic here.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1048,11 +1136,11 @@ as they aren&#8217;t meant to share the data between invokes.
 <h3 id="_store_and_load">5.1. Store and load</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
 <span class="tok-nd">@scheduled</span>
-<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
     <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
     <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1113,11 +1201,11 @@ That&#8217;s why the returned type is <code>str</code>.</td>
 <h3 id="_delete">5.2. Delete</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
 <span class="tok-nd">@scheduled</span>
-<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
     <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">mapping</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key2&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val3&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="1"></i><b>(1)</b>
 
     <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-n">keys</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">])</span>  <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1171,11 +1259,11 @@ By default <code>Cache</code> sets an expiry to <code>60</code> days.
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">datetime</span>
 <span class="tok-kn">import</span> <span class="tok-nn">time</span>
 
-<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
 <span class="tok-nd">@scheduled</span>
-<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
     <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
     <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">timedelta</span><span class="tok-p">(</span><span class="tok-n">seconds</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">))</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
@@ -1641,18 +1729,22 @@ Use code samples above as the examples.</p>
 </div>
 <div class="sect2">
 <h3 id="_scheduled">7.2. Scheduled</h3>
+<div class="sect3">
+<h4 id="_data_time">7.2.1. Data Time</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
 <span class="tok-nd">@scheduled</span>
-<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
     <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_scheduled_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
-    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">ScheduledEvent</span><span class="tok-p">(</span><span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">start_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">end_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">(</span>
+        <span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">start_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">end_time</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span>
+    <span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
 
     <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">scheduled_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
 
@@ -1682,6 +1774,106 @@ Use code samples above as the examples.</p>
 <td>Verify the result.</td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_depth_2">7.2.2. Depth</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_scheduled_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">(</span>
+        <span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span>
+        <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span>
+        <span class="tok-n">top_depth</span><span class="tok-o">=</span><span class="tok-mf">0.0</span><span class="tok-p">,</span>
+        <span class="tok-n">bottom_depth</span><span class="tok-o">=</span><span class="tok-mf">1.0</span><span class="tok-p">,</span>
+        <span class="tok-n">log_identifier</span><span class="tok-o">=</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">,</span>
+        <span class="tok-n">interval</span><span class="tok-o">=</span><span class="tok-mf">1.0</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">scheduled_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sample app that we want to test.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add <code>app_runner</code> argument to your test function.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Verify the result.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_natural_time">7.2.3. Natural Time</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">return</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_scheduled_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">(</span>
+        <span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">schedule_start</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">interval</span><span class="tok-o">=</span><span class="tok-mi">1</span>
+    <span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">scheduled_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-p">)</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;Hello, World!&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sample app that we want to test.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add <code>app_runner</code> argument to your test function.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Verify the result.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect2">
