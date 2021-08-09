@@ -6,13 +6,13 @@ import freezegun
 import pytest
 from pytest_mock import MockerFixture
 
-from corva import ScheduledEvent
+from corva import ScheduledDataTimeEvent
 from corva.state.redis_state import RedisState
 from docs.src.cache import tutorial001, tutorial002, tutorial003
 
 
 def test_tutorial001(app_runner, mocker: MockerFixture):
-    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
+    event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     store_spy = mocker.spy(RedisState, 'store')
     load_spy = mocker.spy(RedisState, 'load')
@@ -26,7 +26,7 @@ def test_tutorial001(app_runner, mocker: MockerFixture):
 
 
 def test_tutorial002(app_runner, mocker: MockerFixture):
-    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
+    event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     store_spy = mocker.spy(RedisState, 'store')
     delete_spy = mocker.spy(RedisState, 'delete')
@@ -49,7 +49,7 @@ def test_tutorial002(app_runner, mocker: MockerFixture):
     ),
 )
 def test_tutorial003(delta: datetime.timedelta, ctx, app_runner, mocker: MockerFixture):
-    event = ScheduledEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
+    event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     store_spy = mocker.spy(RedisState, 'store')
     ttl_spy = mocker.spy(RedisState, 'ttl')

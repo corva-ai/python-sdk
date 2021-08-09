@@ -8,7 +8,8 @@ from corva.configuration import SETTINGS
 from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
-from corva.models.scheduled import RawScheduledEvent, ScheduledEvent
+from corva.models.scheduled.raw import RawScheduledEvent
+from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
@@ -179,7 +180,7 @@ def scheduled(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ):
-            result = func(ScheduledEvent.parse_obj(event), api, cache)
+            result = func(event.scheduler_type.event.parse_obj(event), api, cache)
 
         try:
             event.set_schedule_as_completed(api=api)
