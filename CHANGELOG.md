@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2021-08-09
+
 ### Added
 - Subtypes of scheduled event:
 `ScheduledDataTimeEvent`, `ScheduledDepthEvent` and `ScheduledNaturalTimeEvent`  
@@ -187,7 +189,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.1.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.2.0...master
+[1.2.0] https://github.com/corva-ai/python-sdk/compare/v1.1.0...v1.2.0
 [1.1.0] https://github.com/corva-ai/python-sdk/compare/v1.0.3...v1.1.0
 [1.0.3] https://github.com/corva-ai/python-sdk/compare/v1.0.2...v1.0.3
 [1.0.2] https://github.com/corva-ai/python-sdk/compare/v1.0.1...v1.0.2
