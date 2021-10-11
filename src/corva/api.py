@@ -23,17 +23,19 @@ class Api:
         api_key: str,
         app_key: str,
         timeout: Optional[int] = None,
+        authentication_scheme: Optional[str] = 'API'
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_key = app_key
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
+        self.authentication_scheme = authentication_scheme
 
     @property
     def default_headers(self):
         return {
-            'Authorization': f'API {self.api_key}',
+            'Authorization': f'{self.authentication_scheme} {self.api_key}',
             'X-Corva-App': self.app_key,
         }
 
