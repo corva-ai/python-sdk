@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed 
-- Task handler stores app's result in task payload 
-only if type of the result is dict.
+### Deprecated 
+- Returning dict result from task app
+to get it stored in task payload.
+Send the request to update the payload explicitly in your app.
 
 
 ## [1.2.0] - 2021-08-09
