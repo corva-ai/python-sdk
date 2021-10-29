@@ -1,6 +1,7 @@
 import functools
 import logging
 import sys
+import warnings
 from typing import Any, Callable, List, Optional, Type
 
 from corva.api import Api
@@ -238,9 +239,16 @@ def task(
             ):
                 result = func(app_event, api)
 
-            # TODO: do not send task result in payload
             if isinstance(result, dict):
+                warnings.warn(
+                    "Returning dict result from task app to get it stored in task "
+                    "payload is deprecated and will be removed from corva in the next "
+                    "major version. Update the payload explicitly in your app.",
+                    FutureWarning,
+                )
+
                 data = {'payload': result}
+
             status = TaskStatus.success
 
             return result
