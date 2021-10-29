@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed 
+- Result of successful task execution 
+is not stored in `payload` anymore. 
+
+
 ## [1.2.0] - 2021-08-09
 
 ### Added
