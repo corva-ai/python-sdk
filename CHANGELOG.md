@@ -6,9 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed 
-- Result of successful task execution 
-is not stored in `payload` anymore. 
+### Changed 
+- Task handler stores app's result in task payload 
+only if type of the result is dict.
 
 
 ## [1.2.0] - 2021-08-09
