@@ -49,7 +49,8 @@ def test_lambda_succeeds_if_unable_to_get_task_event(
         assert result is None
 
     if status == 'success':
-        assert put_mock.request_history[0].json() == {'payload': True}
+        with pytest.raises(TypeError):
+            put_mock.request_history[0].json()
         assert result is True
 
 
@@ -86,7 +87,8 @@ def test_lambda_succeeds_if_user_app_fails(
         assert result is None
 
     if status == 'success':
-        assert put_mock.request_history[0].json() == {'payload': True}
+        with pytest.raises(TypeError):
+            put_mock.request_history[0].json()
         assert result is True
 
 
@@ -131,7 +133,8 @@ def test_task_app_succeeds(context, requests_mock: RequestsMocker):
     assert get_mock.called_once
     assert put_mock.called_once
 
-    assert put_mock.request_history[0].json() == {'payload': True}
+    with pytest.raises(TypeError):
+        put_mock.request_history[0].json()
     assert result is True
 
 
