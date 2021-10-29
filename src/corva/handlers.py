@@ -238,6 +238,9 @@ def task(
             ):
                 result = func(app_event, api)
 
+            # TODO: do not send task result in payload
+            if isinstance(result, dict):
+                data = {'payload': result}
             status = TaskStatus.success
 
             return result
