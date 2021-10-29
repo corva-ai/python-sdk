@@ -1,6 +1,7 @@
 import functools
 import logging
 import sys
+import warnings
 from typing import Any, Callable, List, Optional, Type
 
 from corva.api import Api
@@ -215,6 +216,9 @@ def task(
         aws_request_id: str,
         logging_ctx: LoggingContext,
     ) -> Any:
+        status = TaskStatus.fail
+        data = None
+
         try:
             app_event = event.get_task_event(api=api)
 
@@ -235,15 +239,22 @@ def task(
             ):
                 result = func(app_event, api)
 
+            if isinstance(result, dict):
+                warnings.warn(
+                    "Returning dict result from task app to get it stored in task "
+                    "payload is deprecated and will be removed from corva in the next "
+                    "major version. Update the payload explicitly in your app.",
+                    FutureWarning,
+                )
+
+                data = {'payload': result}
+
             status = TaskStatus.success
-            data = {'payload': result}
 
             return result
 
         except Exception as exc:
             CORVA_LOGGER.exception('Task app failed to execute.')
-
-            status = TaskStatus.fail
             data = {'fail_reason': str(exc)}
 
         finally:
@@ -252,7 +263,7 @@ def task(
                     api=api,
                     status=status,
                     data=data,
-                )
+                ).raise_for_status()
             except Exception:
                 # lambda succeeds if we're unable to update task data
                 CORVA_LOGGER.exception('Could not update task data.')

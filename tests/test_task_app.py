@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import re
 
@@ -49,7 +50,8 @@ def test_lambda_succeeds_if_unable_to_get_task_event(
         assert result is None
 
     if status == 'success':
-        assert put_mock.request_history[0].json() == {'payload': True}
+        with pytest.raises(TypeError):
+            put_mock.request_history[0].json()
         assert result is True
 
 
@@ -86,7 +88,8 @@ def test_lambda_succeeds_if_user_app_fails(
         assert result is None
 
     if status == 'success':
-        assert put_mock.request_history[0].json() == {'payload': True}
+        with pytest.raises(TypeError):
+            put_mock.request_history[0].json()
         assert result is True
 
 
@@ -113,10 +116,25 @@ def test_lambda_succeeds_if_unable_to_update_task_data(context, mocker: MockerFi
     update_task_data_patch.assert_called_once()
 
 
-def test_task_app_succeeds(context, requests_mock: RequestsMocker):
+@pytest.mark.parametrize(
+    'app_result, exc_ctx',
+    [
+        pytest.param(
+            True,
+            pytest.raises(TypeError),
+            id='Task handler doesnt store non-dict data in task payload.',
+        ),
+        pytest.param(
+            {'field': 'value'},
+            contextlib.nullcontext(),
+            id='Task handler stores dict data in task payload.',
+        ),
+    ],
+)
+def test_task_app_succeeds(app_result, exc_ctx, context, requests_mock: RequestsMocker):
     @task
     def task_app(event, api):
-        return True
+        return app_result
 
     event = RawTaskEvent(task_id='0', version=2).dict()
 
@@ -131,8 +149,9 @@ def test_task_app_succeeds(context, requests_mock: RequestsMocker):
     assert get_mock.called_once
     assert put_mock.called_once
 
-    assert put_mock.request_history[0].json() == {'payload': True}
-    assert result is True
+    with exc_ctx:
+        assert put_mock.request_history[0].json()['payload'] == app_result
+    assert result == app_result
 
 
 def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsys):
