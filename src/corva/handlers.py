@@ -217,7 +217,7 @@ def task(
         logging_ctx: LoggingContext,
     ) -> Any:
         status = TaskStatus.fail
-        data = None
+        data = {"payload": {}}
 
         try:
             app_event = event.get_task_event(api=api)
@@ -247,7 +247,7 @@ def task(
                     FutureWarning,
                 )
 
-                data = {'payload': result}
+                data['payload'] = result
 
             status = TaskStatus.success
 
