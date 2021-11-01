@@ -6,10 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.1] - 2021-10-29
-
 ### Fixed
 - Successful task app failing to update task status.
+
+
+## [1.2.1] - 2021-10-29
 
 ### Deprecated 
 - Returning dict result from task app
