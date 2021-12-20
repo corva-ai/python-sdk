@@ -33,20 +33,33 @@ install-test: install-corva-sdk
 install-lint:
 	@pip install -U -r requirements-lint.txt
 
-## test: Run tests and show code coverage.
+## test: Run tests.
 .PHONY: test
-test:
-	@pytest --cov
+test: unit-tests up-cache integration-tests down-cache
+
+## unit-tests: Run unit tests.
+.PHONY: unit-tests
+unit-tests: test_path = tests/unit
+unit-tests:
+	@coverage run -m pytest $(test_path)
 
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
-integration-tests: export CACHE_URL ?= redis://localhost:6379
+integration-tests: export CACHE_URL = redis://localhost:6379
+integration-tests: test_path = tests/integration
 integration-tests:
-	@pytest tests/test_integration
+	@coverage run -m pytest $(test_path)
 
-## testcov: Show HTML code coverage.
-.PHONY: testcov
-testcov: test
+## coverage: Display code coverage in the console.
+.PHONY: coverage
+coverage: test
+	@coverage combine
+	@coverage report
+
+## coverage-html: Display code coverage in the browser.
+.PHONY: coverage-html
+coverage-html: test
+	@coverage combine
 	@coverage html
 	@x-www-browser htmlcov/index.html
 
@@ -100,17 +113,15 @@ release:
 
 ## up-cache: Start Redis.
 .PHONY: up-cache
-up-cache: container_name = python-sdk-redis
 up-cache:
 	@docker run \
 	--rm \
 	-d \
-	--name $(container_name) \
+	--name python-sdk-redis \
 	-p 6379:6379 \
 	redis:6.0.9  # apps use 6.0.9 or 6.2.3
 
 # down-cache: Stop Redis.
 .PHONY: down-cache
-down-cache: container_name = python-sdk-redis
 down-cache:
-	@docker stop $(container_name)
+	@docker stop python-sdk-redis
