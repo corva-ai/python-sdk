@@ -42,9 +42,9 @@ class TestSet:
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value'}
 
     def test_overwrites_the_value_and_ttl(
-         self,
-         redis_client: redis.Redis,
-         redis_adapter: adapters.cache.RedisCache,
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: adapters.cache.RedisCache,
     ):
         assert not redis_client.keys(pattern='*')
 
