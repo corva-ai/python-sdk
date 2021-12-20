@@ -38,6 +38,12 @@ install-lint:
 test:
 	@pytest --cov
 
+## integration-tests: Run integration tests.
+.PHONY: integration-tests
+integration-tests: export CACHE_URL ?= redis://localhost:6379
+integration-tests:
+	@pytest tests/test_integration
+
 ## testcov: Show HTML code coverage.
 .PHONY: testcov
 testcov: test
@@ -91,3 +97,20 @@ release:
 	@echo "Commit the changes."
 	@echo "Create tag like "v1.0.0"."
 	@echo "Push commit and tag."
+
+## up-cache: Start Redis.
+.PHONY: up-cache
+up-cache: container_name = python-sdk-redis
+up-cache:
+	@docker run \
+	--rm \
+	-d \
+	--name $(container_name) \
+	-p 6379:6379 \
+	redis:6.0.9  # apps use 6.0.9 or 6.2.3
+
+# down-cache: Stop Redis.
+.PHONY: down-cache
+down-cache: container_name = python-sdk-redis
+down-cache:
+	@docker stop $(container_name)
