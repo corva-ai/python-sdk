@@ -183,7 +183,7 @@ class TestDelete:
         assert redis_adapter.get(key='key') == 'value'
 
         redis_adapter.delete(key='key')
-        assert redis_adapter.get(key='key') == None
+        assert redis_adapter.get(key='key') is None
 
         assert not redis_client.keys(pattern='*')
 
@@ -199,7 +199,7 @@ class TestDelete:
         assert redis_adapter.get(key='key1') == 'value1'
 
         redis_adapter.delete(key='key1')
-        assert redis_adapter.get(key='key1') == None
+        assert redis_adapter.get(key='key1') is None
         assert redis_client.keys(pattern='*')
 
         redis_adapter.delete(key='key2')
@@ -227,9 +227,9 @@ class TestVacuum:
             'key1': 'value1',
             'key2': 'value2',
         }
-        assert redis_adapter.get('key3') == None
-        assert redis_adapter.get('key4') == None
-        assert redis_adapter.get('key5') == None
+        assert redis_adapter.get('key3') is None
+        assert redis_adapter.get('key4') is None
+        assert redis_adapter.get('key5') is None
 
         redis_adapter.delete(key='key1')
 
