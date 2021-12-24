@@ -4,7 +4,7 @@ from typing import Iterable
 import pytest
 import redis
 
-from corva import adapters, configuration
+from corva import cache_adapter, configuration
 
 HASH_NAME = 'test_hash_name'
 
@@ -25,8 +25,8 @@ def redis_client() -> Iterable[redis.Redis]:
 @pytest.fixture(scope='function')
 def redis_adapter(
     redis_client: redis.Redis,
-) -> Iterable[adapters.cache.RedisRepository]:
-    redis_adapter = adapters.cache.RedisRepository(
+) -> Iterable[cache_adapter.RedisRepository]:
+    redis_adapter = cache_adapter.RedisRepository(
         hash_name=HASH_NAME, client=redis_client
     )
 
@@ -37,7 +37,7 @@ class TestSet:
     def test_sets_the_value(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -48,7 +48,7 @@ class TestSet:
     def test_overwrites_the_value_and_ttl(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -63,7 +63,7 @@ class TestSet:
     def test_expiration(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -81,7 +81,7 @@ class TestSet:
     def test_sets_max_expiration(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -107,7 +107,7 @@ class TestGet:
     def test_gets_if_no_existing_zset(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -118,7 +118,7 @@ class TestGet:
     def test_gets_if_no_entry_in_zset(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -130,7 +130,7 @@ class TestGet:
     def test_gets_if_now_less_than_expireat(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -146,7 +146,7 @@ class TestGet:
     def test_returns_nil_if_now_equal_to_expireat(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -161,7 +161,7 @@ class TestGet:
     def test_returns_nil_if_now_bigger_than_expireat(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -179,7 +179,7 @@ class TestDelete:
     def test_deletes_the_key(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -194,7 +194,7 @@ class TestDelete:
     def test_delete_makes_key_unavailable(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -215,7 +215,7 @@ class TestVacuum:
     def test_vacuum(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
@@ -238,7 +238,7 @@ class TestVacuum:
     def test_does_not_fail_for_empty_cache(
         self,
         redis_client: redis.Redis,
-        redis_adapter: adapters.cache.RedisRepository,
+        redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
         redis_adapter.vacuum(delete_count=1)
