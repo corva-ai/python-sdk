@@ -1,10 +1,9 @@
-import datetime
 from typing import Optional, Protocol
 
 import redis
 
 
-class CacheProtocol(Protocol):
+class CacheRepositoryProtocol(Protocol):
     def set(
         self,
         key: str,
@@ -19,13 +18,8 @@ class CacheProtocol(Protocol):
     def delete(self, key: str) -> None:
         ...
 
-    def vacuum(self) -> None:
-        ...
 
-
-class RedisCache:
-    SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
-
+class RedisRepository:
     # Inserts a field with an expiration time into the hash specified by the key.
     #
     # Complexity: O(log(N)) with N being the number of elements in the hash.
@@ -99,26 +93,30 @@ class RedisCache:
     end
     """
 
-    # Deletes three expired keys from the hash.
+    # Deletes M expired keys from the hash.
     #
     # Complexity: O(log(N) + M) + O(M) + O(M * log(N)) with N being the number of
-    # elements in the hash and M being number of elements deleted. For constant M == 3
-    # the complexity is O(log(N)).
+    # elements in the hash and M being the number of elements deleted. For constant M
+    # (e.g., 3) the complexity is O(log(N)).
     #
     # Args:
     #     KEYS:
     #         hash_name.
     #         zset_name.
     #
+    #     ARGV:
+    #         delete_count.
+    #
     # Returns: nil.
     LUA_VACUUM_SCRIPT = """
     local hash_name = KEYS[1]
     local zset_name = KEYS[2]
+    local delete_count = tonumber(ARGV[1])
     local time = redis.call('TIME')
     local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
 
     local keys_to_delete = redis.call(
-            'ZRANGEBYSCORE', zset_name, '-inf', pnow, 'LIMIT', 0, 3
+            'ZRANGEBYSCORE', zset_name, '-inf', pnow, 'LIMIT', 0, delete_count
     )
 
     if not next(keys_to_delete) then
@@ -137,12 +135,7 @@ class RedisCache:
         self.lua_get = self.client.register_script(self.LUA_GET_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
 
-    def set(
-        self,
-        key: str,
-        value: str,
-        ttl: int = SIXTY_DAYS,
-    ) -> None:
+    def set(self, key: str, value: str, ttl: int) -> None:
         self.lua_set(keys=[self.hash_name, self.zset_name], args=[key, value, ttl])
 
     def get(self, key: str) -> Optional[str]:
@@ -151,5 +144,5 @@ class RedisCache:
     def delete(self, key: str) -> None:
         self.set(key=key, value='', ttl=-1)
 
-    def vacuum(self) -> None:
-        self.lua_vacuum(keys=[self.hash_name, self.zset_name])
+    def vacuum(self, delete_count: int) -> None:
+        self.lua_vacuum(keys=[self.hash_name, self.zset_name], args=[delete_count])

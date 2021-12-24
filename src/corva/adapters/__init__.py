@@ -1,1 +1,1 @@
-from .cache import CacheProtocol, RedisCache
+from .cache import CacheRepositoryProtocol, RedisRepository
