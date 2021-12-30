@@ -97,7 +97,7 @@ clean:
 	@-rm -rf src/*.egg-info
 	@-rm -rf .pytest_cache
 	@-rm -rf htmlcov
-	@-rm .coverage
+	@-rm .coverage*
 	@-sudo rm -rf $(docs_dir)/$(docs_build_dir)
 
 ## release: How to release a new version.
