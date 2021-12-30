@@ -1,12 +1,15 @@
+import functools
 import inspect
 from types import SimpleNamespace
-from typing import Any, Callable, ClassVar, Union
+from typing import Any, Callable, ClassVar, Dict, Optional, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
+from corva.service import service
+from corva.service.api_sdk import FakeApiSdk
 from corva.state.redis_state import get_cache
 
 
@@ -32,13 +35,18 @@ class TestClient:
     def run(
         fn: Callable,
         event: Union[TaskEvent, StreamEvent, ScheduledEvent],
+        *,
+        secrets: Optional[Dict[str, str]] = None
     ) -> Any:
 
+        app = None
+
         if isinstance(event, TaskEvent):
-            return inspect.unwrap(fn)(event, TestClient._api)
+            app = functools.partial(inspect.unwrap(fn), event, TestClient._api)
 
         if isinstance(event, (ScheduledEvent, StreamEvent)):
-            return inspect.unwrap(fn)(
+            app = functools.partial(
+                inspect.unwrap(fn),
                 event,
                 TestClient._api,
                 get_cache(
@@ -50,3 +58,13 @@ class TestClient:
                     cache_url=SETTINGS.CACHE_URL,
                 ),
             )
+
+        if app is None:
+            return
+
+        return service.run_app(
+            has_secrets=True,
+            app_id=1,
+            api_sdk=FakeApiSdk(secrets={1: secrets or {}}),
+            app=app,
+        )

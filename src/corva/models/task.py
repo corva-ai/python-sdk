@@ -27,11 +27,13 @@ class TaskEvent(CorvaBaseEvent):
 
     asset_id: int
     company_id: int
+    app_id: int
     properties: dict = {}
 
 
 class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     task_id: str
+    has_secrets: bool = False
     version: conint(ge=2, le=2)  # only utils API v2 supported
 
     @staticmethod

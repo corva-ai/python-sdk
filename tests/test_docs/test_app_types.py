@@ -41,7 +41,7 @@ def test_tutorial003(app_runner):
 
 
 def test_tutorial004(app_runner):
-    event = TaskEvent(asset_id=0, company_id=0)
+    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
 
     assert app_runner(tutorial004.task_app, event) == 'Hello, World!'
 

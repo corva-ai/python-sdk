@@ -36,6 +36,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         app_stream=int(),
         company=int(),
         scheduler_type=SchedulerType.data_time,
+        app=int(),
     )
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
@@ -76,7 +77,7 @@ def test_stream_logging(context, capsys):
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )
@@ -97,12 +98,12 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
         Logger.warning('Hello, World!')
 
     raw_event = RawTaskEvent(task_id='0', version=2).dict()
-    event = TaskEvent(asset_id=0, company_id=int())
+    event = TaskEvent(asset_id=0, company_id=int(), app_id=int())
 
     mocker.patch.object(
         RawTaskEvent,
         'get_task_event',
-        return_value=TaskEvent(asset_id=0, company_id=int()),
+        return_value=TaskEvent(asset_id=0, company_id=int(), app_id=int()),
     )
     mocker.patch.object(RawTaskEvent, 'update_task_data')
 
@@ -141,7 +142,7 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )
@@ -171,7 +172,7 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )
@@ -221,7 +222,7 @@ def test_long_message_gets_truncated(
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )
@@ -270,7 +271,7 @@ def test_max_message_count_reached(
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )

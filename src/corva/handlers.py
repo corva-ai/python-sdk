@@ -124,7 +124,7 @@ def stream(
         ):
             result = service.run_app(
                 has_secrets=event.has_secrets,
-                app_connection_id=event.app_connection_id,
+                app_id=event.app_id,
                 api_sdk=CorvaApiSdk(api_adapter=api),
                 app=functools.partial(func, app_event, api, cache),
             )
@@ -192,7 +192,7 @@ def scheduled(
         ):
             result = service.run_app(
                 has_secrets=event.has_secrets,
-                app_connection_id=event.app_connection_id,
+                app_id=event.app_id,
                 api_sdk=CorvaApiSdk(api_adapter=api),
                 app=functools.partial(func, app_event, api, cache),
             )
@@ -251,7 +251,12 @@ def task(
                 user_handler=handler,
                 logger=CORVA_LOGGER,
             ):
-                result = func(app_event, api)
+                result = service.run_app(
+                    has_secrets=event.has_secrets,
+                    app_id=app_event.app_id,
+                    api_sdk=CorvaApiSdk(api_adapter=api),
+                    app=functools.partial(func, app_event, api),
+                )
 
             if isinstance(result, dict):
                 warnings.warn(

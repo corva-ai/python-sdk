@@ -42,6 +42,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
     scheduler_type: SchedulerType
+    app_id: int = pydantic.Field(..., alias='app')
     has_secrets: bool = False
 
     @staticmethod

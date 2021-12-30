@@ -22,7 +22,7 @@ def test_task_app_runner(app_runner):
     def task_app(event, api):
         return 'Task app result'
 
-    event = TaskEvent(asset_id=int(), company_id=int())
+    event = TaskEvent(asset_id=int(), company_id=int(), app_id=int())
 
     assert app_runner(task_app, event) == 'Task app result'
 

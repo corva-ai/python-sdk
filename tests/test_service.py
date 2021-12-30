@@ -12,7 +12,7 @@ class TestRunApp:
 
         api_sdk = FakeApiSdk(secrets={1: {"my": "secret"}})
 
-        service.run_app(has_secrets=True, app_connection_id=1, api_sdk=api_sdk, app=app)
+        service.run_app(has_secrets=True, app_id=1, api_sdk=api_sdk, app=app)
 
         assert secrets == {}
 
@@ -20,7 +20,7 @@ class TestRunApp:
         api_sdk = FakeApiSdk(secrets={})
 
         result = service.run_app(
-            has_secrets=False, app_connection_id=1, api_sdk=api_sdk, app=lambda: 1
+            has_secrets=False, app_id=1, api_sdk=api_sdk, app=lambda: 10
         )
 
-        assert result == 1
+        assert result == 10
