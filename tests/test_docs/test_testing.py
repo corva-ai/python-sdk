@@ -5,6 +5,7 @@ from docs.src.testing import (
     tutorial004,
     tutorial005,
     tutorial006,
+    tutorial007,
 )
 
 
@@ -30,3 +31,7 @@ def test_tutorial005(app_runner):
 
 def test_tutorial006(app_runner):
     tutorial006.test_scheduled_app(app_runner)
+
+
+def test_tutorial007(app_runner):
+    tutorial007.test_task_app(app_runner)
