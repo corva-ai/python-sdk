@@ -27,6 +27,7 @@ class TaskEvent(CorvaBaseEvent):
 
     asset_id: int
     company_id: int
+    app_id: int
     properties: dict = {}
 
 

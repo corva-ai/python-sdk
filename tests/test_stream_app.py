@@ -37,7 +37,11 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
             ],
             metadata=RawMetadata(
                 app_stream_id=int(),
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                apps={
+                    SETTINGS.APP_KEY: RawAppMetadata(
+                        app_connection_id=int(), app_id=int()
+                    )
+                },
                 log_type=LogType.time,
             ),
         ).dict()
@@ -72,7 +76,9 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -108,7 +114,9 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -144,7 +152,9 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -186,7 +196,9 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -228,7 +240,9 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.depth,
                     ),
@@ -284,7 +298,11 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
             ],
             metadata=RawMetadata(
                 app_stream_id=int(),
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                apps={
+                    SETTINGS.APP_KEY: RawAppMetadata(
+                        app_connection_id=int(), app_id=int()
+                    )
+                },
                 log_type=LogType.time,
             ),
         ).dict()
@@ -325,7 +343,9 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -359,7 +379,9 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.time,
                     ),
@@ -387,7 +409,9 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.depth,
                     ),
@@ -421,7 +445,9 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                     metadata=RawMetadata(
                         app_stream_id=int(),
                         apps={
-                            SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())
+                            SETTINGS.APP_KEY: RawAppMetadata(
+                                app_connection_id=int(), app_id=int()
+                            )
                         },
                         log_type=LogType.depth,
                     ),
@@ -463,7 +489,11 @@ def test_set_cached_max_record_value_should_not_fail_lambda(
             ],
             metadata=RawMetadata(
                 app_stream_id=int(),
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                apps={
+                    SETTINGS.APP_KEY: RawAppMetadata(
+                        app_connection_id=int(), app_id=int()
+                    )
+                },
                 log_type=LogType.time,
             ),
         ).dict()
@@ -497,7 +527,11 @@ def test_log_if_unable_to_set_cached_max_record_value(
             ],
             metadata=RawMetadata(
                 app_stream_id=int(),
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                apps={
+                    SETTINGS.APP_KEY: RawAppMetadata(
+                        app_connection_id=int(), app_id=int()
+                    )
+                },
                 log_type=LogType.time,
             ),
         ).dict()
@@ -532,7 +566,7 @@ def test_custom_log_handler(context, capsys):
         ],
         metadata=RawMetadata(
             app_stream_id=int(),
-            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1, app_id=int())},
             log_type=LogType.time,
         ),
     )

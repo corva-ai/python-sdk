@@ -34,6 +34,7 @@ def test_set_completed_status(context, requests_mock):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
+                app=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -63,6 +64,7 @@ def test_set_completed_status(context, requests_mock):
             app_stream=int(),
             company=int(),
             scheduler_type=SchedulerType.data_time,
+            app=int(),
         ).dict(
             by_alias=True,
             exclude_unset=True,
@@ -78,6 +80,7 @@ def test_set_completed_status(context, requests_mock):
             top_depth=0.0,
             bottom_depth=1.0,
             log_identifier='',
+            app=int(),
         ).dict(
             by_alias=True,
             exclude_unset=True,
@@ -91,6 +94,7 @@ def test_set_completed_status(context, requests_mock):
             company=int(),
             scheduler_type=SchedulerType.natural_time,
             schedule_start=int(),
+            app=int(),
         ).dict(
             by_alias=True,
             exclude_unset=True,
@@ -124,6 +128,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
+                app=int(),
             ),
             'end_time',
         ],
@@ -137,6 +142,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.natural_time,
+                app=int(),
             ),
             'schedule_start',
         ],
@@ -215,6 +221,7 @@ def test_set_start_time(
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
+                app=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -245,6 +252,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
+                app=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -277,6 +285,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
+                app=int(),
             ).dict(
                 by_alias=True,
                 exclude_unset=True,
@@ -311,6 +320,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
         app_stream=int(),
         company=int(),
         scheduler_type=SchedulerType.data_time,
+        app=int(),
     )
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')

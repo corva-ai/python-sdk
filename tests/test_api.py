@@ -21,7 +21,7 @@ def app(event, api):
 def api(app_runner) -> Api:
     """Returns Api instance from task app."""
 
-    event = TaskEvent(asset_id=int(), company_id=int())
+    event = TaskEvent(asset_id=int(), company_id=int(), app_id=int())
 
     return app_runner(app, event)
 
