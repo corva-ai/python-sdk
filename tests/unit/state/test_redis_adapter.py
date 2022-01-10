@@ -1,10 +1,19 @@
 from datetime import datetime, timedelta
 
+import fakeredis
 import pytest
 from freezegun import freeze_time
 from redis import ConnectionError, Redis
 
-from corva.state.redis_adapter import RedisAdapter
+from corva.cache_adapter import DeprecatedRedisAdapter
+from corva.configuration import SETTINGS
+
+
+@pytest.fixture(scope='function')
+def redis_adapter() -> DeprecatedRedisAdapter:
+    client = fakeredis.FakeRedis.from_url(url=SETTINGS.CACHE_URL, decode_responses=True)
+    return DeprecatedRedisAdapter(hash_name='default_name', client=client)
+
 
 NAME = 'NAME'
 KEY = 'key'
@@ -20,7 +29,7 @@ def test_init_connect_exc():
     fake_cache_url = 'redis://random:123'
 
     with pytest.raises(ConnectionError):
-        RedisAdapter(hash_name='name', client=Redis.from_url(fake_cache_url))
+        DeprecatedRedisAdapter(hash_name='name', client=Redis.from_url(fake_cache_url))
 
 
 @pytest.mark.parametrize('name', (None, NAME))
@@ -89,7 +98,9 @@ def test_pttl(redis_adapter, name):
 def test_hset_default_expiry(redis_adapter):
     with freeze_time('2020'):
         redis_adapter.hset(key=KEY, value=VAL)
-        assert redis_adapter.ttl() == RedisAdapter.DEFAULT_EXPIRY.total_seconds()
+        assert (
+            redis_adapter.ttl() == DeprecatedRedisAdapter.DEFAULT_EXPIRY.total_seconds()
+        )
 
 
 def test_hset_expiry_override(redis_adapter):

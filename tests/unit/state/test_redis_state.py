@@ -2,6 +2,19 @@ from unittest.mock import patch
 
 import pytest
 
+from corva.configuration import SETTINGS
+from corva.service.cache_sdk import UserRedisSdk
+
+
+@pytest.fixture(scope='function')
+def redis() -> UserRedisSdk:
+    return UserRedisSdk(
+        hash_name='test_hash_name',
+        redis_dsn=SETTINGS.CACHE_URL,
+        use_fakes=True,
+    )
+
+
 KWARGS = {'key1': 'val1'}
 NAMES = ['1', '2']
 

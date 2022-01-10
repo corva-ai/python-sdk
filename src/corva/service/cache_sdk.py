@@ -6,7 +6,6 @@ import fakeredis
 import redis
 
 from corva import cache_adapter
-from corva.state import redis_adapter
 
 
 class UserCacheSdkProtocol(Protocol):
@@ -42,7 +41,7 @@ class UserRedisSdk:
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=hash_name, client=client
         )
-        self.old_cache_repo = redis_adapter.RedisAdapter(
+        self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
             hash_name=hash_name, client=client
         )
 
