@@ -154,6 +154,9 @@ class InternalRedisSdk:
         self.cache_repo.vacuum(delete_count=delete_count)
 
 
-class FakeInternalCacheSdk(list):
+class FakeInternalCacheSdk:
+    def __init__(self):
+        self.vacuum_called = False
+
     def vacuum(self, delete_count: int) -> None:
-        self.append('vacuum')
+        self.vacuum_called = True

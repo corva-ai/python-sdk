@@ -15,6 +15,8 @@ class TestRunApp:
         api_sdk = FakeApiSdk(secrets={})
         cache_sdk = FakeInternalCacheSdk()
 
+        assert not cache_sdk.vacuum_called
+
         service.run_app(
             has_secrets=False,
             app_key='',
@@ -23,7 +25,7 @@ class TestRunApp:
             app=lambda: None,
         )
 
-        assert cache_sdk == ['vacuum']
+        assert cache_sdk.vacuum_called
 
     def test_caches_secrets(self):
         def app1():
