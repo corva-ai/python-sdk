@@ -12,7 +12,7 @@ from corva.service.cache_sdk import FakeInternalCacheSdk
 
 class TestRunApp:
     def test_invokes_cache_vacuum(self):
-        api_sdk = FakeApiSdk(secrets={})
+        api_sdk = FakeApiSdk()
         cache_sdk = FakeInternalCacheSdk()
 
         assert not cache_sdk.vacuum_called
@@ -84,7 +84,7 @@ class TestRunApp:
         assert secrets == {}
 
     def test_returns_app_result(self):
-        api_sdk = FakeApiSdk(secrets={})
+        api_sdk = FakeApiSdk()
         cache_sdk = FakeInternalCacheSdk()
 
         result = service.run_app(
