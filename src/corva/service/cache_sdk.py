@@ -15,7 +15,7 @@ class UserCacheSdkProtocol(Protocol):
     def get(self, key: str) -> Optional[str]:
         ...
 
-    # TODO: remove asteriks in v2 - it was added for backward compatibility
+    # TODO: remove asterisk in v2 - it was added for backward compatibility
     def delete(self, *, key: str) -> None:
         ...
 
