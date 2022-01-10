@@ -16,7 +16,7 @@ from corva.models.task import RawTaskEvent, TaskEvent
         [400, None, 'fail'],
         [
             200,
-            TaskEvent(asset_id=int(), company_id=int(), app_id=int()).dict(),
+            TaskEvent(asset_id=int(), company_id=int()).dict(),
             'success',
         ],
     ),
@@ -69,7 +69,7 @@ def test_lambda_succeeds_if_user_app_fails(
     mocker.patch.object(
         RawTaskEvent,
         'get_task_event',
-        return_value=TaskEvent(asset_id=int(), company_id=int(), app_id=int()),
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
@@ -100,7 +100,7 @@ def test_lambda_succeeds_if_unable_to_update_task_data(context, mocker: MockerFi
     mocker.patch.object(
         RawTaskEvent,
         'get_task_event',
-        return_value=TaskEvent(asset_id=int(), company_id=int(), app_id=int()),
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
     )
     update_task_data_patch = mocker.patch.object(
         RawTaskEvent,
@@ -139,7 +139,7 @@ def test_task_app_succeeds(
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json=TaskEvent(asset_id=int(), company_id=int(), app_id=int()).dict(),
+        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
@@ -162,7 +162,7 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
     mocker.patch.object(
         RawTaskEvent,
         'get_task_event',
-        return_value=TaskEvent(asset_id=int(), company_id=int(), app_id=int()),
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
     )
     update_task_data_patch = mocker.patch.object(
         RawTaskEvent,
@@ -190,7 +190,7 @@ def test_log_if_user_app_fails(
     mocker.patch.object(
         RawTaskEvent,
         'get_task_event',
-        return_value=TaskEvent(asset_id=int(), company_id=int(), app_id=int()),
+        return_value=TaskEvent(asset_id=int(), company_id=int()),
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
 
@@ -209,7 +209,7 @@ def test_custom_log_handler(context, mocker: MockerFixture, capsys):
         Logger.info('Info message!')
 
     raw_event = RawTaskEvent(task_id='0', version=2).dict()
-    event = TaskEvent(asset_id=0, company_id=int(), app_id=int())
+    event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(
         RawTaskEvent,

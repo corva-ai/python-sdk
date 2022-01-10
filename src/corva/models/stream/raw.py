@@ -47,7 +47,6 @@ class RawDepthRecord(RawBaseRecord):
 
 class RawAppMetadata(CorvaBaseEvent):
     app_connection_id: int
-    app_id: int
     has_secrets: bool = False
 
 
@@ -81,10 +80,6 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     @property
     def has_secrets(self) -> bool:
         return getattr(self.metadata.apps, SETTINGS.APP_KEY).has_secrets
-
-    @property
-    def app_id(self) -> int:
-        return getattr(self.metadata.apps, SETTINGS.APP_KEY).app_id
 
     @property
     def app_stream_id(self) -> int:

@@ -11,7 +11,7 @@ from docs.src.api import tutorial001, tutorial002, tutorial003, tutorial004, tut
 
 
 def test_tutorial001(app_runner, requests_mock: RequestsMocker):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     mock1 = requests_mock.get('/v2/pads')
     mock2 = requests_mock.get('/api/v1/data/provider/dataset/')
@@ -28,7 +28,7 @@ def test_tutorial001(app_runner, requests_mock: RequestsMocker):
     'json,ctx', ([{}, contextlib.nullcontext()], [None, pytest.raises(JSONDecodeError)])
 )
 def test_tutorial002(json, ctx, app_runner, requests_mock: RequestsMocker):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     mock1 = requests_mock.get('/v2/pads', json=json)
     mock2 = requests_mock.get('/v2/pads?company=1', complete_qs=True)
@@ -41,7 +41,7 @@ def test_tutorial002(json, ctx, app_runner, requests_mock: RequestsMocker):
 
 
 def test_tutorial003(app_runner, requests_mock: RequestsMocker):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     post_mock = requests_mock.post('/v2/pads')
     delete_mock = requests_mock.delete('/v2/pads/123')
@@ -57,7 +57,7 @@ def test_tutorial003(app_runner, requests_mock: RequestsMocker):
 
 
 def test_tutorial004(app_runner, requests_mock: RequestsMocker):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     expected_headers = {
         'header': 'header-value',
@@ -75,7 +75,7 @@ def test_tutorial004(app_runner, requests_mock: RequestsMocker):
 
 
 def test_tutorial005(app_runner, mocker: MockerFixture):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     mock = mocker.patch.object(Api, 'get_dataset')
 
