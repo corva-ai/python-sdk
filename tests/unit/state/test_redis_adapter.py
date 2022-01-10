@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 
 import pytest
-from fakeredis import FakeServer
 from freezegun import freeze_time
-from redis import ConnectionError
+from redis import ConnectionError, Redis
 
 from corva.state.redis_adapter import RedisAdapter
 
@@ -14,18 +13,14 @@ MAPPING = {'key1': 'val1', 'key2': 'val2'}
 
 
 def test_connect(redis_adapter):
-    assert redis_adapter.ping()
+    assert redis_adapter.client.ping()
 
 
 def test_init_connect_exc():
-    server = FakeServer()
-    server.connected = False
-
     fake_cache_url = 'redis://random:123'
 
-    with pytest.raises(ConnectionError) as exc:
-        RedisAdapter(default_name='name', cache_url=fake_cache_url, server=server)
-    assert str(exc.value) == f'Could not connect to Redis with URL: {fake_cache_url}'
+    with pytest.raises(ConnectionError):
+        RedisAdapter(hash_name='name', client=Redis.from_url(fake_cache_url))
 
 
 @pytest.mark.parametrize('name', (None, NAME))

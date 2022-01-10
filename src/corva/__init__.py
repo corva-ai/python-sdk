@@ -14,7 +14,7 @@ from .models.stream.stream import (
 )
 from .models.task import TaskEvent
 from .shared import SECRETS as secrets
-from .state.redis_state import RedisState as Cache
+from .service.cache_sdk import UserCacheSdkProtocol as Cache
 
 
 def __getattr__(name):

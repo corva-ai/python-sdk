@@ -1,12 +1,13 @@
+import time
+
 from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled
 def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
-    cache.store(mapping={'key1': 'val1', 'key2': 'val2', 'key3': 'val3'})  # <1>
+    cache.set(key='key', value='value', ttl=1)  # <.>
+    assert cache.get('key') == 'value'
 
-    cache.delete(keys=['key1'])  # <2>
-    assert cache.load_all() == {'key2': 'val2', 'key3': 'val3'}  # <3>
+    time.sleep(1)  # <.>
 
-    cache.delete_all()  # <4>
-    assert cache.load_all() == {}  # <5>
+    assert cache.get('key') is None  # <.>

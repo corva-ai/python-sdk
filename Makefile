@@ -35,7 +35,7 @@ install-lint:
 
 ## test: Run tests.
 .PHONY: test
-test: unit-tests up-cache integration-tests down-cache
+test: up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
 .PHONY: unit-tests

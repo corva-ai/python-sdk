@@ -12,25 +12,30 @@ NAMES = ['1', '2']
         ('store', 'hset'),
         ('load', 'hget'),
         ('load_all', 'hgetall'),
-        ('delete', 'hdel'),
         ('ttl', 'ttl'),
         ('pttl', 'pttl'),
     ),
 )
 def test_all(redis, call_func_name, mock_func_name):
-    with patch.object(redis.redis, mock_func_name) as mock_func:
+    with patch.object(redis.old_cache_repo, mock_func_name) as mock_func:
         call_func = getattr(redis, call_func_name)
         call_func(**KWARGS)
         mock_func.assert_called_once_with(**KWARGS)
 
 
 def test_delete_all(redis):
-    with patch.object(redis.redis, 'delete') as mock_func:
+    with patch.object(redis.old_cache_repo, 'delete') as mock_func:
         redis.delete_all(*NAMES)
         mock_func.assert_called_once_with(*NAMES)
 
 
+def test_delete(redis):
+    with patch.object(redis.old_cache_repo, 'hdel') as mock_func:
+        redis.delete(['1'])
+        mock_func.assert_called_once_with(keys=['1'], name=None)
+
+
 def test_exists(redis):
-    with patch.object(redis.redis, 'exists') as mock_func:
+    with patch.object(redis.old_cache_repo, 'exists') as mock_func:
         redis.exists(*NAMES)
         mock_func.assert_called_once_with(*NAMES)

@@ -16,7 +16,25 @@ from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
-from corva.state.redis_state import RedisState, get_cache
+from corva.service.cache_sdk import (
+    FakeInternalCacheSdk,
+    InternalRedisSdk,
+    UserCacheSdkProtocol,
+    UserRedisSdk,
+)
+
+
+def get_cache_key(
+    provider: str,
+    asset_id: int,
+    app_stream_id: int,
+    app_key: str,
+    app_connection_id: int,
+) -> str:
+    return (
+        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
+        f'{app_key}/{app_connection_id}'
+    )
 
 
 def base_handler(
@@ -64,7 +82,7 @@ def base_handler(
 
 
 def stream(
-    func: Optional[Callable[[StreamEvent, Api, RedisState], Any]] = None,
+    func: Optional[Callable[[StreamEvent, Api, UserCacheSdkProtocol], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -88,18 +106,21 @@ def stream(
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
 
-        cache = get_cache(
+        hash_name = get_cache_key(
+            provider=SETTINGS.PROVIDER,
             asset_id=event.asset_id,
             app_stream_id=event.app_stream_id,
-            app_connection_id=event.app_connection_id,
-            provider=SETTINGS.PROVIDER,
             app_key=SETTINGS.APP_KEY,
-            cache_url=SETTINGS.CACHE_URL,
-            cache_settings=None,
+            app_connection_id=event.app_connection_id,
+        )
+
+        user_cache_sdk = UserRedisSdk(hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        internal_cache_sdk = InternalRedisSdk(
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL
         )
 
         records = event.filter_records(
-            old_max_record_value=event.get_cached_max_record_value(cache=cache)
+            old_max_record_value=event.get_cached_max_record_value(cache=user_cache_sdk)
         )
 
         if not records:
@@ -126,13 +147,15 @@ def stream(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
                 api_sdk=CachingApiSdk(
-                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
-                ),
-                app=functools.partial(func, app_event, api, cache),
+                        api_sdk=CorvaApiSdk(api_adapter=api),
+                        ttl=SETTINGS.SECRETS_CACHE_TTL,
+                    ),
+                cache_sdk=internal_cache_sdk,
+                app=functools.partial(func, app_event, api, user_cache_sdk),
             )
 
         try:
-            event.set_cached_max_record_value(cache=cache)
+            event.set_cached_max_record_value(cache=user_cache_sdk)
         except Exception:
             # lambda succeeds if we're unable to cache the value
             CORVA_LOGGER.exception('Could not save data to cache.')
@@ -143,7 +166,7 @@ def stream(
 
 
 def scheduled(
-    func: Optional[Callable[[ScheduledEvent, Api, RedisState], Any]] = None,
+    func: Optional[Callable[[ScheduledEvent, Api, UserCacheSdkProtocol], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -167,14 +190,17 @@ def scheduled(
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
 
-        cache = get_cache(
+        hash_name = get_cache_key(
+            provider=SETTINGS.PROVIDER,
             asset_id=event.asset_id,
             app_stream_id=event.app_stream_id,
-            app_connection_id=event.app_connection_id,
-            provider=SETTINGS.PROVIDER,
             app_key=SETTINGS.APP_KEY,
-            cache_url=SETTINGS.CACHE_URL,
-            cache_settings=None,
+            app_connection_id=event.app_connection_id,
+        )
+
+        user_cache_sdk = UserRedisSdk(hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        internal_cache_sdk = InternalRedisSdk(
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL
         )
 
         app_event = event.scheduler_type.event.parse_obj(event)
@@ -196,9 +222,11 @@ def scheduled(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
                 api_sdk=CachingApiSdk(
-                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
-                ),
-                app=functools.partial(func, app_event, api, cache),
+                        api_sdk=CorvaApiSdk(api_adapter=api),
+                        ttl=SETTINGS.SECRETS_CACHE_TTL,
+                    ),
+                cache_sdk=internal_cache_sdk,
+                app=functools.partial(func, app_event, api, user_cache_sdk),
             )
 
         try:
@@ -262,6 +290,7 @@ def task(
                         api_sdk=CorvaApiSdk(api_adapter=api),
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
+                    cache_sdk=FakeInternalCacheSdk(),
                     app=functools.partial(func, app_event, api),
                 )
 

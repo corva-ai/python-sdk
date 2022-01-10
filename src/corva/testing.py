@@ -10,7 +10,7 @@ from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
 from corva.service import service
 from corva.service.api_sdk import FakeApiSdk
-from corva.state.redis_state import get_cache
+from corva.service.cache_sdk import FakeInternalCacheSdk, UserRedisSdk
 
 
 class TestClient:
@@ -49,22 +49,17 @@ class TestClient:
                 inspect.unwrap(fn),
                 event,
                 TestClient._api,
-                get_cache(
-                    asset_id=event.asset_id,
-                    app_stream_id=int(),
-                    app_connection_id=int(),
-                    provider=SETTINGS.PROVIDER,
-                    app_key=SETTINGS.APP_KEY,
-                    cache_url=SETTINGS.CACHE_URL,
+                UserRedisSdk(
+                    hash_name='hash_name',
+                    redis_dsn=SETTINGS.CACHE_URL,
+                    use_fakes=True,
                 ),
             )
-
-        if app is None:
-            return
 
         return service.run_app(
             has_secrets=True,
             app_key='test_app_key',
             api_sdk=FakeApiSdk(secrets={'test_app_key': secrets or {}}),
+            cache_sdk=FakeInternalCacheSdk(),
             app=app,
         )

@@ -250,54 +250,31 @@ To get the most out of `Cache`:
 NOTE: <<task,Task>> apps don't get a `Cache` parameter
 as they aren't meant to share the data between invokes.
 
-=== Store and load
+=== Get, set and delete
 
 [source,python]
 ----
 include::src/cache/tutorial001.py[]
 ----
-<.> `Cache` can store `str` values.
+<.> Save some data to `Cache`.
 <.> Load the value using its key.
-<.> `Cache` can store `int` values.
-<.> `Cache` stores the values in binary format.
-The data is decoded while loading,
-but `Cache` can't assume the type of the value.
-That's why the returned type is `str`.
-<.> `Cache` can store `float` values.
-<.> `Cache` can store `bytes` values.
-<.> Store multiple values at once using `mapping` parameter.
-<.> Load all data from cache.
+<.> Delete the data,
+when it is no longer needed.
+<.> The data is not present anymore.
 
+=== Key expiry
 
-=== Delete
+NOTE: By default keys expire in 60 days.
 
 [source,python]
 ----
 include::src/cache/tutorial002.py[]
 ----
-<.> Store some data.
-<.> Delete specific key.
-<.> Deleted key is not present in cache.
-<.> Delete all keys.
-<.> Cache is empty.
+<.> Specify how many seconds you want your key to live
+using `ttl` parameter.
+<.> Wait for key to expire.
+<.> The data is not present anymore.
 
-=== Expiry, ttl and exists
-
-NOTE: By default `Cache` sets an expiry to `60` days.
-
-[source,python]
-----
-include::src/cache/tutorial003.py[]
-----
-<.> Store the value and set an expiry to `60` seconds
-using `expiry` parameter.
-<.> `expiry` parameter also supports
-`datetime.timedelta` objects.
-<.> Get the remaining time of key expiry in seconds.
-<.> Get the remaining time of key expiry in milliseconds.
-<.> Verify, that cache contains some data.
-<.> Wait for 60 seconds for data to expire.
-<.> Verify, that cache is empty.
 
 == Logging
 
