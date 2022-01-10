@@ -66,7 +66,7 @@ def test_context(
     requests_mock.request(
         requests_mock_lib.ANY,
         requests_mock_lib.ANY,
-        json=TaskEvent(asset_id=0, company_id=0, app_id=int()).dict(),
+        json=TaskEvent(asset_id=0, company_id=0).dict(),
     )
 
     with exc_ctx:

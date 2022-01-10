@@ -8,7 +8,7 @@ from docs.src.logging import tutorial001, tutorial002
 
 
 def test_tutorial001(app_runner, mocker: MockerFixture, capsys):
-    event = TaskEvent(asset_id=0, company_id=0, app_id=int())
+    event = TaskEvent(asset_id=0, company_id=0)
 
     Logger.setLevel('DEBUG')
 
@@ -31,7 +31,7 @@ def test_tutorial001(app_runner, mocker: MockerFixture, capsys):
 
 def test_tutorial002(context, mocker: MockerFixture, capsys, caplog):
     raw_event = RawTaskEvent(task_id='0', version=2).dict()
-    event = TaskEvent(asset_id=0, company_id=int(), app_id=int())
+    event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(
         RawTaskEvent,

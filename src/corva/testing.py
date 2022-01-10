@@ -64,7 +64,7 @@ class TestClient:
 
         return service.run_app(
             has_secrets=True,
-            app_id=1,
-            api_sdk=FakeApiSdk(secrets={1: secrets or {}}),
+            app_key='test_app_key',
+            api_sdk=FakeApiSdk(secrets={'test_app_key': secrets or {}}),
             app=app,
         )

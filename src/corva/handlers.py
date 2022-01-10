@@ -124,7 +124,7 @@ def stream(
         ):
             result = service.run_app(
                 has_secrets=event.has_secrets,
-                app_id=event.app_id,
+                app_key=SETTINGS.APP_KEY,
                 api_sdk=CorvaApiSdk(api_adapter=api),
                 app=functools.partial(func, app_event, api, cache),
             )
@@ -192,7 +192,7 @@ def scheduled(
         ):
             result = service.run_app(
                 has_secrets=event.has_secrets,
-                app_id=event.app_id,
+                app_key=SETTINGS.APP_KEY,
                 api_sdk=CorvaApiSdk(api_adapter=api),
                 app=functools.partial(func, app_event, api, cache),
             )
@@ -253,7 +253,7 @@ def task(
             ):
                 result = service.run_app(
                     has_secrets=event.has_secrets,
-                    app_id=app_event.app_id,
+                    app_key=SETTINGS.APP_KEY,
                     api_sdk=CorvaApiSdk(api_adapter=api),
                     app=functools.partial(func, app_event, api),
                 )
