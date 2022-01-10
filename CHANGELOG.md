@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Secrets support.
 See corresponding section in docs.
+- `get`, `set` and new signature for `delete` methods to `Cache`.
+See docs for more info.
+
+### Deprecated
+- `Cache` methods:
+  * old `delete` signature
+  * `store`
+  * `load`
+  * `load_all`
+  * `delete_all`
+  * `ttl`
+  * `pttl`
+  * `exists`
+
+### Fixed
+- `Cache` unable to set unique expiry for each key.
 
 
 ## [1.2.2] - 2021-11-01
