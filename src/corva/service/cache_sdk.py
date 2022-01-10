@@ -17,42 +17,7 @@ class UserCacheSdkProtocol(Protocol):
         ...
 
     # TODO: remove asteriks in v2 - it was added for backward compatibility
-    @overload
     def delete(self, *, key: str) -> None:
-        ...
-
-    @overload
-    def delete(self, keys: List[str], name: Optional[str] = ...) -> int:
-        ...
-
-    def delete(
-        self,
-        keys: Optional[List[str]] = None,
-        name: Optional[str] = None,
-        *,
-        key: Optional[str] = None,
-    ) -> Optional[int]:
-        ...
-
-    def store(self, **kwargs):
-        ...
-
-    def load(self, **kwargs):
-        ...
-
-    def load_all(self, **kwargs):
-        ...
-
-    def delete_all(self, *names):
-        ...
-
-    def ttl(self, **kwargs):
-        ...
-
-    def pttl(self, **kwargs):
-        ...
-
-    def exists(self, *names):
         ...
 
 
@@ -88,20 +53,20 @@ class UserRedisSdk:
         return self.cache_repo.get(key=key)
 
     @overload
-    def delete(self, keys: List[str], name: Optional[str] = ...) -> int:
+    def delete(self, *, key: str) -> None:
         ...
 
     @overload
-    def delete(self, *, key: str) -> None:
+    def delete(self, keys: List[str], name: Optional[str] = ...) -> int:
         ...
 
     def delete(
         self,
-        keys: Optional[List[str]] = None,
-        name: Optional[str] = None,
+        keys=None,
+        name=None,
         *,
-        key: Optional[str] = None,
-    ) -> Optional[int]:
+        key=None,
+    ):
         if keys is not None:
             warnings.warn(
                 "The `keys` and `name` kwargs of `delete` cache method are deprecated "
