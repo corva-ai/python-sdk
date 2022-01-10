@@ -21,13 +21,10 @@ class UserCacheSdkProtocol(Protocol):
 
 
 class UserRedisSdk:
-    """An interface to set, get and do other operations with data in redis.
+    """User cache protocol implementation using Redis.
 
-    As AWS Lambda is meant to be stateless,
-    the apps need some mechanism to share the data between invokes.
-    Redis provides an in-memory low latency storage for such data.
-    This class provides and interface to set,
-    get and do other operations with data in redis.
+    As AWS Lambda is meant to be stateless, the apps need some mechanism to share the
+    data between invokes. Redis provides an in-memory low latency storage for such data.
     """
 
     SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
