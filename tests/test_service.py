@@ -1,6 +1,8 @@
 import datetime
+from typing import Dict
 
 import freezegun
+import pytest
 
 from corva import secrets
 from corva.service import service
@@ -35,16 +37,29 @@ class TestRunApp:
         with freezegun.freeze_time(freeze_time_plus_2_sec):
             service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk2, app=app2)
 
-    def test_temporarily_sets_secrets(self):
+    @pytest.mark.parametrize(
+        'has_secrets, expected_secrets',
+        (
+            pytest.param(
+                False, {}, id='Does not fetch secrets if `has_secrets is False`'
+            ),
+            pytest.param(
+                True, {'my': 'secret'}, id='Fetches secrets if `has_secrets is True`'
+            ),
+        ),
+    )
+    def test_temporarily_sets_secrets(
+        self, has_secrets: bool, expected_secrets: Dict[str, str]
+    ):
         def app():
-            assert secrets == {"my": "secret"}
+            assert secrets == expected_secrets
 
         assert secrets == {}
 
         api_sdk = FakeApiSdk(secrets={'test_app_key': {"my": "secret"}})
 
         service.run_app(
-            has_secrets=True, app_key='test_app_key', api_sdk=api_sdk, app=app
+            has_secrets=has_secrets, app_key='test_app_key', api_sdk=api_sdk, app=app
         )
 
         assert secrets == {}
