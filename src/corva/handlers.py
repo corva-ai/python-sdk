@@ -147,9 +147,9 @@ def stream(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
                 api_sdk=CachingApiSdk(
-                        api_sdk=CorvaApiSdk(api_adapter=api),
-                        ttl=SETTINGS.SECRETS_CACHE_TTL,
-                    ),
+                    api_sdk=CorvaApiSdk(api_adapter=api),
+                    ttl=SETTINGS.SECRETS_CACHE_TTL,
+                ),
                 cache_sdk=internal_cache_sdk,
                 app=functools.partial(func, app_event, api, user_cache_sdk),
             )
@@ -222,9 +222,9 @@ def scheduled(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
                 api_sdk=CachingApiSdk(
-                        api_sdk=CorvaApiSdk(api_adapter=api),
-                        ttl=SETTINGS.SECRETS_CACHE_TTL,
-                    ),
+                    api_sdk=CorvaApiSdk(api_adapter=api),
+                    ttl=SETTINGS.SECRETS_CACHE_TTL,
+                ),
                 cache_sdk=internal_cache_sdk,
                 app=functools.partial(func, app_event, api, user_cache_sdk),
             )

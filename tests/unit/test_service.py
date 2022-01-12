@@ -47,13 +47,31 @@ class TestRunApp:
         freeze_time_plus_2_sec = freeze_time + datetime.timedelta(seconds=2)
 
         with freezegun.freeze_time(freeze_time):
-            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk1,cache_sdk=cache_sdk, app=app1)
+            service.run_app(
+                has_secrets=True,
+                app_key='key',
+                api_sdk=api_sdk1,
+                cache_sdk=cache_sdk,
+                app=app1,
+            )
 
         with freezegun.freeze_time(freeze_time_plus_1_sec):
-            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk2,cache_sdk=cache_sdk, app=app1)
+            service.run_app(
+                has_secrets=True,
+                app_key='key',
+                api_sdk=api_sdk2,
+                cache_sdk=cache_sdk,
+                app=app1,
+            )
 
         with freezegun.freeze_time(freeze_time_plus_2_sec):
-            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk2,cache_sdk=cache_sdk, app=app2)
+            service.run_app(
+                has_secrets=True,
+                app_key='key',
+                api_sdk=api_sdk2,
+                cache_sdk=cache_sdk,
+                app=app2,
+            )
 
     @pytest.mark.parametrize(
         'has_secrets, expected_secrets',
@@ -78,7 +96,11 @@ class TestRunApp:
         cache_sdk = FakeInternalCacheSdk()
 
         service.run_app(
-            has_secrets=has_secrets, app_key='test_app_key', api_sdk=api_sdk, cache_sdk=cache_sdk, app=app
+            has_secrets=has_secrets,
+            app_key='test_app_key',
+            api_sdk=api_sdk,
+            cache_sdk=cache_sdk,
+            app=app,
         )
 
         assert secrets == {}
