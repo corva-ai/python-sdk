@@ -1,9 +1,40 @@
+import datetime
+
+import freezegun
+
 from corva import secrets
 from corva.service import service
-from corva.service.api_sdk import FakeApiSdk
+from corva.service.api_sdk import CachingApiSdk, FakeApiSdk
 
 
 class TestRunApp:
+    def test_caches_secrets(self):
+        def app1():
+            assert secrets == {"name1": "value1"}
+
+        def app2():
+            assert secrets == {"name2": "value2"}
+
+        api_sdk1 = CachingApiSdk(
+            api_sdk=FakeApiSdk(secrets={'key': {"name1": "value1"}}), ttl=2
+        )
+        api_sdk2 = CachingApiSdk(
+            api_sdk=FakeApiSdk(secrets={'key': {"name2": "value2"}}), ttl=2
+        )
+
+        freeze_time = datetime.datetime(year=2022, month=1, day=1)
+        freeze_time_plus_1_sec = freeze_time + datetime.timedelta(seconds=1)
+        freeze_time_plus_2_sec = freeze_time + datetime.timedelta(seconds=2)
+
+        with freezegun.freeze_time(freeze_time):
+            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk1, app=app1)
+
+        with freezegun.freeze_time(freeze_time_plus_1_sec):
+            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk2, app=app1)
+
+        with freezegun.freeze_time(freeze_time_plus_2_sec):
+            service.run_app(has_secrets=True, app_key='key', api_sdk=api_sdk2, app=app2)
+
     def test_temporarily_sets_secrets(self):
         def app():
             assert secrets == {"my": "secret"}

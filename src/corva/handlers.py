@@ -15,7 +15,7 @@ from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
-from corva.service.api_sdk import CorvaApiSdk
+from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.state.redis_state import RedisState, get_cache
 
 
@@ -125,7 +125,9 @@ def stream(
             result = service.run_app(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
-                api_sdk=CorvaApiSdk(api_adapter=api),
+                api_sdk=CachingApiSdk(
+                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
+                ),
                 app=functools.partial(func, app_event, api, cache),
             )
 
@@ -193,7 +195,9 @@ def scheduled(
             result = service.run_app(
                 has_secrets=event.has_secrets,
                 app_key=SETTINGS.APP_KEY,
-                api_sdk=CorvaApiSdk(api_adapter=api),
+                api_sdk=CachingApiSdk(
+                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
+                ),
                 app=functools.partial(func, app_event, api, cache),
             )
 
@@ -254,7 +258,10 @@ def task(
                 result = service.run_app(
                     has_secrets=event.has_secrets,
                     app_key=SETTINGS.APP_KEY,
-                    api_sdk=CorvaApiSdk(api_adapter=api),
+                    api_sdk=CachingApiSdk(
+                        api_sdk=CorvaApiSdk(api_adapter=api),
+                        ttl=SETTINGS.SECRETS_CACHE_TTL,
+                    ),
                     app=functools.partial(func, app_event, api),
                 )
 
