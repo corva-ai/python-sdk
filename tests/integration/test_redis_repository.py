@@ -54,10 +54,12 @@ class TestSet:
 
         redis_adapter.set(key='key', value='value', ttl=1)
         assert redis_client.ttl(redis_adapter.hash_name) == 1
+        assert redis_client.ttl(redis_adapter.zset_name) == 1
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value'}
 
         redis_adapter.set(key='key', value='value2', ttl=2)
         assert redis_client.ttl(redis_adapter.hash_name) == 2
+        assert redis_client.ttl(redis_adapter.zset_name) == 2
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value2'}
 
     def test_expiration(
@@ -69,12 +71,9 @@ class TestSet:
 
         redis_adapter.set(key='key', value='value', ttl=1)
         assert redis_client.ttl(redis_adapter.hash_name) == 1
+        assert redis_client.ttl(redis_adapter.zset_name) == 1
 
-        redis_adapter.set(
-            key='key',
-            value='value',
-            ttl=-int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()) - 9,
-        )
+        redis_adapter.delete(key='key')
 
         assert not redis_client.keys(pattern='*')
 
@@ -87,18 +86,17 @@ class TestSet:
 
         redis_adapter.set(key='key1', value='value1', ttl=2)
         assert redis_client.ttl(redis_adapter.hash_name) == 2
+        assert redis_client.ttl(redis_adapter.zset_name) == 2
 
         redis_adapter.set(key='key2', value='value2', ttl=1)
         assert redis_client.ttl(redis_adapter.hash_name) == 2  # key1 has max expiration
+        assert redis_client.ttl(redis_adapter.zset_name) == 2
 
         redis_adapter.set(key='key1', value='value1', ttl=0)
         assert redis_client.ttl(redis_adapter.hash_name) == 1  # key2 has max expiration
+        assert redis_client.ttl(redis_adapter.zset_name) == 1
 
-        redis_adapter.set(
-            key='key2',
-            value='value2',
-            ttl=-int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()) - 9,
-        )
+        redis_adapter.delete(key='key2')
 
         assert not redis_client.keys(pattern='*')
 
@@ -220,7 +218,6 @@ class TestVacuum:
         assert not redis_client.keys(pattern='*')
 
         redis_adapter.set(key='key1', value='value1', ttl=1)
-
         redis_adapter.set(key='key2', value='value2', ttl=-1)
         redis_adapter.set(key='key3', value='value3', ttl=-2)
 
@@ -229,11 +226,9 @@ class TestVacuum:
             'key1': 'value1',
             'key2': 'value2',
         }
-        assert redis_adapter.get('key3') is None
-
-        redis_adapter.delete(key='key1')
-
-        assert not redis_client.keys(pattern='*')
+        assert set(
+            redis_client.zrange(name=redis_adapter.zset_name, start=0, end=-1)
+        ) == {'key2', 'key1'}
 
     def test_does_not_fail_for_empty_cache(
         self,
