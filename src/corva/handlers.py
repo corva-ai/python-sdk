@@ -14,6 +14,8 @@ from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
+from corva.service import service
+from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.state.redis_state import RedisState, get_cache
 
 
@@ -120,7 +122,14 @@ def stream(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ):
-            result = func(app_event, api, cache)
+            result = service.run_app(
+                has_secrets=event.has_secrets,
+                app_key=SETTINGS.APP_KEY,
+                api_sdk=CachingApiSdk(
+                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
+                ),
+                app=functools.partial(func, app_event, api, cache),
+            )
 
         try:
             event.set_cached_max_record_value(cache=cache)
@@ -168,6 +177,8 @@ def scheduled(
             cache_settings=None,
         )
 
+        app_event = event.scheduler_type.event.parse_obj(event)
+
         with LoggingContext(
             aws_request_id=aws_request_id,
             asset_id=event.asset_id,
@@ -181,7 +192,14 @@ def scheduled(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ):
-            result = func(event.scheduler_type.event.parse_obj(event), api, cache)
+            result = service.run_app(
+                has_secrets=event.has_secrets,
+                app_key=SETTINGS.APP_KEY,
+                api_sdk=CachingApiSdk(
+                    api_sdk=CorvaApiSdk(api_adapter=api), ttl=SETTINGS.SECRETS_CACHE_TTL
+                ),
+                app=functools.partial(func, app_event, api, cache),
+            )
 
         try:
             event.set_schedule_as_completed(api=api)
@@ -237,7 +255,15 @@ def task(
                 user_handler=handler,
                 logger=CORVA_LOGGER,
             ):
-                result = func(app_event, api)
+                result = service.run_app(
+                    has_secrets=event.has_secrets,
+                    app_key=SETTINGS.APP_KEY,
+                    api_sdk=CachingApiSdk(
+                        api_sdk=CorvaApiSdk(api_adapter=api),
+                        ttl=SETTINGS.SECRETS_CACHE_TTL,
+                    ),
+                    app=functools.partial(func, app_event, api),
+                )
 
             if isinstance(result, dict):
                 warnings.warn(

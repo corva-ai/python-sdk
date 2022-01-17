@@ -42,6 +42,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     app_connection_id: int = pydantic.Field(..., alias='app_connection')
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
     scheduler_type: SchedulerType
+    has_secrets: bool = False
 
     @staticmethod
     def from_raw_event(event: Union[dict, List[List[dict]]]) -> List[RawScheduledEvent]:

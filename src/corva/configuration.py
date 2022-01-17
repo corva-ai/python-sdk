@@ -1,3 +1,5 @@
+import datetime
+
 import pydantic
 
 
@@ -17,6 +19,9 @@ class Settings(pydantic.BaseSettings):
     # company and app
     APP_KEY: str  # <provider-name-with-dashes>.<app-name-with-dashes>
     PROVIDER: str
+
+    # secrets
+    SECRETS_CACHE_TTL: int = int(datetime.timedelta(minutes=5).total_seconds())
 
 
 SETTINGS = Settings()

@@ -427,6 +427,31 @@ as a keyword argument to the app decorator.
 Use code samples above as the examples.
 
 
+== Secrets
+You can store sensitive data such as passwords,
+tokens,
+confidential configuration data,
+or any other types of data that you want to protect
+as application secrets.
+To access such data inside the app
+{corva-sdk} provides `secrets` object.
+
+See <<testing_secrets, `testing secrets`>> section
+to see how to test an app
+that uses secrets.
+
+[source,python]
+----
+include::src/secrets/tutorial001.py[]
+----
+<.> Import `secrets` object.
+<.> `secrets` is a dictionary so
+use key to retrieve the value.
+<.> Values are stored as strings,
+cast the value to required type as needed.
+Example shows how to get the integer.
+
+
 == Testing
 
 Testing apps is easy and enjoyable.
@@ -513,6 +538,23 @@ include::src/testing/tutorial004.py[]
 <.> {test-app-step3}
 <.> {test-app-step4}
 <.> {test-app-step5}
+
+[#testing_secrets]
+=== Secrets
+This section shows
+how to test an app that uses secrets.
+[source,python]
+----
+include::src/testing/tutorial007.py[]
+----
+<.> {test-app-step1}
+<.> {test-app-step2}
+<.> {test-app-step3}
+<.> {test-app-step4}
+Pass dictionary with required secrets
+as `secrets` parameter.
+<.> {test-app-step5}
+
 
 == Development - Contributing
 

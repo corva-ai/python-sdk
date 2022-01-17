@@ -13,6 +13,7 @@ from .models.stream.stream import (
     StreamTimeRecord,
 )
 from .models.task import TaskEvent
+from .shared import SECRETS as secrets
 from .state.redis_state import RedisState as Cache
 
 
