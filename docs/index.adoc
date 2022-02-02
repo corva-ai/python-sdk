@@ -250,11 +250,52 @@ To get the most out of `Cache`:
 NOTE: <<task,Task>> apps don't get a `Cache` parameter
 as they aren't meant to share the data between invokes.
 
-=== Get, set and delete
+=== Get and set
+
+[TIP]
+====
+`Cache` can store only string data.
+
+Cast your data to `str` before saving.
+====
+
+==== Storing `str`
 
 [source,python]
 ----
 include::src/cache/tutorial001.py[]
+----
+<.> Save `str` data to `Cache`.
+<.> Load the value using its key.
+
+==== Storing `int`
+
+[source,python]
+----
+include::src/cache/tutorial004.py[]
+----
+<.> Cast `int` to `str` before saving data to `Cache`.
+<.> Load the value using its key.
+Notice that returned value has `str` type.
+<.> Cast the value back to `int` as needed.
+
+==== Storing `dict`
+
+[source,python]
+----
+include::src/cache/tutorial005.py[]
+----
+<.> Cast `dict` to JSON `str` before saving data to `Cache`.
+<.> Load the value using its key.
+Notice that returned value has `str` type.
+<.> Parse JSON `str`
+and convert it back into a `dict`.
+
+=== Delete
+
+[source,python]
+----
+include::src/cache/tutorial003.py[]
 ----
 <.> Save some data to `Cache`.
 <.> Load the value using its key.

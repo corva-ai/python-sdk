@@ -5,3 +5,6 @@ from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
     cache.set(key='str', value='text')  # <.>
     assert cache.get(key='str') == 'text'  # <.>
+
+    cache.delete(key='str')  # <.>
+    assert cache.get(key='str') is None  # <.>
