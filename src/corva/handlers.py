@@ -16,12 +16,7 @@ from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
-from corva.service.cache_sdk import (
-    FakeInternalCacheSdk,
-    InternalRedisSdk,
-    UserCacheSdkProtocol,
-    UserRedisSdk,
-)
+from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
 
 
 def get_cache_key(
@@ -82,7 +77,7 @@ def base_handler(
 
 
 def stream(
-    func: Optional[Callable[[StreamEvent, Api, UserCacheSdkProtocol], Any]] = None,
+    func: Optional[Callable[[StreamEvent, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -166,7 +161,7 @@ def stream(
 
 
 def scheduled(
-    func: Optional[Callable[[ScheduledEvent, Api, UserCacheSdkProtocol], Any]] = None,
+    func: Optional[Callable[[ScheduledEvent, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
