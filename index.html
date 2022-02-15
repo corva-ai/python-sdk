@@ -570,29 +570,31 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 </ul>
 </li>
-<li><a href="#_testing">7. Testing</a>
+<li><a href="#_secrets">7. Secrets</a></li>
+<li><a href="#_testing">8. Testing</a>
 <ul class="sectlevel2">
-<li><a href="#_stream">7.1. Stream</a>
+<li><a href="#_stream">8.1. Stream</a>
 <ul class="sectlevel3">
-<li><a href="#_time">7.1.1. Time</a></li>
-<li><a href="#_depth">7.1.2. Depth</a></li>
+<li><a href="#_time">8.1.1. Time</a></li>
+<li><a href="#_depth">8.1.2. Depth</a></li>
 </ul>
 </li>
-<li><a href="#_scheduled">7.2. Scheduled</a>
+<li><a href="#_scheduled">8.2. Scheduled</a>
 <ul class="sectlevel3">
-<li><a href="#_data_time">7.2.1. Data Time</a></li>
-<li><a href="#_depth_2">7.2.2. Depth</a></li>
-<li><a href="#_natural_time">7.2.3. Natural Time</a></li>
+<li><a href="#_data_time">8.2.1. Data Time</a></li>
+<li><a href="#_depth_2">8.2.2. Depth</a></li>
+<li><a href="#_natural_time">8.2.3. Natural Time</a></li>
 </ul>
 </li>
-<li><a href="#_task">7.3. Task</a></li>
+<li><a href="#_task">8.3. Task</a></li>
+<li><a href="#testing_secrets">8.4. Secrets</a></li>
 </ul>
 </li>
-<li><a href="#_development_contributing">8. Development - Contributing</a>
+<li><a href="#_development_contributing">9. Development - Contributing</a>
 <ul class="sectlevel2">
-<li><a href="#_create_and_activate_virtual_environment">8.1. Create and activate virtual environment</a></li>
-<li><a href="#_install_dependencies_and_run_tests">8.2. Install dependencies and run tests</a></li>
-<li><a href="#_whats_next">8.3. What&#8217;s next?</a></li>
+<li><a href="#_create_and_activate_virtual_environment">9.1. Create and activate virtual environment</a></li>
+<li><a href="#_install_dependencies_and_run_tests">9.2. Install dependencies and run tests</a></li>
+<li><a href="#_whats_next">9.3. What&#8217;s next?</a></li>
 </ul>
 </li>
 </ul>
@@ -602,7 +604,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>v1.2.2</strong>.</p>
+<p>Documentation for version <strong>v1.3.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -1610,7 +1612,56 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_testing">7. Testing</h2>
+<h2 id="_secrets">7. Secrets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can store sensitive data such as passwords,
+tokens,
+confidential configuration data,
+or any other types of data that you want to protect
+as application secrets.
+To access such data inside the app
+<strong>corva-sdk</strong> provides <code>secrets</code> object.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="#testing_secrets"><code>testing secrets</code></a> section
+to see how to test an app
+that uses secrets.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">secrets</span><span class="tok-p">,</span> <span class="tok-n">task</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>
+    <span class="tok-n">secrets</span><span class="tok-p">[</span><span class="tok-s1">&#39;api_token&#39;</span><span class="tok-p">]</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">secrets</span><span class="tok-p">[</span><span class="tok-s1">&#39;integer&#39;</span><span class="tok-p">])</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import <code>secrets</code> object.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>secrets</code> is a dictionary so
+use key to retrieve the value.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Values are stored as strings,
+cast the value to required type as needed.
+Example shows how to get the integer.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing">8. Testing</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Testing apps is easy and enjoyable.</p>
@@ -1631,9 +1682,9 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stream">7.1. Stream</h3>
+<h3 id="_stream">8.1. Stream</h3>
 <div class="sect3">
-<h4 id="_time">7.1.1. Time</h4>
+<h4 id="_time">8.1.1. Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">StreamTimeRecord</span><span class="tok-p">,</span> <span class="tok-n">stream</span>
@@ -1680,7 +1731,7 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_depth">7.1.2. Depth</h4>
+<h4 id="_depth">8.1.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">StreamDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">StreamDepthRecord</span><span class="tok-p">,</span> <span class="tok-n">stream</span>
@@ -1728,9 +1779,9 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_scheduled">7.2. Scheduled</h3>
+<h3 id="_scheduled">8.2. Scheduled</h3>
 <div class="sect3">
-<h4 id="_data_time">7.2.1. Data Time</h4>
+<h4 id="_data_time">8.2.1. Data Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
@@ -1777,7 +1828,7 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_depth_2">7.2.2. Depth</h4>
+<h4 id="_depth_2">8.2.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDepthEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
@@ -1829,7 +1880,7 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_natural_time">7.2.3. Natural Time</h4>
+<h4 id="_natural_time">8.2.3. Natural Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledNaturalTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
@@ -1877,7 +1928,7 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_task">7.3. Task</h3>
+<h3 id="_task">8.3. Task</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">task</span>
@@ -1921,16 +1972,69 @@ Use code samples above as the examples.</p>
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="testing_secrets">8.4. Secrets</h3>
+<div class="paragraph">
+<p>This section shows
+how to test an app that uses secrets.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">secrets</span><span class="tok-p">,</span> <span class="tok-n">task</span>
+
+
+<span class="tok-nd">@task</span>
+<span class="tok-k">def</span> <span class="tok-nf">task_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">TaskEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">):</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">api_token</span> <span class="tok-o">=</span> <span class="tok-n">secrets</span><span class="tok-p">[</span><span class="tok-s1">&#39;api_token&#39;</span><span class="tok-p">]</span>
+
+    <span class="tok-k">return</span> <span class="tok-n">api_token</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_task_app</span><span class="tok-p">(</span><span class="tok-n">app_runner</span><span class="tok-p">):</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">TaskEvent</span><span class="tok-p">(</span><span class="tok-n">asset_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-n">company_id</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    <span class="tok-n">api_token</span> <span class="tok-o">=</span> <span class="tok-n">app_runner</span><span class="tok-p">(</span><span class="tok-n">task_app</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">secrets</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;api_token&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;12345&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    <span class="tok-k">assert</span> <span class="tok-n">api_token</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;12345&#39;</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sample app that we want to test.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add <code>app_runner</code> argument to your test function.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.
+Pass dictionary with required secrets
+as <code>secrets</code> parameter.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Verify the result.</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_development_contributing">8. Development - Contributing</h2>
+<h2 id="_development_contributing">9. Development - Contributing</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Here are some guidelines to set up your environment.</p>
 </div>
 <div class="sect2">
-<h3 id="_create_and_activate_virtual_environment">8.1. Create and activate virtual environment</h3>
+<h3 id="_create_and_activate_virtual_environment">9.1. Create and activate virtual environment</h3>
 <div class="paragraph">
 <p>What&#8217;s needed:</p>
 </div>
@@ -1982,7 +2086,7 @@ when working with the project.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_install_dependencies_and_run_tests">8.2. Install dependencies and run tests</h3>
+<h3 id="_install_dependencies_and_run_tests">9.2. Install dependencies and run tests</h3>
 <div class="paragraph">
 <p>What&#8217;s needed:</p>
 </div>
@@ -2014,7 +2118,7 @@ to verify that the project was set up properly.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_whats_next">8.3. What&#8217;s next?</h3>
+<h3 id="_whats_next">9.3. What&#8217;s next?</h3>
 <div class="paragraph">
 <p>After completing steps above
 you can explore the project
