@@ -1,8 +1,5 @@
-import functools
 import os
-from unittest import mock
 
-import fakeredis
 import pytest
 
 
@@ -42,38 +39,3 @@ def pytest_load_initial_conftests(args, early_config, parser):
         **os.environ,  # override env values if provided by user
     }
     os.environ.update(env)
-
-
-@pytest.fixture(scope='function', autouse=True)
-def _patch_redis_adapter():
-    """Allows testing of Corva apps without running a real Redis server.
-
-    Internally Corva uses Redis as cache. This function patches RedisAdapter to use
-    fakeredis instead of redis. fakeredis is a library that simulates talking to a
-    real Redis server. This way the function allows testing Corva apps without running
-    a real Redis server.
-
-    Patch steps:
-      1. patch RedisAdapter.__bases__ to use fakeredis.FakeRedis instead of redis.Redis
-      2. patch redis.from_url with fakeredis.FakeRedis.from_url
-    """
-
-    redis_adapter_path = 'corva.state.redis_adapter'
-
-    redis_adapter_patcher = mock.patch(
-        f'{redis_adapter_path}.RedisAdapter.__bases__', (fakeredis.FakeRedis,)
-    )
-
-    server = (
-        fakeredis.FakeServer()
-    )  # use FakeServer to share cache between different instances of RedisState
-    from_url_patcher = mock.patch(
-        f'{redis_adapter_path}.from_url',
-        side_effect=functools.partial(fakeredis.FakeRedis.from_url, server=server),
-    )
-
-    with redis_adapter_patcher, from_url_patcher:
-        # stops mock.patch from trying to call delattr when reversing the patch
-        redis_adapter_patcher.is_local = True
-
-        yield

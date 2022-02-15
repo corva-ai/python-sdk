@@ -1,18 +1,10 @@
-import datetime
-import time
-
 from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled
 def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
-    cache.store(key='key', value='val', expiry=60)  # <.>
-    cache.store(key='key', value='val', expiry=datetime.timedelta(seconds=60))  # <.>
+    cache.set(key='str', value='text')  # <.>
+    assert cache.get(key='str') == 'text'  # <.>
 
-    assert cache.ttl() == 60  # <.>
-    assert cache.pttl() == 60000  # <.>
-    assert cache.exists()  # <.>
-
-    time.sleep(60)  # <.>
-
-    assert not cache.exists()  # <.>
+    cache.delete(key='str')  # <.>
+    assert cache.get(key='str') is None  # <.>

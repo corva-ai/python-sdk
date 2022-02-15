@@ -10,7 +10,7 @@ from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
-from corva.state.redis_state import RedisState
+from corva.service.cache_sdk import UserCacheSdkProtocol
 
 
 class RawBaseRecord(CorvaBaseEvent, abc.ABC):
@@ -111,16 +111,20 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
         return result
 
-    def get_cached_max_record_value(self, cache: RedisState) -> Optional[float]:
-        result = cache.load(key=self._max_record_value_cache_key)
+    def get_cached_max_record_value(
+        self, cache: UserCacheSdkProtocol
+    ) -> Optional[float]:
+        result = cache.get(key=self._max_record_value_cache_key)
 
         if result is None:
             return result
 
         return float(result)
 
-    def set_cached_max_record_value(self, cache: RedisState) -> None:
-        cache.store(key=self._max_record_value_cache_key, value=self.max_record_value)
+    def set_cached_max_record_value(self, cache: UserCacheSdkProtocol) -> None:
+        cache.set(
+            key=self._max_record_value_cache_key, value=str(self.max_record_value)
+        )
 
     def filter_records(
         self,

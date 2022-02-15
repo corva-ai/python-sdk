@@ -33,14 +33,33 @@ install-test: install-corva-sdk
 install-lint:
 	@pip install -U -r requirements-lint.txt
 
-## test: Run tests and show code coverage.
+## test: Run tests.
 .PHONY: test
-test:
-	@pytest --cov
+test: up-cache unit-tests integration-tests down-cache
 
-## testcov: Show HTML code coverage.
-.PHONY: testcov
-testcov: test
+## unit-tests: Run unit tests.
+.PHONY: unit-tests
+unit-tests: test_path = tests/unit
+unit-tests:
+	@coverage run -m pytest $(test_path)
+
+## integration-tests: Run integration tests.
+.PHONY: integration-tests
+integration-tests: export CACHE_URL = redis://localhost:6379
+integration-tests: test_path = tests/integration
+integration-tests:
+	@coverage run -m pytest $(test_path)
+
+## coverage: Display code coverage in the console.
+.PHONY: coverage
+coverage: test
+	@coverage combine
+	@coverage report
+
+## coverage-html: Display code coverage in the browser.
+.PHONY: coverage-html
+coverage-html: test
+	@coverage combine
 	@coverage html
 	@x-www-browser htmlcov/index.html
 
@@ -78,7 +97,7 @@ clean:
 	@-rm -rf src/*.egg-info
 	@-rm -rf .pytest_cache
 	@-rm -rf htmlcov
-	@-rm .coverage
+	@-rm .coverage*
 	@-sudo rm -rf $(docs_dir)/$(docs_build_dir)
 
 ## release: How to release a new version.
@@ -91,3 +110,18 @@ release:
 	@echo "Commit the changes."
 	@echo "Create tag like "v1.0.0"."
 	@echo "Push commit and tag."
+
+## up-cache: Start Redis.
+.PHONY: up-cache
+up-cache:
+	@docker run \
+	--rm \
+	-d \
+	--name python-sdk-redis \
+	-p 6379:6379 \
+	redis:6.0.9  # apps use 6.0.9 or 6.2.3
+
+# down-cache: Stop Redis.
+.PHONY: down-cache
+down-cache:
+	@docker stop python-sdk-redis

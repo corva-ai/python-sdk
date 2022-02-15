@@ -13,8 +13,8 @@ from .models.stream.stream import (
     StreamTimeRecord,
 )
 from .models.task import TaskEvent
+from .service.cache_sdk import UserRedisSdk as Cache
 from .shared import SECRETS as secrets
-from .state.redis_state import RedisState as Cache
 
 
 def __getattr__(name):

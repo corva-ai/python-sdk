@@ -37,7 +37,7 @@ jobs:
         run: make install-test
 
       - name: Run
-        run: make test
+        run: make coverage
 
   deploy:
     name: Build and publish to PyPI
