@@ -7,12 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
-## [1.3.0] - 2021-02-15
-
 ### Added
-- Secrets support.
-See corresponding section in docs.
 - `get`, `set` and new signature for `delete` methods to `Cache`.
 See docs for more info.
 
@@ -29,6 +24,13 @@ See docs for more info.
 
 ### Fixed
 - `Cache` unable to set unique expiry for each key.
+
+
+## [1.3.0] - 2021-02-15
+
+### Added
+- Secrets support.
+See corresponding section in docs.
 
 
 ## [1.2.2] - 2021-11-01
