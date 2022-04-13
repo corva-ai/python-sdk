@@ -59,7 +59,7 @@ class RawMetadata(CorvaBaseEvent):
                 RawAppMetadata,
                 ...,
             )
-        }
+        },
     )
     log_type: LogType
 
