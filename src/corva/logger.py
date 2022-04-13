@@ -109,8 +109,8 @@ class CorvaLoggerHandler(logging.Handler):
         message = super().format(record)
 
         # https://github.com/debug-js/debug/issues/296#issuecomment-289595923
-        # CloudWatch uses `\n` to split logs into different log entries
-        # and `\r` to specify end of line for multiline logs.
+        # For CloudWatch `\n` means end of whole log and `\r` means end of line in
+        # multiline logs.
         # Replace `\n` for `\r` for logs to display correctly in CloudWatch.
         message = message.replace('\n', '\r')
         message = f'{message}{self.TERMINATOR}'
