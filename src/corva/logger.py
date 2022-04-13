@@ -88,7 +88,7 @@ class CorvaLoggerHandler(logging.Handler):
         # one extra message to log the warning
         self.residue_message_count = self.max_message_count + 1
 
-    def emit(self, record) -> None:
+    def emit(self, record: logging.LogRecord) -> None:
         if self.residue_message_count == 0:
             return
 
