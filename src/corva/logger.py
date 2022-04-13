@@ -23,7 +23,7 @@ def get_formatter(
         f'%(levelname)s '
         f'{"ASSET=%(asset_id)s " if asset_id else ""}'
         f'{"AC=%(app_connection_id)s " if app_connection_id else ""}'
-        f'| %(message)s\n',
+        f'| %(message)s',
         '%Y-%m-%dT%H:%M:%S',
     )
 
@@ -105,6 +105,8 @@ class CorvaLoggerHandler(logging.Handler):
 
     def format(self, record: logging.LogRecord) -> str:
         message = super().format(record)
+
+        message.replace('\n', '\r')
 
         extra_chars_count = len(message) - self.max_message_size
 
