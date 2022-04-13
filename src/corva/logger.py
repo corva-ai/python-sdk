@@ -70,6 +70,8 @@ class CorvaLoggerHandler(logging.Handler):
             if it has been truncated.
     """
 
+    TERMINATOR = '\n'
+
     def __init__(
         self,
         max_message_size: int,
@@ -82,7 +84,7 @@ class CorvaLoggerHandler(logging.Handler):
         self.max_message_size = max_message_size
         self.max_message_count = max_message_count
         self.logger = logger
-        self.placeholder = placeholder
+        self.placeholder = f'{placeholder}{self.TERMINATOR}'
 
         self.logging_warning = False
         # one extra message to log the warning
@@ -106,7 +108,12 @@ class CorvaLoggerHandler(logging.Handler):
     def format(self, record: logging.LogRecord) -> str:
         message = super().format(record)
 
-        message.replace('\n', '\r')
+        # https://github.com/debug-js/debug/issues/296#issuecomment-289595923
+        # CloudWatch uses `\n` to split logs into different log entries
+        # and `\r` to specify end of line for multiline logs.
+        # Replace `\n` for `\r` for logs to display correctly in CloudWatch.
+        message = message.replace('\n', '\r')
+        message = f'{message}{self.TERMINATOR}'
 
         extra_chars_count = len(message) - self.max_message_size
 
