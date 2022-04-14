@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Wrong log formatting in Dev Center:
+multiline Python logs (like stack traces)
+being split into multiple CloudWatch log entries.
+
 
 ## [1.4.0-rc.1] - 2021-02-15
 
