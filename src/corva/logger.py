@@ -23,7 +23,7 @@ def get_formatter(
         f'%(levelname)s '
         f'{"ASSET=%(asset_id)s " if asset_id else ""}'
         f'{"AC=%(app_connection_id)s " if app_connection_id else ""}'
-        f'| %(message)s\n',
+        f'| %(message)s',
         '%Y-%m-%dT%H:%M:%S',
     )
 
@@ -70,6 +70,8 @@ class CorvaLoggerHandler(logging.Handler):
             if it has been truncated.
     """
 
+    TERMINATOR = '\n'
+
     def __init__(
         self,
         max_message_size: int,
@@ -82,13 +84,13 @@ class CorvaLoggerHandler(logging.Handler):
         self.max_message_size = max_message_size
         self.max_message_count = max_message_count
         self.logger = logger
-        self.placeholder = placeholder
+        self.placeholder = f'{placeholder}{self.TERMINATOR}'
 
         self.logging_warning = False
         # one extra message to log the warning
         self.residue_message_count = self.max_message_count + 1
 
-    def emit(self, record) -> None:
+    def emit(self, record: logging.LogRecord) -> None:
         if self.residue_message_count == 0:
             return
 
@@ -105,6 +107,13 @@ class CorvaLoggerHandler(logging.Handler):
 
     def format(self, record: logging.LogRecord) -> str:
         message = super().format(record)
+
+        # https://github.com/debug-js/debug/issues/296#issuecomment-289595923
+        # For CloudWatch `\n` means end of whole log and `\r` means end of line in
+        # multiline logs.
+        # Replace `\n` for `\r` for logs to display correctly in CloudWatch.
+        message = message.replace('\n', '\r')
+        message = f'{message}{self.TERMINATOR}'
 
         extra_chars_count = len(message) - self.max_message_size
 
