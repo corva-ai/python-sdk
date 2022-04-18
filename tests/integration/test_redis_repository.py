@@ -102,75 +102,17 @@ class TestSet:
 
 
 class TestGet:
-    def test_gets_if_no_existing_zset(
+    def test_success(
         self,
         redis_client: redis.Redis,
         redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
-        redis_client.hset(name=redis_adapter.hash_name, key='key', value='value')
+        redis_client.hset(redis_adapter.hash_name, mapping={'k1': 1})
+        result = redis_adapter.get('k1')
 
-        assert redis_adapter.get(key='key') == 'value'
-
-    def test_gets_if_no_entry_in_zset(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'other_key': 1})
-        redis_client.hset(name=redis_adapter.hash_name, key='key', value='value')
-
-        assert redis_adapter.get(key='key') == 'value'
-
-    def test_gets_if_now_less_than_expireat(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        pexpireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-            + 9000
-        )
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
-        redis_client.hset(name=redis_adapter.hash_name, key='key', value='value')
-
-        assert redis_adapter.get(key='key') == 'value'
-
-    def test_returns_nil_if_now_equal_to_expireat(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        expireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000) + 0
-        )
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': expireat})
-        redis_client.hset(name=redis_adapter.hash_name, key='key', value='value')
-
-        assert redis_adapter.get(key='key') is None
-
-    def test_returns_nil_if_now_bigger_than_expireat(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        expireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-            - 9000
-        )
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': expireat})
-        redis_client.hset(name=redis_adapter.hash_name, key='key', value='value')
-
-        assert redis_adapter.get(key='key') is None
+        assert result == '1'
 
 
 class TestDelete:
@@ -426,3 +368,92 @@ class TestGetAll:
         result = redis_adapter.get_all()
 
         assert result == {'k1': '1', 'k2': '2'}
+
+
+class TestGetMany:
+    def test_gets_many(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.hset(redis_adapter.hash_name, mapping={'k1': 1, 'k2': 2})
+        result = redis_adapter.get_many(['k1', 'k2', 'k3'])
+
+        assert result == {'k1': '1', 'k2': '2', 'k3': None}
+
+    def test_gets_if_no_entry_in_zset(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_many(['k'])
+
+        assert result == {'k': '1'}
+
+    def test_gets_if_now_less_that_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={
+                'k': int(
+                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
+                )
+                + 9000
+            },
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_many(['k'])
+
+        assert result == {'k': '1'}
+
+    def test_returns_nil_if_now_equal_to_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={
+                'k': int(
+                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
+                )
+                + 0
+            },
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_many(['k'])
+
+        assert result == {}
+
+    def test_returns_nil_if_now_bigger_than_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={
+                'k': int(
+                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
+                )
+                - 9000
+            },
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_many(['k'])
+
+        assert result == {}

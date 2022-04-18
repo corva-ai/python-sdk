@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, List, Optional, Protocol, Union
+from typing import Dict, List, Optional, Protocol, Sequence, Union
 
 import redis
 
@@ -14,6 +14,9 @@ class CacheRepositoryProtocol(Protocol):
         ...
 
     def get(self, key: str) -> Optional[str]:
+        ...
+
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
         ...
 
     def get_all(self) -> Dict[str, str]:
@@ -186,21 +189,69 @@ class RedisRepository:
     return result
     """
 
+    # Gets the values of the fields in the hash specified by the keys.
+    #
+    # Complexity: O(N), where N is the number of requested keys.
+    #
+    # Args:
+    #     KEYS:
+    #         hash_name.
+    #         zset_name.
+    #
+    #     ARGV:
+    #         key
+    #         key
+    #         ...
+    #
+    # Returns:
+    #     - nil if the field has expired.
+    #     - field's value when field does not have expiration time.
+    #     - field's value when field has not expired yet.
+    LUA_GET_MANY_SCRIPT = """
+    local hash_name = KEYS[1]
+    local zset_name = KEYS[2]
+    local time = redis.call('TIME')
+    local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
+    
+    local hash = redis.call('HMGET', hash_name, unpack(ARGV))
+    
+    local result = {}
+    
+    for i, key in ipairs(ARGV) do
+        local pexpireat = redis.call('ZSCORE', zset_name, key)
+    
+        if not pexpireat or pnow < tonumber(pexpireat) then
+            table.insert(result, hash[i])
+        else
+            table.insert(result, nil)
+        end
+    end
+    
+    return result
+    """
+
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
         self.zset_name = f'{hash_name}.EXPIREAT'
         self.client = client
         self.lua_set = self.client.register_script(self.LUA_SET_SCRIPT)
-        self.lua_get = self.client.register_script(self.LUA_GET_SCRIPT)
+        self.lua_get_many = self.client.register_script(self.LUA_GET_MANY_SCRIPT)
+        self.lua_get_all = self.client.register_script(self.LUA_GET_ALL_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
         self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
-        self.lua_get_all = self.client.register_script(self.LUA_GET_ALL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
         self.lua_set(keys=[self.hash_name, self.zset_name], args=[key, value, ttl])
 
     def get(self, key: str) -> Optional[str]:
-        return self.lua_get(keys=[self.hash_name, self.zset_name], args=[key])
+        return self.get_many(keys=[key]).get(key)
+
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
+        cache_data = self.lua_get_many(
+            keys=[self.hash_name, self.zset_name], args=list(keys)
+        )
+        result = dict(zip(keys, cache_data))
+        return result
 
     def get_all(self) -> Dict[str, str]:
         data = self.lua_get_all(keys=[self.hash_name, self.zset_name])
