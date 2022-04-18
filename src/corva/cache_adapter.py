@@ -16,6 +16,9 @@ class CacheRepositoryProtocol(Protocol):
     def get(self, key: str) -> Optional[str]:
         ...
 
+    def get_all(self) -> Dict[str, str]:
+        ...
+
     def delete(self, key: str) -> None:
         ...
 
@@ -152,6 +155,37 @@ class RedisRepository:
     return ttl
     """
 
+    LUA_GET_ALL_SCRIPT = """
+    local hash_name = KEYS[1]
+    local zset_name = KEYS[2]
+    local time = redis.call('TIME')
+    local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
+    
+    local hash = redis.call('HGETALL', hash_name)
+    local zset = redis.call('ZRANGEBYSCORE', zset_name, '-inf', '+inf', 'WITHSCORES')
+    
+    local zset_mapping = {}
+    for i, _ in ipairs(zset) do
+        if i % 2 == 1 then
+            zset_mapping[zset[i]] = zset[i + 1]
+        end
+    end
+    
+    local result = {}
+    for i, _ in ipairs(hash) do
+        if i % 2 == 1 then
+            local pexpireat = zset_mapping[hash[i]]
+    
+            if not pexpireat or pnow < tonumber(pexpireat) then
+                table.insert(result, hash[i])
+                table.insert(result, hash[i + 1])
+            end
+        end
+    end
+    
+    return result
+    """
+
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
         self.zset_name = f'{hash_name}.EXPIREAT'
@@ -160,12 +194,17 @@ class RedisRepository:
         self.lua_get = self.client.register_script(self.LUA_GET_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
         self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
+        self.lua_get_all = self.client.register_script(self.LUA_GET_ALL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
         self.lua_set(keys=[self.hash_name, self.zset_name], args=[key, value, ttl])
 
     def get(self, key: str) -> Optional[str]:
         return self.lua_get(keys=[self.hash_name, self.zset_name], args=[key])
+
+    def get_all(self) -> Dict[str, str]:
+        data = self.lua_get_all(keys=[self.hash_name, self.zset_name])
+        return dict(zip(data[::2], data[1::2]))
 
     def delete(self, key: str) -> None:
         self.set(key=key, value='', ttl=-1)

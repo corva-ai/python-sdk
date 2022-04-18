@@ -291,3 +291,138 @@ class TestTtl:
         redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
 
         assert redis_adapter.ttl(key='key') is not None
+
+
+class TestGetAll:
+    def test_1(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        now = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000) + 0
+        )
+        past = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            - 9000
+        )
+        future = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            + 9000
+        )
+
+        redis_client.hset(
+            redis_adapter.hash_name,
+            mapping={'key1': 1, 'key2': 2, 'key4': 4, 'key5': 5},
+        )
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={'key1': now, 'key2': past, 'key3': future, 'key4': future},
+        )
+        result = redis_adapter.get_all()
+        assert result == {'key4': '4', 'key5': '5'}
+        # returns not expired, non-existend keys,
+
+    def test_returns_if_no_existing_zset(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_all()
+
+        assert result == {'k': '1'}
+
+    def test_returns_if_no_entry_in_zset(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={'notk': 1},
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_all()
+
+        assert result == {'k': '1'}
+
+    def test_returns_if_now_less_than_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            + 9000
+        )
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={'k': pexpireat},
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_all()
+
+        assert result == {'k': '1'}
+
+    def test_does_not_return_if_now_equal_to_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000) + 0
+        )
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={'k': pexpireat},
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_all()
+
+        assert result == {}
+
+    def test_does_not_return_if_now_bigger_than_expireat(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            - 9000
+        )
+
+        redis_client.zadd(
+            name=redis_adapter.zset_name,
+            mapping={'k': pexpireat},
+        )
+        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
+        result = redis_adapter.get_all()
+
+        assert result == {}
+
+    def test_gets_many(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_client.hset(redis_adapter.hash_name, mapping={'k1': 1, 'k2': 2})
+        result = redis_adapter.get_all()
+
+        assert result == {'k1': '1', 'k2': '2'}
