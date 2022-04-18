@@ -237,3 +237,57 @@ class TestVacuum:
     ):
         assert not redis_client.keys(pattern='*')
         redis_adapter.vacuum(delete_count=1)
+
+
+class TestTtl:
+    def test_returns_nil_for_non_existing_key(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+        assert redis_adapter.ttl(key='nonexisting') is None
+
+    def test_returns_nil_for_negative_ttl(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            - 9000
+        )
+        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
+
+        assert redis_adapter.ttl(key='key') is None
+
+    def test_returns_nil_for_zero_ttl(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000) + 0
+        )
+        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
+
+        assert redis_adapter.ttl(key='key') is None
+
+    def test_returns_ttl_for_positive_ttl(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        pexpireat = (
+            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+            + 9000
+        )
+        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
+
+        assert redis_adapter.ttl(key='key') is not None
