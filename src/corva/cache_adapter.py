@@ -29,6 +29,9 @@ class CacheRepositoryProtocol(Protocol):
     def delete(self, key: str) -> None:
         ...
 
+    def delete_many(self, keys: Sequence[str]) -> None:
+        ...
+
     def ttl(self, key) -> Optional[int]:
         ...
 
@@ -135,7 +138,7 @@ class RedisRepository:
     #         ...
     #
     # Returns:
-    #     - nil if the field has expired.
+    #     - 'CORVA_NIL' if the field has expired.
     #     - field's value when field does not have expiration time.
     #     - field's value when field has not expired yet.
     LUA_GET_MANY_SCRIPT = """
@@ -154,7 +157,7 @@ class RedisRepository:
         if not pexpireat or pnow < tonumber(pexpireat) then
             table.insert(result, hash[i])
         else
-            table.insert(result, nil)
+            table.insert(result, 'CORVA_NIL')
         end
     end
     
@@ -181,6 +184,7 @@ class RedisRepository:
     #         key.
     #         value.
     #         ttl.
+    #         ...
     #
     # Returns: nil.
     LUA_SET_MANY_SCRIPT = """
@@ -237,6 +241,7 @@ class RedisRepository:
         cache_data = self.lua_get_many(
             keys=[self.hash_name, self.zset_name], args=list(keys)
         )
+        cache_data = [None if datum == 'CORVA_NIL' else datum for datum in cache_data]
         result = dict(zip(keys, cache_data))
         return result
 
@@ -245,7 +250,10 @@ class RedisRepository:
         return dict(zip(data[::2], data[1::2]))
 
     def delete(self, key: str) -> None:
-        self.set(key=key, value='', ttl=-1)
+        self.delete_many(keys=[key])
+
+    def delete_many(self, keys: Sequence[str]) -> None:
+        self.set_many(data=[(key, '', -1) for key in keys])
 
     def vacuum(self, delete_count: int) -> None:
         self.lua_vacuum(keys=[self.hash_name, self.zset_name], args=[delete_count])

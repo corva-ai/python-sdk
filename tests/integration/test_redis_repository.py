@@ -69,29 +69,11 @@ class TestDelete:
         assert not redis_client.keys(pattern='*')
 
         redis_adapter.set(key='key', value='value', ttl=1)
+        assert redis_client.hgetall(redis_adapter.hash_name) == {'key': 'value'}
         assert redis_adapter.get(key='key') == 'value'
 
         redis_adapter.delete(key='key')
         assert redis_adapter.get(key='key') is None
-
-        assert not redis_client.keys(pattern='*')
-
-    def test_delete_makes_key_unavailable(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_adapter.set(key='key1', value='value1', ttl=1)
-        redis_adapter.set(key='key2', value='value2', ttl=1)
-        assert redis_adapter.get(key='key1') == 'value1'
-
-        redis_adapter.delete(key='key1')
-        assert redis_adapter.get(key='key1') is None
-        assert redis_client.keys(pattern='*')
-
-        redis_adapter.delete(key='key2')
 
         assert not redis_client.keys(pattern='*')
 
@@ -469,3 +451,35 @@ class TestSetMany:
         redis_adapter.set_many(data=[('k1', 'v1', 0)])
         assert redis_client.ttl(redis_adapter.hash_name) == 2  # k3 has max expiration
         assert redis_client.ttl(redis_adapter.zset_name) == 2
+
+
+class TestDeleteMany:
+    def test_deletes_the_keys(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many([('k1', 'v1', 1), ('k2', 'v2', 1), ('k3', 'v3', 1)])
+        assert redis_client.hgetall(redis_adapter.hash_name) == {
+            'k1': 'v1',
+            'k2': 'v2',
+            'k3': 'v3',
+        }
+        assert redis_adapter.get_many(keys=['k1', 'k2', 'k3']) == {
+            'k1': 'v1',
+            'k2': 'v2',
+            'k3': 'v3',
+        }
+
+        redis_adapter.delete_many(keys=['k1', 'k2'])
+        assert redis_adapter.get_many(keys=['k1', 'k2', 'k3']) == {
+            'k1': None,
+            'k2': None,
+            'k3': 'v3',
+        }
+
+        redis_adapter.delete_many(keys=['k3'])
+
+        assert not redis_client.keys(pattern='*')
