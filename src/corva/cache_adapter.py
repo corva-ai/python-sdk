@@ -191,7 +191,7 @@ class RedisRepository:
             local value = ARGV[i + 1]
             local ttl = ARGV[i + 2]
             local pexpireat = (
-                    (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
+                (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
             )
     
             redis.call('HSET', hash_name, key, value)
