@@ -362,7 +362,7 @@ class TestGetMany:
         redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
         result = redis_adapter.get_many(['k'])
 
-        assert result == {}
+        assert result == {'k': None}
 
     def test_returns_nil_if_now_bigger_than_expireat(
         self,
@@ -383,7 +383,7 @@ class TestGetMany:
         redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
         result = redis_adapter.get_many(['k'])
 
-        assert result == {}
+        assert result == {'k': None}
 
 
 class TestSetMany:
@@ -483,3 +483,22 @@ class TestDeleteMany:
         redis_adapter.delete_many(keys=['k3'])
 
         assert not redis_client.keys(pattern='*')
+
+
+class TestDeleteAll:
+    def test_delete_all(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many([('k1', 'v1', 1), ('k2', 'v2', 1), ('k3', 'v3', 1)])
+        assert (
+            redis_client.exists(redis_adapter.hash_name, redis_adapter.zset_name) == 2
+        )
+
+        redis_adapter.delete_all()
+        assert (
+            redis_client.exists(redis_adapter.hash_name, redis_adapter.zset_name) == 0
+        )

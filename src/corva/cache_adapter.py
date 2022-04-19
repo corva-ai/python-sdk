@@ -32,6 +32,9 @@ class CacheRepositoryProtocol(Protocol):
     def delete_many(self, keys: Sequence[str]) -> None:
         ...
 
+    def delete_all(self) -> None:
+        ...
+
     def ttl(self, key) -> Optional[int]:
         ...
 
@@ -215,6 +218,13 @@ class RedisRepository:
     redis.call('PEXPIREAT', zset_name, max_pexpireat)
     """
 
+    LUA_DELETE_ALL_SCRIPT = """
+    local hash_name = KEYS[1]
+    local zset_name = KEYS[2]
+
+    redis.call('DEL', hash_name, zset_name)
+    """
+
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
         self.zset_name = f'{hash_name}.EXPIREAT'
@@ -224,6 +234,7 @@ class RedisRepository:
         self.lua_get_all = self.client.register_script(self.LUA_GET_ALL_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
         self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
+        self.lua_delete_all = self.client.register_script(self.LUA_DELETE_ALL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
         self.set_many(data=[(key, value, ttl)])
@@ -254,6 +265,9 @@ class RedisRepository:
 
     def delete_many(self, keys: Sequence[str]) -> None:
         self.set_many(data=[(key, '', -1) for key in keys])
+
+    def delete_all(self) -> None:
+        self.lua_delete_all(keys=[self.hash_name, self.zset_name])
 
     def vacuum(self, delete_count: int) -> None:
         self.lua_vacuum(keys=[self.hash_name, self.zset_name], args=[delete_count])
