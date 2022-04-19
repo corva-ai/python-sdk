@@ -1,5 +1,6 @@
+import itertools
 from datetime import timedelta
-from typing import Dict, List, Optional, Protocol, Sequence, Union
+from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union
 
 import redis
 
@@ -30,50 +31,6 @@ class CacheRepositoryProtocol(Protocol):
 
 
 class RedisRepository:
-    # Inserts a field with an expiration time into the hash specified by the key.
-    #
-    # Complexity: O(log(N)) with N being the number of elements in the hash.
-    #
-    # 1. If hash does not exist, it will automatically create one.
-    # 2. If the field already exists, its value and ttl will be overwritten.
-    # 3. Hash ttl is always set to the biggest field's ttl.
-    # 4. When the field expires it may be deleted by:
-    #    - Manually invoking `vacuum` script.
-    #    - Redis automatically deleting expired hash (see note #3).
-    #
-    # Args:
-    #     KEYS:
-    #         hash_name.
-    #         zset_name.
-    #
-    #     ARGV:
-    #         key.
-    #         value.
-    #         ttl.
-    #
-    # Returns: nil.
-    LUA_SET_SCRIPT = """
-    local hash_name = KEYS[1]
-    local zset_name = KEYS[2]
-    local key = ARGV[1]
-    local value = ARGV[2]
-    local ttl = tonumber(ARGV[3])
-    local time = redis.call('TIME')
-    local pexpireat = (
-            (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
-    )
-
-    redis.call('HSET', hash_name, key, value)
-    redis.call('ZADD', zset_name, pexpireat, key)
-
-    local max_pexpireat = tonumber(redis.call(
-            'ZREVRANGEBYSCORE', zset_name, '+inf', '-inf', 'WITHSCORES', 'LIMIT', 0, 1
-    )[2])
-
-    redis.call('PEXPIREAT', hash_name, max_pexpireat)
-    redis.call('PEXPIREAT', zset_name, max_pexpireat)
-    """
-
     # Gets the value of a field in hash specified by the key.
     #
     # Complexity: O(1).
@@ -230,18 +187,74 @@ class RedisRepository:
     return result
     """
 
+    # Inserts fields with expiration times into the hash specified by the keys.
+    #
+    # Complexity: O(Nlog(M)), where N number of inserted elements, M hash size.
+    #
+    # 1. If hash does not exist, it will automatically create one.
+    # 2. If the field already exists, its value and ttl will be overwritten.
+    # 3. Hash ttl is always set to the biggest field's ttl.
+    # 4. When the field expires it may be deleted by:
+    #    - Manually invoking `vacuum` script.
+    #    - Redis automatically deleting expired hash (see note #3).
+    #
+    # Args:
+    #     KEYS:
+    #         hash_name.
+    #         zset_name.
+    #
+    #     ARGV:
+    #         key.
+    #         value.
+    #         ttl.
+    #
+    # Returns: nil.
+    LUA_SET_MANY_SCRIPT = """
+    local hash_name = KEYS[1]
+    local zset_name = KEYS[2]
+    local time = redis.call('TIME')
+    
+    for i, _ in ipairs(ARGV) do
+        if i % 3 == 1 then
+            local key = ARGV[i]
+            local value = ARGV[i + 1]
+            local ttl = ARGV[i + 2]
+            local pexpireat = (
+                    (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
+            )
+    
+            redis.call('HSET', hash_name, key, value)
+            redis.call('ZADD', zset_name, pexpireat, key)
+    
+        end
+    end
+    
+    local max_pexpireat = tonumber(redis.call(
+            'ZREVRANGEBYSCORE', zset_name, '+inf', '-inf', 'WITHSCORES', 'LIMIT', 0, 1
+    )[2])
+    
+    redis.call('PEXPIREAT', hash_name, max_pexpireat)
+    redis.call('PEXPIREAT', zset_name, max_pexpireat)
+    """
+
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
         self.zset_name = f'{hash_name}.EXPIREAT'
         self.client = client
-        self.lua_set = self.client.register_script(self.LUA_SET_SCRIPT)
+        self.lua_set_many = self.client.register_script(self.LUA_SET_MANY_SCRIPT)
         self.lua_get_many = self.client.register_script(self.LUA_GET_MANY_SCRIPT)
         self.lua_get_all = self.client.register_script(self.LUA_GET_ALL_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
         self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
-        self.lua_set(keys=[self.hash_name, self.zset_name], args=[key, value, ttl])
+        self.set_many(data=[(key, value, ttl)])
+
+    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None:
+        self.lua_set_many(
+            keys=[self.hash_name, self.zset_name],
+            args=list(itertools.chain.from_iterable(data)),
+        )
 
     def get(self, key: str) -> Optional[str]:
         return self.get_many(keys=[key]).get(key)

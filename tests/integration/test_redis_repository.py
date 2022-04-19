@@ -45,61 +45,6 @@ class TestSet:
 
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value'}
 
-    def test_overwrites_the_value_and_ttl(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_adapter.set(key='key', value='value', ttl=1)
-        assert redis_client.ttl(redis_adapter.hash_name) == 1
-        assert redis_client.ttl(redis_adapter.zset_name) == 1
-        assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value'}
-
-        redis_adapter.set(key='key', value='value2', ttl=2)
-        assert redis_client.ttl(redis_adapter.hash_name) == 2
-        assert redis_client.ttl(redis_adapter.zset_name) == 2
-        assert redis_client.hgetall(name=redis_adapter.hash_name) == {'key': 'value2'}
-
-    def test_expiration(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_adapter.set(key='key', value='value', ttl=1)
-        assert redis_client.ttl(redis_adapter.hash_name) == 1
-        assert redis_client.ttl(redis_adapter.zset_name) == 1
-
-        redis_adapter.delete(key='key')
-
-        assert not redis_client.keys(pattern='*')
-
-    def test_sets_max_expiration(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_adapter.set(key='key1', value='value1', ttl=2)
-        assert redis_client.ttl(redis_adapter.hash_name) == 2
-        assert redis_client.ttl(redis_adapter.zset_name) == 2
-
-        redis_adapter.set(key='key2', value='value2', ttl=1)
-        assert redis_client.ttl(redis_adapter.hash_name) == 2  # key1 has max expiration
-        assert redis_client.ttl(redis_adapter.zset_name) == 2
-
-        redis_adapter.set(key='key1', value='value1', ttl=0)
-        assert redis_client.ttl(redis_adapter.hash_name) == 1  # key2 has max expiration
-        assert redis_client.ttl(redis_adapter.zset_name) == 1
-
-        redis_adapter.delete(key='key2')
-
-        assert not redis_client.keys(pattern='*')
-
 
 class TestGet:
     def test_success(
@@ -457,3 +402,70 @@ class TestGetMany:
         result = redis_adapter.get_many(['k'])
 
         assert result == {}
+
+
+class TestSetMany:
+    def test_sets_many(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many(data=[('k1', 'v1', 1), ('k2', 'v2', 2)])
+
+        assert redis_client.hgetall(name=redis_adapter.hash_name) == {
+            'k1': 'v1',
+            'k2': 'v2',
+        }
+
+    def test_overwrites_the_value_and_ttl(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many(data=[('k', 'v', 1)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 1
+        assert redis_client.ttl(redis_adapter.zset_name) == 1
+        assert redis_client.hgetall(name=redis_adapter.hash_name) == {'k': 'v'}
+
+        redis_adapter.set_many(data=[('k', 'v2', 2)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 2
+        assert redis_client.ttl(redis_adapter.zset_name) == 2
+        assert redis_client.hgetall(name=redis_adapter.hash_name) == {'k': 'v2'}
+
+    def test_expiration(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many(data=[('k', 'v', 1)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 1
+        assert redis_client.ttl(redis_adapter.zset_name) == 1
+
+        redis_adapter.delete(key='k')
+
+        assert not redis_client.keys(pattern='*')
+
+    def test_sets_max_expiration(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+
+        redis_adapter.set_many(data=[('k1', 'v1', 3), ('k2', 'v2', 1), ('k3', 'v3', 2)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 3
+        assert redis_client.ttl(redis_adapter.zset_name) == 3
+
+        redis_adapter.set_many(data=[('k4', 'v4', 1)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 3  # k1 has max expiration
+        assert redis_client.ttl(redis_adapter.zset_name) == 3
+
+        redis_adapter.set_many(data=[('k1', 'v1', 0)])
+        assert redis_client.ttl(redis_adapter.hash_name) == 2  # k3 has max expiration
+        assert redis_client.ttl(redis_adapter.zset_name) == 2
