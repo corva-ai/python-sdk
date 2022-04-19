@@ -14,6 +14,9 @@ class CacheRepositoryProtocol(Protocol):
     ) -> None:
         ...
 
+    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None:
+        ...
+
     def get(self, key: str) -> Optional[str]:
         ...
 
