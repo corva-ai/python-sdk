@@ -121,6 +121,10 @@ class RedisRepository:
         keys = redis.call('HKEYS', hash_name)
     end
     
+    if not next(keys) then
+        return {}
+    end
+    
     local hash = redis.call('HMGET', hash_name, unpack(keys))
     
     local result = {}

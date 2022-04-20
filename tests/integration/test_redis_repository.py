@@ -149,6 +149,14 @@ class TestGetScript:
 
         assert result == {'k1': '1', 'k2': '2'}
 
+    def test_get_with_empty_keys(
+        self,
+        redis_client: redis.Redis,
+        redis_adapter: cache_adapter.RedisRepository,
+    ):
+        assert not redis_client.keys(pattern='*')
+        assert redis_adapter.get_all() == {}
+
     @pytest.mark.parametrize(
         'mapping, keys_to_get, expected',
         [
