@@ -35,9 +35,6 @@ class CacheRepositoryProtocol(Protocol):
     def delete_all(self) -> None:
         ...
 
-    def ttl(self, key) -> Optional[int]:
-        ...
-
 
 class RedisRepository:
     # Deletes M expired keys from the hash.
@@ -71,27 +68,6 @@ class RedisRepository:
 
     redis.call('HDEL', hash_name, unpack(keys_to_delete))
     redis.call('ZREM', zset_name, unpack(keys_to_delete))
-    """
-
-    LUA_TTL_SCRIPT = """
-    local zset_name = KEYS[1]
-    local key = ARGV[1]
-    local time = redis.call('TIME')
-    local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
-
-    local pexpireat = redis.call('ZSCORE', zset_name, key)
-
-    if not pexpireat then
-        return
-    end
-
-    local ttl = tonumber(pexpireat) - pnow
-
-    if ttl <= 0 then
-        return
-    end
-
-    return ttl
     """
 
     # Gets either all or only requested keys and values from hash.
@@ -215,7 +191,6 @@ class RedisRepository:
         self.lua_set_many = self.client.register_script(self.LUA_SET_SCRIPT)
         self.lua_get = self.client.register_script(self.LUA_GET_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
-        self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
         self.lua_delete_all = self.client.register_script(self.LUA_DELETE_ALL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
@@ -254,9 +229,6 @@ class RedisRepository:
 
     def vacuum(self, delete_count: int) -> None:
         self.lua_vacuum(keys=[self.hash_name, self.zset_name], args=[delete_count])
-
-    def ttl(self, key) -> Optional[int]:
-        return self.lua_ttl(keys=[self.zset_name], args=[key])
 
 
 class DeprecatedRedisAdapter:

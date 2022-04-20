@@ -63,68 +63,6 @@ class TestVacuumScript:
         redis_adapter.vacuum(delete_count=1)
 
 
-class TestTtlScript:
-    def test_returns_nil_for_non_existing_key(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-        assert redis_adapter.ttl(key='nonexisting') is None
-
-    @pytest.mark.parametrize(
-        'pexpireat, ttl_exists',
-        [
-            pytest.param(
-                (
-                    int(
-                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
-                        * 1000
-                    )
-                    - 9000
-                ),
-                False,
-                id='Returns `None` for ttl < 0.',
-            ),
-            pytest.param(
-                (
-                    int(
-                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
-                        * 1000
-                    )
-                    + 0
-                ),
-                False,
-                id='Returns `None` for ttl == 0.',
-            ),
-            pytest.param(
-                (
-                    int(
-                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
-                        * 1000
-                    )
-                    + 9000
-                ),
-                True,
-                id='Returns value for  ttl > 0.',
-            ),
-        ],
-    )
-    def test_expiration(
-        self,
-        pexpireat: int,
-        ttl_exists: bool,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
-        actual = redis_adapter.ttl(key='key')
-
-        assert bool(actual) is ttl_exists
-
-
 class TestGetScript:
     def test_get(
         self,
