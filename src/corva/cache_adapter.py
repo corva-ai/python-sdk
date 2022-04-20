@@ -42,17 +42,16 @@ class CacheRepositoryProtocol(Protocol):
 class RedisRepository:
     # Deletes M expired keys from the hash.
     #
-    # Complexity: O(log(N) + M) + O(M) + O(M * log(N)) with N being the number of
-    # elements in the hash and M being the number of elements deleted. For constant M
-    # (e.g., 3) the complexity is O(log(N)).
+    # Complexity: O(log(N) + M) + O(M) + O(M * log(N)) where N is the size of hash
+    # and M is the number of elements deleted. For constant M (e.g., 3) the complexity
+    # is O(log(N)).
     #
-    # Args:
-    #     KEYS:
-    #         hash_name.
-    #         zset_name.
+    # KEYS:
+    #      hash_name.
+    #      zset_name.
     #
-    #     ARGV:
-    #         delete_count.
+    # ARGV:
+    #      delete_count.
     #
     # Returns: nil.
     LUA_VACUUM_SCRIPT = """
@@ -95,23 +94,22 @@ class RedisRepository:
     return ttl
     """
 
-    # Gets keys and values from hash.
+    # Gets either all or only requested keys and values from hash.
     #
-    # Gets all keys if nothing specified in ARGV.
+    # Gets all keys if no keys specified in ARGV.
     #
-    # Complexity: O(N), where N is the number of requested keys.
+    # Complexity: O(N) where N is the number of requested keys.
     #
-    # Args:
-    #     KEYS:
-    #         hash_name.
-    #         zset_name.
+    # KEYS:
+    #     hash_name.
+    #     zset_name.
     #
-    #     Optional ARGV:
-    #         key1
-    #         key2
-    #         ...
+    # Optional ARGV:
+    #     key1.
+    #     key2.
+    #     ...
     #
-    # Returns: name and value of non-expired keys.
+    # Returns: list of names and values for non-expired keys.
     LUA_GET_SCRIPT = """
     local hash_name = KEYS[1]
     local zset_name = KEYS[2]
@@ -139,30 +137,30 @@ class RedisRepository:
     return result
     """
 
-    # Inserts fields with expiration times into the hash specified by the keys.
+    # Inserts list of keys-value-expiration tuples into the hash.
     #
-    # Complexity: O(Nlog(M)), where N number of inserted elements, M hash size.
+    # Complexity: O(N * log(M)), where N is the number of inserted elements and
+    # M is the hash size.
     #
     # 1. If hash does not exist, it will automatically create one.
     # 2. If the field already exists, its value and ttl will be overwritten.
-    # 3. Hash ttl is always set to the biggest field's ttl.
+    # 3. Hash and zset ttl is always set to the biggest field's ttl.
     # 4. When the field expires it may be deleted by:
     #    - Manually invoking `vacuum` script.
     #    - Redis automatically deleting expired hash (see note #3).
     #
-    # Args:
-    #     KEYS:
-    #         hash_name.
-    #         zset_name.
+    # KEYS:
+    #     hash_name.
+    #     zset_name.
     #
-    #     ARGV:
-    #         key.
-    #         value.
-    #         ttl.
-    #         ...
+    # ARGV:
+    #     key.
+    #     value.
+    #     ttl.
+    #     ...
     #
     # Returns: nil.
-    LUA_SET_MANY_SCRIPT = """
+    LUA_SET_SCRIPT = """
     local hash_name = KEYS[1]
     local zset_name = KEYS[2]
     local time = redis.call('TIME')
@@ -190,6 +188,15 @@ class RedisRepository:
     redis.call('PEXPIREAT', zset_name, max_pexpireat)
     """
 
+    # Deletes all data from hash and zset.
+    #
+    # Complexity: O(N) where N is the hash size.
+    #
+    # KEYS:
+    #     hash_name.
+    #     zset_name.
+    #
+    # Returns: nil.
     LUA_DELETE_ALL_SCRIPT = """
     local hash_name = KEYS[1]
     local zset_name = KEYS[2]
@@ -201,7 +208,7 @@ class RedisRepository:
         self.hash_name = hash_name
         self.zset_name = f'{hash_name}.EXPIREAT'
         self.client = client
-        self.lua_set_many = self.client.register_script(self.LUA_SET_MANY_SCRIPT)
+        self.lua_set_many = self.client.register_script(self.LUA_SET_SCRIPT)
         self.lua_get = self.client.register_script(self.LUA_GET_SCRIPT)
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
         self.lua_ttl = self.client.register_script(self.LUA_TTL_SCRIPT)
