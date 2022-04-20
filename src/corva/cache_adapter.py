@@ -78,19 +78,19 @@ class RedisRepository:
     local key = ARGV[1]
     local time = redis.call('TIME')
     local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
-    
+
     local pexpireat = redis.call('ZSCORE', zset_name, key)
-    
+
     if not pexpireat then
         return
     end
-    
+
     local ttl = tonumber(pexpireat) - pnow
-    
+
     if ttl <= 0 then
         return
     end
-    
+
     return ttl
     """
 
@@ -115,29 +115,29 @@ class RedisRepository:
     local zset_name = KEYS[2]
     local time = redis.call('TIME')
     local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
-    
+
     local keys = ARGV
     if next(ARGV) == nil then
         keys = redis.call('HKEYS', hash_name)
     end
-    
+
     if not next(keys) then
         return {}
     end
-    
+
     local hash = redis.call('HMGET', hash_name, unpack(keys))
-    
+
     local result = {}
-    
+
     for i, key in ipairs(keys) do
         local pexpireat = redis.call('ZSCORE', zset_name, key)
-    
+
         if not pexpireat or pnow < tonumber(pexpireat) then
             table.insert(result, key)
             table.insert(result, hash[i])
         end
     end
-    
+
     return result
     """
 
@@ -168,7 +168,7 @@ class RedisRepository:
     local hash_name = KEYS[1]
     local zset_name = KEYS[2]
     local time = redis.call('TIME')
-    
+
     for i, _ in ipairs(ARGV) do
         if i % 3 == 1 then
             local key = ARGV[i]
@@ -177,17 +177,17 @@ class RedisRepository:
             local pexpireat = (
                 (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
             )
-    
+
             redis.call('HSET', hash_name, key, value)
             redis.call('ZADD', zset_name, pexpireat, key)
-    
+
         end
     end
-    
+
     local max_pexpireat = tonumber(redis.call(
             'ZREVRANGEBYSCORE', zset_name, '+inf', '-inf', 'WITHSCORES', 'LIMIT', 0, 1
     )[2])
-    
+
     redis.call('PEXPIREAT', hash_name, max_pexpireat)
     redis.call('PEXPIREAT', zset_name, max_pexpireat)
     """
