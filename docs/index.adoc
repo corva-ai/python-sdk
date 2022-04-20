@@ -316,6 +316,44 @@ using `ttl` parameter.
 <.> Wait for key to expire.
 <.> The data is not present anymore.
 
+=== Bulk methods
+
+`Cache` provides some bulk methods
+which make it easy to work with multiple
+keys at once.
+
+==== Get many, get all and set many
+
+[source,python]
+----
+include::src/cache/tutorial006.py[]
+----
+<.> Get all the data from the hash.
+It is empty as we have not stored anything yet.
+<.> Store multiple key-value pairs at once.
+<.> You can set custom key expiry in seconds
+by providing additional tuple element.
+<.> Get multiple keys at once.
+<.> If you request a non-existent key
+it will be assigned a value of `None`.
+<.> Get all the data from the hash.
+<.> Wait for key with custom expiry to expire.
+<.> The expired key is not present anymore.
+
+
+==== Delete many and delete all
+
+[source,python]
+----
+include::src/cache/tutorial007.py[]
+----
+<.> Cache is empty as we have not stored anything yet.
+<.> Store some data.
+<.> Delete multiple keys at once.
+<.> Deleted keys are non-existent anymore.
+<.> Delete all the data.
+<.> Cache is empty.
+
 
 == Logging
 
