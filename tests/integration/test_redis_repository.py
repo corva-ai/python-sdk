@@ -1,5 +1,5 @@
 import datetime
-from typing import Iterable
+from typing import Dict, Iterable, Optional, Sequence
 
 import pytest
 import redis
@@ -33,7 +33,7 @@ def redis_adapter(
     yield redis_adapter
 
 
-class TestVacuum:
+class TestVacuumScript:
     def test_vacuum(
         self,
         redis_client: redis.Redis,
@@ -63,7 +63,7 @@ class TestVacuum:
         redis_adapter.vacuum(delete_count=1)
 
 
-class TestTtl:
+class TestTtlScript:
     def test_returns_nil_for_non_existing_key(
         self,
         redis_client: redis.Redis,
@@ -72,52 +72,60 @@ class TestTtl:
         assert not redis_client.keys(pattern='*')
         assert redis_adapter.ttl(key='nonexisting') is None
 
-    def test_returns_nil_for_negative_ttl(
+    @pytest.mark.parametrize(
+        'pexpireat, ttl_exists',
+        [
+            pytest.param(
+                (
+                    int(
+                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+                        * 1000
+                    )
+                    - 9000
+                ),
+                False,
+                id='Returns `None` for ttl < 0.',
+            ),
+            pytest.param(
+                (
+                    int(
+                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+                        * 1000
+                    )
+                    + 0
+                ),
+                False,
+                id='Returns `None` for ttl == 0.',
+            ),
+            pytest.param(
+                (
+                    int(
+                        datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+                        * 1000
+                    )
+                    + 9000
+                ),
+                True,
+                id='Returns value for  ttl > 0.',
+            ),
+        ],
+    )
+    def test_expiration(
         self,
+        pexpireat: int,
+        ttl_exists: bool,
         redis_client: redis.Redis,
         redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
-        pexpireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-            - 9000
-        )
         redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
+        actual = redis_adapter.ttl(key='key')
 
-        assert redis_adapter.ttl(key='key') is None
-
-    def test_returns_nil_for_zero_ttl(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        pexpireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000) + 0
-        )
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
-
-        assert redis_adapter.ttl(key='key') is None
-
-    def test_returns_ttl_for_positive_ttl(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        pexpireat = (
-            int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-            + 9000
-        )
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'key': pexpireat})
-
-        assert redis_adapter.ttl(key='key') is not None
+        assert bool(actual) is ttl_exists
 
 
-class TestGet:
+class TestGetScript:
     def test_get(
         self,
         redis_client: redis.Redis,
@@ -126,9 +134,8 @@ class TestGet:
         assert not redis_client.keys(pattern='*')
 
         redis_client.hset(redis_adapter.hash_name, mapping={'k1': 1})
-        result = redis_adapter.get('k1')
 
-        assert result == '1'
+        assert redis_adapter.get('k1') == '1'
 
     def test_get_all(
         self,
@@ -142,17 +149,36 @@ class TestGet:
 
         assert result == {'k1': '1', 'k2': '2'}
 
+    @pytest.mark.parametrize(
+        'mapping, keys_to_get, expected',
+        [
+            pytest.param(
+                {'k1': 1, 'k2': 2},
+                ['k1', 'k2'],
+                {'k1': '1', 'k2': '2'},
+                id='Gets many.',
+            ),
+            pytest.param(
+                {'k1': 1},
+                ['k2'],
+                {'k2': None},
+                id='Returns `None` for non-existing keys.',
+            ),
+        ],
+    )
     def test_get_many(
         self,
+        mapping: Dict[str, int],
+        keys_to_get: Sequence[str],
+        expected: Dict[str, str],
         redis_client: redis.Redis,
         redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
-        redis_client.hset(redis_adapter.hash_name, mapping={'k1': 1, 'k2': 2})
-        result = redis_adapter.get_many(['k1', 'k2', 'k3'])
+        redis_client.hset(redis_adapter.hash_name, mapping=mapping)
 
-        assert result == {'k1': '1', 'k2': '2', 'k3': None}
+        assert redis_adapter.get_many(keys_to_get) == expected
 
     def test_gets_if_no_entry_in_zset(
         self,
@@ -162,75 +188,48 @@ class TestGet:
         assert not redis_client.keys(pattern='*')
 
         redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
-        result = redis_adapter.get_many(['k'])
 
-        assert result == {'k': '1'}
+        assert redis_adapter.get('k') == '1'
 
-    def test_gets_if_now_less_that_expireat(
+    @pytest.mark.parametrize(
+        'pexpireat, expected',
+        [
+            pytest.param(
+                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+                + 9000,
+                '1',
+                id='Now < expireat',
+            ),
+            pytest.param(
+                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+                + 0,
+                None,
+                id='Now == expireat',
+            ),
+            pytest.param(
+                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
+                - 9000,
+                None,
+                id='Now > expireat',
+            ),
+        ],
+    )
+    def test_expiration(
         self,
+        pexpireat: int,
+        expected: Optional[str],
         redis_client: redis.Redis,
         redis_adapter: cache_adapter.RedisRepository,
     ):
         assert not redis_client.keys(pattern='*')
 
-        redis_client.zadd(
-            name=redis_adapter.zset_name,
-            mapping={
-                'k': int(
-                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
-                )
-                + 9000
-            },
-        )
+        redis_client.zadd(name=redis_adapter.zset_name, mapping={'k': pexpireat})
         redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
-        result = redis_adapter.get_many(['k'])
 
-        assert result == {'k': '1'}
-
-    def test_returns_nil_if_now_equal_to_expireat(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_client.zadd(
-            name=redis_adapter.zset_name,
-            mapping={
-                'k': int(
-                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
-                )
-                + 0
-            },
-        )
-        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
-        result = redis_adapter.get_many(['k'])
-
-        assert result == {'k': None}
-
-    def test_returns_nil_if_now_bigger_than_expireat(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_client.zadd(
-            name=redis_adapter.zset_name,
-            mapping={
-                'k': int(
-                    datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000
-                )
-                - 9000
-            },
-        )
-        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
-        result = redis_adapter.get_many(['k'])
-
-        assert result == {'k': None}
+        assert redis_adapter.get('k') == expected
 
 
-class TestSet:
+class TestSetScript:
     def test_set(
         self,
         redis_client: redis.Redis,
@@ -308,7 +307,7 @@ class TestSet:
         assert redis_client.ttl(redis_adapter.zset_name) == 2
 
 
-class TestDeleteMany:
+class TestDelete:
     def test_delete(
         self,
         redis_client: redis.Redis,
@@ -356,7 +355,7 @@ class TestDeleteMany:
         assert not redis_client.keys(pattern='*')
 
 
-class TestDeleteAll:
+class TestDeleteAllScript:
     def test_delete_all(
         self,
         redis_client: redis.Redis,
