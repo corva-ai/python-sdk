@@ -151,9 +151,9 @@ def stream(
 
         try:
             event.set_cached_max_record_value(cache=user_cache_sdk)
-        except Exception:
+        except Exception as e:
             # lambda succeeds if we're unable to cache the value
-            CORVA_LOGGER.exception('Could not save data to cache.')
+            CORVA_LOGGER.warning(f'Could not save data to cache. Details: {str(e)}.')
 
         return result
 
@@ -226,9 +226,11 @@ def scheduled(
 
         try:
             event.set_schedule_as_completed(api=api)
-        except Exception:
+        except Exception as e:
             # lambda succeeds if we're unable to set completed status
-            CORVA_LOGGER.exception('Could not set schedule as completed.')
+            CORVA_LOGGER.warning(
+                f'Could not set schedule as completed. Details: {str(e)}.'
+            )
 
         return result
 
@@ -314,8 +316,8 @@ def task(
                     status=status,
                     data=data,
                 ).raise_for_status()
-            except Exception:
+            except Exception as e:
                 # lambda succeeds if we're unable to update task data
-                CORVA_LOGGER.exception('Could not update task data.')
+                CORVA_LOGGER.warning(f'Could not update task data. Details: {str(e)}.')
 
     return wrapper
