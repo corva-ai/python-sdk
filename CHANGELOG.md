@@ -11,7 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Wrong log formatting in Dev Center:
 multiline Python logs (like stack traces)
 being split into multiple CloudWatch log entries.
+- Internal SDK errors being logged
+as `exception`
 
+### Changed
+- Log internal SDK errors using
+`warning` level instead of `exception`.
 
 ## [1.4.0-rc.1] - 2021-02-15
 
