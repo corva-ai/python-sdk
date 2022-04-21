@@ -34,6 +34,14 @@ See docs for more info.
 - `Cache` unable to set unique expiry for each key.
 
 
+## [1.3.1] - 2022-04-14
+
+### Fixed
+- Wrong log formatting in Dev Center:
+multiline Python logs (like stack traces)
+being split into multiple CloudWatch log entries.
+
+
 ## [1.3.0] - 2021-02-15
 
 ### Added
@@ -239,7 +247,8 @@ env variables, that should be used to configure logging.
 
 
 [Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.4.0-rc.1...master
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.3.0...v1.4.0-rc.1
+[1.4.0-rc.1] https://github.com/corva-ai/python-sdk/compare/v1.3.1...v1.4.0-rc.1
+[1.3.1] https://github.com/corva-ai/python-sdk/compare/v1.3.0...v1.3.1
 [1.3.0] https://github.com/corva-ai/python-sdk/compare/v1.2.2...v1.3.0
 [1.2.2] https://github.com/corva-ai/python-sdk/compare/v1.2.1...v1.2.2
 [1.2.1] https://github.com/corva-ai/python-sdk/compare/v1.2.0...v1.2.1
