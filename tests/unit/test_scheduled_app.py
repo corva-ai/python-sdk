@@ -285,7 +285,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
     ]
 
     patch = mocker.patch.object(
-        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception
+        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception('Oops!')
     )
 
     scheduled_app(event, context)
@@ -293,7 +293,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
     captured = capsys.readouterr()
 
     assert 'ASSET=0 AC=0' in captured.out
-    assert 'Could not set schedule as completed.' in captured.out
+    assert 'Could not set schedule as completed. Details: Oops!.' in captured.out
     patch.assert_called_once()
 
 
