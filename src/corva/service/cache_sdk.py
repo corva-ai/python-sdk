@@ -47,13 +47,15 @@ class UserRedisSdk:
     SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
 
     def __init__(self, hash_name: str, redis_dsn: str, use_fakes: bool = False):
+        use_lua_52 = False
         if use_fakes:
             client = fakeredis.FakeRedis.from_url(url=redis_dsn, decode_responses=True)
+            use_lua_52 = True
         else:
             client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
         self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name, client=client
+            hash_name=hash_name, client=client, use_lua_52=use_lua_52
         )
         self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
             hash_name=hash_name, client=client
