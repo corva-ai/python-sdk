@@ -167,7 +167,7 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
     update_task_data_patch = mocker.patch.object(
         RawTaskEvent,
         'update_task_data',
-        side_effect=Exception,
+        side_effect=Exception('Oops!'),
     )
 
     task_app(event, context)
@@ -175,7 +175,7 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
     captured = capsys.readouterr()
 
     assert 'ASSET=0' in captured.out
-    assert 'Could not update task data.' in captured.out
+    assert 'Could not update task data. Details: Oops!.' in captured.out
     update_task_data_patch.assert_called_once()
 
 

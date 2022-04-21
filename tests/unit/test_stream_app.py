@@ -504,7 +504,7 @@ def test_log_if_unable_to_set_cached_max_record_value(
     ]
 
     patch = mocker.patch.object(
-        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception
+        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception('Oops!')
     )
 
     stream_app(event, context)
@@ -512,7 +512,7 @@ def test_log_if_unable_to_set_cached_max_record_value(
     captured = capsys.readouterr()
 
     assert 'ASSET=0 AC=0' in captured.out
-    assert 'Could not save data to cache.' in captured.out
+    assert 'Could not save data to cache. Details: Oops!.' in captured.out
     patch.assert_called_once()
 
 
