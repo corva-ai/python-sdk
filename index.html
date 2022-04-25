@@ -553,9 +553,21 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 <li><a href="#cache">5. Cache</a>
 <ul class="sectlevel2">
-<li><a href="#_store_and_load">5.1. Store and load</a></li>
+<li><a href="#_get_and_set">5.1. Get and set</a>
+<ul class="sectlevel3">
+<li><a href="#_storing_str">5.1.1. Storing <code>str</code></a></li>
+<li><a href="#_storing_int">5.1.2. Storing <code>int</code></a></li>
+<li><a href="#_storing_dict">5.1.3. Storing <code>dict</code></a></li>
+</ul>
+</li>
 <li><a href="#_delete">5.2. Delete</a></li>
-<li><a href="#_expiry_ttl_and_exists">5.3. Expiry, ttl and exists</a></li>
+<li><a href="#_key_expiry">5.3. Key expiry</a></li>
+<li><a href="#_bulk_methods">5.4. Bulk methods</a>
+<ul class="sectlevel3">
+<li><a href="#_get_many_get_all_and_set_many">5.4.1. Get many, get all and set many</a></li>
+<li><a href="#_delete_many_and_delete_all">5.4.2. Delete many and delete all</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_logging">6. Logging</a>
@@ -604,7 +616,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>v1.3.1</strong>.</p>
+<p>Documentation for version <strong>v1.4.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -1135,7 +1147,26 @@ as they aren&#8217;t meant to share the data between invokes.
 </table>
 </div>
 <div class="sect2">
-<h3 id="_store_and_load">5.1. Store and load</h3>
+<h3 id="_get_and_set">5.1. Get and set</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>Cache</code> can store only string data.</p>
+</div>
+<div class="paragraph">
+<p>Cast your data to <code>str</code> before saving.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_storing_str">5.1.1. Storing <code>str</code></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
@@ -1143,60 +1174,89 @@ as they aren&#8217;t meant to share the data between invokes.
 
 <span class="tok-nd">@scheduled</span>
 <span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b>
-
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-mi">0</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;0&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
-
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-mf">0.0</span><span class="tok-p">)</span>  <i class="conum" data-value="5"></i><b>(5)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;0.0&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
-
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-sa">b</span><span class="tok-s1">&#39;&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="6"></i><b>(6)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;&#39;</span>  <i class="conum" data-value="4"></i><b>(4)</b>
-
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">mapping</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;other-key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;other-val&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="7"></i><b>(7)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;other-key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;other-val&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;text&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;text&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>Cache</code> can store <code>str</code> values.</td>
+<td>Save <code>str</code> data to <code>Cache</code>.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>Load the value using its key.</td>
 </tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_storing_int">5.1.2. Storing <code>int</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;int&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">))</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;int&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;0&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">assert</span> <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;int&#39;</span><span class="tok-p">))</span> <span class="tok-o">==</span> <span class="tok-mi">0</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Cast <code>int</code> to <code>str</code> before saving data to <code>Cache</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Load the value using its key.
+Notice that returned value has <code>str</code> type.</td>
+</tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>Cache</code> can store <code>int</code> values.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td><code>Cache</code> stores the values in binary format.
-The data is decoded while loading,
-but <code>Cache</code> can&#8217;t assume the type of the value.
-That&#8217;s why the returned type is <code>str</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td><code>Cache</code> can store <code>float</code> values.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td><code>Cache</code> can store <code>bytes</code> values.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Store multiple values at once using <code>mapping</code> parameter.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>Load all data from cache.</td>
+<td>Cast the value back to <code>int</code> as needed.</td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_storing_dict">5.1.3. Storing <code>dict</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">json</span>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;json&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">dumps</span><span class="tok-p">({</span><span class="tok-s1">&#39;int&#39;</span><span class="tok-p">:</span> <span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-s1">&#39;str&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;text&#39;</span><span class="tok-p">}))</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;json&#39;</span><span class="tok-p">),</span> <span class="tok-nb">str</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;json&#39;</span><span class="tok-p">))</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;int&#39;</span><span class="tok-p">:</span> <span class="tok-mi">0</span><span class="tok-p">,</span> <span class="tok-s1">&#39;str&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;text&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Cast <code>dict</code> to JSON <code>str</code> before saving data to <code>Cache</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Load the value using its key.
+Notice that returned value has <code>str</code> type.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Parse JSON <code>str</code>
+and convert it back into a <code>dict</code>.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1208,42 +1268,37 @@ That&#8217;s why the returned type is <code>str</code>.</td>
 
 <span class="tok-nd">@scheduled</span>
 <span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">mapping</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key2&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val3&#39;</span><span class="tok-p">})</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;text&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;text&#39;</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-n">keys</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">&#39;key1&#39;</span><span class="tok-p">])</span>  <i class="conum" data-value="2"></i><b>(2)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key2&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;key3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;val3&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="3"></i><b>(3)</b>
-
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_all</span><span class="tok-p">()</span>  <i class="conum" data-value="4"></i><b>(4)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">load_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{}</span>  <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">)</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;str&#39;</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-kc">None</span>  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Store some data.</td>
+<td>Save some data to <code>Cache</code>.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Delete specific key.</td>
+<td>Load the value using its key.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Deleted key is not present in cache.</td>
+<td>Delete the data,
+when it is no longer needed.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Delete all keys.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Cache is empty.</td>
+<td>The data is not present anymore.</td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_expiry_ttl_and_exists">5.3. Expiry, ttl and exists</h3>
+<h3 id="_key_expiry">5.3. Key expiry</h3>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -1251,66 +1306,178 @@ That&#8217;s why the returned type is <code>str</code>.</td>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-By default <code>Cache</code> sets an expiry to <code>60</code> days.
+By default keys expire in 60 days.
 </td>
 </tr>
 </table>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">datetime</span>
-<span class="tok-kn">import</span> <span class="tok-nn">time</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">time</span>
 
 <span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
 
 
 <span class="tok-nd">@scheduled</span>
 <span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
-    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">store</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;val&#39;</span><span class="tok-p">,</span> <span class="tok-n">expiry</span><span class="tok-o">=</span><span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">timedelta</span><span class="tok-p">(</span><span class="tok-n">seconds</span><span class="tok-o">=</span><span class="tok-mi">60</span><span class="tok-p">))</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-n">key</span><span class="tok-o">=</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-n">value</span><span class="tok-o">=</span><span class="tok-s1">&#39;value&#39;</span><span class="tok-p">,</span> <span class="tok-n">ttl</span><span class="tok-o">=</span><span class="tok-mi">1</span><span class="tok-p">)</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-s1">&#39;value&#39;</span>
 
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">ttl</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-mi">60</span>  <i class="conum" data-value="3"></i><b>(3)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">pttl</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-mi">60000</span>  <i class="conum" data-value="4"></i><b>(4)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>  <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-n">time</span><span class="tok-o">.</span><span class="tok-n">sleep</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>  <i class="conum" data-value="2"></i><b>(2)</b>
 
-    <span class="tok-n">time</span><span class="tok-o">.</span><span class="tok-n">sleep</span><span class="tok-p">(</span><span class="tok-mi">60</span><span class="tok-p">)</span>  <i class="conum" data-value="6"></i><b>(6)</b>
-
-    <span class="tok-k">assert</span> <span class="tok-ow">not</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>  <i class="conum" data-value="7"></i><b>(7)</b></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-kc">None</span>  <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Store the value and set an expiry to <code>60</code> seconds
-using <code>expiry</code> parameter.</td>
+<td>Specify how many seconds you want your key to live
+using <code>ttl</code> parameter.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>expiry</code> parameter also supports
-<code>datetime.timedelta</code> objects.</td>
+<td>Wait for key to expire.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Get the remaining time of key expiry in seconds.</td>
+<td>The data is not present anymore.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bulk_methods">5.4. Bulk methods</h3>
+<div class="paragraph">
+<p><code>Cache</code> provides some bulk methods
+which make it easy to work with multiple
+keys at once.</p>
+</div>
+<div class="sect3">
+<h4 id="_get_many_get_all_and_set_many">5.4.1. Get many, get all and set many</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">time</span>
+
+<span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{}</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set_many</span><span class="tok-p">(</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="tok-n">data</span><span class="tok-o">=</span><span class="tok-p">[</span>
+            <span class="tok-p">(</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;value_1&#39;</span><span class="tok-p">),</span>
+            <span class="tok-p">(</span><span class="tok-s1">&#39;key_with_custom_expiry&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;value_2&#39;</span><span class="tok-p">,</span> <span class="tok-mi">1</span><span class="tok-p">),</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="tok-p">]</span>
+    <span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_many</span><span class="tok-p">(</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+        <span class="tok-n">keys</span><span class="tok-o">=</span><span class="tok-p">[</span>
+            <span class="tok-s1">&#39;key&#39;</span><span class="tok-p">,</span>
+            <span class="tok-s1">&#39;non-existent-key&#39;</span><span class="tok-p">,</span>  <i class="conum" data-value="5"></i><b>(5)</b>
+        <span class="tok-p">]</span>
+    <span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;value_1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;non-existent-key&#39;</span><span class="tok-p">:</span> <span class="tok-kc">None</span><span class="tok-p">}</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span>  <i class="conum" data-value="6"></i><b>(6)</b>
+        <span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;value_1&#39;</span><span class="tok-p">,</span>
+        <span class="tok-s1">&#39;key_with_custom_expiry&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;value_2&#39;</span><span class="tok-p">,</span>
+    <span class="tok-p">}</span>
+
+    <span class="tok-n">time</span><span class="tok-o">.</span><span class="tok-n">sleep</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>  <i class="conum" data-value="7"></i><b>(7)</b>
+
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;key&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;value_1&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="8"></i><b>(8)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Get all the data from the hash.
+It is empty as we have not stored anything yet.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Store multiple key-value pairs at once.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>You can set custom key expiry in seconds
+by providing additional tuple element.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Get the remaining time of key expiry in milliseconds.</td>
+<td>Get multiple keys at once.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Verify, that cache contains some data.</td>
+<td>If you request a non-existent key
+it will be assigned a value of <code>None</code>.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Wait for 60 seconds for data to expire.</td>
+<td>Get all the data from the hash.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>Verify, that cache is empty.</td>
+<td>Wait for key with custom expiry to expire.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>The expired key is not present anymore.</td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_many_and_delete_all">5.4.2. Delete many and delete all</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">corva</span> <span class="tok-kn">import</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">Cache</span><span class="tok-p">,</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">scheduled</span>
+
+
+<span class="tok-nd">@scheduled</span>
+<span class="tok-k">def</span> <span class="tok-nf">scheduled_app</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">ScheduledDataTimeEvent</span><span class="tok-p">,</span> <span class="tok-n">api</span><span class="tok-p">:</span> <span class="tok-n">Api</span><span class="tok-p">,</span> <span class="tok-n">cache</span><span class="tok-p">:</span> <span class="tok-n">Cache</span><span class="tok-p">):</span>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{}</span>  <i class="conum" data-value="1"></i><b>(1)</b>
+
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set_many</span><span class="tok-p">(</span><span class="tok-n">data</span><span class="tok-o">=</span><span class="tok-p">[(</span><span class="tok-s1">&#39;k1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;v1&#39;</span><span class="tok-p">),</span> <span class="tok-p">(</span><span class="tok-s1">&#39;k2&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;v2&#39;</span><span class="tok-p">),</span> <span class="tok-p">(</span><span class="tok-s1">&#39;k3&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;v3&#39;</span><span class="tok-p">),</span> <span class="tok-p">(</span><span class="tok-s1">&#39;k4&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;v4&#39;</span><span class="tok-p">)])</span>  <i class="conum" data-value="2"></i><b>(2)</b>
+
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_many</span><span class="tok-p">(</span><span class="tok-n">keys</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">&#39;k1&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;k2&#39;</span><span class="tok-p">])</span>  <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{</span><span class="tok-s1">&#39;k3&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;v3&#39;</span><span class="tok-p">,</span> <span class="tok-s1">&#39;k4&#39;</span><span class="tok-p">:</span> <span class="tok-s1">&#39;v4&#39;</span><span class="tok-p">}</span>  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_all</span><span class="tok-p">()</span>  <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get_all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">{}</span>  <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Cache is empty as we have not stored anything yet.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Store some data.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Delete multiple keys at once.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Deleted keys are non-existent anymore.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Delete all the data.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Cache is empty.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
