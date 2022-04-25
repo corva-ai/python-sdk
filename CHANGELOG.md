@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Cache` methods:
+  * `set_many`
+  * `get_many`
+  * `get_all`
+  * `delete_many`
+  * `delete_all`
+
 ### Fixed
 - Wrong log formatting in Dev Center:
 multiline Python logs (like stack traces)

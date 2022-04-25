@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import List, Optional, Protocol, overload
+from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union, overload
 
 import fakeredis
 import redis
@@ -12,11 +12,28 @@ class UserCacheSdkProtocol(Protocol):
     def set(self, key: str, value: str, ttl: int = ...) -> None:
         ...
 
+    def set_many(
+        self, data: Sequence[Union[Tuple[str, str], Tuple[str, str, int]]]
+    ) -> None:
+        ...
+
     def get(self, key: str) -> Optional[str]:
+        ...
+
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
+        ...
+
+    def get_all(self) -> Dict[str, str]:
         ...
 
     # TODO: remove asterisk in v2 - it was added for backward compatibility
     def delete(self, *, key: str) -> None:
+        ...
+
+    def delete_many(self, keys: Sequence[str]) -> None:
+        ...
+
+    def delete_all(self) -> None:
         ...
 
 
@@ -30,13 +47,15 @@ class UserRedisSdk:
     SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
 
     def __init__(self, hash_name: str, redis_dsn: str, use_fakes: bool = False):
+        use_lua_52 = False
         if use_fakes:
             client = fakeredis.FakeRedis.from_url(url=redis_dsn, decode_responses=True)
+            use_lua_52 = True
         else:
             client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
         self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name, client=client
+            hash_name=hash_name, client=client, use_lua_52=use_lua_52
         )
         self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
             hash_name=hash_name, client=client
@@ -45,8 +64,23 @@ class UserRedisSdk:
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
         self.cache_repo.set(key=key, value=value, ttl=ttl)
 
+    def set_many(
+        self, data: Sequence[Union[Tuple[str, str], Tuple[str, str, int]]]
+    ) -> None:
+        prepared_data = [
+            datum if len(datum) == 3 else (datum[0], datum[1], self.SIXTY_DAYS)
+            for datum in data
+        ]
+        self.cache_repo.set_many(data=prepared_data)
+
     def get(self, key: str) -> Optional[str]:
         return self.cache_repo.get(key=key)
+
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
+        return self.cache_repo.get_many(keys=keys)
+
+    def get_all(self) -> Dict[str, str]:
+        return self.cache_repo.get_all()
 
     @overload
     def delete(self, *, key: str) -> None:
@@ -78,10 +112,33 @@ class UserRedisSdk:
 
         raise TypeError("Bad arguments")
 
+    def delete_many(self, keys: Sequence[str]) -> None:
+        self.cache_repo.delete_many(keys=keys)
+
+    @overload
+    def delete_all(self) -> None:
+        ...
+
+    @overload
+    def delete_all(self, *names: str) -> int:
+        ...
+
+    def delete_all(self, *names):
+        if names:
+            warnings.warn(
+                "`delete_all` with `*names` parameter cache method is deprecated and"
+                " will be removed from corva in the next major version. Use "
+                "`delete_many` cache method instead.",
+                FutureWarning,
+            )
+            return self.old_cache_repo.delete(*names)
+        else:
+            self.cache_repo.delete_all()
+
     def store(self, **kwargs):
         warnings.warn(
             "`store` cache method is deprecated and will be removed from corva in the"
-            " next major version. Use `set` cache method instead.",
+            " next major version. Use `set` or `set_many` cache methods instead.",
             FutureWarning,
         )
         return self.old_cache_repo.hset(**kwargs)
@@ -89,7 +146,7 @@ class UserRedisSdk:
     def load(self, **kwargs):
         warnings.warn(
             "`load` cache method is deprecated and will be removed from corva in the"
-            " next major version. Use `get` cache method instead.",
+            " next major version. Use `get` or `get_many` cache methods instead.",
             FutureWarning,
         )
         return self.old_cache_repo.hget(**kwargs)
@@ -97,18 +154,10 @@ class UserRedisSdk:
     def load_all(self, **kwargs):
         warnings.warn(
             "`load_all` cache method is deprecated and will be removed from corva in "
-            "the next major version. Use `get` cache method instead.",
+            "the next major version. Use `get_all` cache method instead.",
             FutureWarning,
         )
         return self.old_cache_repo.hgetall(**kwargs)
-
-    def delete_all(self, *names):
-        warnings.warn(
-            "`delete_all` cache method is deprecated and will be removed from corva in "
-            "the next major version. Use `delete` cache method instead.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.delete(*names)
 
     def ttl(self, **kwargs):
         warnings.warn(
