@@ -1,8 +1,3 @@
-# What's needed?
-# 1. Api SDK Request retries
-# 2. Api SDK Request timeouts
-# 3. Use api as standalone object
-# 4. Request/Response error logging
 import dataclasses
 import functools
 import json
@@ -137,47 +132,15 @@ class DataApiV1Sdk:
 
         return data
 
-    def get_one(self):
-        ...
-
-    def get_aggregate(self):
-        ...
-
-    def get_aggregate_pipeline(self):
-        ...
-
-    def set(self):
-        ...
-
-    def delete(self):
-        ...
-
-    def update(self):
-        ...
-
-    def update_partial(self):
-        ...
-
 
 class PlatformApiV1Sdk:
     def __init__(self, client: httpx.Client):
         self.http = client
 
-    # .....
-    # other high-level methods here
-    # .....
-
 
 class PlatformApiV2Sdk:
     def __init__(self, client: httpx.Client):
         self.http = client
-
-    # .....
-    # other high-level methods here
-    # .....
-
-
-# ================================================
 
 
 @dataclasses.dataclass(frozen=True)
@@ -247,54 +210,3 @@ class UserApiSdk:
         self.data.v1.http.close()
         self.platform.v1.http.close()
         self.platform.v2.http.close()
-
-
-# with UserApiSdk(..., ..., ..., ..., ...) as sdk:
-#     sdk.data.v1.http.get()
-#     ...
-
-
-def app(api: UserApiSdk):
-    # Objective: users should get clear, easy to use Api interface without low level details that
-    # they currently get in api object.
-
-    # Currently users get a low level api adapter:
-    #   - adapter contains low-level functions of no use for user
-    #   - adapter shuffles functions for all apis (not clear which one is called)
-    #   - user needs to specify api and version through path param
-
-    # New api sdk:
-    #   - has "dot" acess to api type and version (e.g., api.data.v1..., api.platform.v1...)
-    #   - has frequently used api method represented as functions (e.g., api.data.v1.get_dataset)
-    #   - not frequently used api method can be called using http client (e.g., api.data.v1.http.get...)
-    #   - has correct type hints for all methods (intead of *args and **kwargs currently used)
-
-    # Platform api calls
-
-    # before
-    #   - not clear which api is called
-    api.get("/v1/data/provider/dataset")
-    # after
-    api.platform.v1.http.get("data/provider/dataset")
-
-    # before
-    #   - not clear which api is called
-    api.post("/v2/rigs")
-    # after
-    api.platform.v2.http.post("rigs")
-
-    # Specialized functions
-
-    # before
-    #   - not clear which api is called
-    api.get_dataset()
-    # after
-    api.data.v1.get_dataset()
-
-    # Data api calls
-
-    # before
-    #   - not clear which api is called
-    api.delete("/api/v1/data/provider/dataset/")
-    # after
-    api.data.v1.http.delete("data/provider/dataset/")
