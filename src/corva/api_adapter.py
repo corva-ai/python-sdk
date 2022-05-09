@@ -72,11 +72,6 @@ def logging_send(func: Callable, *, logger: logging.Logger) -> Callable:
     return wrapper
 
 
-# ===============  User stuff  ===============
-
-# ================================================
-
-
 class DataApiV1Sdk:
     def __init__(self, client: httpx.Client):
         self.http = client
