@@ -101,6 +101,8 @@ class DataApiV1Sdk:
                     1. The bigger ↑ each data point is - the smaller ↓ the limit;
                     2. The smaller ↓ each data point is - the bigger ↑ the limit.
             skip: exclude from the response the first N items of the dataset.
+                Note: skip should only be used for small amounts of data, having a
+                large skip will lead to very slow queries.
             fields: comma separated list of fields to return. Example: "_id,data".
 
         Raises:
