@@ -43,6 +43,8 @@ setuptools.setup(
         "pydantic >=1.8.2, <2.0.0",
         "redis >=3.5.3, <4.0.0",
         "requests >=2.25.0, <3.0.0",
+        "httpx >=0.22.0, <0.23.0",
+        "PyYAML >=6.0, <6.1",
     ],
     python_requires='>=3.8, <4.0',
     license='The Unlicense',
