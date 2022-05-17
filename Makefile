@@ -6,7 +6,7 @@ black = black --skip-string-normalization $(srcs)
 
 ## all: Run linter and tests.
 .PHONY: all
-all: lint test
+all: lint coverage
 
 ## help: Show this help.
 .PHONY: help
