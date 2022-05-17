@@ -39,16 +39,20 @@ test: up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
 .PHONY: unit-tests
-unit-tests: test_path = tests/unit
 unit-tests:
-	@coverage run -m pytest $(test_path)
+	@coverage run -m pytest tests/unit
 
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
 integration-tests: export CACHE_URL = redis://localhost:6379
-integration-tests: test_path = tests/integration
+integration-tests: export PROVIDER ?=
+integration-tests: export TEST_DATASET ?=
+integration-tests: export API_ROOT_URL ?=
+integration-tests: export DATA_API_ROOT_URL ?=
+integration-tests: export TEST_API_KEY ?=
+integration-tests: export TEST_BEARER_TOKEN ?=
 integration-tests:
-	@coverage run -m pytest $(test_path)
+	@coverage run -m pytest --vcr-record=none tests/integration
 
 ## coverage: Display code coverage in the console.
 .PHONY: coverage
