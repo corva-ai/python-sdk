@@ -176,23 +176,20 @@ def _setup(
     response.raise_for_status()
     asset_id = response.json()['data']['attributes']['asset_id']
 
-    response = data.delete(
+    data.delete(
         f'data/{provider}/{dataset}/',
         params={'query': json.dumps({'asset_id': asset_id})},
-    )
-    response.raise_for_status()
+    ).raise_for_status()
 
     try:
         yield asset_id
     finally:
-        response = platform.delete(f'wells/{well_id}')
-        response.raise_for_status()
+        platform.delete(f'wells/{well_id}').raise_for_status()
 
-        response = data.delete(
+        data.delete(
             f'data/{provider}/{dataset}/',
             params={'query': json.dumps({'asset_id': asset_id})},
-        )
-        response.raise_for_status()
+        ).raise_for_status()
 
 
 @pytest.fixture(scope='module')
