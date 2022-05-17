@@ -2,7 +2,6 @@ import dataclasses
 import functools
 import json
 import logging
-import posixpath
 from typing import Callable, List, Optional
 
 import httpx
@@ -154,14 +153,16 @@ class DataApiVersions:
 class UserApiSdk:
     def __init__(
         self,
-        platform_api_url: str,
+        platform_v1_url: str,
+        platform_v2_url: str,
         data_api_url: str,
         api_key: str,
         app_key: str,
         logger: logging.Logger,
         timeout: int = 30,
     ):
-        self._platform_api_url = platform_api_url
+        self._platform_v1_url = platform_v1_url
+        self._platform_v2_url = platform_v2_url
         self._data_api_url = data_api_url
         self._headers = {
             "Authorization": f"API {api_key}",
@@ -172,17 +173,17 @@ class UserApiSdk:
 
     def __enter__(self):
         data_cli = httpx.Client(
-            base_url=posixpath.join(self._data_api_url, "api/v1"),
+            base_url=self._data_api_url,
             headers=self._headers,
             timeout=self._timeout,
         )
         platform_v1_cli = httpx.Client(
-            base_url=posixpath.join(self._platform_api_url, "v1"),
+            base_url=self._platform_v1_url,
             headers=self._headers,
             timeout=self._timeout,
         )
         platform_v2_cli = httpx.Client(
-            base_url=posixpath.join(self._platform_api_url, "v2"),
+            base_url=self._platform_v2_url,
             headers=self._headers,
             timeout=self._timeout,
         )
