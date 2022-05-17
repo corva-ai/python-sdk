@@ -45,12 +45,12 @@ unit-tests:
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
 integration-tests: export CACHE_URL = redis://localhost:6379
-integration-tests: export PROVIDER ?=
-integration-tests: export TEST_DATASET ?=
-integration-tests: export API_ROOT_URL ?=
-integration-tests: export DATA_API_ROOT_URL ?=
-integration-tests: export TEST_API_KEY ?=
-integration-tests: export TEST_BEARER_TOKEN ?=
+integration-tests: export PROVIDER =
+integration-tests: export TEST_DATASET =
+integration-tests: export API_ROOT_URL = https://platform.localhost.ai
+integration-tests: export DATA_API_ROOT_URL = https://data.localhost.ai
+integration-tests: export TEST_API_KEY =
+integration-tests: export TEST_BEARER_TOKEN =
 integration-tests:
 	@coverage run -m pytest --vcr-record=none tests/integration
 
