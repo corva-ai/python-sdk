@@ -38,13 +38,6 @@ jobs:
 
       - name: Run
         run: make coverage
-        env:
-          PROVIDER: ${{ secrets.PROVIDER }}
-          TEST_DATASET: ${{ secrets.TEST_DATASET }}
-          API_ROOT_URL: ${{ secrets.API_ROOT_URL }}
-          DATA_API_ROOT_URL: ${{ secrets.DATA_API_ROOT_URL }}
-          TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
-          TEST_BEARER_TOKEN: ${{ secrets.TEST_BEARER_TOKEN }}
 
   deploy:
     name: Build and publish to PyPI
