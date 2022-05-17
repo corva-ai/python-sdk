@@ -158,7 +158,7 @@ class UserApiSdk:
         data_api_url: str,
         api_key: str,
         app_key: str,
-        logger: logging.Logger,
+        logger: logging.Logger = logging.getLogger(),
         timeout: int = 30,
     ):
         self._platform_v1_url = platform_v1_url
