@@ -6,7 +6,7 @@ black = black --skip-string-normalization $(srcs)
 
 ## all: Run linter and tests.
 .PHONY: all
-all: lint coverage
+all: lint test
 
 ## help: Show this help.
 .PHONY: help
@@ -39,11 +39,13 @@ test: up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
 .PHONY: unit-tests
+unit-tests: test_path = tests/unit
 unit-tests:
-	@coverage run -m pytest tests/unit
+	@coverage run -m pytest $(test_path)
 
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
+integration-tests: test_path = tests/integration
 integration-tests: export CACHE_URL = redis://localhost:6379
 integration-tests: export PROVIDER =
 integration-tests: export TEST_DATASET =
@@ -52,7 +54,7 @@ integration-tests: export DATA_API_ROOT_URL = https://data.localhost.ai
 integration-tests: export TEST_API_KEY =
 integration-tests: export TEST_BEARER_TOKEN =
 integration-tests:
-	@coverage run -m pytest --vcr-record=none tests/integration
+	@coverage run -m pytest --vcr-record=none $(test_path)
 
 ## coverage: Display code coverage in the console.
 .PHONY: coverage
