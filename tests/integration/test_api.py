@@ -209,20 +209,13 @@ def setup_(
 def sdk(
     platform_v1_url: str, platform_v2_url: str, data_url: str, app_key: str
 ) -> Iterable[corva.api_adapter.UserApiSdk]:
-    import sys
-
-    logger = logging.getLogger(name='l')
-    logger.setLevel('INFO')
-    handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(handler)
-
     sdk = corva.api_adapter.UserApiSdk(
         platform_v1_url=platform_v1_url,
         platform_v2_url=platform_v2_url,
         data_api_url=data_url,
         api_key=corva.configuration.get_test_api_key(),
         app_key=app_key,
-        logger=logger,
+        logger=logging.getLogger(),
     )
 
     yield sdk
