@@ -149,6 +149,31 @@ class DataApiV1Sdk:
 
         return response.json()
 
+    def replace(self, provider: str, dataset: str, id_: str, *, document: dict) -> dict:
+        """Replaces all document data.
+
+        Replace all document data using the endpoint PUT
+            'data/{provider}/{dataset}/{id}/'.
+
+        Args:
+            provider: company name owning the dataset.
+            dataset: dataset name.
+            id_: document id to replace.
+            document: new document data.
+
+        Raises:
+            httpx.HTTPStatusError: if request was unsuccessful.
+
+        Returns:
+            Updated document.
+        """
+
+        response = self.http.put(url=f"data/{provider}/{dataset}/{id_}/", json=document)
+
+        response.raise_for_status()
+
+        return response.json()
+
 
 class PlatformApiV1Sdk:
     def __init__(self, client: httpx.Client):

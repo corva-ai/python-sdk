@@ -154,6 +154,11 @@ def dataset() -> str:
 
 
 @pytest.fixture(scope='module')
+def company_id() -> int:
+    return corva.configuration.get_test_company_id()
+
+
+@pytest.fixture(scope='module')
 def app_key() -> str:
     now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
     return f'python-sdk-autotest-{now}'
@@ -204,13 +209,20 @@ def setup_(
 def sdk(
     platform_v1_url: str, platform_v2_url: str, data_url: str, app_key: str
 ) -> Iterable[corva.api_adapter.UserApiSdk]:
+    import sys
+
+    logger = logging.getLogger(name='l')
+    logger.setLevel('INFO')
+    handler = logging.StreamHandler(stream=sys.stdout)
+    logger.addHandler(handler)
+
     sdk = corva.api_adapter.UserApiSdk(
         platform_v1_url=platform_v1_url,
         platform_v2_url=platform_v2_url,
         data_api_url=data_url,
         api_key=corva.configuration.get_test_api_key(),
         app_key=app_key,
-        logger=logging.getLogger(),
+        logger=logger,
     )
 
     yield sdk
@@ -326,3 +338,52 @@ class TestUserApiSdk:
             collection = response.json()
 
         assert len(collection) == 2
+
+    @pytest.mark.vcr
+    def test_replace(
+        self,
+        setup_: Iterable[int],
+        sdk: corva.api_adapter.UserApiSdk,
+        dataset: str,
+        provider: str,
+        company_id: int,
+        data: httpx.Client,
+    ):
+        with setup_ as asset_id:
+            response = data.post(
+                f'data/{provider}/{dataset}/',
+                json=[
+                    {
+                        "asset_id": asset_id,
+                        "version": 1,
+                        "data": {"k1": "v1"},
+                        "timestamp": 10,
+                    },
+                ],
+            )
+            response.raise_for_status()
+            id_ = response.json()['inserted_ids'][0]
+
+            with sdk as s:
+                s.data.v1.replace(
+                    provider=provider,
+                    dataset=dataset,
+                    id_=id_,
+                    document={
+                        'data': {'k2': 'v2'},
+                        'version': 2,
+                        'company_id': company_id,
+                        'timestamp': 11,
+                        'asset_id': asset_id,
+                    },
+                )
+
+            response = data.get(
+                url=f"data/{provider}/{dataset}/{id_}/",
+            )
+            response.raise_for_status()
+            document_after_replace = response.json()
+
+        assert document_after_replace['data'] == {'k2': 'v2'}
+        assert document_after_replace['version'] == 2
+        assert document_after_replace['timestamp'] == 11
