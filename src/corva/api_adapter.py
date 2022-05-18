@@ -2,7 +2,7 @@ import dataclasses
 import functools
 import json
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence
 
 import httpx
 import yaml
@@ -127,6 +127,27 @@ class DataApiV1Sdk:
         data = list(response.json())
 
         return data
+
+    def insert(self, provider: str, dataset: str, *, documents: Sequence[dict]) -> dict:
+        """Inserts data using the endpoint POST 'data/{provider}/{dataset}/'.
+
+        Args:
+            provider: company name owning the dataset.
+            dataset: dataset name.
+            documents: data to insert.
+
+        Raises:
+            httpx.HTTPStatusError: if request was unsuccessful.
+
+        Returns:
+            Data from dataset.
+        """
+
+        response = self.http.post(url=f"data/{provider}/{dataset}/", json=documents)
+
+        response.raise_for_status()
+
+        return response.json()
 
 
 class PlatformApiV1Sdk:
