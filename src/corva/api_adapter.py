@@ -5,6 +5,7 @@ import logging
 from typing import Callable, List, Optional, Sequence
 
 import httpx
+import pydantic
 import yaml
 
 
@@ -71,6 +72,12 @@ def logging_send(func: Callable, *, logger: logging.Logger) -> Callable:
     return wrapper
 
 
+class InsertResult(pydantic.BaseModel):
+    inserted_ids: List[str]
+    failed_count: int
+    messages: List[str]
+
+
 class DataApiV1Sdk:
     def __init__(self, client: httpx.Client):
         self.http = client
@@ -128,7 +135,9 @@ class DataApiV1Sdk:
 
         return data
 
-    def insert(self, provider: str, dataset: str, *, documents: Sequence[dict]) -> dict:
+    def insert(
+        self, provider: str, dataset: str, *, documents: Sequence[dict]
+    ) -> InsertResult:
         """Inserts data using the endpoint POST 'data/{provider}/{dataset}/'.
 
         Args:
@@ -140,14 +149,14 @@ class DataApiV1Sdk:
             httpx.HTTPStatusError: if request was unsuccessful.
 
         Returns:
-            Data from dataset.
+            Insert result.
         """
 
         response = self.http.post(url=f"data/{provider}/{dataset}/", json=documents)
 
         response.raise_for_status()
 
-        return response.json()
+        return InsertResult.parse_obj(response.json())
 
 
 class PlatformApiV1Sdk:
