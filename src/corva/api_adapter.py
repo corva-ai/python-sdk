@@ -105,7 +105,7 @@ class DataApiV1Sdk:
             fields: comma separated list of fields to return. Example: "_id,data".
 
         Raises:
-            requests.HTTPError: if request was unsuccessful.
+            httpx.HTTPStatusError: if request was unsuccessful.
 
         Returns:
             Data from dataset.
