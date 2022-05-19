@@ -358,8 +358,8 @@ class DeprecatedRedisAdapter:
     def delete(self, *names: List[str]) -> int:
         """Deletes all data from cache"""
 
-        names = names or [self.default_name]
-        return self.client.delete(*names)
+        delete_names = names or [self.default_name]
+        return self.client.delete(*delete_names)
 
     def ttl(self, name: Optional[str] = None) -> int:
         """Returns the number of seconds until expiration"""
