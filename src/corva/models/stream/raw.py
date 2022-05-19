@@ -77,8 +77,8 @@ else:
 class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     records: RecordsBase
     metadata: RawMetadata
-    asset_id: int = None
-    company_id: int = None
+    asset_id: int = None  # type: ignore
+    company_id: int = None  # type: ignore
 
     # private attributes
     _max_record_value_cache_key: ClassVar[str]
