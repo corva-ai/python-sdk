@@ -18,9 +18,9 @@ class SchedulerType(enum.Enum):
         )
 
         mapping = {
-            self.natural_time: RawScheduledNaturalTimeEvent,
-            self.data_time: RawScheduledDataTimeEvent,
-            self.data_depth_milestone: RawScheduledDepthEvent,
+            type(self).natural_time: RawScheduledNaturalTimeEvent,
+            type(self).data_time: RawScheduledDataTimeEvent,
+            type(self).data_depth_milestone: RawScheduledDepthEvent,
         }
         return mapping[self]
 
@@ -33,8 +33,8 @@ class SchedulerType(enum.Enum):
         )
 
         mapping = {
-            self.natural_time: ScheduledNaturalTimeEvent,
-            self.data_time: ScheduledDataTimeEvent,
-            self.data_depth_milestone: ScheduledDepthEvent,
+            type(self).natural_time: ScheduledNaturalTimeEvent,
+            type(self).data_time: ScheduledDataTimeEvent,
+            type(self).data_depth_milestone: ScheduledDepthEvent,
         }
         return mapping[self]
