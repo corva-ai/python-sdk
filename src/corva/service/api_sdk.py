@@ -47,7 +47,7 @@ class CorvaApiSdk:
 
 class FakeApiSdk:
     def __init__(self, secrets: Optional[Dict[str, Dict[str, str]]] = None):
-        self.secrets = secrets
+        self.secrets = secrets or {}
 
     def get_secrets(self, app_key: str) -> Dict[str, str]:
         return self.secrets[app_key]
