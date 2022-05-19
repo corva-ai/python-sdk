@@ -179,7 +179,6 @@ class LoggingContext(contextlib.ContextDecorator):
 
         self.user_handler = user_handler
         self.logger = logger
-        self.old_handlers = None
 
     @property
     def asset_id(self) -> Optional[int]:
