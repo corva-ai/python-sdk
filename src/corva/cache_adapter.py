@@ -376,5 +376,5 @@ class DeprecatedRedisAdapter:
     def exists(self, *names: List[str]) -> int:
         """Returns whether there is data in cache"""
 
-        names = names or [self.default_name]
-        return self.client.exists(*names)
+        exists_names = names or [self.default_name]
+        return self.client.exists(*exists_names)
