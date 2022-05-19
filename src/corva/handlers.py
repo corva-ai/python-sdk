@@ -2,7 +2,7 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional, Type, cast
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -146,7 +146,12 @@ def stream(
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
                 ),
                 cache_sdk=internal_cache_sdk,
-                app=functools.partial(func, app_event, api, user_cache_sdk),
+                app=functools.partial(
+                    cast(Callable[[StreamEvent, Api, UserRedisSdk], Any], func),
+                    app_event,
+                    api,
+                    user_cache_sdk,
+                ),
             )
 
         try:
@@ -221,7 +226,12 @@ def scheduled(
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
                 ),
                 cache_sdk=internal_cache_sdk,
-                app=functools.partial(func, app_event, api, user_cache_sdk),
+                app=functools.partial(
+                    cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
+                    app_event,
+                    api,
+                    user_cache_sdk,
+                ),
             )
 
         try:
@@ -288,7 +298,9 @@ def task(
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
                     cache_sdk=FakeInternalCacheSdk(),
-                    app=functools.partial(func, app_event, api),
+                    app=functools.partial(
+                        cast(Callable[[TaskEvent, Api], Any], func), app_event, api
+                    ),
                 )
 
             if isinstance(result, dict):
