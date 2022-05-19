@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Sequence
+
 import pydantic
 
 from corva.models.base import CorvaBaseEvent
@@ -35,6 +37,16 @@ class StreamDepthRecord(StreamBaseRecord):
     metadata: dict = {}
 
 
+if TYPE_CHECKING:
+    RecordsBase = Sequence[StreamBaseRecord]
+    RecordsTime = Sequence[StreamTimeRecord]
+    RecordsDepth = Sequence[StreamDepthRecord]
+else:
+    RecordsBase = pydantic.conlist(StreamBaseRecord, min_items=1)
+    RecordsTime = pydantic.conlist(StreamTimeRecord, min_items=1)
+    RecordsDepth = pydantic.conlist(StreamDepthRecord, min_items=1)
+
+
 class StreamEvent(CorvaBaseEvent):
     """Stream event data.
 
@@ -46,16 +58,16 @@ class StreamEvent(CorvaBaseEvent):
 
     asset_id: int
     company_id: int
-    records: pydantic.conlist(StreamBaseRecord, min_items=1)
+    records: RecordsBase
 
 
 class StreamTimeEvent(StreamEvent):
     """Stream time event data."""
 
-    records: pydantic.conlist(StreamTimeRecord, min_items=1)
+    records: RecordsTime
 
 
 class StreamDepthEvent(StreamEvent):
     """Stream depth event data."""
 
-    records: pydantic.conlist(StreamDepthRecord, min_items=1)
+    records: RecordsDepth
