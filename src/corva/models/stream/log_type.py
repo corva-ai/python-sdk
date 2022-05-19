@@ -9,12 +9,15 @@ class LogType(enum.Enum):
     def raw_event(self):
         from corva.models.stream.raw import RawStreamDepthEvent, RawStreamTimeEvent
 
-        mapping = {self.time: RawStreamTimeEvent, self.depth: RawStreamDepthEvent}
+        mapping = {
+            type(self).time: RawStreamTimeEvent,
+            type(self).depth: RawStreamDepthEvent,
+        }
         return mapping[self]
 
     @property
     def event(self):
         from corva.models.stream.stream import StreamDepthEvent, StreamTimeEvent
 
-        mapping = {self.time: StreamTimeEvent, self.depth: StreamDepthEvent}
+        mapping = {type(self).time: StreamTimeEvent, type(self).depth: StreamDepthEvent}
         return mapping[self]
