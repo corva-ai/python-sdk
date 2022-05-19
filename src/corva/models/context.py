@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Any
+from typing import Any, ContextManager
 from unittest import mock
 
 import pydantic
@@ -37,15 +37,14 @@ class CorvaContext(pydantic.BaseModel):
 
     @classmethod
     def from_aws(cls, aws_event: Any, aws_context: Any) -> CorvaContext:
-        parse_ctx = (
-            mock.patch.object(
+        parse_ctx: ContextManager = contextlib.nullcontext()
+
+        if aws_context.client_context is None:
+            parse_ctx = mock.patch.object(
                 aws_context,
                 'client_context',
                 AwsEventWithClientContext.parse_obj(aws_event).client_context,
             )
-            if aws_context.client_context is None
-            else contextlib.nullcontext()
-        )
 
         with parse_ctx:
             return CorvaContext.from_orm(aws_context)
