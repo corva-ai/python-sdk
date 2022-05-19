@@ -122,7 +122,7 @@ class Api:
 
         return response
 
-    def _validate_timeout(self, timeout: int) -> bool:
+    def _validate_timeout(self, timeout: int) -> None:
         if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
             raise ValueError(
                 f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and '
