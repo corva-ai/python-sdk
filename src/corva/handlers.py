@@ -2,7 +2,7 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, List, Optional, Type, cast
+from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -270,7 +270,7 @@ def task(
         logging_ctx: LoggingContext,
     ) -> Any:
         status = TaskStatus.fail
-        data = {"payload": {}}
+        data: Dict[str, Union[dict, str]] = {"payload": {}}
 
         try:
             app_event = event.get_task_event(api=api)
