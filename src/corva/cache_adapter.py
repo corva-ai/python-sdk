@@ -1,6 +1,6 @@
 import itertools
 from datetime import timedelta
-from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union, cast
 
 import redis
 
@@ -224,7 +224,7 @@ class RedisRepository:
         return data
 
     def get_all(self) -> Dict[str, str]:
-        return self.get_many(keys=[])
+        return cast(Dict[str, str], self.get_many(keys=[]))
 
     def delete(self, key: str) -> None:
         self.delete_many(keys=[key])
