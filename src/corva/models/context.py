@@ -11,11 +11,15 @@ class AwsEventWithClientContext(pydantic.BaseModel):
     client_context: dict
 
 
+class Env(pydantic.BaseModel):
+    API_KEY: str
+
+
 class ClientContext(pydantic.BaseModel):
     class Config:
         orm_mode = True
 
-    env: pydantic.create_model('Env', API_KEY=(str, ...))  # noqa: F821
+    env: Env
 
 
 class CorvaContext(pydantic.BaseModel):
