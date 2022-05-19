@@ -79,7 +79,7 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     """
 
     schedule_start: int
-    start_time: int = None
+    start_time: int = None  # type: ignore
     interval: float
 
     # validators
