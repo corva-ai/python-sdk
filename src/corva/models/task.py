@@ -5,7 +5,6 @@ from typing import List
 
 import pydantic
 import requests
-from pydantic.types import conint
 
 from corva.api import Api
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
@@ -33,7 +32,7 @@ class TaskEvent(CorvaBaseEvent):
 class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     task_id: str
     has_secrets: bool = False
-    version: conint(ge=2, le=2)  # only utils API v2 supported
+    version: int = pydantic.Field(..., le=2, ge=2)  # only utils API v2 supported
 
     @staticmethod
     def from_raw_event(event: dict) -> List[RawTaskEvent]:
