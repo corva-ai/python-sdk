@@ -132,7 +132,7 @@ class UserRedisSdk:
         ...
 
     @overload
-    def delete_all(self, *names: str) -> int:
+    def delete_all(self, *names: str):
         ...
 
     def delete_all(self, *names):
