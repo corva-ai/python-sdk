@@ -10,7 +10,7 @@ class SchedulerType(enum.Enum):
     data_depth_milestone = 4
 
     @property
-    def raw_event(self) -> Type[pydantic.BaseModel]:
+    def raw_event(self):
         from corva.models.scheduled.raw import (
             RawScheduledDataTimeEvent,
             RawScheduledDepthEvent,
