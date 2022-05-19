@@ -146,7 +146,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
             new_records = new_records[:-1]  # remove "completed" record
 
         if old_max_record_value is None:
-            return new_records
+            return list(new_records)
 
         values = [record.record_value for record in new_records]
 
