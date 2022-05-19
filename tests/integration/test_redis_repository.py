@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, Iterable, Optional, Sequence
+from typing import Dict, Iterable, Mapping, Optional, Sequence
 
 import pytest
 import redis
@@ -114,7 +114,7 @@ class TestGetScript:
     )
     def test_get_many(
         self,
-        mapping: Dict[str, int],
+        mapping: Mapping[str, int],
         keys_to_get: Sequence[str],
         expected: Dict[str, str],
         redis_client: redis.Redis,
@@ -122,7 +122,7 @@ class TestGetScript:
     ):
         assert not redis_client.keys(pattern='*')
 
-        redis_client.hset(redis_adapter.hash_name, mapping=mapping)
+        redis_client.hset(redis_adapter.hash_name, mapping=mapping)  # type: ignore
 
         assert redis_adapter.get_many(keys_to_get) == expected
 
