@@ -1,6 +1,16 @@
 import itertools
 from datetime import timedelta
-from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union, cast
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import redis
 
@@ -259,13 +269,35 @@ class DeprecatedRedisAdapter:
 
         self.client.ping()
 
+    @overload
     def hset(
         self,
-        name: Optional[str] = None,
-        key: Optional[str] = None,
-        value: Optional[REDIS_STORED_VALUE_TYPE] = None,
-        mapping: Optional[Dict[str, REDIS_STORED_VALUE_TYPE]] = None,
-        expiry: Union[int, timedelta, None] = DEFAULT_EXPIRY,
+        name: Optional[str] = ...,
+        key: str = ...,
+        value: REDIS_STORED_VALUE_TYPE = ...,
+        mapping: None = ...,
+        expiry: Union[int, timedelta, None] = ...,
+    ) -> int:
+        ...
+
+    @overload
+    def hset(
+        self,
+        name: Optional[str] = ...,
+        key: None = ...,
+        value: None = ...,
+        mapping: Dict[str, REDIS_STORED_VALUE_TYPE] = ...,
+        expiry: Union[int, timedelta, None] = ...,
+    ) -> int:
+        ...
+
+    def hset(
+        self,
+        name=None,
+        key=None,
+        value=None,
+        mapping=None,
+        expiry=DEFAULT_EXPIRY,
     ) -> int:
         """Stores the data in cache
 
