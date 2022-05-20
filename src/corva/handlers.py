@@ -2,7 +2,7 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -17,6 +17,9 @@ from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
+
+StreamEventT = TypeVar('StreamEventT', bound=StreamEvent)
+ScheduledEventT = TypeVar('ScheduledEventT', bound=ScheduledEvent)
 
 
 def get_cache_key(
@@ -77,7 +80,7 @@ def base_handler(
 
 
 def stream(
-    func: Optional[Callable[[StreamEvent, Api, UserRedisSdk], Any]] = None,
+    func: Optional[Callable[[StreamEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -166,7 +169,7 @@ def stream(
 
 
 def scheduled(
-    func: Optional[Callable[[ScheduledEvent, Api, UserRedisSdk], Any]] = None,
+    func: Optional[Callable[[ScheduledEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
