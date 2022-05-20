@@ -30,7 +30,7 @@ install-test: install-corva-sdk
 
 ## install-lint: Install lint requirements.
 .PHONY: install-lint
-install-lint:
+install-lint: install-test
 	@pip install -U -r requirements-lint.txt
 
 ## test: Run tests.
