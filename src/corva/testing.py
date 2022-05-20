@@ -39,7 +39,7 @@ class TestClient:
         secrets: Optional[Dict[str, str]] = None
     ) -> Any:
 
-        app = None
+        app: Callable[[], Any]
 
         if isinstance(event, TaskEvent):
             app = functools.partial(inspect.unwrap(fn), event, TestClient._api)
