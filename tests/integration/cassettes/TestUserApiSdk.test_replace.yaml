@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"well": {"name": "deleteme-python-sdk-autotest-49ed84f5"}}'
+    body: '{"well": {"name": "deleteme-python-sdk-autotest-d4a1214c"}}'
     headers:
       accept:
       - '*/*'
@@ -17,7 +17,7 @@ interactions:
     method: POST
     uri: null
   response:
-    content: '{"data":{"id":"326537","type":"well","attributes":{"name":"deleteme-python-sdk-autotest-49ed84f5","status":"unknown","state":"planned"},"relationships":{}}}'
+    content: '{"data":{"id":"328568","type":"well","attributes":{"name":"deleteme-python-sdk-autotest-d4a1214c","status":"unknown","state":"planned"},"relationships":{}}}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -28,9 +28,9 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 14:25:27 GMT
+      - Mon, 23 May 2022 11:41:15 GMT
       ETag:
-      - W/"2b4c6d4d3a0bae2cda001a44dce7a587"
+      - W/"11b6d1d9eb9720313d1fd72196df9595"
       Referrer-Policy:
       - strict-origin-when-cross-origin
       Server:
@@ -50,9 +50,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - 96e8dba2-f6db-49be-8db0-3cad5456dd6e
+      - ce585d4e-d4dc-47bb-9f2a-f109e6a3a59b
       X-Runtime:
-      - '0.135435'
+      - '0.101889'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -71,7 +71,7 @@ interactions:
     method: GET
     uri: null
   response:
-    content: '{"data":{"id":"326537","type":"well","attributes":{"asset_id":32946351},"relationships":{}}}'
+    content: '{"data":{"id":"328568","type":"well","attributes":{"asset_id":30719716},"relationships":{}}}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -82,9 +82,9 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 14:25:28 GMT
+      - Mon, 23 May 2022 11:41:15 GMT
       ETag:
-      - W/"39909209f7c32816963aac957c249f15"
+      - W/"b161ea51687ef8fd4b47fd4dc1ca754d"
       Referrer-Policy:
       - strict-origin-when-cross-origin
       Server:
@@ -104,9 +104,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - 1503989c-86a3-4287-8313-59da4abc76eb
+      - 05e9b6f6-ab30-4478-8f0d-dfe7e7679ac7
       X-Runtime:
-      - '0.078469'
+      - '0.044065'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -134,13 +134,13 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 14:25:29 GMT
+      - Mon, 23 May 2022 11:41:16 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
     status_code: 200
 - request:
-    body: '[{"asset_id": 32946351, "version": 1, "data": {"k1": "v1"}, "timestamp":
+    body: '[{"asset_id": 30719716, "version": 1, "data": {"k1": "v1"}, "timestamp":
       10}]'
     headers:
       accept:
@@ -158,7 +158,7 @@ interactions:
     method: POST
     uri: null
   response:
-    content: '{"inserted_ids":["628501d93cc8096aa7e5d248"],"failed_count":0,"messages":[]}'
+    content: '{"inserted_ids":["628b72dcd6aff355ccea8b78"],"failed_count":0,"messages":[]}'
     headers:
       Connection:
       - keep-alive
@@ -167,14 +167,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 14:25:29 GMT
+      - Mon, 23 May 2022 11:41:16 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
     status_code: 200
 - request:
     body: '{"data": {"k2": "v2"}, "version": 2, "company_id": 80, "timestamp": 11,
-      "asset_id": 32946351}'
+      "asset_id": 30719716}'
     headers:
       accept:
       - '*/*'
@@ -189,20 +189,20 @@ interactions:
       user-agent:
       - python-httpx/0.22.0
       x-corva-app:
-      - python-sdk-autotest-2022-05-18 14:25:27+00:00
+      - python-sdk-autotest-2022-05-23 11:41:14+00:00
     method: PUT
     uri: null
   response:
-    content: '{"_id":"628501d93cc8096aa7e5d248","company_id":80,"asset_id":32946351,"version":2,"provider":"big-data-energy","collection":"corva-sdk-autotest","data":{"k2":"v2"},"timestamp":11,"app_key":"big-data-energy.oleksii_test_task_app"}'
+    content: '{"_id":"628b72dcd6aff355ccea8b78","company_id":80,"asset_id":30719716,"version":2,"provider":"big-data-energy","collection":"python-sdk-autotests","data":{"k2":"v2"},"timestamp":11,"app_key":"big-data-energy.python_sdk_app_for_autotests"}'
     headers:
       Connection:
       - keep-alive
       Content-Length:
-      - '229'
+      - '238'
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 14:25:30 GMT
+      - Mon, 23 May 2022 11:41:17 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
@@ -221,16 +221,16 @@ interactions:
     method: GET
     uri: null
   response:
-    content: '{"_id":"628501d93cc8096aa7e5d248","company_id":80,"asset_id":32946351,"version":2,"provider":"big-data-energy","collection":"corva-sdk-autotest","data":{"k2":"v2"},"timestamp":11,"app_key":"big-data-energy.oleksii_test_task_app"}'
+    content: '{"_id":"628b72dcd6aff355ccea8b78","company_id":80,"asset_id":30719716,"version":2,"provider":"big-data-energy","collection":"python-sdk-autotests","data":{"k2":"v2"},"timestamp":11,"app_key":"big-data-energy.python_sdk_app_for_autotests"}'
     headers:
       Connection:
       - keep-alive
       Content-Length:
-      - '229'
+      - '238'
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 14:25:30 GMT
+      - Mon, 23 May 2022 11:41:17 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
@@ -260,7 +260,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 14:25:31 GMT
+      - Mon, 23 May 2022 11:41:18 GMT
       ETag:
       - W/"4df20f95e824b2af44a61642d88daaf0"
       Referrer-Policy:
@@ -282,9 +282,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - f5e6dbb9-b87f-41b6-8541-8231a6e4640f
+      - db6d7a71-cce6-4279-8050-eb7c52cecd26
       X-Runtime:
-      - '0.136116'
+      - '0.073215'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -312,7 +312,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 14:25:31 GMT
+      - Mon, 23 May 2022 11:41:18 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
