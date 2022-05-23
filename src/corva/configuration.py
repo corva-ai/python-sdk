@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import pydantic
 
@@ -25,3 +26,21 @@ class Settings(pydantic.BaseSettings):
 
 
 SETTINGS = Settings()
+
+
+def get_test_api_key() -> str:
+    """Api key for testing"""
+
+    return os.environ['TEST_API_KEY']
+
+
+def get_test_bearer() -> str:
+    """Bearer token for testing"""
+
+    return os.environ['TEST_BEARER_TOKEN']
+
+
+def get_test_dataset() -> str:
+    """Dataset for testing"""
+
+    return os.environ['TEST_DATASET']

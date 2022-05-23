@@ -1,0 +1,289 @@
+interactions:
+- request:
+    body: '{"well": {"name": "deleteme-python-sdk-autotest-b307dd45"}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '59'
+      content-type:
+      - application/json
+      user-agent:
+      - python-httpx/0.22.0
+    method: POST
+    uri: null
+  response:
+    content: '{"data":{"id":"325393","type":"well","attributes":{"name":"deleteme-python-sdk-autotest-b307dd45","status":"unknown","state":"planned"},"relationships":{}}}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 17 May 2022 12:13:38 GMT
+      ETag:
+      - W/"091ea5d8aea25ce573aabb2cc6e565ef"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx/1.18.0
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Rack-CORS:
+      - miss; no-origin
+      X-Request-Id:
+      - 33879c04-be0f-4457-ba80-74891ef992ba
+      X-Runtime:
+      - '0.136328'
+      X-XSS-Protection:
+      - 1; mode=block
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      user-agent:
+      - python-httpx/0.22.0
+    method: GET
+    uri: null
+  response:
+    content: '{"data":{"id":"325393","type":"well","attributes":{"asset_id":89513687},"relationships":{}}}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 17 May 2022 12:13:38 GMT
+      ETag:
+      - W/"cdb0cbdaaae6aca210587ce8dfdfbb2b"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx/1.18.0
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Rack-CORS:
+      - miss; no-origin
+      X-Request-Id:
+      - 3cba62ba-04d5-4d93-ad86-b38aa900701c
+      X-Runtime:
+      - '0.064769'
+      X-XSS-Protection:
+      - 1; mode=block
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      user-agent:
+      - python-httpx/0.22.0
+    method: DELETE
+    uri: null
+  response:
+    content: '{"deleted_count":0}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '19'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 17 May 2022 12:13:39 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: '[{"asset_id": 89513687, "version": 1, "data": {"k": "v"}, "timestamp":
+      10}, {"asset_id": 89513687, "version": 1, "data": {"k": "v"}, "timestamp": 12},
+      {"asset_id": 89513687, "version": 1, "data": {"k": "v"}, "timestamp": 11}, {"asset_id":
+      89513687, "version": 1, "data": {"k": "v"}, "timestamp": 13}]'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '300'
+      content-type:
+      - application/json
+      user-agent:
+      - python-httpx/0.22.0
+    method: POST
+    uri: null
+  response:
+    content: '{"inserted_ids":["62839173c5745c7f7606c6fa","62839173c5745c7f7606c6fb","62839173c5745c7f7606c6fc","62839173c5745c7f7606c6fd"],"failed_count":0,"messages":[]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '157'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 17 May 2022 12:13:39 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      user-agent:
+      - python-httpx/0.22.0
+      x-corva-app:
+      - python-sdk-autotest-2022-05-17 12:13:37+00:00
+    method: GET
+    uri: null
+  response:
+    content: '[{"_id":"62839173c5745c7f7606c6fc","timestamp":11},{"_id":"62839173c5745c7f7606c6fb","timestamp":12}]'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '101'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 17 May 2022 12:13:40 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      user-agent:
+      - python-httpx/0.22.0
+    method: DELETE
+    uri: null
+  response:
+    content: '{"status":"deleted"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 17 May 2022 12:13:40 GMT
+      ETag:
+      - W/"4df20f95e824b2af44a61642d88daaf0"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx/1.18.0
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Rack-CORS:
+      - miss; no-origin
+      X-Request-Id:
+      - bf08403a-c9de-43e3-a365-bbda6b009563
+      X-Runtime:
+      - '0.118524'
+      X-XSS-Protection:
+      - 1; mode=block
+    http_version: HTTP/1.1
+    status_code: 200
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      user-agent:
+      - python-httpx/0.22.0
+    method: DELETE
+    uri: null
+  response:
+    content: '{"deleted_count":4}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '19'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 17 May 2022 12:13:40 GMT
+      server:
+      - uvicorn
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1
