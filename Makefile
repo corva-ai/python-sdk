@@ -45,10 +45,16 @@ unit-tests:
 
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
-integration-tests: export CACHE_URL = redis://localhost:6379
 integration-tests: test_path = tests/integration
 integration-tests:
-	@coverage run -m pytest $(test_path)
+	@CACHE_URL=redis://localhost:6379 \
+	PROVIDER='' \
+	TEST_DATASET='' \
+	API_ROOT_URL=https://platform.localhost.ai \
+	DATA_API_ROOT_URL=https://data.localhost.ai \
+	TEST_API_KEY='' \
+	TEST_BEARER_TOKEN='' \
+	coverage run -m pytest --vcr-record=none $(test_path)
 
 ## coverage: Display code coverage in the console.
 .PHONY: coverage
