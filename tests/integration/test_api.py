@@ -112,7 +112,7 @@ def vcr_before_record_request(request):
 def vcr_config():
     return {
         # Replace the Authorization request header
-        "filter_headers": ["Authorization", 'host'],
+        "filter_headers": ["Authorization", "host"],
         "before_record_request": vcr_before_record_request,
     }
 
@@ -174,7 +174,7 @@ def _setup(
 
     response = platform.get(url=f'wells/{well_id}?fields[]=well.asset_id')
     response.raise_for_status()
-    asset_id = response.json()['data']['attributes']['asset_id']
+    asset_id: int = response.json()['data']['attributes']['asset_id']
 
     data.delete(
         f'data/{provider}/{dataset}/',
@@ -192,7 +192,7 @@ def _setup(
         ).raise_for_status()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def setup_(
     platform_v2_url: str, data: httpx.Client, headers: dict, provider: str, dataset: str
 ) -> Iterable[int]:
@@ -213,8 +213,7 @@ def sdk(
         logger=logging.getLogger(),
     )
 
-    with sdk:
-        yield sdk
+    yield sdk
 
 
 class TestUserApiSdk:
@@ -258,15 +257,72 @@ class TestUserApiSdk:
                 ],
             ).raise_for_status()
 
-            data = sdk.data.v1.get(
-                provider=provider,
-                dataset=dataset,
-                query={'asset_id': asset_id},
-                sort={'timestamp': 1},
-                limit=2,
-                skip=1,
-                fields='timestamp',
-            )
+            with sdk as s:
+                collection = s.data.v1.get(
+                    provider=provider,
+                    dataset=dataset,
+                    query={'asset_id': asset_id},
+                    sort={'timestamp': 1},
+                    limit=2,
+                    skip=1,
+                    fields='timestamp',
+                )
 
-        assert len(data) == 2
-        assert set(datum['timestamp'] for datum in data) == {11, 12}
+        assert len(collection) == 2
+        assert set(doc['timestamp'] for doc in collection) == {11, 12}
+
+    @pytest.mark.vcr
+    def test_insert(
+        self,
+        setup_: Iterable[int],
+        sdk: corva.api_adapter.UserApiSdk,
+        dataset: str,
+        provider: str,
+        data: httpx.Client,
+    ):
+        with setup_ as asset_id:
+            response = data.get(
+                url=f"data/{provider}/{dataset}/",
+                params={
+                    "query": json.dumps({'asset_id': asset_id}),
+                    "sort": json.dumps({'timestamp': 1}),
+                    "limit": 1,
+                },
+            )
+            response.raise_for_status()
+            collection = response.json()
+
+            assert not collection
+
+            with sdk as s:
+                s.data.v1.insert(
+                    provider=provider,
+                    dataset=dataset,
+                    documents=[
+                        {
+                            "asset_id": asset_id,
+                            "version": 1,
+                            "data": {"k": "v"},
+                            "timestamp": 10,
+                        },
+                        {
+                            "asset_id": asset_id,
+                            "version": 1,
+                            "data": {"k": "v"},
+                            "timestamp": 11,
+                        },
+                    ],
+                )
+
+            response = data.get(
+                url=f"data/{provider}/{dataset}/",
+                params={
+                    "query": json.dumps({'asset_id': asset_id}),
+                    "sort": json.dumps({'timestamp': 1}),
+                    "limit": 3,
+                },
+            )
+            response.raise_for_status()
+            collection = response.json()
+
+        assert len(collection) == 2

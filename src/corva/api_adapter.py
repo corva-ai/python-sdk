@@ -2,9 +2,10 @@ import dataclasses
 import functools
 import json
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence
 
 import httpx
+import pydantic
 import yaml
 
 
@@ -71,6 +72,12 @@ def logging_send(func: Callable, *, logger: logging.Logger) -> Callable:
     return wrapper
 
 
+class InsertResult(pydantic.BaseModel):
+    inserted_ids: List[str]
+    failed_count: int
+    messages: List[str]
+
+
 class DataApiV1Sdk:
     def __init__(self, client: httpx.Client):
         self.http = client
@@ -105,7 +112,7 @@ class DataApiV1Sdk:
             fields: comma separated list of fields to return. Example: "_id,data".
 
         Raises:
-            requests.HTTPError: if request was unsuccessful.
+            httpx.HTTPStatusError: if request was unsuccessful.
 
         Returns:
             Data from dataset.
@@ -127,6 +134,29 @@ class DataApiV1Sdk:
         data = list(response.json())
 
         return data
+
+    def insert(
+        self, provider: str, dataset: str, *, documents: Sequence[dict]
+    ) -> InsertResult:
+        """Inserts data using the endpoint POST 'data/{provider}/{dataset}/'.
+
+        Args:
+            provider: company name owning the dataset.
+            dataset: dataset name.
+            documents: data to insert.
+
+        Raises:
+            httpx.HTTPStatusError: if request was unsuccessful.
+
+        Returns:
+            Insert result.
+        """
+
+        response = self.http.post(url=f"data/{provider}/{dataset}/", json=documents)
+
+        response.raise_for_status()
+
+        return InsertResult.parse_obj(response.json())
 
 
 class PlatformApiV1Sdk:

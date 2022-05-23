@@ -1,4 +1,5 @@
 from .api import Api
+from .api_adapter import InsertResult
 from .handlers import scheduled, stream, task
 from .logger import CORVA_LOGGER as Logger
 from .models.scheduled.scheduled import (
