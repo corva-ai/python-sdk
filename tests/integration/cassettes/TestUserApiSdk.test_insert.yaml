@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"well": {"name": "deleteme-python-sdk-autotest-dd55ea8a"}}'
+    body: '{"well": {"name": "deleteme-python-sdk-autotest-eb81d18c"}}'
     headers:
       accept:
       - '*/*'
@@ -17,7 +17,7 @@ interactions:
     method: POST
     uri: null
   response:
-    content: '{"data":{"id":"326390","type":"well","attributes":{"name":"deleteme-python-sdk-autotest-dd55ea8a","status":"unknown","state":"planned"},"relationships":{}}}'
+    content: '{"data":{"id":"328567","type":"well","attributes":{"name":"deleteme-python-sdk-autotest-eb81d18c","status":"unknown","state":"planned"},"relationships":{}}}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -28,9 +28,9 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 13:10:07 GMT
+      - Mon, 23 May 2022 11:39:27 GMT
       ETag:
-      - W/"2c6cd5798156037b6539b51077f3828c"
+      - W/"ec3494f3333667f241a2e1d1b41205ae"
       Referrer-Policy:
       - strict-origin-when-cross-origin
       Server:
@@ -50,9 +50,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - 317799f8-50e1-48ba-9cc5-52f283604ba1
+      - 3462393c-fe38-4cd3-aca1-a4d4a7b722ee
       X-Runtime:
-      - '0.156188'
+      - '0.105799'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -71,7 +71,7 @@ interactions:
     method: GET
     uri: null
   response:
-    content: '{"data":{"id":"326390","type":"well","attributes":{"asset_id":83776921},"relationships":{}}}'
+    content: '{"data":{"id":"328567","type":"well","attributes":{"asset_id":53781610},"relationships":{}}}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -82,9 +82,9 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 13:10:08 GMT
+      - Mon, 23 May 2022 11:39:27 GMT
       ETag:
-      - W/"90948c5d20ba8334b7bcb3e4413b14f6"
+      - W/"c412a0007563bca3e870f857bfe4cf1e"
       Referrer-Policy:
       - strict-origin-when-cross-origin
       Server:
@@ -104,9 +104,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - 76035711-c879-46c3-8659-70e034a23ecc
+      - 099e239c-b7af-452d-9340-9456471dbcf9
       X-Runtime:
-      - '0.064434'
+      - '0.059369'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -134,7 +134,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 13:10:08 GMT
+      - Mon, 23 May 2022 11:39:27 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
@@ -162,14 +162,14 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 13:10:09 GMT
+      - Mon, 23 May 2022 11:39:28 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
     status_code: 200
 - request:
-    body: '[{"asset_id": 83776921, "version": 1, "data": {"k": "v"}, "timestamp":
-      10}, {"asset_id": 83776921, "version": 1, "data": {"k": "v"}, "timestamp": 11}]'
+    body: '[{"asset_id": 53781610, "version": 1, "data": {"k": "v"}, "timestamp":
+      10}, {"asset_id": 53781610, "version": 1, "data": {"k": "v"}, "timestamp": 11}]'
     headers:
       accept:
       - '*/*'
@@ -184,11 +184,11 @@ interactions:
       user-agent:
       - python-httpx/0.22.0
       x-corva-app:
-      - python-sdk-autotest-2022-05-18 13:10:06+00:00
+      - python-sdk-autotest-2022-05-23 11:39:26+00:00
     method: POST
     uri: null
   response:
-    content: '{"inserted_ids":["6284f0323cc8096aa7e5c8f8","6284f0323cc8096aa7e5c8f9"],"failed_count":0,"messages":[]}'
+    content: '{"inserted_ids":["628b7271d6aff355ccea8b61","628b7271d6aff355ccea8b62"],"failed_count":0,"messages":[]}'
     headers:
       Connection:
       - keep-alive
@@ -197,7 +197,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 13:10:10 GMT
+      - Mon, 23 May 2022 11:39:29 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
@@ -216,16 +216,16 @@ interactions:
     method: GET
     uri: null
   response:
-    content: '[{"_id":"6284f0323cc8096aa7e5c8f8","company_id":80,"asset_id":83776921,"version":1,"provider":"big-data-energy","collection":"corva-sdk-autotest","data":{"k":"v"},"timestamp":10,"app_key":"big-data-energy.oleksii_test_task_app"},{"_id":"6284f0323cc8096aa7e5c8f9","company_id":80,"asset_id":83776921,"version":1,"provider":"big-data-energy","collection":"corva-sdk-autotest","data":{"k":"v"},"timestamp":11,"app_key":"big-data-energy.oleksii_test_task_app"}]'
+    content: '[{"_id":"628b7271d6aff355ccea8b61","company_id":80,"asset_id":53781610,"version":1,"provider":"big-data-energy","collection":"python-sdk-autotests","data":{"k":"v"},"timestamp":10,"app_key":"big-data-energy.python_sdk_app_for_autotests"},{"_id":"628b7271d6aff355ccea8b62","company_id":80,"asset_id":53781610,"version":1,"provider":"big-data-energy","collection":"python-sdk-autotests","data":{"k":"v"},"timestamp":11,"app_key":"big-data-energy.python_sdk_app_for_autotests"}]'
     headers:
       Connection:
       - keep-alive
       Content-Length:
-      - '457'
+      - '475'
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 13:10:10 GMT
+      - Mon, 23 May 2022 11:39:29 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
@@ -255,7 +255,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Wed, 18 May 2022 13:10:10 GMT
+      - Mon, 23 May 2022 11:39:29 GMT
       ETag:
       - W/"4df20f95e824b2af44a61642d88daaf0"
       Referrer-Policy:
@@ -277,9 +277,9 @@ interactions:
       X-Rack-CORS:
       - miss; no-origin
       X-Request-Id:
-      - c0433dcd-cedb-4cd1-861f-4cad8b69b5d2
+      - 8424ca9f-13a6-4ac7-9f70-836a3011124f
       X-Runtime:
-      - '0.189032'
+      - '0.099032'
       X-XSS-Protection:
       - 1; mode=block
     http_version: HTTP/1.1
@@ -307,7 +307,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Wed, 18 May 2022 13:10:10 GMT
+      - Mon, 23 May 2022 11:39:29 GMT
       server:
       - uvicorn
     http_version: HTTP/1.1
