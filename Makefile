@@ -30,7 +30,7 @@ install-test: install-corva-sdk
 
 ## install-lint: Install lint requirements.
 .PHONY: install-lint
-install-lint:
+install-lint: install-test
 	@pip install -U -r requirements-lint.txt
 
 ## test: Run tests.
@@ -68,6 +68,7 @@ coverage-html: test
 lint:
 	@flake8 $(srcs)
 	@$(black) --check
+	@mypy --check-untyped-defs $(srcs)
 
 ## format: Format all files.
 .PHONY: format
@@ -99,6 +100,7 @@ clean:
 	@-rm -rf htmlcov
 	@-rm .coverage*
 	@-sudo rm -rf $(docs_dir)/$(docs_build_dir)
+	@-rm -rf .mypy_cache
 
 ## release: How to release a new version.
 .PHONY: release

@@ -169,7 +169,7 @@ def test_set_schedule_start(
         return e
 
     event = event.copy(update={'schedule_start': value})
-    event = (
+    app_event = (
         type(event)
         .parse_obj(
             event.dict(
@@ -185,7 +185,7 @@ def test_set_schedule_start(
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
-    result_event: ScheduledEvent = app(event, context)[0]
+    result_event: ScheduledEvent = app(app_event, context)[0]
 
     assert getattr(result_event, attr) == expected
 

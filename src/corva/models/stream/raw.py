@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union
 
 import pydantic
 
@@ -52,7 +52,7 @@ class RawAppMetadata(CorvaBaseEvent):
 
 class RawMetadata(CorvaBaseEvent):
     app_stream_id: int
-    apps: pydantic.create_model(
+    apps: pydantic.create_model(  # type: ignore
         "Apps",  # noqa: F821
         **{
             SETTINGS.APP_KEY: (
@@ -64,11 +64,21 @@ class RawMetadata(CorvaBaseEvent):
     log_type: LogType
 
 
+if TYPE_CHECKING:
+    RecordsBase = Sequence[RawBaseRecord]
+    RecordsTime = Sequence[RawTimeRecord]
+    RecordsDepth = Sequence[RawDepthRecord]
+else:
+    RecordsBase = pydantic.conlist(RawBaseRecord, min_items=1)
+    RecordsTime = pydantic.conlist(RawTimeRecord, min_items=1)
+    RecordsDepth = pydantic.conlist(RawDepthRecord, min_items=1)
+
+
 class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
-    records: pydantic.conlist(RawBaseRecord, min_items=1)
+    records: RecordsBase
     metadata: RawMetadata
-    asset_id: int = None
-    company_id: int = None
+    asset_id: int = None  # type: ignore
+    company_id: int = None  # type: ignore
 
     # private attributes
     _max_record_value_cache_key: ClassVar[str]
@@ -136,7 +146,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
             new_records = new_records[:-1]  # remove "completed" record
 
         if old_max_record_value is None:
-            return new_records
+            return list(new_records)
 
         values = [record.record_value for record in new_records]
 
@@ -170,10 +180,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
 
 class RawStreamTimeEvent(RawStreamEvent):
-    records: pydantic.conlist(RawTimeRecord, min_items=1)
+    records: RecordsTime
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
 
 
 class RawStreamDepthEvent(RawStreamEvent):
-    records: pydantic.conlist(RawDepthRecord, min_items=1)
+    records: RecordsDepth
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'

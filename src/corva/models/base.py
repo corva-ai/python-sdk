@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, List
+from typing import Any, Sequence
 
 import pydantic
 
@@ -15,5 +15,5 @@ class CorvaBaseEvent(pydantic.BaseModel):
 class RawBaseEvent(abc.ABC):
     @staticmethod
     @abc.abstractmethod
-    def from_raw_event(event: Any) -> List[RawBaseEvent]:
+    def from_raw_event(event: Any) -> Sequence[RawBaseEvent]:
         pass

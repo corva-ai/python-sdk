@@ -2,7 +2,7 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -17,6 +17,9 @@ from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
+
+StreamEventT = TypeVar('StreamEventT', bound=StreamEvent)
+ScheduledEventT = TypeVar('ScheduledEventT', bound=ScheduledEvent)
 
 
 def get_cache_key(
@@ -77,7 +80,7 @@ def base_handler(
 
 
 def stream(
-    func: Optional[Callable[[StreamEvent, Api, UserRedisSdk], Any]] = None,
+    func: Optional[Callable[[StreamEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -146,7 +149,12 @@ def stream(
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
                 ),
                 cache_sdk=internal_cache_sdk,
-                app=functools.partial(func, app_event, api, user_cache_sdk),
+                app=functools.partial(
+                    cast(Callable[[StreamEvent, Api, UserRedisSdk], Any], func),
+                    app_event,
+                    api,
+                    user_cache_sdk,
+                ),
             )
 
         try:
@@ -161,7 +169,7 @@ def stream(
 
 
 def scheduled(
-    func: Optional[Callable[[ScheduledEvent, Api, UserRedisSdk], Any]] = None,
+    func: Optional[Callable[[ScheduledEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -221,7 +229,12 @@ def scheduled(
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
                 ),
                 cache_sdk=internal_cache_sdk,
-                app=functools.partial(func, app_event, api, user_cache_sdk),
+                app=functools.partial(
+                    cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
+                    app_event,
+                    api,
+                    user_cache_sdk,
+                ),
             )
 
         try:
@@ -260,7 +273,7 @@ def task(
         logging_ctx: LoggingContext,
     ) -> Any:
         status = TaskStatus.fail
-        data = {"payload": {}}
+        data: Dict[str, Union[dict, str]] = {"payload": {}}
 
         try:
             app_event = event.get_task_event(api=api)
@@ -288,7 +301,9 @@ def task(
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
                     cache_sdk=FakeInternalCacheSdk(),
-                    app=functools.partial(func, app_event, api),
+                    app=functools.partial(
+                        cast(Callable[[TaskEvent, Api], Any], func), app_event, api
+                    ),
                 )
 
             if isinstance(result, dict):

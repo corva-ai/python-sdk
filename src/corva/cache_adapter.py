@@ -1,6 +1,16 @@
 import itertools
 from datetime import timedelta
-from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import redis
 
@@ -224,7 +234,7 @@ class RedisRepository:
         return data
 
     def get_all(self) -> Dict[str, str]:
-        return self.get_many(keys=[])
+        return cast(Dict[str, str], self.get_many(keys=[]))
 
     def delete(self, key: str) -> None:
         self.delete_many(keys=[key])
@@ -259,13 +269,35 @@ class DeprecatedRedisAdapter:
 
         self.client.ping()
 
+    @overload
     def hset(
         self,
-        name: Optional[str] = None,
-        key: Optional[str] = None,
-        value: Optional[REDIS_STORED_VALUE_TYPE] = None,
-        mapping: Optional[Dict[str, REDIS_STORED_VALUE_TYPE]] = None,
-        expiry: Union[int, timedelta, None] = DEFAULT_EXPIRY,
+        name: Optional[str] = ...,
+        key: str = ...,
+        value: REDIS_STORED_VALUE_TYPE = ...,
+        mapping: None = ...,
+        expiry: Union[int, timedelta, None] = ...,
+    ) -> int:
+        ...
+
+    @overload
+    def hset(
+        self,
+        name: Optional[str] = ...,
+        key: None = ...,
+        value: None = ...,
+        mapping: Dict[str, REDIS_STORED_VALUE_TYPE] = ...,
+        expiry: Union[int, timedelta, None] = ...,
+    ) -> int:
+        ...
+
+    def hset(
+        self,
+        name=None,
+        key=None,
+        value=None,
+        mapping=None,
+        expiry=DEFAULT_EXPIRY,
     ) -> int:
         """Stores the data in cache
 
@@ -326,8 +358,8 @@ class DeprecatedRedisAdapter:
     def delete(self, *names: List[str]) -> int:
         """Deletes all data from cache"""
 
-        names = names or [self.default_name]
-        return self.client.delete(*names)
+        delete_names = names or [self.default_name]
+        return self.client.delete(*delete_names)
 
     def ttl(self, name: Optional[str] = None) -> int:
         """Returns the number of seconds until expiration"""
@@ -344,5 +376,5 @@ class DeprecatedRedisAdapter:
     def exists(self, *names: List[str]) -> int:
         """Returns whether there is data in cache"""
 
-        names = names or [self.default_name]
-        return self.client.exists(*names)
+        exists_names = names or [self.default_name]
+        return self.client.exists(*exists_names)

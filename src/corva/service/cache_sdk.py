@@ -1,6 +1,16 @@
 import datetime
 import warnings
-from typing import Dict, List, Optional, Protocol, Sequence, Tuple, Union, overload
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import fakeredis
 import redis
@@ -68,7 +78,9 @@ class UserRedisSdk:
         self, data: Sequence[Union[Tuple[str, str], Tuple[str, str, int]]]
     ) -> None:
         prepared_data = [
-            datum if len(datum) == 3 else (datum[0], datum[1], self.SIXTY_DAYS)
+            cast(Tuple[str, str, int], datum)
+            if len(datum) == 3
+            else (datum[0], datum[1], self.SIXTY_DAYS)
             for datum in data
         ]
         self.cache_repo.set_many(data=prepared_data)
@@ -120,7 +132,7 @@ class UserRedisSdk:
         ...
 
     @overload
-    def delete_all(self, *names: str) -> int:
+    def delete_all(self, *names: str):
         ...
 
     def delete_all(self, *names):

@@ -50,13 +50,15 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
             event = [[event]]
 
         # flatten the event into 1d array
-        event: List[dict] = list(itertools.chain(*event))
+        flattened_event: List[dict] = list(itertools.chain(*event))
 
-        parsed_raw_events = pydantic.parse_obj_as(List[RawScheduledEvent], event)
+        parsed_raw_events = pydantic.parse_obj_as(
+            List[RawScheduledEvent], flattened_event
+        )
 
         events = [
             parsed_raw_event.scheduler_type.raw_event.parse_obj(sub_event)
-            for parsed_raw_event, sub_event in zip(parsed_raw_events, event)
+            for parsed_raw_event, sub_event in zip(parsed_raw_events, flattened_event)
         ]
 
         return events
@@ -77,7 +79,7 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     """
 
     schedule_start: int
-    start_time: int = None
+    start_time: int = None  # type: ignore
     interval: float
 
     # validators
