@@ -8,7 +8,7 @@ from corva import (
     StreamTimeRecord,
     TaskEvent,
 )
-from docs.src.app_types import (
+from docs.modules.ROOT.examples.app_types import (
     tutorial001,
     tutorial002,
     tutorial003,

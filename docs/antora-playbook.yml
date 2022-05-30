@@ -1,0 +1,30 @@
+site:
+  title: corva-sdk
+  start_page: corva-sdk::index.adoc
+content:
+  sources:
+    - url: /antora  # Volume mount target inside docker container
+      start_path: docs
+      # Use `branches: HEAD` for local development
+      branches: []
+      tags: []
+asciidoc:
+  attributes:
+    page-toclevels: 5
+    sectnums: True
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files:
+    - path: partials/header-content.hbs  # Override header to be empty
+      contents: |
+        <header class="header">
+          <nav class="navbar">
+            <div class="navbar-brand">
+              <a class="navbar-item" href="{{{or site.url siteRootPath}}}">{{site.title}}</a>
+            </div>
+          </nav>
+        </header>
+    - path: partials/footer-content.hbs  # Override footer to be empty
+      contents:
