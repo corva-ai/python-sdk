@@ -1,5 +1,5 @@
 from corva import TaskEvent
-from docs.src.secrets import tutorial001
+from docs.modules.ROOT.examples.secrets import tutorial001
 
 
 def test_tutorial001(app_runner):

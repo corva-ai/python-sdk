@@ -7,7 +7,13 @@ from requests_mock import Mocker as RequestsMocker
 
 from corva import Api, TaskEvent
 from corva.testing import TestClient
-from docs.src.api import tutorial001, tutorial002, tutorial003, tutorial004, tutorial005
+from docs.modules.ROOT.examples.api import (
+    tutorial001,
+    tutorial002,
+    tutorial003,
+    tutorial004,
+    tutorial005,
+)
 
 
 def test_tutorial001(app_runner, requests_mock: RequestsMocker):

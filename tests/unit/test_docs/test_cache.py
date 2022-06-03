@@ -1,5 +1,5 @@
 from corva import ScheduledDataTimeEvent
-from docs.src.cache import (
+from docs.modules.ROOT.examples.cache import (
     tutorial001,
     tutorial002,
     tutorial003,

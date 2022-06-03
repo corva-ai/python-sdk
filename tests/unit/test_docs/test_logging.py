@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 
 from corva import Logger, TaskEvent
 from corva.models.task import RawTaskEvent
-from docs.src.logging import tutorial001, tutorial002
+from docs.modules.ROOT.examples.logging import tutorial001, tutorial002
 
 
 def test_tutorial001(app_runner, mocker: MockerFixture, capsys):

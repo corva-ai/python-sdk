@@ -1,11 +1,4 @@
 = https://github.com/corva-ai/python-sdk[corva-sdk]
-:toc: left
-:toclevels: 5
-:sectnums:
-:nofooter:
-:icons: font
-:source-highlighter: pygments
-:pygments-style: default
 // document attributes
 :dev-center-link: https://app.corva.ai/dev-center/docs[Corva DevCenter]
 :corva-platform-api-link: https://api.corva.ai/documentation/index.html[Corva Platform API]
@@ -28,7 +21,7 @@
 :test-app-step4: pass:quotes[Use `app_runner` fixture to run the app.]
 :test-app-step5: Verify the result.
 
-Documentation for version *v1.4.0*.
+Documentation for version *{page-version}*.
 
 {corva-sdk} is a framework for building {dev-center-link} Python apps.
 
@@ -67,7 +60,7 @@ Stream apps can be
 
 [source,python]
 ----
-include::src/app_types/tutorial001.py[]
+include::example$app_types/tutorial001.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -79,7 +72,7 @@ include::src/app_types/tutorial001.py[]
 
 [source,python]
 ----
-include::src/app_types/tutorial002.py[]
+include::example$app_types/tutorial002.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -99,7 +92,7 @@ or <<scheduled_natural,natural time>> based.
 
 [source,python]
 ----
-include::src/app_types/tutorial003.py[]
+include::example$app_types/tutorial003.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -111,7 +104,7 @@ include::src/app_types/tutorial003.py[]
 
 [source,python]
 ----
-include::src/app_types/tutorial005.py[]
+include::example$app_types/tutorial005.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -123,7 +116,7 @@ include::src/app_types/tutorial005.py[]
 
 [source,python]
 ----
-include::src/app_types/tutorial006.py[]
+include::example$app_types/tutorial006.py[]
 ----
 <.> {app-step1}
 <.> {app-step2}
@@ -135,11 +128,11 @@ include::src/app_types/tutorial006.py[]
 
 [source,python]
 ----
-include::src/app_types/tutorial004.py[]
+include::example$app_types/tutorial004.py[]
 ----
 <.> {app-step1}
 <.> Define your function.
-It must receive two argumets:
+It must receive two arguments:
 <<event,event>> and <<api,api>>.
 The arguments serve as building blocks for your app.
 <.> {app-step3} `task`.
@@ -165,7 +158,7 @@ and reasonable timeouts to API requests.
 
 [source,python]
 ----
-include::src/api/tutorial001.py[]
+include::example$api/tutorial001.py[]
 ----
 <.> Use {corva-platform-api-link} URL suffix
 to make a Platform API call.
@@ -177,7 +170,7 @@ to make a Data API call.
 
 [source,python]
 ----
-include::src/api/tutorial002.py[]
+include::example$api/tutorial002.py[]
 ----
 <.> Simplest GET example.
 <.> Use optional `params` parameter
@@ -190,7 +183,7 @@ as all `Api` methods return `requests.Response` objects.
 
 [source,python]
 ----
-include::src/api/tutorial003.py[]
+include::example$api/tutorial003.py[]
 ----
 <.> Simplest POST example.
 <.> Simplest DELETE example.
@@ -198,13 +191,13 @@ include::src/api/tutorial003.py[]
 <.> Simplest PATCH example.
 <.> Use `data` parameter
 to provide a request body,
-that will be casted to json.
+that will be cast to json.
 
 === Custom headers and timeouts
 
 [source,python]
 ----
-include::src/api/tutorial004.py[]
+include::example$api/tutorial004.py[]
 ----
 <.> Use `headers` parameter
 to add custom headers to the request.
@@ -224,7 +217,7 @@ using `Api.get_dataset` method.
 
 [source,python]
 ----
-include::src/api/tutorial005.py[]
+include::example$api/tutorial005.py[]
 ----
 
 [#cache]
@@ -263,7 +256,7 @@ Cast your data to `str` before saving.
 
 [source,python]
 ----
-include::src/cache/tutorial001.py[]
+include::example$cache/tutorial001.py[]
 ----
 <.> Save `str` data to `Cache`.
 <.> Load the value using its key.
@@ -272,7 +265,7 @@ include::src/cache/tutorial001.py[]
 
 [source,python]
 ----
-include::src/cache/tutorial004.py[]
+include::example$cache/tutorial004.py[]
 ----
 <.> Cast `int` to `str` before saving data to `Cache`.
 <.> Load the value using its key.
@@ -283,7 +276,7 @@ Notice that returned value has `str` type.
 
 [source,python]
 ----
-include::src/cache/tutorial005.py[]
+include::example$cache/tutorial005.py[]
 ----
 <.> Cast `dict` to JSON `str` before saving data to `Cache`.
 <.> Load the value using its key.
@@ -295,7 +288,7 @@ and convert it back into a `dict`.
 
 [source,python]
 ----
-include::src/cache/tutorial003.py[]
+include::example$cache/tutorial003.py[]
 ----
 <.> Save some data to `Cache`.
 <.> Load the value using its key.
@@ -305,11 +298,11 @@ when it is no longer needed.
 
 === Key expiry
 
-NOTE: By default keys expire in 60 days.
+NOTE: By default, keys expire in 60 days.
 
 [source,python]
 ----
-include::src/cache/tutorial002.py[]
+include::example$cache/tutorial002.py[]
 ----
 <.> Specify how many seconds you want your key to live
 using `ttl` parameter.
@@ -326,7 +319,7 @@ keys at once.
 
 [source,python]
 ----
-include::src/cache/tutorial006.py[]
+include::example$cache/tutorial006.py[]
 ----
 <.> Get all the data from the hash.
 It is empty as we have not stored anything yet.
@@ -345,7 +338,7 @@ it will be assigned a value of `None`.
 
 [source,python]
 ----
-include::src/cache/tutorial007.py[]
+include::example$cache/tutorial007.py[]
 ----
 <.> Cache is empty as we have not stored anything yet.
 <.> Store some data.
@@ -387,7 +380,7 @@ The `Logger` has following features:
 
 [source,python]
 ----
-include::src/logging/tutorial001.py[]
+include::example$logging/tutorial001.py[]
 ----
 <.> Import `Logger` object.
 <.> Use `Logger` as every other Python logger.
@@ -403,7 +396,7 @@ Custom handler will be used alongside {corva-sdk}'s default one.
 
 [source,python]
 ----
-include::src/logging/tutorial002.py[]
+include::example$logging/tutorial002.py[]
 ----
 <.> Import the module which contains the handler
 that we want to use.
@@ -427,7 +420,7 @@ pip install sentry-sdk <.>
 
 [source,python]
 ----
-include::src/logging/tutorial003.py[]
+include::example$logging/tutorial003.py[]
 ----
 <.> Import Sentry SDK.
 <.> Initialize the library.
@@ -448,7 +441,7 @@ pip install rollbar <.>
 
 [source,python]
 ----
-include::src/logging/tutorial004.py[]
+include::example$logging/tutorial004.py[]
 ----
 <.> Import Rollbar SDK.
 <.> Initialize Rollbar handler.
@@ -468,7 +461,7 @@ pip install raygun4py <.>
 
 [source,python]
 ----
-include::src/logging/tutorial005.py[]
+include::example$logging/tutorial005.py[]
 ----
 <.> Import Raygun SDK.
 <.> Initialize Raygun handler.
@@ -498,7 +491,7 @@ that uses secrets.
 
 [source,python]
 ----
-include::src/secrets/tutorial001.py[]
+include::example$secrets/tutorial001.py[]
 ----
 <.> Import `secrets` object.
 <.> `secrets` is a dictionary so
@@ -530,7 +523,7 @@ pip install pytest
 ==== Time
 [source,python]
 ----
-include::src/testing/tutorial001.py[]
+include::example$testing/tutorial001.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -541,7 +534,7 @@ include::src/testing/tutorial001.py[]
 ==== Depth
 [source,python]
 ----
-include::src/testing/tutorial002.py[]
+include::example$testing/tutorial002.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -554,7 +547,7 @@ include::src/testing/tutorial002.py[]
 ==== Data Time
 [source,python]
 ----
-include::src/testing/tutorial003.py[]
+include::example$testing/tutorial003.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -565,7 +558,7 @@ include::src/testing/tutorial003.py[]
 ==== Depth
 [source,python]
 ----
-include::src/testing/tutorial005.py[]
+include::example$testing/tutorial005.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -576,7 +569,7 @@ include::src/testing/tutorial005.py[]
 ==== Natural Time
 [source,python]
 ----
-include::src/testing/tutorial006.py[]
+include::example$testing/tutorial006.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -587,7 +580,7 @@ include::src/testing/tutorial006.py[]
 === Task
 [source,python]
 ----
-include::src/testing/tutorial004.py[]
+include::example$testing/tutorial004.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}
@@ -601,7 +594,7 @@ This section shows
 how to test an app that uses secrets.
 [source,python]
 ----
-include::src/testing/tutorial007.py[]
+include::example$testing/tutorial007.py[]
 ----
 <.> {test-app-step1}
 <.> {test-app-step2}

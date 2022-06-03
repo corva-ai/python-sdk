@@ -1,4 +1,4 @@
-from docs.src.testing import (
+from docs.modules.ROOT.examples.testing import (
     tutorial001,
     tutorial002,
     tutorial003,
