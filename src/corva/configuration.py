@@ -44,3 +44,9 @@ def get_test_dataset() -> str:
     """Dataset for testing"""
 
     return os.environ['TEST_DATASET']
+
+
+def get_test_company_id() -> int:
+    """Company id for testing"""
+
+    return int(os.environ['TEST_COMPANY_ID'])

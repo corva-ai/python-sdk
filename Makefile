@@ -54,6 +54,7 @@ integration-tests:
 	DATA_API_ROOT_URL=https://data.localhost.ai \
 	TEST_API_KEY='' \
 	TEST_BEARER_TOKEN='' \
+	TEST_COMPANY_ID='-1' \
 	coverage run -m pytest --vcr-record=none $(test_path)
 
 ## coverage: Display code coverage in the console.
