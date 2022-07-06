@@ -6,22 +6,9 @@ from typing import List, Union
 import pydantic
 
 from corva.api import Api
+from corva.models import validators
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
-
-
-def set_schedule_start(schedule_start: int) -> int:
-    """Casts Unix timestamp from milliseconds to seconds.
-
-    Casts Unix timestamp from millisecond to seconds, if provided timestamp is in
-        milliseconds.
-    """
-
-    # 1 January 10000 00:00:00 - first date to not fit into the datetime instance
-    if schedule_start >= 253402300800:
-        schedule_start //= 1000
-
-    return schedule_start
 
 
 class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
@@ -84,7 +71,7 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        set_schedule_start
+        validators.from_ms_to_s
     )
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
@@ -125,5 +112,5 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        set_schedule_start
+        validators.from_ms_to_s
     )
