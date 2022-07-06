@@ -4,11 +4,25 @@ from corva.models import base, validators
 
 
 class RerunDepthRange(base.CorvaBaseEvent):
+    """Rerun depth range metadata.
+
+    Attributes:
+        start: start depth.
+        end: end depth.
+    """
+
     start: float
     end: float
 
 
 class RerunTimeRange(base.CorvaBaseEvent):
+    """Rerun time range metadata.
+
+    Attributes:
+        start: start time.
+        end: end time.
+    """
+
     start: int
     end: int
 
