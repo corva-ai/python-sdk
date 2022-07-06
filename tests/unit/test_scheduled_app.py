@@ -8,13 +8,18 @@ from requests_mock import Mocker as RequestsMocker
 
 from corva import Logger
 from corva.handlers import scheduled
+from corva.models.rerun import RerunTime, RerunTimeRange
 from corva.models.scheduled.raw import (
     RawScheduledDataTimeEvent,
     RawScheduledDepthEvent,
     RawScheduledEvent,
     RawScheduledNaturalTimeEvent,
 )
-from corva.models.scheduled.scheduled import ScheduledDataTimeEvent, ScheduledEvent
+from corva.models.scheduled.scheduled import (
+    ScheduledDataTimeEvent,
+    ScheduledEvent,
+    ScheduledNaturalTimeEvent,
+)
 from corva.models.scheduled.scheduler_type import SchedulerType
 
 
@@ -331,3 +336,79 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
 
     assert captured.out.endswith('Info message!\n')
     assert captured.err == 'Info message!\n'
+
+
+@pytest.mark.parametrize(
+    'time, expected',
+    (
+        # 1 January 2021 00:00:00 in ms
+        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        # 1 January 2021 00:00:00 in sec
+        pytest.param(1609459200, 1609459200, id='no cast performed'),
+    ),
+)
+def test_rerun_data_time_cast_from_ms_to_s(
+    time: int, expected: int, context, mocker: MockerFixture
+):
+    @scheduled
+    def app(event, api, state):
+        return event
+
+    event = RawScheduledDataTimeEvent(
+        asset_id=0,
+        company=10,
+        schedule=20,
+        app_connection=30,
+        app_stream=40,
+        scheduler_type=SchedulerType.data_time,
+        schedule_start=50,
+        interval=60,
+        rerun=RerunTime(
+            range=RerunTimeRange(start=time, end=time), invoke=70, total=80
+        ),
+    ).dict(by_alias=True, exclude_unset=True)
+
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+
+    result_event: ScheduledDataTimeEvent = app(event, context)[0]
+
+    assert result_event.rerun.range.start == expected
+    assert result_event.rerun.range.end == expected
+
+
+@pytest.mark.parametrize(
+    'time, expected',
+    (
+        # 1 January 2021 00:00:00 in ms
+        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        # 1 January 2021 00:00:00 in sec
+        pytest.param(1609459200, 1609459200, id='no cast performed'),
+    ),
+)
+def test_rerun_natural_time_cast_from_ms_to_s(
+    time: int, expected: int, context, mocker: MockerFixture
+):
+    @scheduled
+    def app(event, api, state):
+        return event
+
+    event = RawScheduledNaturalTimeEvent(
+        asset_id=0,
+        company=10,
+        schedule=20,
+        app_connection=30,
+        app_stream=40,
+        scheduler_type=SchedulerType.data_time,
+        schedule_start=50,
+        interval=60,
+        rerun=RerunTime(
+            range=RerunTimeRange(start=time, end=time), invoke=70, total=80
+        ),
+    ).dict(by_alias=True, exclude_unset=True)
+
+    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+
+    result_event: ScheduledNaturalTimeEvent = app(event, context)[0]
+
+    assert result_event.rerun.range.start == expected
+    assert result_event.rerun.range.end == expected

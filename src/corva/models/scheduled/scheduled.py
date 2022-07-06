@@ -1,6 +1,9 @@
+from typing import Optional
+
 import pydantic
 
 from corva.models.base import CorvaBaseEvent
+from corva.models.rerun import RerunDepth, RerunTime
 
 
 class ScheduledEvent(CorvaBaseEvent):
@@ -22,12 +25,14 @@ class ScheduledDataTimeEvent(ScheduledEvent):
             Use inclusively.
         end_time: right bound of the time range, covered by this event.
             Use inclusively.
+        rerun: rerun metadata.
     """
 
     asset_id: int
     company_id: int
     start_time: int
     end_time: int = pydantic.Field(..., alias='schedule_start')
+    rerun: Optional[RerunTime] = None
 
     class Config:
         allow_population_by_field_name = True
@@ -49,6 +54,7 @@ class ScheduledDepthEvent(ScheduledEvent):
         log_identifier: app stream log identifier. Used to scope data by stream,
             asset might be connected to multiple depth based logs.
         interval: distance between two schedule triggers.
+        rerun: rerun metadata.
     """
 
     asset_id: int
@@ -57,6 +63,7 @@ class ScheduledDepthEvent(ScheduledEvent):
     bottom_depth: float
     log_identifier: str
     interval: float
+    rerun: Optional[RerunDepth] = None
 
 
 class ScheduledNaturalTimeEvent(ScheduledEvent):
@@ -70,9 +77,11 @@ class ScheduledNaturalTimeEvent(ScheduledEvent):
         company_id: company id.
         schedule_start: schedule trigger time.
         interval: time between two schedule triggers.
+        rerun: rerun metadata.
     """
 
     asset_id: int
     company_id: int
     schedule_start: int
     interval: float
+    rerun: Optional[RerunTime] = None
