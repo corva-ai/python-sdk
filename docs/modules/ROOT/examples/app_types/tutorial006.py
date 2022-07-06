@@ -1,5 +1,4 @@
-from corva import Api  # <1>
-from corva import Cache, ScheduledNaturalTimeEvent, scheduled
+from corva import Api, Cache, ScheduledNaturalTimeEvent, scheduled  # <1>
 
 
 @scheduled  # <3>
