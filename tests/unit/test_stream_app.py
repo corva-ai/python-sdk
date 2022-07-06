@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from corva import Logger
 from corva.configuration import SETTINGS
 from corva.handlers import stream
+from corva.models.rerun import RerunTime, RerunTimeRange
 from corva.models.stream.log_type import LogType
 from corva.models.stream.raw import (
     RawAppMetadata,
@@ -16,7 +17,7 @@ from corva.models.stream.raw import (
     RawStreamTimeEvent,
     RawTimeRecord,
 )
-from corva.models.stream.stream import StreamEvent
+from corva.models.stream.stream import StreamEvent, StreamTimeEvent
 
 
 @pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
@@ -543,3 +544,43 @@ def test_custom_log_handler(context, capsys):
 
     assert captured.out.endswith('Info message!\n')
     assert captured.err == 'Info message!\n'
+
+
+@pytest.mark.parametrize(
+    'time, expected',
+    (
+        # 1 January 2021 00:00:00 in ms
+        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        # 1 January 2021 00:00:00 in sec
+        pytest.param(1609459200, 1609459200, id='no cast performed'),
+    ),
+)
+def test_rerun_time_cast_from_ms_to_s(time: int, expected: int, context):
+    @stream
+    def app(event, api, cache):
+        return event
+
+    event = RawStreamTimeEvent(
+        records=[
+            RawTimeRecord(
+                asset_id=0,
+                company_id=int(),
+                collection=str(),
+                timestamp=int(),
+            ),
+        ],
+        metadata=RawMetadata(
+            app_stream_id=int(),
+            apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+            log_type=LogType.time,
+        ),
+        rerun=RerunTime(
+            range=RerunTimeRange(start=time, end=time), invoke=10, total=20
+        ),
+    )
+
+    result_event: StreamTimeEvent = app([event.dict()], context)[0]
+
+    assert result_event.rerun is not None  # for mypy to not complain.
+    assert result_event.rerun.range.start == expected
+    assert result_event.rerun.range.end == expected

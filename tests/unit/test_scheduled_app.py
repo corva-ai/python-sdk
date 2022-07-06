@@ -372,6 +372,7 @@ def test_rerun_data_time_cast_from_ms_to_s(
 
     result_event: ScheduledDataTimeEvent = app(event, context)[0]
 
+    assert result_event.rerun is not None  # for mypy to not complain.
     assert result_event.rerun.range.start == expected
     assert result_event.rerun.range.end == expected
 
@@ -410,5 +411,6 @@ def test_rerun_natural_time_cast_from_ms_to_s(
 
     result_event: ScheduledNaturalTimeEvent = app(event, context)[0]
 
+    assert result_event.rerun is not None  # for mypy to not complain.
     assert result_event.rerun.range.start == expected
     assert result_event.rerun.range.end == expected

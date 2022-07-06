@@ -1,15 +1,12 @@
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence
 
 import pydantic
 
 from corva.models.base import CorvaBaseEvent
+from corva.models.rerun import RerunDepth, RerunTime
 
 
-class StreamBaseRecord(CorvaBaseEvent):
-    """Stream base record data."""
-
-
-class StreamTimeRecord(StreamBaseRecord):
+class StreamTimeRecord(CorvaBaseEvent):
     """Stream time record data.
 
     Attributes:
@@ -23,7 +20,7 @@ class StreamTimeRecord(StreamBaseRecord):
     metadata: dict = {}
 
 
-class StreamDepthRecord(StreamBaseRecord):
+class StreamDepthRecord(CorvaBaseEvent):
     """Stream depth record data.
 
     Attributes:
@@ -38,36 +35,44 @@ class StreamDepthRecord(StreamBaseRecord):
 
 
 if TYPE_CHECKING:
-    RecordsBase = Sequence[StreamBaseRecord]
     RecordsTime = Sequence[StreamTimeRecord]
     RecordsDepth = Sequence[StreamDepthRecord]
 else:
-    RecordsBase = pydantic.conlist(StreamBaseRecord, min_items=1)
     RecordsTime = pydantic.conlist(StreamTimeRecord, min_items=1)
     RecordsDepth = pydantic.conlist(StreamDepthRecord, min_items=1)
 
 
 class StreamEvent(CorvaBaseEvent):
-    """Stream event data.
+    """Base stream event data."""
+
+
+class StreamTimeEvent(StreamEvent):
+    """Stream time event data.
 
     Attributes:
         asset_id: asset id.
         company_id: company id.
         records: data records.
+        rerun: rerun metadata.
     """
 
     asset_id: int
     company_id: int
-    records: RecordsBase
-
-
-class StreamTimeEvent(StreamEvent):
-    """Stream time event data."""
-
     records: RecordsTime
+    rerun: Optional[RerunTime] = None
 
 
 class StreamDepthEvent(StreamEvent):
-    """Stream depth event data."""
+    """Stream depth event data.
 
+    Attributes:
+        asset_id: asset id.
+        company_id: company id.
+        records: data records.
+        rerun: rerun metadata.
+    """
+
+    asset_id: int
+    company_id: int
     records: RecordsDepth
+    rerun: Optional[RerunDepth] = None

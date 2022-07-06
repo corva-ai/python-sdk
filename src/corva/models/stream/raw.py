@@ -8,6 +8,7 @@ import pydantic
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
+from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
 from corva.service.cache_sdk import UserCacheSdkProtocol
@@ -181,9 +182,11 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
 class RawStreamTimeEvent(RawStreamEvent):
     records: RecordsTime
+    rerun: Optional[RerunTime] = None
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
 
 
 class RawStreamDepthEvent(RawStreamEvent):
     records: RecordsDepth
+    rerun: Optional[RerunDepth] = None
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
