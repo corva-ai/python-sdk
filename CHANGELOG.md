@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Rerun support.
+`StreamTimeEvent`, `StreamDepthEvent`,
+`ScheduledDataTimeEvent`, `ScheduledDepthEvent`
+and `ScheduledNaturalTimeEvent` got new
+`rerun` field which stores rerun metadata.
+
 
 ## [1.4.0] - 2021-04-25
 

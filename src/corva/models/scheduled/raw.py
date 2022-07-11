@@ -1,27 +1,15 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pydantic
 
 from corva.api import Api
+from corva.models import validators
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
+from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.scheduled.scheduler_type import SchedulerType
-
-
-def set_schedule_start(schedule_start: int) -> int:
-    """Casts Unix timestamp from milliseconds to seconds.
-
-    Casts Unix timestamp from millisecond to seconds, if provided timestamp is in
-        milliseconds.
-    """
-
-    # 1 January 10000 00:00:00 - first date to not fit into the datetime instance
-    if schedule_start >= 253402300800:
-        schedule_start //= 1000
-
-    return schedule_start
 
 
 class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
@@ -76,15 +64,17 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
         start_time: left bound of the time range, covered by this event.
             Use inclusively.
         interval: time between two schedule triggers.
+        rerun: rerun metadata.
     """
 
     schedule_start: int
     start_time: int = None  # type: ignore
     interval: float
+    rerun: Optional[RerunTime] = None
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        set_schedule_start
+        validators.from_ms_to_s
     )
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)
@@ -104,12 +94,14 @@ class RawScheduledDepthEvent(RawScheduledEvent):
         log_identifier: app stream log identifier. Used to scope data by stream,
             asset might be connected to multiple depth based logs.
         interval: distance between two schedule triggers.
+        rerun: rerun metadata.
     """
 
     top_depth: float
     bottom_depth: float
     log_identifier: str
     interval: float = pydantic.Field(..., alias='depth_milestone')
+    rerun: Optional[RerunDepth] = None
 
 
 class RawScheduledNaturalTimeEvent(RawScheduledEvent):
@@ -118,12 +110,14 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     Attributes:
         schedule_start: Unix timestamp, when the schedule was triggered.
         interval: time between two schedule triggers.
+        rerun: rerun metadata.
     """
 
     schedule_start: int
     interval: float
+    rerun: Optional[RerunTime] = None
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        set_schedule_start
+        validators.from_ms_to_s
     )

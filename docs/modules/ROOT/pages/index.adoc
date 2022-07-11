@@ -605,6 +605,25 @@ as `secrets` parameter.
 <.> {test-app-step5}
 
 
+== App rerun
+You might want to implement custom logic for app rerun,
+for this events include `rerun` field
+that stores rerun metadata.
+
+Example usage scenario of `rerun` field:
+
+. Well start 22/01/31 - end 22/03/31.
+
+. Rerun start 22/02/02 - end 22/02/04.
+
+. By default app uses the latest calculated record
+as the base to catch up to real-time.
+
+. During rerun app must use the latest record before 22/02/02 (using `rerun.start`)
+as the base for the initial calculation.
+
+
+
 == Development - Contributing
 
 Here are some guidelines to set up your environment.
