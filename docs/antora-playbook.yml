@@ -28,3 +28,9 @@ ui:
         </header>
     - path: partials/footer-content.hbs  # Override footer to be empty
       contents:
+    # Add .nojekyll: https://docs.antora.org/antora/latest/publish-to-github-pages/
+    - path: ui.yml
+      contents: |
+        static_files:
+        - .nojekyll
+    - path: .nojekyll
