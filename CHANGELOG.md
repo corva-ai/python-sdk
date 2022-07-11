@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.5.0] - 2022-07-11
+
 ### Added
 - Rerun support.
 `StreamTimeEvent`, `StreamDepthEvent`,
@@ -15,7 +18,7 @@ and `ScheduledNaturalTimeEvent` got new
 `rerun` field which stores rerun metadata.
 
 
-## [1.4.0] - 2021-04-25
+## [1.4.0] - 2022-04-25
 
 ### Added
 - `Cache` methods:
@@ -34,7 +37,7 @@ being split into multiple CloudWatch log entries.
 - Log internal SDK errors using
 `warning` level instead of `exception`.
 
-## [1.4.0-rc.1] - 2021-02-15
+## [1.4.0-rc.1] - 2022-02-15
 
 ### Added
 - `get`, `set` and new signature for `delete` methods to `Cache`.
@@ -63,7 +66,7 @@ multiline Python logs (like stack traces)
 being split into multiple CloudWatch log entries.
 
 
-## [1.3.0] - 2021-02-15
+## [1.3.0] - 2022-02-15
 
 ### Added
 - Secrets support.
@@ -267,7 +270,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.4.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.5.0...master
+[1.5.0] https://github.com/corva-ai/python-sdk/compare/v1.4.0...v1.5.0
 [1.4.0] https://github.com/corva-ai/python-sdk/compare/v1.4.0-rc.1...v1.4.0
 [1.4.0-rc.1] https://github.com/corva-ai/python-sdk/compare/v1.3.1...v1.4.0-rc.1
 [1.3.1] https://github.com/corva-ai/python-sdk/compare/v1.3.0...v1.3.1
