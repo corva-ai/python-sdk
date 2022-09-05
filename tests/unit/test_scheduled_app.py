@@ -57,6 +57,85 @@ def test_set_completed_status(context, requests_mock):
 
 
 @pytest.mark.parametrize(
+    'event, post_called',
+    [
+        pytest.param(
+            RawScheduledNaturalTimeEvent(
+                asset_id=int(),
+                company=int(),
+                schedule=int(),
+                app_connection=int(),
+                app_stream=int(),
+                scheduler_type=SchedulerType.natural_time,
+                schedule_start=int(),
+                interval=int(),
+            ),
+            True,
+            id='Set status as completed for failed natural time app.',
+        ),
+        pytest.param(
+            RawScheduledDataTimeEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ),
+            False,
+            id='Does not set status as completed for failed data time app.',
+        ),
+        pytest.param(
+            RawScheduledDepthEvent(
+                asset_id=int(),
+                depth_milestone=float(),
+                schedule=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_depth_milestone,
+                top_depth=0.0,
+                bottom_depth=1.0,
+                log_identifier='',
+            ),
+            False,
+            id='Does not set status as completed for failed depth app.',
+        ),
+    ],
+)
+def test_set_completed_status_for_failed_apps(
+    event: RawScheduledEvent, post_called: bool, context, requests_mock
+):
+    @scheduled
+    def scheduled_app(event, api, state):
+        raise Exception
+
+    app_event = [
+        [
+            event.dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        ]
+    ]
+
+    # patch post request, that sets scheduled task as completed
+    # looks for url path like /scheduler/123/completed
+    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+
+    with pytest.raises(Exception):
+        scheduled_app(app_event, context)
+
+    if post_called:
+        assert post_mock.called_once
+        assert post_mock.last_request.path == '/scheduler/0/completed'
+    else:
+        assert not post_mock.called_once
+
+
+@pytest.mark.parametrize(
     'event',
     (
         RawScheduledDataTimeEvent(

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Set status as completed
+for failed scheduled natural time apps. 
+
 
 ## [1.5.2] - 2022-07-11
 
