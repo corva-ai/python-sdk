@@ -105,7 +105,7 @@ def test_set_completed_status(context, requests_mock):
         ),
     ],
 )
-def test_sets_failed_natural_time_app_status_set(
+def test_set_completed_status_for_failed_apps(
     event: RawScheduledEvent, post_called: bool, context, requests_mock
 ):
     @scheduled
