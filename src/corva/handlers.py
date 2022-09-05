@@ -10,7 +10,7 @@ from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
 from corva.models.scheduled.raw import RawScheduledEvent
-from corva.models.scheduled.scheduled import ScheduledEvent
+from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
@@ -221,33 +221,40 @@ def scheduled(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ):
-            result = service.run_app(
-                has_secrets=event.has_secrets,
-                app_key=SETTINGS.APP_KEY,
-                api_sdk=CachingApiSdk(
-                    api_sdk=CorvaApiSdk(api_adapter=api),
-                    ttl=SETTINGS.SECRETS_CACHE_TTL,
-                ),
-                cache_sdk=internal_cache_sdk,
-                app=functools.partial(
-                    cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
-                    app_event,
-                    api,
-                    user_cache_sdk,
-                ),
-            )
-
-        try:
-            event.set_schedule_as_completed(api=api)
-        except Exception as e:
-            # lambda succeeds if we're unable to set completed status
-            CORVA_LOGGER.warning(
-                f'Could not set schedule as completed. Details: {str(e)}.'
-            )
+            try:
+                result = service.run_app(
+                    has_secrets=event.has_secrets,
+                    app_key=SETTINGS.APP_KEY,
+                    api_sdk=CachingApiSdk(
+                        api_sdk=CorvaApiSdk(api_adapter=api),
+                        ttl=SETTINGS.SECRETS_CACHE_TTL,
+                    ),
+                    cache_sdk=internal_cache_sdk,
+                    app=functools.partial(
+                        cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
+                        app_event,
+                        api,
+                        user_cache_sdk,
+                    ),
+                )
+            except Exception:
+                if isinstance(app_event, ScheduledNaturalTimeEvent):
+                    set_schedule_as_completed(event=event, api=api)
+                raise
+            else:
+                set_schedule_as_completed(event=event, api=api)
 
         return result
 
     return wrapper
+
+
+def set_schedule_as_completed(event: RawScheduledEvent, api: Api) -> None:
+    try:
+        event.set_schedule_as_completed(api=api)
+    except Exception as e:
+        # lambda succeeds if we're unable to set completed status
+        CORVA_LOGGER.warning(f'Could not set schedule as completed. Details: {str(e)}.')
 
 
 def task(
