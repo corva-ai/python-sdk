@@ -89,7 +89,7 @@ def test_stream_app_runner(event, app_runner):
     assert app_runner(stream_app, event) == 'Stream app result'
 
 
-def test_reuse_cache(event, app_runner):
+def test_reuse_cache(app_runner):
     """
     Testing that cache is reset or reused between runs.
     """
