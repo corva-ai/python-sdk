@@ -196,7 +196,7 @@ class RedisRepository:
 
     def __init__(self, hash_name: str, client: redis.Redis, use_lua_52: bool = False):
         self.hash_name = hash_name
-        self.zset_name = f'{hash_name}.EXPIREAT'
+        self.zset_name = f"{hash_name}.EXPIREAT"
         self.client = client
         self.lua_set_many = self.client.register_script(self.LUA_SET_SCRIPT)
 
@@ -205,7 +205,7 @@ class RedisRepository:
             # Hack for tests to work with fakeredis, as it uses Lua version > 5.1.
             # In Lua 5.1, unpack was a global, but in 5.2 it's been moved to
             # table.unpack.
-            lua_get_script = self.LUA_GET_SCRIPT.replace('unpack', 'table.unpack')
+            lua_get_script = self.LUA_GET_SCRIPT.replace("unpack", "table.unpack")
         self.lua_get = self.client.register_script(lua_get_script)
 
         self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
@@ -240,7 +240,7 @@ class RedisRepository:
         self.delete_many(keys=[key])
 
     def delete_many(self, keys: Sequence[str]) -> None:
-        self.set_many(data=[(key, '', -1) for key in keys])
+        self.set_many(data=[(key, "", -1) for key in keys])
 
     def delete_all(self) -> None:
         self.lua_delete_all(keys=[self.hash_name, self.zset_name])

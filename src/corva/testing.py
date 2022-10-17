@@ -22,12 +22,12 @@ class TestClient:
     """
 
     _context: ClassVar[SimpleNamespace] = SimpleNamespace(
-        aws_request_id='qwerty', client_context=SimpleNamespace(env={'API_KEY': '123'})
+        aws_request_id="qwerty", client_context=SimpleNamespace(env={"API_KEY": "123"})
     )
     _api: ClassVar[Api] = Api(
         api_url=SETTINGS.API_ROOT_URL,
         data_api_url=SETTINGS.DATA_API_ROOT_URL,
-        api_key=_context.client_context.env['API_KEY'],
+        api_key=_context.client_context.env["API_KEY"],
         app_key=SETTINGS.APP_KEY,
     )
 
@@ -48,7 +48,7 @@ class TestClient:
         if isinstance(event, (ScheduledEvent, StreamEvent)):
             if not cache:
                 cache = UserRedisSdk(
-                    hash_name='hash_name',
+                    hash_name="hash_name",
                     redis_dsn=SETTINGS.CACHE_URL,
                     use_fakes=True,
                 )
@@ -62,8 +62,8 @@ class TestClient:
 
         return service.run_app(
             has_secrets=True,
-            app_key='test_app_key',
-            api_sdk=FakeApiSdk(secrets={'test_app_key': secrets or {}}),
+            app_key="test_app_key",
+            api_sdk=FakeApiSdk(secrets={"test_app_key": secrets or {}}),
             cache_sdk=FakeInternalCacheSdk(),
             app=app,
         )

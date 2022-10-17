@@ -84,7 +84,7 @@ def test_scheduled_depth_app(app_runner):
         company_id=0,
         top_depth=0.0,
         bottom_depth=1.0,
-        log_identifier='',
+        log_identifier="",
         interval=1.0,
         rerun=RerunDepth(range=RerunDepthRange(start=0.0, end=0.0), invoke=0, total=0),
     )

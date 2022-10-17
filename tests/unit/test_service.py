@@ -19,7 +19,7 @@ class TestRunApp:
 
         service.run_app(
             has_secrets=False,
-            app_key='',
+            app_key="",
             api_sdk=api_sdk,
             cache_sdk=cache_sdk,
             app=lambda: None,
@@ -35,10 +35,10 @@ class TestRunApp:
             assert secrets == {"name2": "value2"}
 
         api_sdk1 = CachingApiSdk(
-            api_sdk=FakeApiSdk(secrets={'key': {"name1": "value1"}}), ttl=2
+            api_sdk=FakeApiSdk(secrets={"key": {"name1": "value1"}}), ttl=2
         )
         api_sdk2 = CachingApiSdk(
-            api_sdk=FakeApiSdk(secrets={'key': {"name2": "value2"}}), ttl=2
+            api_sdk=FakeApiSdk(secrets={"key": {"name2": "value2"}}), ttl=2
         )
         cache_sdk = FakeInternalCacheSdk()
 
@@ -49,7 +49,7 @@ class TestRunApp:
         with freezegun.freeze_time(freeze_time):
             service.run_app(
                 has_secrets=True,
-                app_key='key',
+                app_key="key",
                 api_sdk=api_sdk1,
                 cache_sdk=cache_sdk,
                 app=app1,
@@ -58,7 +58,7 @@ class TestRunApp:
         with freezegun.freeze_time(freeze_time_plus_1_sec):
             service.run_app(
                 has_secrets=True,
-                app_key='key',
+                app_key="key",
                 api_sdk=api_sdk2,
                 cache_sdk=cache_sdk,
                 app=app1,
@@ -67,20 +67,20 @@ class TestRunApp:
         with freezegun.freeze_time(freeze_time_plus_2_sec):
             service.run_app(
                 has_secrets=True,
-                app_key='key',
+                app_key="key",
                 api_sdk=api_sdk2,
                 cache_sdk=cache_sdk,
                 app=app2,
             )
 
     @pytest.mark.parametrize(
-        'has_secrets, expected_secrets',
+        "has_secrets, expected_secrets",
         (
             pytest.param(
-                False, {}, id='Does not fetch secrets if `has_secrets is False`'
+                False, {}, id="Does not fetch secrets if `has_secrets is False`"
             ),
             pytest.param(
-                True, {'my': 'secret'}, id='Fetches secrets if `has_secrets is True`'
+                True, {"my": "secret"}, id="Fetches secrets if `has_secrets is True`"
             ),
         ),
     )
@@ -92,12 +92,12 @@ class TestRunApp:
 
         assert secrets == {}
 
-        api_sdk = FakeApiSdk(secrets={'test_app_key': {"my": "secret"}})
+        api_sdk = FakeApiSdk(secrets={"test_app_key": {"my": "secret"}})
         cache_sdk = FakeInternalCacheSdk()
 
         service.run_app(
             has_secrets=has_secrets,
-            app_key='test_app_key',
+            app_key="test_app_key",
             api_sdk=api_sdk,
             cache_sdk=cache_sdk,
             app=app,
@@ -111,7 +111,7 @@ class TestRunApp:
 
         result = service.run_app(
             has_secrets=False,
-            app_key='',
+            app_key="",
             api_sdk=api_sdk,
             cache_sdk=cache_sdk,
             app=lambda: 10,

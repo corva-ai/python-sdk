@@ -19,9 +19,9 @@ from docs.modules.ROOT.examples.api import (
 def test_tutorial001(app_runner, requests_mock: RequestsMocker):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    mock1 = requests_mock.get('/v2/pads')
-    mock2 = requests_mock.get('/api/v1/data/provider/dataset/')
-    mock3 = requests_mock.get('https://api.corva.ai/v2/pads')
+    mock1 = requests_mock.get("/v2/pads")
+    mock2 = requests_mock.get("/api/v1/data/provider/dataset/")
+    mock3 = requests_mock.get("https://api.corva.ai/v2/pads")
 
     app_runner(tutorial001.task_app, event)
 
@@ -31,13 +31,13 @@ def test_tutorial001(app_runner, requests_mock: RequestsMocker):
 
 
 @pytest.mark.parametrize(
-    'json,ctx', ([{}, contextlib.nullcontext()], [None, pytest.raises(JSONDecodeError)])
+    "json,ctx", ([{}, contextlib.nullcontext()], [None, pytest.raises(JSONDecodeError)])
 )
 def test_tutorial002(json, ctx, app_runner, requests_mock: RequestsMocker):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    mock1 = requests_mock.get('/v2/pads', json=json)
-    mock2 = requests_mock.get('/v2/pads?company=1', complete_qs=True)
+    mock1 = requests_mock.get("/v2/pads", json=json)
+    mock2 = requests_mock.get("/v2/pads?company=1", complete_qs=True)
 
     with ctx:
         app_runner(tutorial002.task_app, event)
@@ -49,10 +49,10 @@ def test_tutorial002(json, ctx, app_runner, requests_mock: RequestsMocker):
 def test_tutorial003(app_runner, requests_mock: RequestsMocker):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    post_mock = requests_mock.post('/v2/pads')
-    delete_mock = requests_mock.delete('/v2/pads/123')
-    put_mock = requests_mock.put('/api/v1/data/provider/dataset/')
-    patch_mock = requests_mock.patch('/v2/pads/123')
+    post_mock = requests_mock.post("/v2/pads")
+    delete_mock = requests_mock.delete("/v2/pads/123")
+    put_mock = requests_mock.put("/api/v1/data/provider/dataset/")
+    patch_mock = requests_mock.patch("/v2/pads/123")
 
     app_runner(tutorial003.task_app, event)
 
@@ -66,11 +66,11 @@ def test_tutorial004(app_runner, requests_mock: RequestsMocker):
     event = TaskEvent(asset_id=0, company_id=0)
 
     expected_headers = {
-        'header': 'header-value',
+        "header": "header-value",
         **TestClient._api.default_headers,
     }
 
-    mock = requests_mock.get('/v2/pads')
+    mock = requests_mock.get("/v2/pads")
 
     app_runner(tutorial004.task_app, event)
 
@@ -83,7 +83,7 @@ def test_tutorial004(app_runner, requests_mock: RequestsMocker):
 def test_tutorial005(app_runner, mocker: MockerFixture):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    mock = mocker.patch.object(Api, 'get_dataset')
+    mock = mocker.patch.object(Api, "get_dataset")
 
     app_runner(tutorial005.task_app, event)
 

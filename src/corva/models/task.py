@@ -11,8 +11,8 @@ from corva.models.base import CorvaBaseEvent, RawBaseEvent
 
 
 class TaskStatus(enum.Enum):
-    fail = 'fail'
-    success = 'success'
+    fail = "fail"
+    success = "success"
 
 
 class TaskEvent(CorvaBaseEvent):
@@ -39,7 +39,7 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
         return [pydantic.parse_obj_as(RawTaskEvent, event)]
 
     def get_task_event(self, api: Api) -> TaskEvent:
-        response = api.get(path=f'v2/tasks/{self.task_id}')
+        response = api.get(path=f"v2/tasks/{self.task_id}")
         response.raise_for_status()
 
         return TaskEvent(**response.json())
@@ -49,4 +49,4 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     ) -> requests.Response:
         """Updates the task."""
 
-        return api.put(path=f'v2/tasks/{self.task_id}/{status.value}', data=data)
+        return api.put(path=f"v2/tasks/{self.task_id}/{status.value}", data=data)

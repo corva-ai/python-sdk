@@ -16,48 +16,48 @@ def task_app(event, api):
 
 
 @pytest.mark.parametrize(
-    'aws_event,aws_context,exc_ctx,expected',
+    "aws_event,aws_context,exc_ctx,expected",
     (
         [
-            RawTaskEvent(task_id='', version=2).dict(),
+            RawTaskEvent(task_id="", version=2).dict(),
             SimpleNamespace(
-                aws_request_id='', client_context=SimpleNamespace(env={'API_KEY': ''})
+                aws_request_id="", client_context=SimpleNamespace(env={"API_KEY": ""})
             ),
             contextlib.nullcontext(),
-            '',
+            "",
         ],
         [
             RawTaskEvent(
-                task_id='', version=2, client_context={'env': {'API_KEY': ''}}
+                task_id="", version=2, client_context={"env": {"API_KEY": ""}}
             ).dict(),
-            SimpleNamespace(aws_request_id='', client_context=None),
+            SimpleNamespace(aws_request_id="", client_context=None),
             contextlib.nullcontext(),
-            '',
+            "",
         ],
         [
             RawTaskEvent(
-                task_id='', version=2, client_context={'env': {'API_KEY': '0'}}
+                task_id="", version=2, client_context={"env": {"API_KEY": "0"}}
             ).dict(),
             SimpleNamespace(
-                aws_request_id='', client_context=SimpleNamespace(env={'API_KEY': '1'})
+                aws_request_id="", client_context=SimpleNamespace(env={"API_KEY": "1"})
             ),
             contextlib.nullcontext(),
-            '1',
+            "1",
         ],
         [
-            RawTaskEvent(task_id='', version=2).dict(),
-            SimpleNamespace(aws_request_id='', client_context=None),
+            RawTaskEvent(task_id="", version=2).dict(),
+            SimpleNamespace(aws_request_id="", client_context=None),
             pytest.raises(pydantic.ValidationError),
-            '',
+            "",
         ],
     ),
     ids=(
-        'Lambda context has not None `client_context`.'
-        'Lambda event has no `client_context`.',
-        'Lambda context has None `client_context`. Lambda event has `client_context`.',
-        'Lambda context has not None `client_context`. '
-        'Lambda event has `client_context`.',
-        'No `client_context` in Lambda context and event.',
+        "Lambda context has not None `client_context`."
+        "Lambda event has no `client_context`.",
+        "Lambda context has None `client_context`. Lambda event has `client_context`.",
+        "Lambda context has not None `client_context`. "
+        "Lambda event has `client_context`.",
+        "No `client_context` in Lambda context and event.",
     ),
 )
 def test_context(

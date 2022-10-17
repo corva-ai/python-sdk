@@ -103,7 +103,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         There can only be 1 completed record always located at the end of the list.
         """
 
-        return self.records[-1].collection == 'wits.completed'
+        return self.records[-1].collection == "wits.completed"
 
     @property
     def max_record_value(self) -> Union[int, float]:
@@ -163,7 +163,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     def set_asset_id(cls, values: dict) -> dict:
         """Calculates asset_id field."""
 
-        records: List[RawBaseRecord] = values['records']
+        records: List[RawBaseRecord] = values["records"]
 
         values["asset_id"] = int(records[0].asset_id)
 
@@ -173,7 +173,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     def set_company_id(cls, values: dict) -> dict:
         """Calculates company_id field."""
 
-        records: List[RawBaseRecord] = values['records']
+        records: List[RawBaseRecord] = values["records"]
 
         values["company_id"] = int(records[0].company_id)
 
@@ -183,10 +183,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 class RawStreamTimeEvent(RawStreamEvent):
     records: RecordsTime
     rerun: Optional[RerunTime] = None
-    _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
+    _max_record_value_cache_key: ClassVar[str] = "last_processed_timestamp"
 
 
 class RawStreamDepthEvent(RawStreamEvent):
     records: RecordsDepth
     rerun: Optional[RerunDepth] = None
-    _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
+    _max_record_value_cache_key: ClassVar[str] = "last_processed_depth"

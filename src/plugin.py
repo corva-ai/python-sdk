@@ -3,7 +3,7 @@ import os
 import pytest
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def app_runner():
     """Returns a function that should be used to run apps in tests."""
 
@@ -29,13 +29,13 @@ def pytest_load_initial_conftests(args, early_config, parser):
         https://docs.pytest.org/en/stable/writing_plugins.html#plugin-discovery-order-at-tool-startup
     """
 
-    provider = 'test-provider'
+    provider = "test-provider"
     env = {
-        'API_ROOT_URL': 'https://api.localhost.ai',
-        'DATA_API_ROOT_URL': 'https://data.localhost.ai',
-        'CACHE_URL': 'redis://localhost:6379',
-        'APP_KEY': f'{provider}.test-app-name',
-        'PROVIDER': provider,
+        "API_ROOT_URL": "https://api.localhost.ai",
+        "DATA_API_ROOT_URL": "https://data.localhost.ai",
+        "CACHE_URL": "redis://localhost:6379",
+        "APP_KEY": f"{provider}.test-app-name",
+        "PROVIDER": provider,
         **os.environ,  # override env values if provided by user
     }
     os.environ.update(env)

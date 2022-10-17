@@ -42,7 +42,7 @@ class CorvaContext(pydantic.BaseModel):
         if aws_context.client_context is None:
             parse_ctx = mock.patch.object(
                 aws_context,
-                'client_context',
+                "client_context",
                 AwsEventWithClientContext.parse_obj(aws_event).client_context,
             )
 

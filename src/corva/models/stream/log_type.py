@@ -2,8 +2,8 @@ import enum
 
 
 class LogType(enum.Enum):
-    time = 'time'
-    depth = 'depth'
+    time = "time"
+    depth = "depth"
 
     @property
     def raw_event(self):

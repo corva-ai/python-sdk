@@ -93,6 +93,7 @@ def test_reuse_cache(app_runner):
     """
     Testing that cache is reset or reused between runs.
     """
+
     @scheduled
     def scheduled_fibonacci(event, api, cache):
         number1 = int(cache.get('number1') or 1)
@@ -103,10 +104,7 @@ def test_reuse_cache(app_runner):
 
         return number3
 
-    event = ScheduledDataTimeEvent(
-        asset_id=0, company_id=0,
-        start_time=0, end_time=0
-    )
+    event = ScheduledDataTimeEvent(asset_id=0, company_id=0, start_time=0, end_time=0)
 
     # resetting cache - so the results should be the same
     for _ in range(5):

@@ -48,16 +48,16 @@ def test_set_completed_status(context, requests_mock):
 
     # patch post request, that sets scheduled task as completed
     # looks for url path like /scheduler/123/completed
-    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+    post_mock = requests_mock.post(re.compile(r"/scheduler/\d+/completed"))
 
     scheduled_app(event, context)
 
     assert post_mock.called_once
-    assert post_mock.last_request.path == '/scheduler/0/completed'
+    assert post_mock.last_request.path == "/scheduler/0/completed"
 
 
 @pytest.mark.parametrize(
-    'event, post_called',
+    "event, post_called",
     [
         pytest.param(
             RawScheduledNaturalTimeEvent(
@@ -71,7 +71,7 @@ def test_set_completed_status(context, requests_mock):
                 interval=int(),
             ),
             True,
-            id='Set status as completed for failed natural time app.',
+            id="Set status as completed for failed natural time app.",
         ),
         pytest.param(
             RawScheduledDataTimeEvent(
@@ -85,7 +85,7 @@ def test_set_completed_status(context, requests_mock):
                 scheduler_type=SchedulerType.data_time,
             ),
             False,
-            id='Does not set status as completed for failed data time app.',
+            id="Does not set status as completed for failed data time app.",
         ),
         pytest.param(
             RawScheduledDepthEvent(
@@ -98,10 +98,10 @@ def test_set_completed_status(context, requests_mock):
                 scheduler_type=SchedulerType.data_depth_milestone,
                 top_depth=0.0,
                 bottom_depth=1.0,
-                log_identifier='',
+                log_identifier="",
             ),
             False,
-            id='Does not set status as completed for failed depth app.',
+            id="Does not set status as completed for failed depth app.",
         ),
     ],
 )
@@ -123,20 +123,20 @@ def test_set_completed_status_for_failed_apps(
 
     # patch post request, that sets scheduled task as completed
     # looks for url path like /scheduler/123/completed
-    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+    post_mock = requests_mock.post(re.compile(r"/scheduler/\d+/completed"))
 
     with pytest.raises(Exception):
         scheduled_app(app_event, context)
 
     if post_called:
         assert post_mock.called_once
-        assert post_mock.last_request.path == '/scheduler/0/completed'
+        assert post_mock.last_request.path == "/scheduler/0/completed"
     else:
         assert not post_mock.called_once
 
 
 @pytest.mark.parametrize(
-    'event',
+    "event",
     (
         RawScheduledDataTimeEvent(
             asset_id=int(),
@@ -161,7 +161,7 @@ def test_set_completed_status_for_failed_apps(
             scheduler_type=SchedulerType.data_depth_milestone,
             top_depth=0.0,
             bottom_depth=1.0,
-            log_identifier='',
+            log_identifier="",
         ).dict(
             by_alias=True,
             exclude_unset=True,
@@ -181,7 +181,7 @@ def test_set_completed_status_for_failed_apps(
         ),
     ),
 )
-@pytest.mark.parametrize('is_dict', (True, False))
+@pytest.mark.parametrize("is_dict", (True, False))
 def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
     @scheduled
     def scheduled_app(event, api, state):
@@ -196,7 +196,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
 
 
 @pytest.mark.parametrize(
-    'event,attr',
+    "event,attr",
     (
         [
             RawScheduledDataTimeEvent(
@@ -209,7 +209,7 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
             ),
-            'end_time',
+            "end_time",
         ],
         [
             RawScheduledNaturalTimeEvent(
@@ -222,12 +222,12 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
                 company=int(),
                 scheduler_type=SchedulerType.natural_time,
             ),
-            'schedule_start',
+            "schedule_start",
         ],
     ),
 )
 @pytest.mark.parametrize(
-    'value,expected',
+    "value,expected",
     (
         # 31 December 9999 23:59:59 in sec
         [253402300799, 253402300799],
@@ -239,10 +239,10 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
         [1609459200, 1609459200],
     ),
     ids=(
-        'no cast performed',
-        'casted from ms to sec',
-        'casted from ms to sec',
-        'no cast performed',
+        "no cast performed",
+        "casted from ms to sec",
+        "casted from ms to sec",
+        "no cast performed",
     ),
 )
 def test_set_schedule_start(
@@ -252,7 +252,7 @@ def test_set_schedule_start(
     def app(e, api, state):
         return e
 
-    event = event.copy(update={'schedule_start': value})
+    event = event.copy(update={"schedule_start": value})
     app_event = (
         type(event)
         .parse_obj(
@@ -267,7 +267,7 @@ def test_set_schedule_start(
         )
     )
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     result_event: ScheduledEvent = app(app_event, context)[0]
 
@@ -275,7 +275,7 @@ def test_set_schedule_start(
 
 
 @pytest.mark.parametrize(
-    'schedule_start,interval,expected',
+    "schedule_start,interval,expected",
     (
         [2, 1, 2],
         [2, 2, 1],
@@ -306,7 +306,7 @@ def test_set_start_time(
         ]
     ]
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     result_event: ScheduledDataTimeEvent = app(event, context)[0]
 
@@ -337,7 +337,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
     ]
 
     patch = mocker.patch.object(
-        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception
+        RawScheduledEvent, "set_schedule_as_completed", side_effect=Exception
     )
 
     scheduled_app(event, context)
@@ -369,22 +369,22 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
     ]
 
     patch = mocker.patch.object(
-        RawScheduledEvent, 'set_schedule_as_completed', side_effect=Exception('Oops!')
+        RawScheduledEvent, "set_schedule_as_completed", side_effect=Exception("Oops!")
     )
 
     scheduled_app(event, context)
 
     captured = capsys.readouterr()
 
-    assert 'ASSET=0 AC=0' in captured.out
-    assert 'Could not set schedule as completed. Details: Oops!.' in captured.out
+    assert "ASSET=0 AC=0" in captured.out
+    assert "Could not set schedule as completed. Details: Oops!." in captured.out
     patch.assert_called_once()
 
 
 def test_custom_log_handler(context, capsys, mocker: MockerFixture):
     @scheduled(handler=logging.StreamHandler())
     def app(event, api, cache):
-        Logger.info('Info message!')
+        Logger.info("Info message!")
 
     event = RawScheduledDataTimeEvent(
         asset_id=0,
@@ -397,7 +397,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
         scheduler_type=SchedulerType.data_time,
     )
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     app(
         [
@@ -413,17 +413,17 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
 
     captured = capsys.readouterr()
 
-    assert captured.out.endswith('Info message!\n')
-    assert captured.err == 'Info message!\n'
+    assert captured.out.endswith("Info message!\n")
+    assert captured.err == "Info message!\n"
 
 
 @pytest.mark.parametrize(
-    'time, expected',
+    "time, expected",
     (
         # 1 January 2021 00:00:00 in ms
-        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        pytest.param(1609459200000, 1609459200, id="casted from ms to sec"),
         # 1 January 2021 00:00:00 in sec
-        pytest.param(1609459200, 1609459200, id='no cast performed'),
+        pytest.param(1609459200, 1609459200, id="no cast performed"),
     ),
 )
 def test_rerun_data_time_cast_from_ms_to_s(
@@ -447,7 +447,7 @@ def test_rerun_data_time_cast_from_ms_to_s(
         ),
     ).dict(by_alias=True, exclude_unset=True)
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     result_event: ScheduledDataTimeEvent = app(event, context)[0]
 
@@ -457,12 +457,12 @@ def test_rerun_data_time_cast_from_ms_to_s(
 
 
 @pytest.mark.parametrize(
-    'time, expected',
+    "time, expected",
     (
         # 1 January 2021 00:00:00 in ms
-        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        pytest.param(1609459200000, 1609459200, id="casted from ms to sec"),
         # 1 January 2021 00:00:00 in sec
-        pytest.param(1609459200, 1609459200, id='no cast performed'),
+        pytest.param(1609459200, 1609459200, id="no cast performed"),
     ),
 )
 def test_rerun_natural_time_cast_from_ms_to_s(
@@ -486,7 +486,7 @@ def test_rerun_natural_time_cast_from_ms_to_s(
         ),
     ).dict(by_alias=True, exclude_unset=True)
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     result_event: ScheduledNaturalTimeEvent = app(event, context)[0]
 

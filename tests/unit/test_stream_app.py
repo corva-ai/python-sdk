@@ -20,8 +20,8 @@ from corva.models.stream.raw import (
 from corva.models.stream.stream import StreamEvent, StreamTimeEvent
 
 
-@pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
-@pytest.mark.parametrize('value', (1, 2))
+@pytest.mark.parametrize("attr", ("asset_id", "company_id"))
+@pytest.mark.parametrize("value", (1, 2))
 def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixture):
     @stream
     def stream_app(event, api, cache):
@@ -33,7 +33,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                 RawTimeRecord(
                     collection=str(),
                     timestamp=int(),
-                    **{'asset_id': int(), 'company_id': int(), **{attr: value}},
+                    **{"asset_id": int(), "company_id": int(), **{attr: value}},
                 )
             ],
             metadata=RawMetadata(
@@ -50,7 +50,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
 
 
 @pytest.mark.parametrize(
-    'last_value,event,expected',
+    "last_value,event,expected",
     [
         (
             -1,
@@ -66,7 +66,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                         RawTimeRecord(
                             asset_id=int(),
                             company_id=int(),
-                            collection='wits.completed',
+                            collection="wits.completed",
                             timestamp=int(),
                         ),
                     ],
@@ -96,7 +96,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                         RawTimeRecord(
                             asset_id=int(),
                             company_id=int(),
-                            collection='wits.completed',
+                            collection="wits.completed",
                             timestamp=int(),
                         ),
                         RawTimeRecord(
@@ -119,7 +119,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
                 RawTimeRecord(
                     asset_id=int(),
                     company_id=int(),
-                    collection='wits.completed',
+                    collection="wits.completed",
                     timestamp=int(),
                 ),
                 RawTimeRecord(
@@ -246,11 +246,11 @@ def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixtur
         ),
     ],
     ids=[
-        'is completed record last - should be filtered',
-        'is completed record not last - should not be filtered',
-        'last value is None - filtering doesnt fail',
-        'time event filtered',
-        'depth event filtered',
+        "is completed record last - should be filtered",
+        "is completed record not last - should not be filtered",
+        "last value is None - filtering doesnt fail",
+        "time event filtered",
+        "depth event filtered",
     ],
 )
 def test_filter_records(last_value, event, expected, mocker: MockerFixture, context):
@@ -258,9 +258,9 @@ def test_filter_records(last_value, event, expected, mocker: MockerFixture, cont
     def stream_app(event, api, cache):
         pass
 
-    spy = mocker.spy(RawStreamEvent, 'filter_records')
+    spy = mocker.spy(RawStreamEvent, "filter_records")
     mocker.patch.object(
-        RawStreamEvent, 'get_cached_max_record_value', return_value=last_value
+        RawStreamEvent, "get_cached_max_record_value", return_value=last_value
     )
 
     stream_app(event, context)
@@ -292,7 +292,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
     ]
 
     filter_patch = mocker.patch.object(
-        RawStreamEvent, 'filter_records', return_value=[]
+        RawStreamEvent, "filter_records", return_value=[]
     )
     spy = mocker.Mock(stream_app, wraps=stream_app)
 
@@ -303,7 +303,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
 
 
 @pytest.mark.parametrize(
-    'expected,event',
+    "expected,event",
     [
         (
             1,
@@ -438,7 +438,7 @@ def test_last_processed_value_saved_to_cache(
     def stream_app(event, api, cache):
         pass
 
-    spy = mocker.spy(RawStreamEvent, 'get_cached_max_record_value')
+    spy = mocker.spy(RawStreamEvent, "get_cached_max_record_value")
     stream_app(event * 2, context)
 
     assert spy.call_count == 2
@@ -471,7 +471,7 @@ def test_set_cached_max_record_value_should_not_fail_lambda(
     ]
 
     patch = mocker.patch.object(
-        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception
+        RawStreamEvent, "set_cached_max_record_value", side_effect=Exception
     )
 
     stream_app(event, context)
@@ -505,22 +505,22 @@ def test_log_if_unable_to_set_cached_max_record_value(
     ]
 
     patch = mocker.patch.object(
-        RawStreamEvent, 'set_cached_max_record_value', side_effect=Exception('Oops!')
+        RawStreamEvent, "set_cached_max_record_value", side_effect=Exception("Oops!")
     )
 
     stream_app(event, context)
 
     captured = capsys.readouterr()
 
-    assert 'ASSET=0 AC=0' in captured.out
-    assert 'Could not save data to cache. Details: Oops!.' in captured.out
+    assert "ASSET=0 AC=0" in captured.out
+    assert "Could not save data to cache. Details: Oops!." in captured.out
     patch.assert_called_once()
 
 
 def test_custom_log_handler(context, capsys):
     @stream(handler=logging.StreamHandler())
     def app(event, api, cache):
-        Logger.info('Info message!')
+        Logger.info("Info message!")
 
     event = RawStreamTimeEvent(
         records=[
@@ -542,17 +542,17 @@ def test_custom_log_handler(context, capsys):
 
     captured = capsys.readouterr()
 
-    assert captured.out.endswith('Info message!\n')
-    assert captured.err == 'Info message!\n'
+    assert captured.out.endswith("Info message!\n")
+    assert captured.err == "Info message!\n"
 
 
 @pytest.mark.parametrize(
-    'time, expected',
+    "time, expected",
     (
         # 1 January 2021 00:00:00 in ms
-        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        pytest.param(1609459200000, 1609459200, id="casted from ms to sec"),
         # 1 January 2021 00:00:00 in sec
-        pytest.param(1609459200, 1609459200, id='no cast performed'),
+        pytest.param(1609459200, 1609459200, id="no cast performed"),
     ),
 )
 def test_rerun_time_cast_from_ms_to_s(time: int, expected: int, context):

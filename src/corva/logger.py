@@ -9,7 +9,7 @@ from corva.configuration import SETTINGS
 
 logging.Formatter.converter = time.gmtime  # log time as UTC
 
-CORVA_LOGGER = logging.getLogger('corva')
+CORVA_LOGGER = logging.getLogger("corva")
 CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
 
@@ -18,13 +18,13 @@ def get_formatter(
     aws_request_id: bool, asset_id: bool, app_connection_id: bool
 ) -> logging.Formatter:
     return logging.Formatter(
-        f'%(asctime)s.%(msecs)03dZ '
+        f"%(asctime)s.%(msecs)03dZ "
         f'{"%(aws_request_id)s " if aws_request_id else ""}'
-        f'%(levelname)s '
+        f"%(levelname)s "
         f'{"ASSET=%(asset_id)s " if asset_id else ""}'
         f'{"AC=%(app_connection_id)s " if app_connection_id else ""}'
-        f'| %(message)s',
-        '%Y-%m-%dT%H:%M:%S',
+        f"| %(message)s",
+        "%Y-%m-%dT%H:%M:%S",
     )
 
 
@@ -70,7 +70,7 @@ class CorvaLoggerHandler(logging.Handler):
             if it has been truncated.
     """
 
-    TERMINATOR = '\n'
+    TERMINATOR = "\n"
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class CorvaLoggerHandler(logging.Handler):
         self.max_message_size = max_message_size
         self.max_message_count = max_message_count
         self.logger = logger
-        self.placeholder = f'{placeholder}{self.TERMINATOR}'
+        self.placeholder = f"{placeholder}{self.TERMINATOR}"
 
         self.logging_warning = False
         # one extra message to log the warning
@@ -101,8 +101,8 @@ class CorvaLoggerHandler(logging.Handler):
         if self.residue_message_count == 1:
             self.logging_warning = True
             self.logger.warning(
-                f'Disabling the logging as maximum number of logged messages '
-                f'was reached: {self.max_message_count}.'
+                f"Disabling the logging as maximum number of logged messages "
+                f"was reached: {self.max_message_count}."
             )
 
     def format(self, record: logging.LogRecord) -> str:
@@ -112,8 +112,8 @@ class CorvaLoggerHandler(logging.Handler):
         # For CloudWatch `\n` means end of whole log and `\r` means end of line in
         # multiline logs.
         # Replace `\n` for `\r` for logs to display correctly in CloudWatch.
-        message = message.replace('\n', '\r')
-        message = f'{message}{self.TERMINATOR}'
+        message = message.replace("\n", "\r")
+        message = f"{message}{self.TERMINATOR}"
 
         extra_chars_count = len(message) - self.max_message_size
 
@@ -124,7 +124,7 @@ class CorvaLoggerHandler(logging.Handler):
         message_end_idx = len(message) - (extra_chars_count + len(self.placeholder))
 
         if message_end_idx <= 0:
-            return ''
+            return ""
 
         message = message[:message_end_idx] + self.placeholder
 

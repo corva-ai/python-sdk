@@ -39,7 +39,7 @@ class CorvaApiSdk:
 
     def get_secrets(self, app_key: str) -> Dict[str, str]:
         response = self.api_adapter.get(
-            path=f'/v2/apps/secrets/values?app_key={app_key}'
+            path=f"/v2/apps/secrets/values?app_key={app_key}"
         )
         secrets = response.json()
         return secrets

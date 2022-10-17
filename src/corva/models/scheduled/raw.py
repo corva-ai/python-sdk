@@ -25,10 +25,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     """
 
     asset_id: int
-    company_id: int = pydantic.Field(..., alias='company')
-    schedule_id: int = pydantic.Field(..., alias='schedule')
-    app_connection_id: int = pydantic.Field(..., alias='app_connection')
-    app_stream_id: int = pydantic.Field(..., alias='app_stream')
+    company_id: int = pydantic.Field(..., alias="company")
+    schedule_id: int = pydantic.Field(..., alias="schedule")
+    app_connection_id: int = pydantic.Field(..., alias="app_connection")
+    app_stream_id: int = pydantic.Field(..., alias="app_stream")
     scheduler_type: SchedulerType
     has_secrets: bool = False
 
@@ -53,7 +53,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
 
     def set_schedule_as_completed(self, api: Api) -> None:
         """Sets schedule as completed."""
-        api.post(path=f'scheduler/{self.schedule_id}/completed')
+        api.post(path=f"scheduler/{self.schedule_id}/completed")
 
 
 class RawScheduledDataTimeEvent(RawScheduledEvent):
@@ -73,7 +73,7 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     rerun: Optional[RerunTime] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
+    _set_schedule_start = pydantic.validator("schedule_start", allow_reuse=True)(
         validators.from_ms_to_s
     )
 
@@ -100,7 +100,7 @@ class RawScheduledDepthEvent(RawScheduledEvent):
     top_depth: float
     bottom_depth: float
     log_identifier: str
-    interval: float = pydantic.Field(..., alias='depth_milestone')
+    interval: float = pydantic.Field(..., alias="depth_milestone")
     rerun: Optional[RerunDepth] = None
 
 
@@ -118,6 +118,6 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     rerun: Optional[RerunTime] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
+    _set_schedule_start = pydantic.validator("schedule_start", allow_reuse=True)(
         validators.from_ms_to_s
     )

@@ -27,8 +27,8 @@ class RerunTimeRange(base.CorvaBaseEvent):
     end: int
 
     # validators
-    _set_start = pydantic.validator('start', allow_reuse=True)(validators.from_ms_to_s)
-    _set_end = pydantic.validator('end', allow_reuse=True)(validators.from_ms_to_s)
+    _set_start = pydantic.validator("start", allow_reuse=True)(validators.from_ms_to_s)
+    _set_end = pydantic.validator("end", allow_reuse=True)(validators.from_ms_to_s)
 
 
 class RerunTime(base.CorvaBaseEvent):

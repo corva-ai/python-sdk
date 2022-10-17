@@ -25,7 +25,7 @@ from corva.models.task import RawTaskEvent, TaskEvent
 def test_scheduled_logging(context, capsys, mocker: MockerFixture):
     @scheduled
     def app(event, api, cache):
-        Logger.warning('Hello, World!')
+        Logger.warning("Hello, World!")
 
     event = RawScheduledDataTimeEvent(
         asset_id=0,
@@ -38,7 +38,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         scheduler_type=SchedulerType.data_time,
     )
 
-    mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
+    mocker.patch.object(RawScheduledEvent, "set_schedule_as_completed")
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app(
@@ -55,15 +55,15 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
 
     assert (
         capsys.readouterr().out
-        == f'2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING '
-        f'ASSET={event.asset_id} AC={event.app_connection_id} | Hello, World!\n'
+        == f"2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING "
+        f"ASSET={event.asset_id} AC={event.app_connection_id} | Hello, World!\n"
     )
 
 
 def test_stream_logging(context, capsys):
     @stream
     def app(event, api, cache):
-        Logger.warning('Hello, World!')
+        Logger.warning("Hello, World!")
 
     event = RawStreamTimeEvent(
         records=[
@@ -86,25 +86,25 @@ def test_stream_logging(context, capsys):
 
     assert (
         capsys.readouterr().out
-        == f'2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING '
-        f'ASSET={event.asset_id} AC={event.app_connection_id} | Hello, World!\n'
+        == f"2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING "
+        f"ASSET={event.asset_id} AC={event.app_connection_id} | Hello, World!\n"
     )
 
 
 def test_task_logging(context, capsys, mocker: MockerFixture):
     @task
     def app(event, api):
-        Logger.warning('Hello, World!')
+        Logger.warning("Hello, World!")
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id="0", version=2).dict()
     event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(
         RawTaskEvent,
-        'get_task_event',
+        "get_task_event",
         return_value=TaskEvent(asset_id=0, company_id=int()),
     )
-    mocker.patch.object(RawTaskEvent, 'update_task_data')
+    mocker.patch.object(RawTaskEvent, "update_task_data")
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app(raw_event, context)
@@ -112,23 +112,23 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
     captured = capsys.readouterr()
 
     assert (
-        captured.out == f'2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING '
-        f'ASSET={event.asset_id} | Hello, World!\n'
+        captured.out == f"2021-01-02T03:04:05.678Z {context.aws_request_id} WARNING "
+        f"ASSET={event.asset_id} | Hello, World!\n"
     )
 
 
 @pytest.mark.parametrize(
-    'log_level,expected',
+    "log_level,expected",
     (
-        ['WARN', ''],
-        ['INFO', '2021-01-02T03:04:05.678Z qwerty INFO ASSET=0 AC=1 | Info message.\n'],
+        ["WARN", ""],
+        ["INFO", "2021-01-02T03:04:05.678Z qwerty INFO ASSET=0 AC=1 | Info message.\n"],
     ),
 )
 def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFixture):
     @stream
     def app(event, api, cache):
-        Logger.debug('Debug message.')
-        Logger.info('Info message.')
+        Logger.debug("Debug message.")
+        Logger.info("Info message.")
 
     event = RawStreamTimeEvent(
         records=[
@@ -146,7 +146,7 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
         ),
     )
 
-    mocker.patch.object(SETTINGS, 'LOG_LEVEL', log_level)
+    mocker.patch.object(SETTINGS, "LOG_LEVEL", log_level)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app([event.dict()], context)
@@ -157,8 +157,8 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
 def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixture):
     @stream
     def app(event, api, cache):
-        Logger.warning('Hello, World!')
-        Logger.warning('This should not be printed as logging is disabled.')
+        Logger.warning("Hello, World!")
+        Logger.warning("This should not be printed as logging is disabled.")
 
     event = RawStreamTimeEvent(
         records=[
@@ -177,30 +177,30 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
     )
 
     # disable filtering, as app won't be invoked the second time
-    mocker.patch.object(RawStreamEvent, 'filter_records', return_value=event.records)
+    mocker.patch.object(RawStreamEvent, "filter_records", return_value=event.records)
     # first app invoke will reach the limit.
     # so, if logger is shared, second invoke will log nothing.
-    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', 1)
+    mocker.patch.object(SETTINGS, "LOG_THRESHOLD_MESSAGE_COUNT", 1)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app([event.dict()] * 2, context)
 
     expected = (
-        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
-        '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Disabling the '
-        'logging as maximum number of logged messages was reached: 1.\n'
+        "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n"
+        "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Disabling the "
+        "logging as maximum number of logged messages was reached: 1.\n"
     ) * 2
 
     assert capsys.readouterr().out == expected
 
 
 @pytest.mark.parametrize(
-    'max_message_size,expected',
+    "max_message_size,expected",
     [
-        (68, '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, W ...\n'),
-        (6, '2 ...\n'),
-        (5, ''),
-        (4, ''),
+        (68, "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, W ...\n"),
+        (6, "2 ...\n"),
+        (5, ""),
+        (4, ""),
     ],
 )
 def test_long_message_gets_truncated(
@@ -208,7 +208,7 @@ def test_long_message_gets_truncated(
 ):
     @stream
     def app(event, api, cache):
-        Logger.warning('Hello, World!')
+        Logger.warning("Hello, World!")
 
     event = RawStreamTimeEvent(
         records=[
@@ -226,7 +226,7 @@ def test_long_message_gets_truncated(
         ),
     )
 
-    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_SIZE', max_message_size)
+    mocker.patch.object(SETTINGS, "LOG_THRESHOLD_MESSAGE_SIZE", max_message_size)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app([event.dict()], context)
@@ -235,20 +235,20 @@ def test_long_message_gets_truncated(
 
 
 @pytest.mark.parametrize(
-    'max_message_count, expected',
+    "max_message_count, expected",
     [
         (
             0,
-            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
-            'Disabling the logging as maximum number of logged messages '
-            'was reached: 0.\n',
+            "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | "
+            "Disabling the logging as maximum number of logged messages "
+            "was reached: 0.\n",
         ),
         (
             1,
-            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
-            '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | '
-            'Disabling the logging as maximum number of logged messages '
-            'was reached: 1.\n',
+            "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n"
+            "2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | "
+            "Disabling the logging as maximum number of logged messages "
+            "was reached: 1.\n",
         ),
     ],
 )
@@ -257,7 +257,7 @@ def test_max_message_count_reached(
 ):
     @stream
     def app(event, api, cache):
-        Logger.warning('Hello, World!')
+        Logger.warning("Hello, World!")
 
     event = RawStreamTimeEvent(
         records=[
@@ -275,7 +275,7 @@ def test_max_message_count_reached(
         ),
     )
 
-    mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', max_message_count)
+    mocker.patch.object(SETTINGS, "LOG_THRESHOLD_MESSAGE_COUNT", max_message_count)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
         app([event.dict()], context)
@@ -288,20 +288,20 @@ def test_lambda_exceptions_are_logged(context, capsys, mocker: MockerFixture):
     def app(event, api):
         pass
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id="0", version=2).dict()
 
     mocker.patch.object(
         CorvaContext,
-        'from_aws',
-        side_effect=Exception('test_task_logging2'),
+        "from_aws",
+        side_effect=Exception("test_task_logging2"),
     )
 
-    with pytest.raises(Exception, match=r'^test_task_logging2$'):
+    with pytest.raises(Exception, match=r"^test_task_logging2$"):
         app(raw_event, context)
 
     captured = capsys.readouterr()
 
-    assert 'The app failed to execute.' in captured.out
+    assert "The app failed to execute." in captured.out
 
 
 def test_lambda_exceptions_are_logged_using_custom_log_handler(
@@ -311,18 +311,18 @@ def test_lambda_exceptions_are_logged_using_custom_log_handler(
     def app(event, api):
         pass
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id="0", version=2).dict()
 
     mocker.patch.object(
         CorvaContext,
-        'from_aws',
-        side_effect=Exception('test_task_logging2'),
+        "from_aws",
+        side_effect=Exception("test_task_logging2"),
     )
 
-    with pytest.raises(Exception, match=r'^test_task_logging2$'):
+    with pytest.raises(Exception, match=r"^test_task_logging2$"):
         app(raw_event, context)
 
     captured = capsys.readouterr()
 
-    assert 'The app failed to execute.' in captured.out
-    assert 'The app failed to execute.' in captured.err
+    assert "The app failed to execute." in captured.out
+    assert "The app failed to execute." in captured.err

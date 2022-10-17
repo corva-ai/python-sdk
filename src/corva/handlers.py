@@ -18,8 +18,8 @@ from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
 
-StreamEventT = TypeVar('StreamEventT', bound=StreamEvent)
-ScheduledEventT = TypeVar('ScheduledEventT', bound=ScheduledEvent)
+StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
+ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
 
 
 def get_cache_key(
@@ -30,8 +30,8 @@ def get_cache_key(
     app_connection_id: int,
 ) -> str:
     return (
-        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
-        f'{app_key}/{app_connection_id}'
+        f"{provider}/well/{asset_id}/stream/{app_stream_id}/"
+        f"{app_key}/{app_connection_id}"
     )
 
 
@@ -73,7 +73,7 @@ def base_handler(
                 return results
 
             except Exception:
-                CORVA_LOGGER.exception('The app failed to execute.')
+                CORVA_LOGGER.exception("The app failed to execute.")
                 raise
 
     return wrapper
@@ -126,7 +126,7 @@ def stream(
             return
 
         app_event = event.metadata.log_type.event.parse_obj(
-            event.copy(update={'records': records}, deep=True)
+            event.copy(update={"records": records}, deep=True)
         )
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -136,7 +136,7 @@ def stream(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                 logger=CORVA_LOGGER,
-                placeholder=' ...',
+                placeholder=" ...",
             ),
             user_handler=handler,
             logger=CORVA_LOGGER,
@@ -161,7 +161,7 @@ def stream(
             event.set_cached_max_record_value(cache=user_cache_sdk)
         except Exception as e:
             # lambda succeeds if we're unable to cache the value
-            CORVA_LOGGER.warning(f'Could not save data to cache. Details: {str(e)}.')
+            CORVA_LOGGER.warning(f"Could not save data to cache. Details: {str(e)}.")
 
         return result
 
@@ -216,7 +216,7 @@ def scheduled(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                 logger=CORVA_LOGGER,
-                placeholder=' ...',
+                placeholder=" ...",
             ),
             user_handler=handler,
             logger=CORVA_LOGGER,
@@ -254,7 +254,7 @@ def set_schedule_as_completed(event: RawScheduledEvent, api: Api) -> None:
         event.set_schedule_as_completed(api=api)
     except Exception as e:
         # lambda succeeds if we're unable to set completed status
-        CORVA_LOGGER.warning(f'Could not set schedule as completed. Details: {str(e)}.')
+        CORVA_LOGGER.warning(f"Could not set schedule as completed. Details: {str(e)}.")
 
 
 def task(
@@ -295,7 +295,7 @@ def task(
                     max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                     max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                     logger=CORVA_LOGGER,
-                    placeholder=' ...',
+                    placeholder=" ...",
                 ),
                 user_handler=handler,
                 logger=CORVA_LOGGER,
@@ -321,15 +321,15 @@ def task(
                     FutureWarning,
                 )
 
-                data['payload'] = result
+                data["payload"] = result
 
             status = TaskStatus.success
 
             return result
 
         except Exception as exc:
-            CORVA_LOGGER.exception('Task app failed to execute.')
-            data = {'fail_reason': str(exc)}
+            CORVA_LOGGER.exception("Task app failed to execute.")
+            data = {"fail_reason": str(exc)}
 
         finally:
             try:
@@ -340,6 +340,6 @@ def task(
                 ).raise_for_status()
             except Exception as e:
                 # lambda succeeds if we're unable to update task data
-                CORVA_LOGGER.warning(f'Could not update task data. Details: {str(e)}.')
+                CORVA_LOGGER.warning(f"Could not update task data. Details: {str(e)}.")
 
     return wrapper

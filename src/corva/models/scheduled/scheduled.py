@@ -31,7 +31,7 @@ class ScheduledDataTimeEvent(ScheduledEvent):
     asset_id: int
     company_id: int
     start_time: int
-    end_time: int = pydantic.Field(..., alias='schedule_start')
+    end_time: int = pydantic.Field(..., alias="schedule_start")
     rerun: Optional[RerunTime] = None
 
     class Config:
