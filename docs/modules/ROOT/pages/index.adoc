@@ -604,6 +604,34 @@ Pass dictionary with required secrets
 as `secrets` parameter.
 <.> {test-app-step5}
 
+=== Cache
+This section shows how to test an app that uses cache;
+reuse the same cache or reset it.
+[source,python]
+----
+include::example$testing/tutorial008.py[]
+----
+<.> {test-app-step1}
+It is a sample Fibonacci function that is relying on cache data;
+it receives two numbers from the cache, compute the sum and store
+the last two numbers in the cache.
+<.> {test-app-step2}
+In this test case, the cache is reset for each `app_runner` call.
+<.> {test-app-step3}
+<.> {test-app-step4}
+When the `cache` kwargs is not passed to the `app_runner`,
+it will reset everytime it is called.
+<.> {test-app-step5}
+Since the cache is reset for each `app_runner` call, the results are the same.
+<.> {test-app-step2}
+In this test case, the cache is reused for each `app_runner` call.
+<.> {test-app-step3}
+<.> Defining a cache object.
+<.> {test-app-step4}
+When the `cache` is passed in the `app_runner`,
+it will be used to run the app.
+<.> {test-app-step5}
+Since the same cache object is used, the results are changing.
 
 == App rerun
 You might want to implement custom logic for app rerun,
