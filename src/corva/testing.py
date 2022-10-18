@@ -37,7 +37,7 @@ class TestClient:
         event: Union[TaskEvent, StreamEvent, ScheduledEvent],
         *,
         secrets: Optional[Dict[str, str]] = None,
-        cache: UserRedisSdk = None
+        cache: Optional[UserRedisSdk] = None
     ) -> Any:
 
         app: Callable[[], Any]
