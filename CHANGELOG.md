@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.6.0] - 2022-10-19
+
 ### Changed
 - Added `cache` parameter to `app_runner` to reuse the cache object.
 
@@ -292,8 +295,9 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.5.3...master
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.5.2...v1.5.3
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.6.0...master
+[1.6.0] https://github.com/corva-ai/python-sdk/compare/v1.5.3...v1.6.0
+[1.5.3] https://github.com/corva-ai/python-sdk/compare/v1.5.2...v1.5.3
 [1.5.2] https://github.com/corva-ai/python-sdk/compare/v1.5.1...v1.5.2
 [1.5.1] https://github.com/corva-ai/python-sdk/compare/v1.5.0...v1.5.1
 [1.5.0] https://github.com/corva-ai/python-sdk/compare/v1.4.0...v1.5.0
