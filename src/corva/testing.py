@@ -36,7 +36,8 @@ class TestClient:
         fn: Callable,
         event: Union[TaskEvent, StreamEvent, ScheduledEvent],
         *,
-        secrets: Optional[Dict[str, str]] = None
+        secrets: Optional[Dict[str, str]] = None,
+        cache: Optional[UserRedisSdk] = None
     ) -> Any:
 
         app: Callable[[], Any]
@@ -45,15 +46,18 @@ class TestClient:
             app = functools.partial(inspect.unwrap(fn), event, TestClient._api)
 
         if isinstance(event, (ScheduledEvent, StreamEvent)):
+            if not cache:
+                cache = UserRedisSdk(
+                    hash_name="hash_name",
+                    redis_dsn=SETTINGS.CACHE_URL,
+                    use_fakes=True,
+                )
+
             app = functools.partial(
                 inspect.unwrap(fn),
                 event,
                 TestClient._api,
-                UserRedisSdk(
-                    hash_name='hash_name',
-                    redis_dsn=SETTINGS.CACHE_URL,
-                    use_fakes=True,
-                ),
+                cache,
             )
 
         return service.run_app(
