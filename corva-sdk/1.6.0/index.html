@@ -17,7 +17,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="corva-sdk" data-version="1.5.3">
+<div class="nav-container" data-component="corva-sdk" data-version="1.6.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -37,14 +37,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">corva-sdk</span>
-    <span class="version">1.5.3</span>
+    <span class="version">1.6.0</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <a class="title" href="index.html">corva-sdk</a>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">1.5.3</a>
+          <a href="index.html">1.6.0</a>
         </li>
       </ul>
     </li>
@@ -63,7 +63,7 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.5.3/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.6.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="5">
@@ -74,7 +74,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>1.5.3</strong>.</p>
+<p>Documentation for version <strong>1.6.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -1649,6 +1649,110 @@ as <code>secrets</code> parameter.</td>
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_cache"><a class="anchor" href="#_cache"></a>8.5. Cache</h3>
+<div class="paragraph">
+<p>This section shows how to test an app that uses cache;
+reuse the same cache or reset it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import ScheduledDataTimeEvent, scheduled
+from corva.service.cache_sdk import UserRedisSdk
+
+
+@scheduled
+def scheduled_fibonacci(event, api, cache):  <i class="conum" data-value="1"></i><b>(1)</b>
+    number1 = int(cache.get('number1') or 1)
+    number2 = int(cache.get('number2') or 1)
+    number3 = number1 + number2
+    cache.set('number1', number2)
+    cache.set('number2', number3)
+
+    return number3
+
+
+def test_reset_cache(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
+    event = ScheduledDataTimeEvent(
+        asset_id=0, company_id=0, start_time=0, end_time=0
+    )  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    for _ in range(5):
+        result = app_runner(scheduled_fibonacci, event)  <i class="conum" data-value="4"></i><b>(4)</b>
+        assert result == 2  <i class="conum" data-value="5"></i><b>(5)</b>
+
+
+def test_reuse_cache(app_runner):  <i class="conum" data-value="6"></i><b>(6)</b>
+    event = ScheduledDataTimeEvent(
+        asset_id=0, company_id=0, start_time=0, end_time=0
+    )  <i class="conum" data-value="7"></i><b>(7)</b>
+
+    cache = UserRedisSdk(
+        hash_name='hash_name', redis_dsn='redis://localhost', use_fakes=True
+    )  <i class="conum" data-value="8"></i><b>(8)</b>
+
+    expected_results = [2, 3, 5, 8, 13, 21, 34, 55]
+    for expected_result in expected_results:
+        result = app_runner(scheduled_fibonacci, event, cache=cache)  <i class="conum" data-value="9"></i><b>(9)</b>
+        assert result == expected_result  <i class="conum" data-value="10"></i><b>(10)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sample app that we want to test.
+It is a sample Fibonacci function that is relying on cache data;
+it receives two numbers from the cache, compute the sum and store
+the last two numbers in the cache.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add <code>app_runner</code> argument to your test function.
+In this test case, the cache is reset for each <code>app_runner</code> call.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.
+When the <code>cache</code> kwargs is not passed to the <code>app_runner</code>,
+it will reset everytime it is called.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Verify the result.
+Since the cache is reset for each <code>app_runner</code> call, the results are the same.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Add <code>app_runner</code> argument to your test function.
+In this test case, the cache is reused for each <code>app_runner</code> call.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Defining a cache object.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.
+When the <code>cache</code> is passed in the <code>app_runner</code>,
+it will be used to run the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Verify the result.
+Since the same cache object is used, the results are changing.</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1800,7 +1904,7 @@ a good starting point for exploration.</td>
   </div>
 </main>
 </div>
-<script src="../../_/js/site.js"></script>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>
   </body>
 </html>
