@@ -221,6 +221,7 @@ using `Api.get_dataset` method.
 include::example$api/tutorial005.py[]
 ----
 
+[#produce_messages]
 ==== Produce messages
 
 Post data to the {api-v1-message-producer-link} endpoint
@@ -491,6 +492,14 @@ and pass corresponding logging handler
 as a keyword argument to the app decorator.
 Use code samples above as the examples.
 
+== Followable apps
+
+Followable apps must produce
+messages in order to trigger
+chain reaction of app runs.
+See <<produce_messages>> section
+for instructions on how to produce
+messages.
 
 == Secrets
 You can store sensitive data such as passwords,
