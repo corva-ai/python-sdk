@@ -108,11 +108,11 @@ clean:
 release:
 	@echo "Checkout the master branch."
 	@echo "Update src/version.py with new version."
-	@echo "Update docs/antora.yml with new version."
+	@echo "Update docs/antora.yml 'version' with new version like '1.6.0'."
 	@echo "Update docs/antora-playbook.yml 'content.sources.tags'."
 	@echo "Update CHANGELOG.md."
 	@echo "Commit the changes."
-	@echo "Create tag like "v1.0.0"."
+	@echo "Create tag like 'v1.6.0'."
 	@echo "Nullify version in docs/antora.yml."
 	@echo "Commit the changes."
 	@echo "Push commits and tag."
