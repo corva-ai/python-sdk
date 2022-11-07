@@ -23,11 +23,13 @@ class Api:
         api_key: str,
         app_key: str,
         timeout: Optional[int] = None,
+        app_connection_id: Optional[int] = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_key = app_key
+        self.app_connection_id = app_connection_id
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
 
     @property
@@ -178,3 +180,22 @@ class Api:
         data = list(response.json())
 
         return data
+
+    def produce_messages(self, data: List[dict]) -> None:
+        """Posts data to the endpoint '/api/v1/message_producer/'.
+
+        Args:
+          data: messages to post.
+            Message examples:
+            - time message [{"timestamp": 1}];
+            - depth message [{"measured_depth": 1.0}].
+
+        Raises:
+          requests.HTTPError: if request was unsuccessful.
+        """
+
+        response = self.post(
+            '/api/v1/message_producer/',
+            json={'app_connection_id': self.app_connection_id, 'data': data},
+        )
+        response.raise_for_status()

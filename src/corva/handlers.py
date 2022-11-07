@@ -55,18 +55,12 @@ def base_handler(
                     aws_event=aws_event, aws_context=aws_context
                 )
 
-                api = Api(
-                    api_url=SETTINGS.API_ROOT_URL,
-                    data_api_url=SETTINGS.DATA_API_ROOT_URL,
-                    api_key=context.api_key,
-                    app_key=SETTINGS.APP_KEY,
-                    timeout=None,
-                )
-
                 raw_events = raw_event_type.from_raw_event(event=aws_event)
 
                 results = [
-                    func(raw_event, api, context.aws_request_id, logging_ctx)
+                    func(
+                        raw_event, context.api_key, context.aws_request_id, logging_ctx
+                    )
                     for raw_event in raw_events
                 ]
 
@@ -97,12 +91,21 @@ def stream(
     @functools.partial(base_handler, raw_event_type=RawStreamEvent, handler=handler)
     def wrapper(
         event: RawStreamEvent,
-        api: Api,
+        api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
+
+        api = Api(
+            api_url=SETTINGS.API_ROOT_URL,
+            data_api_url=SETTINGS.DATA_API_ROOT_URL,
+            api_key=api_key,
+            app_key=SETTINGS.APP_KEY,
+            timeout=None,
+            app_connection_id=event.app_connection_id,
+        )
 
         hash_name = get_cache_key(
             provider=SETTINGS.PROVIDER,
@@ -186,12 +189,21 @@ def scheduled(
     @functools.partial(base_handler, raw_event_type=RawScheduledEvent, handler=handler)
     def wrapper(
         event: RawScheduledEvent,
-        api: Api,
+        api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
+
+        api = Api(
+            api_url=SETTINGS.API_ROOT_URL,
+            data_api_url=SETTINGS.DATA_API_ROOT_URL,
+            api_key=api_key,
+            app_key=SETTINGS.APP_KEY,
+            timeout=None,
+            app_connection_id=event.app_connection_id,
+        )
 
         hash_name = get_cache_key(
             provider=SETTINGS.PROVIDER,
@@ -275,12 +287,21 @@ def task(
     @functools.partial(base_handler, raw_event_type=RawTaskEvent, handler=handler)
     def wrapper(
         event: RawTaskEvent,
-        api: Api,
+        api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}
+
+        api = Api(
+            api_url=SETTINGS.API_ROOT_URL,
+            data_api_url=SETTINGS.DATA_API_ROOT_URL,
+            api_key=api_key,
+            app_key=SETTINGS.APP_KEY,
+            timeout=None,
+            app_connection_id=None,
+        )
 
         try:
             app_event = event.get_task_event(api=api)
