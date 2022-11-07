@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
-from corva import Api, TaskEvent
+from corva import Api, ScheduledDataTimeEvent, ScheduledDepthEvent, TaskEvent
 from corva.testing import TestClient
 from docs.modules.ROOT.examples.api import (
     tutorial001,
@@ -13,6 +13,7 @@ from docs.modules.ROOT.examples.api import (
     tutorial003,
     tutorial004,
     tutorial005,
+    tutorial006,
 )
 
 
@@ -88,3 +89,24 @@ def test_tutorial005(app_runner, mocker: MockerFixture):
     app_runner(tutorial005.task_app, event)
 
     mock.assert_called_once()
+
+
+def test_tutorial006(app_runner, mocker: MockerFixture):
+    time_event = ScheduledDataTimeEvent(
+        asset_id=0, company_id=0, start_time=0, end_time=0
+    )
+    time_mock = mocker.patch.object(Api, 'produce_messages')
+    app_runner(tutorial006.scheduled_time_app, time_event)
+    time_mock.assert_called_once()
+
+    depth_event = ScheduledDepthEvent(
+        asset_id=0,
+        company_id=0,
+        top_depth=0,
+        bottom_depth=0,
+        log_identifier='',
+        interval=0,
+    )
+    depth_mock = mocker.patch.object(Api, 'produce_messages')
+    app_runner(tutorial006.scheduled_depth_app, depth_event)
+    depth_mock.assert_called_once()

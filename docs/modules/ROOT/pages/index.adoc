@@ -4,6 +4,7 @@
 :corva-platform-api-link: https://api.corva.ai/documentation/index.html[Corva Platform API]
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
+:api-v1-message-producer-link: https://data.qa.corva.ai/docs#/data/produce_api_v1_message_producer__post[/api/v1/message_producer/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
 :python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
@@ -219,6 +220,21 @@ using `Api.get_dataset` method.
 ----
 include::example$api/tutorial005.py[]
 ----
+
+==== Produce messages
+
+Post data to the {api-v1-message-producer-link} endpoint
+using `Api.produce_messages` method.
+The method will work for both
+<<stream,`stream`>>
+and <<scheduled,`scheduled`>> types of apps.
+
+[source,python]
+----
+include::example$api/tutorial006.py[]
+----
+<.> Example of producing time messages.
+<.> Example of producing depth messages.
 
 [#cache]
 == Cache
