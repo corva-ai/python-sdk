@@ -4,6 +4,7 @@
 :corva-platform-api-link: https://api.corva.ai/documentation/index.html[Corva Platform API]
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
+:api-v1-message-producer-link: https://data.qa.corva.ai/docs#/data/produce_api_v1_message_producer__post[/api/v1/message_producer/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
 :python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
@@ -219,6 +220,22 @@ using `Api.get_dataset` method.
 ----
 include::example$api/tutorial005.py[]
 ----
+
+[#produce_messages]
+==== Produce messages
+
+Post data to the {api-v1-message-producer-link} endpoint
+using `Api.produce_messages` method.
+The method will work for both
+<<stream,`stream`>>
+and <<scheduled,`scheduled`>> types of apps.
+
+[source,python]
+----
+include::example$api/tutorial006.py[]
+----
+<.> Example of producing time messages.
+<.> Example of producing depth messages.
 
 [#cache]
 == Cache
@@ -475,6 +492,14 @@ and pass corresponding logging handler
 as a keyword argument to the app decorator.
 Use code samples above as the examples.
 
+== Followable apps
+
+Followable apps must produce
+messages in order to trigger
+chain reaction of app runs.
+See <<produce_messages>> section
+for instructions on how to produce
+messages.
 
 == Secrets
 You can store sensitive data such as passwords,

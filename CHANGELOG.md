@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `produce_messages` method to `Api`.
+See corresponding section in docs.
+
 
 ## [1.6.0] - 2022-10-19
 
-### Changed
-- Added `cache` parameter to `app_runner` to reuse the cache object.
+### Added
+- `cache` parameter to `app_runner`
+to reuse the cache object.
 
 
 ## [1.5.3] - 2022-09-05

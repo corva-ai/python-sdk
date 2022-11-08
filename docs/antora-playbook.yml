@@ -5,8 +5,8 @@ content:
   sources:
     - url: /antora  # Volume mount target inside docker container
       start_path: docs
-      # Use `branches: HEAD` for local development
       branches: []
+#      branches: HEAD  # Use this for local development
       tags: [v1.6.0]
 asciidoc:
   attributes:
