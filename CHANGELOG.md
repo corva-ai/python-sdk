@@ -4,12 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
+
+
+## [1.7.0] - 2022-11-08
 
 ### Added
 - `produce_messages` method to `Api`.
-See corresponding section in docs.
+See `Produce messages` section in docs.
+- Documentation on followable apps. 
+See `Followable apps` section in docs.
 
 
 ## [1.6.0] - 2022-10-19
@@ -300,7 +304,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.6.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.7.0...master
+[1.7.0] https://github.com/corva-ai/python-sdk/compare/v1.6.0...v1.7.0
 [1.6.0] https://github.com/corva-ai/python-sdk/compare/v1.5.3...v1.6.0
 [1.5.3] https://github.com/corva-ai/python-sdk/compare/v1.5.2...v1.5.3
 [1.5.2] https://github.com/corva-ai/python-sdk/compare/v1.5.1...v1.5.2
