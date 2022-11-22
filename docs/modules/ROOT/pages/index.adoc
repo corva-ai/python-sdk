@@ -510,12 +510,51 @@ Use code samples above as the examples.
 
 == Followable apps
 
+[TIP]
+====
+Only <<stream,`stream`>>
+and <<scheduled,`scheduled`>>
+apps can be followed.
+====
+
+An app is called followable once
+it can be followed by other ones.
 Followable apps must produce
-messages in order to trigger
-chain reaction of app runs.
-See <<produce_messages>> section
+data to trigger
+chain reaction of following app runs.
+See <<produce_messages>> and <<insert_data>> sections
 for instructions on how to produce
 messages.
+
+[source,python]
+----
+include::example$followable/tutorial001.py[]
+----
+<.> The followable app.
+<.> Data documents that should be
+saved and produced.
+<.> *Slow* method which uses two api
+calls.
+<.> First save the data to the dataset.
+See <<insert_data>> for details.
+<.> Then produce the messages.
+See <<produce_messages>> for details.
+<.> *Recommended* method which
+uses single api call.
+<.> Enable this flag to save and
+produce messages at once.
+See <<insert_data>> for details.
+<.> Example scheduled following app.
+It will be invoked as soon as there
+is some time interval worth of data.
+<.> Scheduled apps should query the data
+as unlike stream ones they don't
+receive it in the event.
+<.> Example stream following app.
+It will be invoked as soon as new
+messages are produced.
+<.> Stream apps receive data staight from the event. No api calls needeed.
+
 
 == Secrets
 You can store sensitive data such as passwords,
