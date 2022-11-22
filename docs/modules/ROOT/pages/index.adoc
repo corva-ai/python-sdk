@@ -5,6 +5,7 @@
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
 :api-v1-message-producer-link: https://data.qa.corva.ai/docs#/data/produce_api_v1_message_producer__post[/api/v1/message_producer/]
+:api-v1-post-data-provider-dataset-link: https://data.qa.corva.ai/docs#/data/create_api_v1_data__provider___dataset___post[/api/v1/data/provider/dataset/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
 :python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
@@ -236,6 +237,21 @@ include::example$api/tutorial006.py[]
 ----
 <.> Example of producing time messages.
 <.> Example of producing depth messages.
+
+[#insert_data]
+==== Insert data
+
+Posts data to the
+{api-v1-post-data-provider-dataset-link}
+endpoint.
+
+[source,python]
+----
+include::example$api/tutorial007.py[]
+----
+<.> Save two documents to dataset.
+<.> You can enable this flag
+to save and <<produce_messages,`produce`>> the data at once.
 
 [#cache]
 == Cache

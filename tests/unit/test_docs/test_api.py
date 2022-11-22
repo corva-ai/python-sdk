@@ -14,6 +14,7 @@ from docs.modules.ROOT.examples.api import (
     tutorial004,
     tutorial005,
     tutorial006,
+    tutorial007,
 )
 
 
@@ -110,3 +111,12 @@ def test_tutorial006(app_runner, mocker: MockerFixture):
     depth_mock = mocker.patch.object(Api, 'produce_messages')
     app_runner(tutorial006.scheduled_depth_app, depth_event)
     depth_mock.assert_called_once()
+
+
+def test_tutorial007(app_runner, mocker: MockerFixture):
+    time_event = ScheduledDataTimeEvent(
+        asset_id=0, company_id=0, start_time=0, end_time=0
+    )
+    time_mock = mocker.patch.object(Api, 'insert_data')
+    app_runner(tutorial007.scheduled_app, time_event)
+    time_mock.assert_called_once()

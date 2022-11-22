@@ -11,14 +11,14 @@ def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
                 'asset_id': event.asset_id,
                 'version': 1,
                 'timestamp': 0,
-                'data': {'result': 'very important result'}
+                'data': {'result': 'very important result'},
             },
             {
                 'asset_id': event.asset_id,
                 'version': 1,
                 'timestamp': 1,
-                'data': {'result': 'very important result'}
-            }
+                'data': {'result': 'very important result'},
+            },
         ],  # <.>
-        produce=True  # <.>
+        produce=True,  # <.>
     )
