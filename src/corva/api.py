@@ -1,7 +1,7 @@
 import json
 import posixpath
 import re
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Union
 
 import requests
 
@@ -221,6 +221,8 @@ class Api:
 
         Returns: response dict.
         """
+
+        body: Union[dict, List[dict]]  # make mypy happy
 
         if produce:
             body = {
