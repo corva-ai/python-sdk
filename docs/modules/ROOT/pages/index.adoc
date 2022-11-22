@@ -553,7 +553,8 @@ receive it in the event.
 <.> Example stream following app.
 It will be invoked as soon as new
 messages are produced.
-<.> Stream apps receive data staight from the event. No api calls needeed.
+<.> Stream apps receive data straight
+from the event. No api calls needed.
 
 
 == Secrets
