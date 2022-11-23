@@ -241,7 +241,7 @@ include::example$api/tutorial006.py[]
 [#insert_data]
 ==== Insert data
 
-Posts data to the
+Post data to the
 {api-v1-post-data-provider-dataset-link}
 endpoint.
 
