@@ -17,7 +17,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="corva-sdk" data-version="1.7.0">
+<div class="nav-container" data-component="corva-sdk" data-version="1.8.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -37,14 +37,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">corva-sdk</span>
-    <span class="version">1.7.0</span>
+    <span class="version">1.8.0</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <a class="title" href="index.html">corva-sdk</a>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">1.7.0</a>
+          <a href="index.html">1.8.0</a>
         </li>
       </ul>
     </li>
@@ -63,7 +63,7 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.7.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.8.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="5">
@@ -74,7 +74,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>1.7.0</strong>.</p>
+<p>Documentation for version <strong>1.8.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -574,6 +574,55 @@ def scheduled_depth_app(event: ScheduledDepthEvent, api: Api, cache: Cache):
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>Example of producing depth messages.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="insert_data"><a class="anchor" href="#insert_data"></a>4.5.3. Insert data</h4>
+<div class="paragraph">
+<p>Post data to the
+<a href="https://data.qa.corva.ai/docs#/data/create_api_v1_data__provider___dataset___post">/api/v1/data/provider/dataset/</a>
+endpoint.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
+
+
+@scheduled
+def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
+    api.insert_data(
+        provider='my-company-name',
+        dataset='my-datset-name',
+        data=[
+            {
+                'asset_id': event.asset_id,
+                'version': 1,
+                'timestamp': 0,
+                'data': {'result': 'very important result'},
+            },
+            {
+                'asset_id': event.asset_id,
+                'version': 1,
+                'timestamp': 1,
+                'data': {'result': 'very important result'},
+            },
+        ],  <i class="conum" data-value="1"></i><b>(1)</b>
+        produce=True,  <i class="conum" data-value="2"></i><b>(2)</b>
+    )</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Save two documents to dataset.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can enable this flag
+to save and <a href="#produce_messages"><code>produce</code></a> the data at once.</td>
 </tr>
 </table>
 </div>
@@ -1275,13 +1324,156 @@ Use code samples above as the examples.</p>
 <div class="sect1">
 <h2 id="_followable_apps"><a class="anchor" href="#_followable_apps"></a>7. Followable apps</h2>
 <div class="sectionbody">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Followable apps must produce
-messages in order to trigger
-chain reaction of app runs.
-See <a href="#produce_messages">Produce messages</a> section
+<p>Only <a href="#stream"><code>stream</code></a>
+and <a href="#scheduled"><code>scheduled</code></a>
+apps can be followed.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>An app is called followable once
+it can be followed by other ones.
+Followable apps must produce
+data to trigger
+chain reaction of following app runs.
+See <a href="#produce_messages">Produce messages</a> and <a href="#insert_data">Insert data</a> sections
 for instructions on how to produce
 messages.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledDataTimeEvent, StreamTimeEvent, scheduled, stream
+
+
+@scheduled  <i class="conum" data-value="1"></i><b>(1)</b>
+def followable_scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
+    data = [
+        {
+            'asset_id': event.asset_id,
+            'version': 1,
+            'timestamp': 0,
+            'data': {'answer': 10},
+        },
+        {
+            'asset_id': event.asset_id,
+            'version': 1,
+            'timestamp': 60,
+            'data': {'answer': 11},
+        },
+    ]  <i class="conum" data-value="2"></i><b>(2)</b>
+
+    <i class="conum" data-value="3"></i><b>(3)</b>
+    api.insert_data(
+        provider='my-provider',
+        dataset='quiz-answers',
+        data=data,
+    )  <i class="conum" data-value="4"></i><b>(4)</b>
+    api.produce_messages(data=data)  <i class="conum" data-value="5"></i><b>(5)</b>
+
+    <i class="conum" data-value="6"></i><b>(6)</b>
+    api.insert_data(
+        provider='my-provider',
+        dataset='quiz-answers',
+        data=data,
+        produce=True,  <i class="conum" data-value="7"></i><b>(7)</b>
+    )
+
+
+@scheduled  <i class="conum" data-value="8"></i><b>(8)</b>
+def following_scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
+    data = api.get_dataset(
+        provider='my-provider',
+        dataset='quiz-answers',
+        query={'asset_id': event.asset_id, 'company_id': event.company_id},
+        sort={'timestamp': 1},
+        limit=2,
+    )  <i class="conum" data-value="9"></i><b>(9)</b>
+
+    assert [datum['data'] for datum in data] == [
+        {'answer': 10},
+        {'answer': 11},
+    ]
+
+
+@stream  <i class="conum" data-value="10"></i><b>(10)</b>
+def following_stream_app(event: StreamTimeEvent, api: Api, cache: Cache):
+    assert [record.data for record in event.records] == [
+        {'answer': 10},
+        {'answer': 11},
+    ]  <i class="conum" data-value="11"></i><b>(11)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The followable app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Data documents that should be
+saved and produced.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><strong>Slow</strong> method which uses two api
+calls.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>First save the data to the dataset.
+See <a href="#insert_data">Insert data</a> for details.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Then produce the messages.
+See <a href="#produce_messages">Produce messages</a> for details.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><strong>Recommended</strong> method which
+uses single api call.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Enable this flag to save and
+produce messages at once.
+See <a href="#insert_data">Insert data</a> for details.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Example scheduled following app.
+It will be invoked as soon as there
+is some time interval worth of data.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Scheduled apps should query the data
+as unlike stream ones they don&#8217;t
+receive it in the event.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Example stream following app.
+It will be invoked as soon as new
+messages are produced.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="11"></i><b>11</b></td>
+<td>Stream apps receive data straight
+from the event. No api calls needed.</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
