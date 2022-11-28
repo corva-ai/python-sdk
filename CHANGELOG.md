@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `insert_data` method to `Api`.
+See `Insert data` section in docs.
+- Example usage for followable apps. 
+See `Followable apps` section in docs.
+
 
 ## [1.7.0] - 2022-11-08
 

@@ -5,6 +5,7 @@
 :corva-data-api-link: https://data.corva.ai/docs#/[Corva Data API]
 :api-v1-data-provider-dataset-link: https://data.corva.ai/docs#/default/index_api_v1_data__provider___dataset___get[/api/v1/data/provider/dataset/]
 :api-v1-message-producer-link: https://data.qa.corva.ai/docs#/data/produce_api_v1_message_producer__post[/api/v1/message_producer/]
+:api-v1-post-data-provider-dataset-link: https://data.qa.corva.ai/docs#/data/create_api_v1_data__provider___dataset___post[/api/v1/data/provider/dataset/]
 :python-log-levels-link: https://docs.python.org/3/howto/logging.html[Python log levels]
 :python-log-handlers-link: https://docs.python.org/3/howto/logging.html#handlers
 :pytest-plugin-link: https://docs.pytest.org/en/stable/writing_plugins.html[pytest-plugin]
@@ -236,6 +237,21 @@ include::example$api/tutorial006.py[]
 ----
 <.> Example of producing time messages.
 <.> Example of producing depth messages.
+
+[#insert_data]
+==== Insert data
+
+Post data to the
+{api-v1-post-data-provider-dataset-link}
+endpoint.
+
+[source,python]
+----
+include::example$api/tutorial007.py[]
+----
+<.> Save two documents to dataset.
+<.> You can enable this flag
+to save and <<produce_messages,`produce`>> the data at once.
 
 [#cache]
 == Cache
@@ -494,12 +510,52 @@ Use code samples above as the examples.
 
 == Followable apps
 
+[TIP]
+====
+Only <<stream,`stream`>>
+and <<scheduled,`scheduled`>>
+apps can be followed.
+====
+
+An app is called followable once
+it can be followed by other ones.
 Followable apps must produce
-messages in order to trigger
-chain reaction of app runs.
-See <<produce_messages>> section
+data to trigger
+chain reaction of following app runs.
+See <<produce_messages>> and <<insert_data>> sections
 for instructions on how to produce
 messages.
+
+[source,python]
+----
+include::example$followable/tutorial001.py[]
+----
+<.> The followable app.
+<.> Data documents that should be
+saved and produced.
+<.> *Slow* method which uses two api
+calls.
+<.> First save the data to the dataset.
+See <<insert_data>> for details.
+<.> Then produce the messages.
+See <<produce_messages>> for details.
+<.> *Recommended* method which
+uses single api call.
+<.> Enable this flag to save and
+produce messages at once.
+See <<insert_data>> for details.
+<.> Example scheduled following app.
+It will be invoked as soon as there
+is some time interval worth of data.
+<.> Scheduled apps should query the data
+as unlike stream ones they don't
+receive it in the event.
+<.> Example stream following app.
+It will be invoked as soon as new
+messages are produced.
+<.> Stream apps receive data straight
+from the event. No api calls needed.
+
 
 == Secrets
 You can store sensitive data such as passwords,

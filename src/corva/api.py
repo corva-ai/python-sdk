@@ -1,7 +1,7 @@
 import json
 import posixpath
 import re
-from typing import List, Optional
+from typing import List, Optional, Sequence, Union
 
 import requests
 
@@ -181,7 +181,7 @@ class Api:
 
         return data
 
-    def produce_messages(self, data: List[dict]) -> None:
+    def produce_messages(self, data: Sequence[dict]) -> None:
         """Posts data to the endpoint '/api/v1/message_producer/'.
 
         Args:
@@ -199,3 +199,40 @@ class Api:
             json={'app_connection_id': self.app_connection_id, 'data': data},
         )
         response.raise_for_status()
+
+    def insert_data(
+        self,
+        provider: str,
+        dataset: str,
+        data: Sequence[dict],
+        *,
+        produce: bool = False,
+    ) -> dict:
+        """Posts data to the endpoint '/api/v1/data/{provider}/{dataset}/'.
+
+        Args:
+          provider: company name, that owns the dataset.
+          dataset: dataset name.
+          data: documents to insert.
+          produce: whether to send data to message producer.
+
+        Raises:
+          requests.HTTPError: if request was unsuccessful.
+
+        Returns: response dict.
+        """
+
+        body: Union[dict, List[dict]]  # make mypy happy
+
+        if produce:
+            body = {
+                'data': list(data),
+                'producer': {'app_connection_id': self.app_connection_id},
+            }
+        else:
+            body = list(data)
+
+        response = self.post(f'/api/v1/data/{provider}/{dataset}/', json=body)
+        response.raise_for_status()
+
+        return response.json()
