@@ -7,7 +7,7 @@ content:
       start_path: docs
       branches: []
 #      branches: HEAD  # Use this for local development
-      tags: [v1.7.0]
+      tags: [v1.8.0]
 asciidoc:
   attributes:
     page-toclevels: 5
