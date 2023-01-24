@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.8.1] - 2023-01-24
+
 ### Added
 - `id` field to rerun data.
 
@@ -316,7 +319,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.8.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.8.1...master
+[1.8.1] https://github.com/corva-ai/python-sdk/compare/v1.8.0...v1.8.1
 [1.8.0] https://github.com/corva-ai/python-sdk/compare/v1.7.0...v1.8.0
 [1.7.0] https://github.com/corva-ai/python-sdk/compare/v1.6.0...v1.7.0
 [1.6.0] https://github.com/corva-ai/python-sdk/compare/v1.5.3...v1.6.0
