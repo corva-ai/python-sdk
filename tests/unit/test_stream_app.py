@@ -22,7 +22,7 @@ from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTime
 
 @pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
 @pytest.mark.parametrize('value', (1, 2))
-def test_set_attr_in_raw_stream_event(attr, value, context, mocker: MockerFixture):
+def test_set_attr_in_raw_stream_event(attr, value, context):
     @stream
     def stream_app(event, api, cache):
         return event
