@@ -40,7 +40,7 @@ def test_lambda_raises_if_unable_to_get_task_event(
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
     if status == 'fail':
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match=r'^400 Client Error.*'):
             task_app(event, context)
         assert set(put_mock.request_history[0].json()) == {'fail_reason'}
 
