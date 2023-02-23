@@ -17,7 +17,7 @@ from corva.models.stream.raw import (
     RawStreamTimeEvent,
     RawTimeRecord,
 )
-from corva.models.stream.stream import StreamEvent, StreamTimeEvent
+from corva.models.stream.stream import StreamDepthEvent, StreamEvent, StreamTimeEvent
 
 
 @pytest.mark.parametrize('attr', ('asset_id', 'company_id'))
@@ -584,3 +584,34 @@ def test_rerun_time_cast_from_ms_to_s(time: int, expected: int, context):
     assert result_event.rerun is not None  # for mypy to not complain.
     assert result_event.rerun.range.start == expected
     assert result_event.rerun.range.end == expected
+
+
+def test_stream_depth_app_gets_log_identifier(context):
+    """Stream depth apps must receive `log_identifier` field."""
+
+    @stream
+    def stream_app(event, api, cache):
+        return event
+
+    event = [
+        RawStreamDepthEvent(
+            records=[
+                RawDepthRecord(
+                    asset_id=int(),
+                    company_id=int(),
+                    collection=str(),
+                    measured_depth=float(),
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=int(),
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+                log_type=LogType.depth,
+                log_identifier='log_identifier',
+            ),
+        ).dict()
+    ]
+
+    result_event: StreamDepthEvent = stream_app(event, context)[0]
+
+    assert result_event.log_identifier == 'log_identifier'
