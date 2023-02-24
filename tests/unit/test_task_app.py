@@ -21,7 +21,7 @@ from corva.models.task import RawTaskEvent, TaskEvent
         ],
     ),
 )
-def test_lambda_succeeds_if_unable_to_get_task_event(
+def test_lambda_raises_if_unable_to_get_task_event(
     status_code,
     json,
     status,
@@ -39,25 +39,24 @@ def test_lambda_succeeds_if_unable_to_get_task_event(
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = task_app(event, context)[0]
+    if status == 'fail':
+        with pytest.raises(Exception, match=r'^400 Client Error.*'):
+            task_app(event, context)
+        assert set(put_mock.request_history[0].json()) == {'fail_reason'}
+
+    if status == 'success':
+        assert task_app(event, context)[0] is True
+        assert put_mock.request_history[0].json() == {'payload': {}}
 
     assert get_mock.called_once
     assert put_mock.called_once
-
-    if status == 'fail':
-        assert set(put_mock.request_history[0].json()) == {'fail_reason'}
-        assert result is None
-
-    if status == 'success':
-        assert put_mock.request_history[0].json() == {'payload': {}}
-        assert result is True
 
 
 @pytest.mark.parametrize(
     'status,side_effect',
     (['fail', Exception('test_user_app_raises')], ['success', None]),
 )
-def test_lambda_succeeds_if_user_app_fails(
+def test_lambda_raises_if_user_app_fails(
     status,
     side_effect,
     context,
@@ -73,21 +72,26 @@ def test_lambda_succeeds_if_user_app_fails(
     )
     put_mock = requests_mock.put(re.compile(f'/v2/tasks/0/{status}'))
 
-    result = task(mocker.Mock(side_effect=side_effect, return_value=True))(
-        event, context
-    )[0]
-
-    assert put_mock.called_once
-
     if status == 'fail':
+        with pytest.raises(Exception, match=r'^test_user_app_raises$'):
+            task(mocker.Mock(side_effect=side_effect, return_value=True))(
+                event, context
+            )
         assert put_mock.request_history[0].json() == {
             'fail_reason': 'test_user_app_raises'
         }
-        assert result is None
 
     if status == 'success':
+
+        assert (
+            task(mocker.Mock(side_effect=side_effect, return_value=True))(
+                event, context
+            )[0]
+            is True
+        )
         assert put_mock.request_history[0].json() == {'payload': {}}
-        assert result is True
+
+    assert put_mock.called_once
 
 
 def test_lambda_succeeds_if_unable_to_update_task_data(context, mocker: MockerFixture):
@@ -194,7 +198,8 @@ def test_log_if_user_app_fails(
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/fail'))
 
-    task(mocker.Mock(side_effect=Exception))(event, context)
+    with pytest.raises(Exception):
+        task(mocker.Mock(side_effect=Exception))(event, context)
 
     captured = capsys.readouterr()
 

@@ -351,6 +351,7 @@ def task(
         except Exception as exc:
             CORVA_LOGGER.exception('Task app failed to execute.')
             data = {'fail_reason': str(exc)}
+            raise
 
         finally:
             try:
