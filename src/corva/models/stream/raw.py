@@ -63,6 +63,8 @@ class RawMetadata(CorvaBaseEvent):
         },
     )
     log_type: LogType
+    # TODO: remove `Optional` in v2 as it was added for backward compatibility.
+    log_identifier: Optional[str] = None
 
 
 if TYPE_CHECKING:
@@ -190,3 +192,14 @@ class RawStreamDepthEvent(RawStreamEvent):
     records: RecordsDepth
     rerun: Optional[RerunDepth] = None
     _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
+    log_identifier: str = None  # type: ignore
+
+    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    def set_log_identifier(cls, values: dict) -> dict:
+        """Calculates log_identifier field."""
+
+        metadata: RawMetadata = values["metadata"]
+
+        values["log_identifier"] = metadata.log_identifier
+
+        return values

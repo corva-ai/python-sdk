@@ -75,4 +75,6 @@ class StreamDepthEvent(StreamEvent):
     asset_id: int
     company_id: int
     records: RecordsDepth
+    # TODO: remove `Optional` in v2 as it was added for backward compatibility.
+    log_identifier: Optional[str] = None
     rerun: Optional[RerunDepth] = None
