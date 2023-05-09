@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `urllib3` v2 not supported by AWS Lambda.
+
 
 ## [1.9.0] - 2023-03-06
 
