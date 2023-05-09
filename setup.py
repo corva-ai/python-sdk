@@ -43,7 +43,7 @@ setuptools.setup(
         "pydantic >=1.8.2, <2.0.0",
         "redis >=3.5.3, <4.0.0",
         "requests >=2.25.0, <3.0.0",
-        "urllib3 <2"  # lambda doesnt support version 2 yet
+        "urllib3 <2",  # lambda doesnt support version 2 yet
     ],
     python_requires='>=3.8, <4.0',
     license='The Unlicense',
