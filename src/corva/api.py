@@ -232,7 +232,7 @@ class Api:
         else:
             body = list(data)
 
-        response = self.post(f'/api/v1/data/{provider}/{dataset}/', json=body)
+        response = self.post(f'/api/v1/data/{provider}/{dataset}/', data=body)
         response.raise_for_status()
 
         return response.json()
