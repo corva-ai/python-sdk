@@ -2,6 +2,7 @@ import logging
 import re
 
 import pytest
+import redis
 import requests_mock as requests_mock_lib
 from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
@@ -493,3 +494,41 @@ def test_rerun_natural_time_cast_from_ms_to_s(
     assert result_event.rerun is not None  # for mypy to not complain.
     assert result_event.rerun.range.start == expected
     assert result_event.rerun.range.end == expected
+
+
+def test_cache_connection_limit(requests_mock: RequestsMocker, context):
+    """
+    provided Cache object can't init more than one connection
+    """
+
+    event = RawScheduledDataTimeEvent(
+        asset_id=int(),
+        interval=int(),
+        schedule=int(),
+        schedule_start=int(),
+        app_connection=int(),
+        app_stream=int(),
+        company=int(),
+        scheduler_type=SchedulerType.data_time,
+    ).dict(
+        by_alias=True,
+        exclude_unset=True,
+    )
+
+    @scheduled
+    def scheduled_app(event, api, cache):
+        """
+        try to open additional connection to cache
+        """
+        pool = cache.cache_repo.client.connection_pool
+        # save existing connections
+        pool._in_use_connections = pool._available_connections
+        pool._available_connections = []
+        # try to init new connection, this line should fail with redis
+        # ConnectionError exception
+        pool.get_connection("_")
+
+    requests_mock.post(requests_mock_lib.ANY)
+
+    with pytest.raises(redis.exceptions.ConnectionError):
+        scheduled_app(event, context)
