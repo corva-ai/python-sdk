@@ -7,7 +7,7 @@ import requests_mock as requests_mock_lib
 from pytest_mock import MockerFixture
 from requests_mock import Mocker as RequestsMocker
 
-from corva import Logger, Api, Cache
+from corva import Logger
 from corva.handlers import scheduled
 from corva.models.rerun import RerunTime, RerunTimeRange
 from corva.models.scheduled.raw import (
@@ -107,7 +107,7 @@ def test_set_completed_status(context, requests_mock):
     ],
 )
 def test_set_completed_status_for_failed_apps(
-        event: RawScheduledEvent, post_called: bool, context, requests_mock
+    event: RawScheduledEvent, post_called: bool, context, requests_mock
 ):
     @scheduled
     def scheduled_app(event, api, state):
@@ -139,47 +139,47 @@ def test_set_completed_status_for_failed_apps(
 @pytest.mark.parametrize(
     'event',
     (
-            RawScheduledDataTimeEvent(
-                asset_id=int(),
-                interval=int(),
-                schedule=int(),
-                schedule_start=int(),
-                app_connection=int(),
-                app_stream=int(),
-                company=int(),
-                scheduler_type=SchedulerType.data_time,
-            ).dict(
-                by_alias=True,
-                exclude_unset=True,
-            ),
-            RawScheduledDepthEvent(
-                asset_id=int(),
-                depth_milestone=float(),
-                schedule=int(),
-                app_connection=int(),
-                app_stream=int(),
-                company=int(),
-                scheduler_type=SchedulerType.data_depth_milestone,
-                top_depth=0.0,
-                bottom_depth=1.0,
-                log_identifier='',
-            ).dict(
-                by_alias=True,
-                exclude_unset=True,
-            ),
-            RawScheduledNaturalTimeEvent(
-                asset_id=int(),
-                interval=int(),
-                schedule=int(),
-                app_connection=int(),
-                app_stream=int(),
-                company=int(),
-                scheduler_type=SchedulerType.natural_time,
-                schedule_start=int(),
-            ).dict(
-                by_alias=True,
-                exclude_unset=True,
-            ),
+        RawScheduledDataTimeEvent(
+            asset_id=int(),
+            interval=int(),
+            schedule=int(),
+            schedule_start=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.data_time,
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
+        RawScheduledDepthEvent(
+            asset_id=int(),
+            depth_milestone=float(),
+            schedule=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.data_depth_milestone,
+            top_depth=0.0,
+            bottom_depth=1.0,
+            log_identifier='',
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
+        RawScheduledNaturalTimeEvent(
+            asset_id=int(),
+            interval=int(),
+            schedule=int(),
+            app_connection=int(),
+            app_stream=int(),
+            company=int(),
+            scheduler_type=SchedulerType.natural_time,
+            schedule_start=int(),
+        ).dict(
+            by_alias=True,
+            exclude_unset=True,
+        ),
     ),
 )
 @pytest.mark.parametrize('is_dict', (True, False))
@@ -199,55 +199,55 @@ def test_event_parsing(event, is_dict, requests_mock: RequestsMocker, context):
 @pytest.mark.parametrize(
     'event,attr',
     (
-            [
-                RawScheduledDataTimeEvent(
-                    asset_id=int(),
-                    interval=int(),
-                    schedule=int(),
-                    schedule_start=int(),
-                    app_connection=int(),
-                    app_stream=int(),
-                    company=int(),
-                    scheduler_type=SchedulerType.data_time,
-                ),
-                'end_time',
-            ],
-            [
-                RawScheduledNaturalTimeEvent(
-                    asset_id=int(),
-                    interval=int(),
-                    schedule=int(),
-                    schedule_start=int(),
-                    app_connection=int(),
-                    app_stream=int(),
-                    company=int(),
-                    scheduler_type=SchedulerType.natural_time,
-                ),
-                'schedule_start',
-            ],
+        [
+            RawScheduledDataTimeEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ),
+            'end_time',
+        ],
+        [
+            RawScheduledNaturalTimeEvent(
+                asset_id=int(),
+                interval=int(),
+                schedule=int(),
+                schedule_start=int(),
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.natural_time,
+            ),
+            'schedule_start',
+        ],
     ),
 )
 @pytest.mark.parametrize(
     'value,expected',
     (
-            # 31 December 9999 23:59:59 in sec
-            [253402300799, 253402300799],
-            # 1 January 10000 00:00:00 in sec
-            [253402300800, 253402300],
-            # 1 January 2021 00:00:00 in ms
-            [1609459200000, 1609459200],
-            # 1 January 2021 00:00:00 in sec
-            [1609459200, 1609459200],
+        # 31 December 9999 23:59:59 in sec
+        [253402300799, 253402300799],
+        # 1 January 10000 00:00:00 in sec
+        [253402300800, 253402300],
+        # 1 January 2021 00:00:00 in ms
+        [1609459200000, 1609459200],
+        # 1 January 2021 00:00:00 in sec
+        [1609459200, 1609459200],
     ),
     ids=(
-            'no cast performed',
-            'casted from ms to sec',
-            'casted from ms to sec',
-            'no cast performed',
+        'no cast performed',
+        'casted from ms to sec',
+        'casted from ms to sec',
+        'no cast performed',
     ),
 )
 def test_set_schedule_start(
-        event: RawScheduledEvent, attr: str, value, expected, context, mocker: MockerFixture
+    event: RawScheduledEvent, attr: str, value, expected, context, mocker: MockerFixture
 ):
     @scheduled
     def app(e, api, state):
@@ -278,12 +278,12 @@ def test_set_schedule_start(
 @pytest.mark.parametrize(
     'schedule_start,interval,expected',
     (
-            [2, 1, 2],
-            [2, 2, 1],
+        [2, 1, 2],
+        [2, 2, 1],
     ),
 )
 def test_set_start_time(
-        schedule_start, interval, expected, context, mocker: MockerFixture
+    schedule_start, interval, expected, context, mocker: MockerFixture
 ):
     @scheduled
     def app(event, api, state):
@@ -421,14 +421,14 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
 @pytest.mark.parametrize(
     'time, expected',
     (
-            # 1 January 2021 00:00:00 in ms
-            pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
-            # 1 January 2021 00:00:00 in sec
-            pytest.param(1609459200, 1609459200, id='no cast performed'),
+        # 1 January 2021 00:00:00 in ms
+        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        # 1 January 2021 00:00:00 in sec
+        pytest.param(1609459200, 1609459200, id='no cast performed'),
     ),
 )
 def test_rerun_data_time_cast_from_ms_to_s(
-        time: int, expected: int, context, mocker: MockerFixture
+    time: int, expected: int, context, mocker: MockerFixture
 ):
     @scheduled
     def app(event, api, state):
@@ -460,14 +460,14 @@ def test_rerun_data_time_cast_from_ms_to_s(
 @pytest.mark.parametrize(
     'time, expected',
     (
-            # 1 January 2021 00:00:00 in ms
-            pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
-            # 1 January 2021 00:00:00 in sec
-            pytest.param(1609459200, 1609459200, id='no cast performed'),
+        # 1 January 2021 00:00:00 in ms
+        pytest.param(1609459200000, 1609459200, id='casted from ms to sec'),
+        # 1 January 2021 00:00:00 in sec
+        pytest.param(1609459200, 1609459200, id='no cast performed'),
     ),
 )
 def test_rerun_natural_time_cast_from_ms_to_s(
-        time: int, expected: int, context, mocker: MockerFixture
+    time: int, expected: int, context, mocker: MockerFixture
 ):
     @scheduled
     def app(event, api, state):
@@ -516,7 +516,7 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
     )
 
     @scheduled
-    def scheduled_app(event: RawScheduledDataTimeEvent, api: Api, cache: Cache):
+    def scheduled_app(event, api, cache):
         """
         try to open additional connection to cache
         """
@@ -524,7 +524,8 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
         # save existing connections
         pool._in_use_connections = pool._available_connections
         pool._available_connections = []
-        # try to init new connection, this line should fail with redis ConnectionError exception
+        # try to init new connection, this line should fail with redis
+        # ConnectionError exception
         pool.get_connection("_")
 
     requests_mock.post(requests_mock_lib.ANY)

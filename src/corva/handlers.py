@@ -57,12 +57,18 @@ def base_handler(
                     aws_event=aws_event, aws_context=aws_context
                 )
 
-                redis_client = redis.Redis.from_url(url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1)
+                redis_client = redis.Redis.from_url(
+                    url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1
+                )
                 raw_events = raw_event_type.from_raw_event(event=aws_event)
 
                 results = [
                     func(
-                        raw_event, context.api_key, context.aws_request_id, logging_ctx, redis_client
+                        raw_event,
+                        context.api_key,
+                        context.aws_request_id,
+                        logging_ctx,
+                        redis_client,
                     )
                     for raw_event in raw_events
                 ]
@@ -97,7 +103,7 @@ def stream(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None
+        redis_client: Optional[redis.Redis] = None,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -198,7 +204,7 @@ def scheduled(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None
+        redis_client: Optional[redis.Redis] = None,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -299,7 +305,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None
+        redis_client: Optional[redis.Redis] = None,
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}

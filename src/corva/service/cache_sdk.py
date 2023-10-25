@@ -57,13 +57,19 @@ class UserRedisSdk:
     SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
 
     def __init__(
-        self, hash_name: str, redis_dsn: str, use_fakes: bool = False, redis_client: Optional[redis.Redis] = None
+        self,
+        hash_name: str,
+        redis_dsn: str,
+        use_fakes: bool = False,
+        redis_client=None,
     ):
         use_lua_52 = False
-        # use either provided redis client, or initialize "fake" client(usually used for tests),
-        # or initialize real new client
+        # use either provided redis client, or initialize "fake" client
+        # (usually used for tests), or initialize real new client
         if use_fakes:
-            redis_client = fakeredis.FakeRedis.from_url(url=redis_dsn, decode_responses=True)
+            redis_client = fakeredis.FakeRedis.from_url(
+                url=redis_dsn, decode_responses=True
+            )
             use_lua_52 = True
         elif redis_client is None:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
@@ -206,7 +212,12 @@ class InternalCacheSdkProtocol(Protocol):
 
 
 class InternalRedisSdk:
-    def __init__(self, hash_name: str, redis_dsn: str, redis_client: Optional[redis.Redis] = None):
+    def __init__(
+        self,
+        hash_name: str,
+        redis_dsn: str,
+        redis_client: Optional[redis.Redis] = None,
+    ):
         if not redis_client:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
         self.cache_repo = cache_adapter.RedisRepository(
