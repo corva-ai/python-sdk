@@ -217,7 +217,6 @@ class InternalRedisSdk:
     def __init__(
         self,
         hash_name: str,
-        redis_dsn: str,
         redis_client: redis.Redis,
     ):
         self.cache_repo = cache_adapter.RedisRepository(

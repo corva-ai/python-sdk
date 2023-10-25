@@ -230,7 +230,7 @@ def scheduled(
             hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
         )
         internal_cache_sdk = InternalRedisSdk(
-            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
+            hash_name=hash_name, redis_client=redis_client
         )
 
         app_event = event.scheduler_type.event.parse_obj(event)
