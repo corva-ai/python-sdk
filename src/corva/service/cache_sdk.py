@@ -61,7 +61,7 @@ class UserRedisSdk:
         hash_name: str,
         redis_dsn: str,
         use_fakes: bool = False,
-        redis_client=None,
+        redis_client: Optional[redis.Redis] = None,
     ):
         use_lua_52 = False
         # use either provided redis client, or initialize "fake" client
@@ -75,10 +75,12 @@ class UserRedisSdk:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
         self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name, client=redis_client, use_lua_52=use_lua_52
+            hash_name=hash_name,
+            client=cast(redis.Redis, redis_client),
+            use_lua_52=use_lua_52,
         )
         self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
-            hash_name=hash_name, client=redis_client
+            hash_name=hash_name, client=cast(redis.Redis, redis_client)
         )
 
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
@@ -216,10 +218,8 @@ class InternalRedisSdk:
         self,
         hash_name: str,
         redis_dsn: str,
-        redis_client: Optional[redis.Redis] = None,
+        redis_client: redis.Redis,
     ):
-        if not redis_client:
-            redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=hash_name,
             client=redis_client,

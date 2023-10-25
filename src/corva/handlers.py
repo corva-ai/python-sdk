@@ -103,7 +103,7 @@ def stream(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None,
+        redis_client: redis.Redis,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -204,7 +204,7 @@ def scheduled(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None,
+        redis_client: redis.Redis,
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -305,7 +305,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None,
+        redis_client: redis.Redis,
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}

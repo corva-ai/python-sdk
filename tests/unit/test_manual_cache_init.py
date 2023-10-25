@@ -1,16 +1,9 @@
-import pytest
-
-from corva.service.cache_sdk import InternalRedisSdk, UserRedisSdk
+from corva.service.cache_sdk import UserRedisSdk
 
 
-@pytest.mark.parametrize(
-    'cache_class',
-    (UserRedisSdk, InternalRedisSdk),
-)
-def test_manual_cache_init(cache_class):
+def test_manual_cache_init():
     """
-    When redis_client is not provided our cache classes need to initialize
-    client by themselves
+    When redis_client is not provided UserRedisSdk need to initialize client
     """
-    cache = cache_class("test", "redis://localhost:6379", redis_client=None)
+    cache = UserRedisSdk("test", "redis://localhost:6379", redis_client=None)
     assert cache.cache_repo.client is not None
