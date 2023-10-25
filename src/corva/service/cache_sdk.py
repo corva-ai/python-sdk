@@ -56,19 +56,23 @@ class UserRedisSdk:
 
     SIXTY_DAYS: int = int(datetime.timedelta(days=60).total_seconds())
 
-    def __init__(self, hash_name: str, redis_dsn: str, use_fakes: bool = False):
+    def __init__(
+        self, hash_name: str, redis_dsn: str, use_fakes: bool = False, redis_client: Optional[redis.Redis] = None
+    ):
         use_lua_52 = False
+        # use either provided redis client, or initialize "fake" client(usually used for tests),
+        # or initialize real new client
         if use_fakes:
-            client = fakeredis.FakeRedis.from_url(url=redis_dsn, decode_responses=True)
+            redis_client = fakeredis.FakeRedis.from_url(url=redis_dsn, decode_responses=True)
             use_lua_52 = True
-        else:
-            client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
+        elif redis_client is None:
+            redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
         self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name, client=client, use_lua_52=use_lua_52
+            hash_name=hash_name, client=redis_client, use_lua_52=use_lua_52
         )
         self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
-            hash_name=hash_name, client=client
+            hash_name=hash_name, client=redis_client
         )
 
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
@@ -202,10 +206,12 @@ class InternalCacheSdkProtocol(Protocol):
 
 
 class InternalRedisSdk:
-    def __init__(self, hash_name: str, redis_dsn: str):
+    def __init__(self, hash_name: str, redis_dsn: str, redis_client: Optional[redis.Redis] = None):
+        if not redis_client:
+            redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=hash_name,
-            client=redis.Redis.from_url(url=redis_dsn, decode_responses=True),
+            client=redis_client,
         )
 
     def vacuum(self, delete_count: int) -> None:

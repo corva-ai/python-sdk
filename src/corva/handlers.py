@@ -4,6 +4,8 @@ import sys
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
 
+import redis
+
 from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
@@ -55,11 +57,12 @@ def base_handler(
                     aws_event=aws_event, aws_context=aws_context
                 )
 
+                redis_client = redis.Redis.from_url(url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1)
                 raw_events = raw_event_type.from_raw_event(event=aws_event)
 
                 results = [
                     func(
-                        raw_event, context.api_key, context.aws_request_id, logging_ctx
+                        raw_event, context.api_key, context.aws_request_id, logging_ctx, redis_client
                     )
                     for raw_event in raw_events
                 ]
@@ -94,6 +97,7 @@ def stream(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
+        redis_client: Optional[redis.Redis] = None
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -115,9 +119,11 @@ def stream(
             app_connection_id=event.app_connection_id,
         )
 
-        user_cache_sdk = UserRedisSdk(hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        user_cache_sdk = UserRedisSdk(
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
+        )
         internal_cache_sdk = InternalRedisSdk(
-            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
         )
 
         records = event.filter_records(
@@ -192,6 +198,7 @@ def scheduled(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
+        redis_client: Optional[redis.Redis] = None
     ) -> Any:
         logging_ctx.asset_id = event.asset_id
         logging_ctx.app_connection_id = event.app_connection_id
@@ -213,9 +220,11 @@ def scheduled(
             app_connection_id=event.app_connection_id,
         )
 
-        user_cache_sdk = UserRedisSdk(hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        user_cache_sdk = UserRedisSdk(
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
+        )
         internal_cache_sdk = InternalRedisSdk(
-            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL
+            hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
         )
 
         app_event = event.scheduler_type.event.parse_obj(event)
@@ -290,6 +299,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
+        redis_client: Optional[redis.Redis] = None
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}
