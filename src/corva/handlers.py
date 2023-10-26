@@ -16,6 +16,8 @@ from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTim
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
+from corva.models.merge.raw import RawPartialMergeEvent
+from corva.models.merge.merge import PartialMergeEvent
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
@@ -379,5 +381,102 @@ def task(
             except Exception as e:
                 # lambda succeeds if we're unable to update task data
                 CORVA_LOGGER.warning(f'Could not update task data. Details: {str(e)}.')
+
+    return wrapper
+
+
+def partialmerge(
+    func: Optional[Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any]] = None,
+    *,
+    handler: Optional[logging.Handler] = None,
+) -> Callable:
+    """Runs partial merge app.
+
+    Arguments:
+        handler: logging handler to include in Corva logger.
+    """
+
+    if func is None:
+        return functools.partial(partialmerge, handler=handler)
+
+    @functools.wraps(func)
+    @functools.partial(base_handler, raw_event_type=RawPartialMergeEvent, handler=handler)
+    def wrapper(
+        event: RawPartialMergeEvent,
+        api_key: str,
+        aws_request_id: str,
+        logging_ctx: LoggingContext,
+    ) -> Any:
+
+        app_connection_id = event.data.app_connection_ids[0]
+        logging_ctx.asset_id = event.data.asset_id
+        logging_ctx.app_connection_id = app_connection_id
+
+        api = Api(
+            api_url=SETTINGS.API_ROOT_URL,
+            data_api_url=SETTINGS.DATA_API_ROOT_URL,
+            api_key=api_key,
+            app_key=SETTINGS.APP_KEY,
+        )
+
+        asset_cache_hash_name = get_cache_key(
+            provider=SETTINGS.PROVIDER,
+            asset_id=event.data.asset_id,
+            app_stream_id=event.data.app_stream_id,
+            app_key=SETTINGS.APP_KEY,
+            app_connection_id=event.app_connection_id,
+        )
+        rerun_asset_cache_hash_name = get_cache_key(
+            provider=SETTINGS.PROVIDER,
+            asset_id=event.data.rerun_asset_id,
+            app_stream_id=event.data.rerun_app_stream_id,
+            app_key=SETTINGS.APP_KEY,
+            app_connection_id=event.app_connection_id,
+        )
+        internal_cache_hash_name = get_cache_key(
+            provider=SETTINGS.PROVIDER,
+            asset_id=event.data.rerun_asset_id,
+            app_stream_id=event.data.rerun_app_stream_id,
+            app_key=SETTINGS.APP_KEY,
+            app_connection_id=app_connection_id,
+        )
+
+        asset_cache = UserRedisSdk(hash_name=asset_cache_hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        rerun_asset_cache = UserRedisSdk(hash_name=rerun_asset_cache_hash_name, redis_dsn=SETTINGS.CACHE_URL)
+        app_event = PartialMergeEvent(**event.data.dict(), event_type=event.event_type)
+
+        with LoggingContext(
+            aws_request_id=aws_request_id,
+            asset_id=event.data.asset_id,
+            app_connection_id=app_connection_id,
+            handler=CorvaLoggerHandler(
+                max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
+                max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
+                logger=CORVA_LOGGER,
+                placeholder=' ...',
+            ),
+            user_handler=handler,
+            logger=CORVA_LOGGER,
+        ):
+            result = service.run_app(
+                has_secrets=event.has_secrets,
+                app_key=SETTINGS.APP_KEY,
+                api_sdk=CachingApiSdk(
+                    api_sdk=CorvaApiSdk(api_adapter=api),
+                    ttl=SETTINGS.SECRETS_CACHE_TTL,
+                ),
+                cache_sdk=InternalRedisSdk(
+                    hash_name=internal_cache_hash_name, redis_dsn=SETTINGS.CACHE_URL
+                ),
+                app=functools.partial(
+                    cast(Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any], func),
+                    app_event,
+                    api,
+                    asset_cache,
+                    rerun_asset_cache,
+                ),
+            )
+
+        return result
 
     return wrapper
