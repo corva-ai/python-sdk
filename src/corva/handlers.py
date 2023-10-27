@@ -22,8 +22,8 @@ from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
 
-StreamEventT = TypeVar('StreamEventT', bound=StreamEvent)
-ScheduledEventT = TypeVar('ScheduledEventT', bound=ScheduledEvent)
+StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
+ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
 
 
 def get_cache_key(
@@ -34,7 +34,7 @@ def get_cache_key(
     app_connection_ids: List[int],
 ) -> str:
     return (
-        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
+        f"{provider}/well/{asset_id}/stream/{app_stream_id}/"
         f'{app_key}/{"/".join(map(str, app_connection_ids))}'
     )
 
@@ -78,7 +78,7 @@ def base_handler(
                 return results
 
             except Exception:
-                CORVA_LOGGER.exception('The app failed to execute.')
+                CORVA_LOGGER.exception("The app failed to execute.")
                 raise
 
     return wrapper
@@ -143,7 +143,7 @@ def stream(
             return
 
         app_event = event.metadata.log_type.event.parse_obj(
-            event.copy(update={'records': records}, deep=True)
+            event.copy(update={"records": records}, deep=True)
         )
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -153,7 +153,7 @@ def stream(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                 logger=CORVA_LOGGER,
-                placeholder=' ...',
+                placeholder=" ...",
             ),
             user_handler=handler,
             logger=CORVA_LOGGER,
@@ -178,7 +178,7 @@ def stream(
             event.set_cached_max_record_value(cache=user_cache_sdk)
         except Exception as e:
             # lambda succeeds if we're unable to cache the value
-            CORVA_LOGGER.warning(f'Could not save data to cache. Details: {str(e)}.')
+            CORVA_LOGGER.warning(f"Could not save data to cache. Details: {str(e)}.")
 
         return result
 
@@ -245,7 +245,7 @@ def scheduled(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                 logger=CORVA_LOGGER,
-                placeholder=' ...',
+                placeholder=" ...",
             ),
             user_handler=handler,
             logger=CORVA_LOGGER,
@@ -283,7 +283,7 @@ def set_schedule_as_completed(event: RawScheduledEvent, api: Api) -> None:
         event.set_schedule_as_completed(api=api)
     except Exception as e:
         # lambda succeeds if we're unable to set completed status
-        CORVA_LOGGER.warning(f'Could not set schedule as completed. Details: {str(e)}.')
+        CORVA_LOGGER.warning(f"Could not set schedule as completed. Details: {str(e)}.")
 
 
 def task(
@@ -334,7 +334,7 @@ def task(
                     max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                     max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                     logger=CORVA_LOGGER,
-                    placeholder=' ...',
+                    placeholder=" ...",
                 ),
                 user_handler=handler,
                 logger=CORVA_LOGGER,
@@ -360,15 +360,15 @@ def task(
                     FutureWarning,
                 )
 
-                data['payload'] = result
+                data["payload"] = result
 
             status = TaskStatus.success
 
             return result
 
         except Exception as exc:
-            CORVA_LOGGER.exception('Task app failed to execute.')
-            data = {'fail_reason': str(exc)}
+            CORVA_LOGGER.exception("Task app failed to execute.")
+            data = {"fail_reason": str(exc)}
             raise
 
         finally:
@@ -380,13 +380,15 @@ def task(
                 ).raise_for_status()
             except Exception as e:
                 # lambda succeeds if we're unable to update task data
-                CORVA_LOGGER.warning(f'Could not update task data. Details: {str(e)}.')
+                CORVA_LOGGER.warning(f"Could not update task data. Details: {str(e)}.")
 
     return wrapper
 
 
 def partialmerge(
-    func: Optional[Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any]] = None,
+    func: Optional[
+        Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any]
+    ] = None,
     *,
     handler: Optional[logging.Handler] = None,
 ) -> Callable:
@@ -400,13 +402,15 @@ def partialmerge(
         return functools.partial(partialmerge, handler=handler)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawPartialMergeEvent, handler=handler)
+    @functools.partial(
+        base_handler, raw_event_type=RawPartialMergeEvent, handler=handler
+    )
     def wrapper(
         event: RawPartialMergeEvent,
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: redis.Redis
+        redis_client: redis.Redis,
     ) -> Any:
 
         app_connection_id = event.data.app_connection_ids[0]
@@ -443,10 +447,14 @@ def partialmerge(
         )
 
         asset_cache = UserRedisSdk(
-            hash_name=asset_cache_hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
+            hash_name=asset_cache_hash_name,
+            redis_dsn=SETTINGS.CACHE_URL,
+            redis_client=redis_client,
         )
         rerun_asset_cache = UserRedisSdk(
-            hash_name=rerun_asset_cache_hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
+            hash_name=rerun_asset_cache_hash_name,
+            redis_dsn=SETTINGS.CACHE_URL,
+            redis_client=redis_client,
         )
         app_event = PartialMergeEvent(**event.data.dict(), event_type=event.event_type)
 
@@ -458,7 +466,7 @@ def partialmerge(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
                 logger=CORVA_LOGGER,
-                placeholder=' ...',
+                placeholder=" ...",
             ),
             user_handler=handler,
             logger=CORVA_LOGGER,
@@ -474,7 +482,12 @@ def partialmerge(
                     hash_name=internal_cache_hash_name, redis_client=redis_client
                 ),
                 app=functools.partial(
-                    cast(Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any], func),
+                    cast(
+                        Callable[
+                            [PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any
+                        ],
+                        func,
+                    ),
                     app_event,
                     api,
                     asset_cache,

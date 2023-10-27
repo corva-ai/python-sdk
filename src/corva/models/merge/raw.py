@@ -19,16 +19,18 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     rerun_asset_id: int
     app_stream_id: int
     rerun_app_stream_id: int
-    version: int = pydantic.Field(..., le=1, ge=1)  # Currently handler supports only 1-st version of this event.
+    version: int = pydantic.Field(
+        ..., le=1, ge=1
+    )  # Currently handler supports only 1-st version of this event.
     app_id: int
     app_key: str
-    app_connection_ids: pydantic.conlist(int, min_items=1)
-    rerun_app_connection_ids: pydantic.conlist(int, min_items=1)
+    app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
+    rerun_app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
     source_type: SourceTypesEnum
     log_type: str
     run_until: int
 
-    @pydantic.validator('rerun_app_connection_ids', 'app_connection_ids', pre=True)
+    @pydantic.validator("rerun_app_connection_ids", "app_connection_ids", pre=True)
     def sort_connection_ids(cls, values):
         return sorted(values)
 
