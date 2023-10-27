@@ -1,8 +1,8 @@
 """Module contains functional requirements for partilmerge app."""
 
-import pytest
 from uuid import uuid4
 
+import pytest
 from pydantic import ValidationError
 
 from corva.handlers import partialmerge
@@ -48,7 +48,9 @@ def test_partialmerge_app_returns_expected_type_event(context):
 
 
 def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(context):
-    """Partial merge app must raise Pydantic validation exception while processing event of unexpected type."""
+    """Partial merge app must raise Pydantic validation exception
+    while processing event of unexpected type.
+    """
 
     @partialmerge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
@@ -63,7 +65,9 @@ def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(c
 
 
 def test_partialmerge_app_returns_expected_cache_values(context):
-    """Partial merge app must provide functional cache objects for asset and rerun asset."""
+    """Partial merge app must provide functional cache objects
+    for asset and rerun asset.
+    """
 
     @partialmerge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):

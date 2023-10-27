@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import pydantic
 
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
-from corva.models.merge.enums import RerunModesEnum, EventTypesEnum, SourceTypesEnum
+from corva.models.merge.enums import EventTypesEnum, RerunModesEnum, SourceTypesEnum
 
 
 class RawPartialMergeEventData(pydantic.BaseModel):

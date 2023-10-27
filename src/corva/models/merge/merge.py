@@ -1,7 +1,7 @@
 from typing import List
 
 from corva.models.base import CorvaBaseEvent
-from corva.models.merge.enums import RerunModesEnum, EventTypesEnum, SourceTypesEnum
+from corva.models.merge.enums import EventTypesEnum, RerunModesEnum, SourceTypesEnum
 
 
 class PartialMergeEvent(CorvaBaseEvent):

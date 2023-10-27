@@ -11,13 +11,13 @@ from corva.configuration import SETTINGS
 from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
+from corva.models.merge.merge import PartialMergeEvent
+from corva.models.merge.raw import RawPartialMergeEvent
 from corva.models.scheduled.raw import RawScheduledEvent
 from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
-from corva.models.merge.raw import RawPartialMergeEvent
-from corva.models.merge.merge import PartialMergeEvent
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
