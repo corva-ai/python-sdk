@@ -25,7 +25,7 @@ def test_tutorial001(app_runner):
         asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
     )
 
-    assert app_runner(tutorial001.stream_time_app, event) == 'Hello, World!'
+    assert app_runner(tutorial001.stream_time_app, event) == "Hello, World!"
 
 
 def test_tutorial002(app_runner):
@@ -33,19 +33,19 @@ def test_tutorial002(app_runner):
         asset_id=0, company_id=0, records=[StreamDepthRecord(measured_depth=0)]
     )
 
-    assert app_runner(tutorial002.stream_depth_app, event) == 'Hello, World!'
+    assert app_runner(tutorial002.stream_depth_app, event) == "Hello, World!"
 
 
 def test_tutorial003(app_runner):
     event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
-    assert app_runner(tutorial003.scheduled_app, event) == 'Hello, World!'
+    assert app_runner(tutorial003.scheduled_app, event) == "Hello, World!"
 
 
 def test_tutorial004(app_runner):
     event = TaskEvent(asset_id=0, company_id=0)
 
-    assert app_runner(tutorial004.task_app, event) == 'Hello, World!'
+    assert app_runner(tutorial004.task_app, event) == "Hello, World!"
 
 
 def test_tutorial005(app_runner):
@@ -54,11 +54,11 @@ def test_tutorial005(app_runner):
         company_id=0,
         top_depth=0.0,
         bottom_depth=1.0,
-        log_identifier='',
+        log_identifier="",
         interval=1.0,
     )
 
-    assert app_runner(tutorial005.scheduled_app, event) == 'Hello, World!'
+    assert app_runner(tutorial005.scheduled_app, event) == "Hello, World!"
 
 
 def test_tutorial006(app_runner):
@@ -66,7 +66,7 @@ def test_tutorial006(app_runner):
         asset_id=0, company_id=0, schedule_start=0, interval=1
     )
 
-    assert app_runner(tutorial006.scheduled_app, event) == 'Hello, World!'
+    assert app_runner(tutorial006.scheduled_app, event) == "Hello, World!"
 
 
 def test_tutorial007(app_runner):
@@ -89,7 +89,7 @@ def test_tutorial007(app_runner):
         rerun_app_connection_ids=[2459, 2460],
         source_type="drilling",
         log_type="time",
-        run_until=1543847760
+        run_until=1543847760,
     )
 
-    assert app_runner(tutorial007.partialmerge_app, event) == 'Hello, World!'
+    assert app_runner(tutorial007.partialmerge_app, event) == "Hello, World!"
