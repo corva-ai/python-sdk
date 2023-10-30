@@ -7,6 +7,7 @@ from corva import (
     StreamTimeEvent,
     StreamTimeRecord,
     TaskEvent,
+    PartialMergeEvent,
 )
 from docs.modules.ROOT.examples.app_types import (
     tutorial001,
@@ -15,6 +16,7 @@ from docs.modules.ROOT.examples.app_types import (
     tutorial004,
     tutorial005,
     tutorial006,
+    tutorial007,
 )
 
 
@@ -65,3 +67,29 @@ def test_tutorial006(app_runner):
     )
 
     assert app_runner(tutorial006.scheduled_app, event) == 'Hello, World!'
+
+
+def test_tutorial007(app_runner):
+    event = PartialMergeEvent(
+        event_type="partial-well-rerun-merge",
+        partial_well_rerun_id=123,
+        partition=95,
+        rerun_partition=2,
+        rerun_mode="realtime",
+        start=1543847760,
+        end=1543847760,
+        asset_id=2323245,
+        rerun_asset_id=2323245,
+        app_stream_id=9585,
+        rerun_app_stream_id=4745,
+        version=1,
+        app_id=46,
+        app_key="corva.enrichment-wrapper",
+        app_connection_ids=[2457, 2458],
+        rerun_app_connection_ids=[2459, 2460],
+        source_type="drilling",
+        log_type="time",
+        run_until=1543847760
+    )
+
+    assert app_runner(tutorial007.partialmerge_app, event) == 'Hello, World!'

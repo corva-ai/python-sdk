@@ -8,7 +8,7 @@ class PartialMergeEvent(CorvaBaseEvent):
     """Partial Merge event data.
 
     Attributes:
-        event_type: EventTypesEnum.PARTIAL_WELL_RERUN_MERGE
+        event_type: EventType.PARTIAL_WELL_RERUN_MERGE
         partial_well_rerun_id: partial well rerun id
         partition: partition
         rerun_partition: rerun partition
