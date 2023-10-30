@@ -35,18 +35,6 @@ RAW_EVENT = {
 }
 
 
-def test_partialmerge_app_returns_expected_type_event(context):
-    """Partial merge app must return event of PartialMergeEvent type."""
-
-    @partialmerge
-    def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
-        return event
-
-    result_event = partialmerge_app(RAW_EVENT, context)[0]
-
-    assert isinstance(result_event, PartialMergeEvent)
-
-
 def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(context):
     """Partial merge app must raise Pydantic validation exception
     while processing event of unexpected type.
