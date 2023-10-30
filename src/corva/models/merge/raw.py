@@ -5,14 +5,14 @@ from typing import Any, Dict, List
 import pydantic
 
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
-from corva.models.merge.enums import EventTypesEnum, RerunModesEnum, SourceTypesEnum
+from corva.models.merge.enums import EventType, RerunMode, SourceType
 
 
 class RawPartialMergeEventData(pydantic.BaseModel):
     partial_well_rerun_id: int
     partition: int
     rerun_partition: int
-    rerun_mode: RerunModesEnum
+    rerun_mode: RerunMode
     start: int
     end: int
     asset_id: int
@@ -26,7 +26,7 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     app_key: str
     app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
     rerun_app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
-    source_type: SourceTypesEnum
+    source_type: SourceType
     log_type: str
     run_until: int
 
@@ -36,7 +36,7 @@ class RawPartialMergeEventData(pydantic.BaseModel):
 
 
 class RawPartialMergeEvent(CorvaBaseEvent, RawBaseEvent):
-    event_type: EventTypesEnum
+    event_type: EventType
     data: RawPartialMergeEventData
     has_secrets: bool = False
 

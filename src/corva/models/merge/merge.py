@@ -1,7 +1,7 @@
 from typing import List
 
 from corva.models.base import CorvaBaseEvent
-from corva.models.merge.enums import EventTypesEnum, RerunModesEnum, SourceTypesEnum
+from corva.models.merge.enums import EventType, RerunMode, SourceType
 
 
 class PartialMergeEvent(CorvaBaseEvent):
@@ -29,11 +29,11 @@ class PartialMergeEvent(CorvaBaseEvent):
         run_until: run until
     """
 
-    event_type: EventTypesEnum
+    event_type: EventType
     partial_well_rerun_id: int
     partition: int
     rerun_partition: int
-    rerun_mode: RerunModesEnum
+    rerun_mode: RerunMode
     start: int
     end: int
     asset_id: int
@@ -45,6 +45,6 @@ class PartialMergeEvent(CorvaBaseEvent):
     app_key: str
     app_connection_ids: List[int]
     rerun_app_connection_ids: List[int]
-    source_type: SourceTypesEnum
+    source_type: SourceType
     log_type: str
     run_until: int

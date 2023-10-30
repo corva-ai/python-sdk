@@ -1,15 +1,15 @@
 from enum import Enum
 
 
-class RerunModesEnum(str, Enum):
+class RerunMode(str, Enum):
     REALTIME = "realtime"
     HISTORICAL = "historical"
 
 
-class EventTypesEnum(str, Enum):
+class EventType(str, Enum):
     PARTIAL_WELL_RERUN_MERGE = "partial-well-rerun-merge"
 
 
-class SourceTypesEnum(str, Enum):
+class SourceType(str, Enum):
     DRILLING = "drilling"
     COMPLETIONS = "completions"
