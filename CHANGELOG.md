@@ -6,11 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.9.3] - 2023-10-27
-
-### Changed
-- @partialmerge handler was added. 
-
 
 ## [1.9.2] - 2023-10-25
 
@@ -349,8 +344,7 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.9.3...master
-[1.9.3] https://github.com/corva-ai/python-sdk/compare/v1.9.1...v1.9.3
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.9.2...master
 [1.9.2] https://github.com/corva-ai/python-sdk/compare/v1.9.1...v1.9.2
 [1.9.1] https://github.com/corva-ai/python-sdk/compare/v1.9.0...v1.9.1
 [1.9.0] https://github.com/corva-ai/python-sdk/compare/v1.8.1...v1.9.0
