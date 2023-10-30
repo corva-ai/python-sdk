@@ -1,4 +1,5 @@
 from corva import (
+    PartialMergeEvent,
     ScheduledDataTimeEvent,
     ScheduledDepthEvent,
     ScheduledNaturalTimeEvent,
@@ -7,7 +8,6 @@ from corva import (
     StreamTimeEvent,
     StreamTimeRecord,
     TaskEvent,
-    PartialMergeEvent,
 )
 from docs.modules.ROOT.examples.app_types import (
     tutorial001,

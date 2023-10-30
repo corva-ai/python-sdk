@@ -6,7 +6,6 @@ import pytest
 from pydantic import ValidationError
 
 from corva.handlers import partialmerge
-from corva.models.merge.merge import PartialMergeEvent
 
 ASSET_VALUE_TO_CACHE = str(uuid4())
 RERUN_ASSET_VALUE_TO_CACHE = str(uuid4())
