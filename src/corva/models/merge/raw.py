@@ -24,15 +24,11 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     )  # Currently handler supports only 1-st version of this event.
     app_id: int
     app_key: str
-    app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
-    rerun_app_connection_ids: List[int] = pydantic.Field(..., min_items=1)
+    app_connection_id: int
+    rerun_app_connection_id: int
     source_type: SourceType
     log_type: str
     run_until: int
-
-    @pydantic.validator("rerun_app_connection_ids", "app_connection_ids", pre=True)
-    def sort_connection_ids(cls, values):
-        return sorted(values)
 
 
 class RawPartialMergeEvent(CorvaBaseEvent, RawBaseEvent):

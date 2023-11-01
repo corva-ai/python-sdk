@@ -31,11 +31,11 @@ def get_cache_key(
     asset_id: int,
     app_stream_id: int,
     app_key: str,
-    app_connection_ids: List[int],
+    app_connection_id: int,
 ) -> str:
     return (
-        f"{provider}/well/{asset_id}/stream/{app_stream_id}/"
-        f'{app_key}/{"/".join(map(str, app_connection_ids))}'
+        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
+        f'{app_key}/{app_connection_id}'
     )
 
 
@@ -124,7 +124,7 @@ def stream(
             asset_id=event.asset_id,
             app_stream_id=event.app_stream_id,
             app_key=SETTINGS.APP_KEY,
-            app_connection_ids=[event.app_connection_id],
+            app_connection_id=event.app_connection_id,
         )
 
         user_cache_sdk = UserRedisSdk(
@@ -225,7 +225,7 @@ def scheduled(
             asset_id=event.asset_id,
             app_stream_id=event.app_stream_id,
             app_key=SETTINGS.APP_KEY,
-            app_connection_ids=[event.app_connection_id],
+            app_connection_id=event.app_connection_id,
         )
 
         user_cache_sdk = UserRedisSdk(
@@ -413,9 +413,8 @@ def partialmerge(
         redis_client: redis.Redis,
     ) -> Any:
 
-        app_connection_id = event.data.app_connection_ids[0]
         logging_ctx.asset_id = event.data.asset_id
-        logging_ctx.app_connection_id = app_connection_id
+        logging_ctx.app_connection_id = event.data.app_connection_id
 
         api = Api(
             api_url=SETTINGS.API_ROOT_URL,
@@ -429,21 +428,21 @@ def partialmerge(
             asset_id=event.data.asset_id,
             app_stream_id=event.data.app_stream_id,
             app_key=SETTINGS.APP_KEY,
-            app_connection_ids=event.data.app_connection_ids,
+            app_connection_id=event.data.app_connection_id,
         )
         rerun_asset_cache_hash_name = get_cache_key(
             provider=SETTINGS.PROVIDER,
             asset_id=event.data.rerun_asset_id,
             app_stream_id=event.data.rerun_app_stream_id,
             app_key=SETTINGS.APP_KEY,
-            app_connection_ids=event.data.rerun_app_connection_ids,
+            app_connection_id=event.data.rerun_app_connection_id,
         )
         internal_cache_hash_name = get_cache_key(
             provider=SETTINGS.PROVIDER,
             asset_id=event.data.rerun_asset_id,
             app_stream_id=event.data.rerun_app_stream_id,
             app_key=SETTINGS.APP_KEY,
-            app_connection_ids=[app_connection_id],
+            app_connection_id=event.data.app_connection_id,
         )
 
         asset_cache = UserRedisSdk(
@@ -461,7 +460,7 @@ def partialmerge(
         with LoggingContext(
             aws_request_id=aws_request_id,
             asset_id=event.data.asset_id,
-            app_connection_id=app_connection_id,
+            app_connection_id=event.data.app_connection_id,
             handler=CorvaLoggerHandler(
                 max_message_size=SETTINGS.LOG_THRESHOLD_MESSAGE_SIZE,
                 max_message_count=SETTINGS.LOG_THRESHOLD_MESSAGE_COUNT,
