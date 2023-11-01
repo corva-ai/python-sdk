@@ -34,8 +34,8 @@ def get_cache_key(
     app_connection_id: int,
 ) -> str:
     return (
-        f'{provider}/well/{asset_id}/stream/{app_stream_id}/'
-        f'{app_key}/{app_connection_id}'
+        f"{provider}/well/{asset_id}/stream/{app_stream_id}/"
+        f"{app_key}/{app_connection_id}"
     )
 
 
@@ -455,7 +455,9 @@ def partial_rerun_merge(
             redis_dsn=SETTINGS.CACHE_URL,
             redis_client=redis_client,
         )
-        app_event = PartialRerunMergeEvent(**event.data.dict(), event_type=event.event_type)
+        app_event = PartialRerunMergeEvent(
+            **event.data.dict(), event_type=event.event_type
+        )
 
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -483,7 +485,8 @@ def partial_rerun_merge(
                 app=functools.partial(
                     cast(
                         Callable[
-                            [PartialRerunMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any
+                            [PartialRerunMergeEvent, Api, UserRedisSdk, UserRedisSdk],
+                            Any,
                         ],
                         func,
                     ),
