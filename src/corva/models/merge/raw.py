@@ -31,11 +31,11 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     run_until: int
 
 
-class RawPartialMergeEvent(CorvaBaseEvent, RawBaseEvent):
+class RawPartialRerunMergeEvent(CorvaBaseEvent, RawBaseEvent):
     event_type: EventType
     data: RawPartialMergeEventData
     has_secrets: bool = False
 
     @staticmethod
-    def from_raw_event(event: Dict[str, Any]) -> List[RawPartialMergeEvent]:
-        return [pydantic.parse_obj_as(RawPartialMergeEvent, event)]
+    def from_raw_event(event: Dict[str, Any]) -> List[RawPartialRerunMergeEvent]:
+        return [pydantic.parse_obj_as(RawPartialRerunMergeEvent, event)]

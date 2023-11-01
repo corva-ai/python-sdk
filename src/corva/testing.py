@@ -5,7 +5,7 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
-from corva.models.merge.merge import PartialMergeEvent
+from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
@@ -35,7 +35,7 @@ class TestClient:
     @staticmethod
     def run(
         fn: Callable,
-        event: Union[TaskEvent, StreamEvent, ScheduledEvent, PartialMergeEvent],
+        event: Union[TaskEvent, StreamEvent, ScheduledEvent, PartialRerunMergeEvent],
         *,
         secrets: Optional[Dict[str, str]] = None,
         cache: Optional[UserRedisSdk] = None
@@ -60,7 +60,7 @@ class TestClient:
                 TestClient._api,
                 cache,
             )
-        if isinstance(event, PartialMergeEvent):
+        if isinstance(event, PartialRerunMergeEvent):
             app = functools.partial(
                 inspect.unwrap(fn),
                 event,

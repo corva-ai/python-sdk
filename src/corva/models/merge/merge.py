@@ -2,7 +2,7 @@ from corva.models.base import CorvaBaseEvent
 from corva.models.merge.enums import EventType, RerunMode, SourceType
 
 
-class PartialMergeEvent(CorvaBaseEvent):
+class PartialRerunMergeEvent(CorvaBaseEvent):
     """Partial Merge event data.
 
     Attributes:

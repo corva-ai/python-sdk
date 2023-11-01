@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from corva.handlers import partialmerge
+from corva.handlers import partial_rerun_merge
 
 ASSET_VALUE_TO_CACHE = str(uuid4())
 RERUN_ASSET_VALUE_TO_CACHE = str(uuid4())
@@ -39,7 +39,7 @@ def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(c
     while processing event of unexpected type.
     """
 
-    @partialmerge
+    @partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
 
         return event
@@ -56,7 +56,7 @@ def test_partialmerge_app_returns_expected_cache_values(context):
     for asset and rerun asset.
     """
 
-    @partialmerge
+    @partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
         asset_cache_key = "asset_cache_key"
         rerun_asset_cache_key = "rerun_asset_cache_key"

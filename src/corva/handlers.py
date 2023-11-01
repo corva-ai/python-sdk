@@ -11,8 +11,8 @@ from corva.configuration import SETTINGS
 from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
-from corva.models.merge.merge import PartialMergeEvent
-from corva.models.merge.raw import RawPartialMergeEvent
+from corva.models.merge.merge import PartialRerunMergeEvent
+from corva.models.merge.raw import RawPartialRerunMergeEvent
 from corva.models.scheduled.raw import RawScheduledEvent
 from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
 from corva.models.stream.raw import RawStreamEvent
@@ -385,9 +385,9 @@ def task(
     return wrapper
 
 
-def partialmerge(
+def partial_rerun_merge(
     func: Optional[
-        Callable[[PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any]
+        Callable[[PartialRerunMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any]
     ] = None,
     *,
     handler: Optional[logging.Handler] = None,
@@ -399,14 +399,14 @@ def partialmerge(
     """
 
     if func is None:
-        return functools.partial(partialmerge, handler=handler)
+        return functools.partial(partial_rerun_merge, handler=handler)
 
     @functools.wraps(func)
     @functools.partial(
-        base_handler, raw_event_type=RawPartialMergeEvent, handler=handler
+        base_handler, raw_event_type=RawPartialRerunMergeEvent, handler=handler
     )
     def wrapper(
-        event: RawPartialMergeEvent,
+        event: RawPartialRerunMergeEvent,
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
@@ -455,7 +455,7 @@ def partialmerge(
             redis_dsn=SETTINGS.CACHE_URL,
             redis_client=redis_client,
         )
-        app_event = PartialMergeEvent(**event.data.dict(), event_type=event.event_type)
+        app_event = PartialRerunMergeEvent(**event.data.dict(), event_type=event.event_type)
 
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -483,7 +483,7 @@ def partialmerge(
                 app=functools.partial(
                     cast(
                         Callable[
-                            [PartialMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any
+                            [PartialRerunMergeEvent, Api, UserRedisSdk, UserRedisSdk], Any
                         ],
                         func,
                     ),

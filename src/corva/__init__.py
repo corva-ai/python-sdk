@@ -1,5 +1,5 @@
 from .api import Api
-from .handlers import scheduled, stream, task, partialmerge
+from .handlers import scheduled, stream, task, partial_rerun_merge
 from .logger import CORVA_LOGGER as Logger
 from .models.rerun import RerunDepth, RerunDepthRange, RerunTime, RerunTimeRange
 from .models.scheduled.scheduled import (
@@ -13,7 +13,7 @@ from .models.stream.stream import (
     StreamTimeEvent,
     StreamTimeRecord,
 )
-from .models.merge.merge import PartialMergeEvent
+from .models.merge.merge import PartialRerunMergeEvent
 from .models.task import TaskEvent
 from .service.cache_sdk import UserRedisSdk as Cache
 from .shared import SECRETS as secrets

@@ -1,5 +1,5 @@
 from corva import (
-    PartialMergeEvent,
+    PartialRerunMergeEvent,
     ScheduledDataTimeEvent,
     ScheduledDepthEvent,
     ScheduledNaturalTimeEvent,
@@ -70,7 +70,7 @@ def test_tutorial006(app_runner):
 
 
 def test_tutorial007(app_runner):
-    event = PartialMergeEvent(
+    event = PartialRerunMergeEvent(
         event_type="partial-well-rerun-merge",
         partial_well_rerun_id=123,
         partition=95,
