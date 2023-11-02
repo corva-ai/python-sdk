@@ -3,9 +3,10 @@
 from uuid import uuid4
 
 import pytest
+import corva
+
 from pydantic import ValidationError
 
-from corva.handlers import partial_rerun_merge
 
 ASSET_VALUE_TO_CACHE = str(uuid4())
 RERUN_ASSET_VALUE_TO_CACHE = str(uuid4())
@@ -39,7 +40,7 @@ def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(c
     while processing event of unexpected type.
     """
 
-    @partial_rerun_merge
+    @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
 
         return event
@@ -56,7 +57,7 @@ def test_partialmerge_app_returns_expected_cache_values(context):
     for asset and rerun asset.
     """
 
-    @partial_rerun_merge
+    @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
         asset_cache_key = "asset_cache_key"
         rerun_asset_cache_key = "rerun_asset_cache_key"
@@ -76,3 +77,22 @@ def test_partialmerge_app_returns_expected_cache_values(context):
         RERUN_ASSET_VALUE_TO_CACHE,
     ), "Values retrieved from cache should match values stored to cache."
     assert asset_cached_value != rerun_asset_cached_value
+
+
+def test_merge_event_handler_called_from_stream_app_calls_needle_handler(context):
+    """When calling stream event with merge event handler defined,
+    partial merge handler should be called only.
+    """
+
+    expected_response = str(uuid4())
+
+    @corva.stream
+    def stream_app(event, api, cache):
+        assert False
+
+    @corva.partial_rerun_merge
+    def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
+        return expected_response
+
+    partial_merge_app_response = stream_app(RAW_EVENT, context)[0]
+    assert partial_merge_app_response == expected_response
