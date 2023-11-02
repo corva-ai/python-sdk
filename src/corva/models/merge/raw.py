@@ -39,3 +39,6 @@ class RawPartialRerunMergeEvent(CorvaBaseEvent, RawBaseEvent):
     @staticmethod
     def from_raw_event(event: Dict[str, Any]) -> List[RawPartialRerunMergeEvent]:
         return [pydantic.parse_obj_as(RawPartialRerunMergeEvent, event)]
+
+    def __hash__(self):
+        return hash(self.__class__)

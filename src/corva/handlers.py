@@ -1,9 +1,11 @@
+import contextlib
 import functools
 import logging
 import sys
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
 
+import pydantic
 import redis
 
 from corva.api import Api
@@ -24,6 +26,7 @@ from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, User
 
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
+HANDLERS: Dict[Optional[Type[Union[RawPartialRerunMergeEvent]]], Callable] = {}
 
 
 def get_cache_key(
@@ -54,6 +57,17 @@ def base_handler(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ) as logging_ctx:
+            raw_custom_event_type: Optional[
+                Type[RawPartialRerunMergeEvent]
+            ] = _get_custom_event_type_by_raw_aws_event(aws_event)
+            custom_handler = HANDLERS.get(raw_custom_event_type)
+            if raw_custom_event_type and custom_handler is None:
+                CORVA_LOGGER.warning(
+                    f"No handler for event {raw_custom_event_type} is found."
+                )
+                return []
+            specific_callable = custom_handler or func
+
             try:
                 context = CorvaContext.from_aws(
                     aws_event=aws_event, aws_context=aws_context
@@ -62,10 +76,11 @@ def base_handler(
                 redis_client = redis.Redis.from_url(
                     url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1
                 )
-                raw_events = raw_event_type.from_raw_event(event=aws_event)
+                data_transformation_type = raw_custom_event_type or raw_event_type
+                raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 results = [
-                    func(
+                    specific_callable(
                         raw_event,
                         context.api_key,
                         context.aws_request_id,
@@ -402,9 +417,6 @@ def partial_rerun_merge(
         return functools.partial(partial_rerun_merge, handler=handler)
 
     @functools.wraps(func)
-    @functools.partial(
-        base_handler, raw_event_type=RawPartialRerunMergeEvent, handler=handler
-    )
     def wrapper(
         event: RawPartialRerunMergeEvent,
         api_key: str,
@@ -499,4 +511,20 @@ def partial_rerun_merge(
 
         return result
 
+    HANDLERS[RawPartialRerunMergeEvent] = wrapper
     return wrapper
+
+
+def _get_custom_event_type_by_raw_aws_event(
+    aws_event: Any,
+) -> Optional[Type[RawPartialRerunMergeEvent]]:
+    events = None
+    # Here we do not know what schema will future custom events have,
+    # so trying to parse all registered custom types.
+    for event_type in HANDLERS.keys():
+        if event_type is not None:  # Making MyPy happy.
+            with contextlib.suppress(pydantic.ValidationError, AttributeError):
+                events = event_type.from_raw_event(aws_event)
+        if events:
+            return event_type
+    return None

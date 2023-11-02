@@ -3,10 +3,9 @@
 from uuid import uuid4
 
 import pytest
-import corva
-
 from pydantic import ValidationError
 
+import corva
 
 ASSET_VALUE_TO_CACHE = str(uuid4())
 RERUN_ASSET_VALUE_TO_CACHE = str(uuid4())
@@ -35,27 +34,38 @@ RAW_EVENT = {
 }
 
 
-def test_partialmerge_app_on_unexpected_event_type_raises_validation_exception(context):
+def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_raises_exc(
+    context,
+):
     """Partial merge app must raise Pydantic validation exception
     while processing event of unexpected type.
     """
 
+    @corva.stream
+    def stream_app(event, api, cache):
+        assert False
+
     @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
-
         return event
 
     raw_event = dict(RAW_EVENT)
     raw_event["event_type"] = "unknown_event_type"
     with pytest.raises(ValidationError) as e:
-        partialmerge_app(raw_event, context)
-    assert "value is not a valid enumeration" in str(e.value)
+        stream_app(raw_event, context)
+    assert "validation error" in str(e.value)
 
 
-def test_partialmerge_app_returns_expected_cache_values(context):
+def test_merge_event_handler_called_from_stream_app_returns_expected_cache_values(
+    context,
+):
     """Partial merge app must provide functional cache objects
     for asset and rerun asset.
     """
+
+    @corva.stream
+    def stream_app(event, api, cache):
+        assert False
 
     @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
@@ -69,9 +79,7 @@ def test_partialmerge_app_returns_expected_cache_values(context):
             key=rerun_asset_cache_key
         )
 
-    asset_cached_value, rerun_asset_cached_value = partialmerge_app(RAW_EVENT, context)[
-        0
-    ]
+    asset_cached_value, rerun_asset_cached_value = stream_app(RAW_EVENT, context)[0]
     assert (asset_cached_value, rerun_asset_cached_value) == (
         ASSET_VALUE_TO_CACHE,
         RERUN_ASSET_VALUE_TO_CACHE,
