@@ -1,4 +1,4 @@
-"""Module contains functional requirements for partilmerge app."""
+"""Module contains functional requirements for partial_merge_event event handler."""
 
 from uuid import uuid4
 
@@ -43,11 +43,11 @@ def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_rai
 
     @corva.stream
     def stream_app(event, api, cache):
-        pass
+        pytest.fail("Stream app was unexpectedly called!")
 
     @corva.partial_rerun_merge
-    def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
-        pass
+    def partial_rerun_merge_app(event, api, asset_cache, rerun_asset_cache):
+        pytest.fail("Partial rerun merge app was unexpectedly executed!")
 
     raw_event = dict(RAW_EVENT)
     raw_event["event_type"] = "unknown_event_type"
@@ -65,10 +65,10 @@ def test_merge_event_handler_called_from_stream_app_returns_expected_cache_value
 
     @corva.stream
     def stream_app(event, api, cache):
-        pass
+        pytest.fail("Stream app was unexpectedly called!")
 
     @corva.partial_rerun_merge
-    def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
+    def partial_rerun_merge_app(event, api, asset_cache, rerun_asset_cache):
         asset_cache_key = "asset_cache_key"
         rerun_asset_cache_key = "rerun_asset_cache_key"
         asset_cache.set(key=asset_cache_key, value=ASSET_VALUE_TO_CACHE)
@@ -96,10 +96,10 @@ def test_merge_event_handler_called_from_stream_app_calls_needed_handler(context
 
     @corva.stream
     def stream_app(event, api, cache):
-        pass
+        pytest.fail("Stream app was unexpectedly called!")
 
     @corva.partial_rerun_merge
-    def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
+    def partial_rerun_merge_app(event, api, asset_cache, rerun_asset_cache):
         return expected_response
 
     partial_merge_app_response = stream_app(RAW_EVENT, context)[0]
@@ -115,10 +115,10 @@ def test_merge_event_handler_called_from_scheduled_app_calls_needed_handler(cont
 
     @corva.scheduled
     def scheduled_app(event, api, cache):
-        pass
+        pytest.fail("Scheduled app was unexpectedly called!")
 
     @corva.partial_rerun_merge
-    def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
+    def partial_rerun_merge_app(event, api, asset_cache, rerun_asset_cache):
         return expected_response
 
     partial_merge_app_response = scheduled_app(RAW_EVENT, context)[0]
