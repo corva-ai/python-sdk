@@ -59,7 +59,7 @@ def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_rai
 def test_merge_event_handler_called_from_stream_app_returns_expected_cache_values(
     context,
 ):
-    """Partial merge app must provide functional cache objects
+    """Partial merge app must provide functional(working) cache objects
     for asset and rerun asset.
     """
 
@@ -103,4 +103,23 @@ def test_merge_event_handler_called_from_stream_app_calls_needed_handler(context
         return expected_response
 
     partial_merge_app_response = stream_app(RAW_EVENT, context)[0]
+    assert partial_merge_app_response == expected_response
+
+
+def test_merge_event_handler_called_from_scheduled_app_calls_needed_handler(context):
+    """When calling scheduled event with merge event handler defined,
+    partial merge handler should be called only.
+    """
+
+    expected_response = str(uuid4())
+
+    @corva.scheduled
+    def scheduled_app(event, api, cache):
+        assert False
+
+    @corva.partial_rerun_merge
+    def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
+        return expected_response
+
+    partial_merge_app_response = scheduled_app(RAW_EVENT, context)[0]
     assert partial_merge_app_response == expected_response
