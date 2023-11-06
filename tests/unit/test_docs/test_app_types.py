@@ -92,4 +92,4 @@ def test_tutorial007(app_runner):
         run_until=1543847760,
     )
 
-    assert app_runner(tutorial007.partialmerge_app, event) == "Hello, World!"
+    assert app_runner(tutorial007.partial_rerun_app, event) == "Hello, World!"
