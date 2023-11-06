@@ -86,7 +86,10 @@ def base_handler(
                 data_transformation_type = raw_custom_event_type or raw_event_type
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
-                if custom_handler is None and data_transformation_type not in GENERIC_APP_EVENT_TYPES:
+                if (
+                    custom_handler is None
+                    and data_transformation_type not in GENERIC_APP_EVENT_TYPES
+                ):
                     CORVA_LOGGER.warning(
                         f"No handler for event {data_transformation_type} is found."
                     )
