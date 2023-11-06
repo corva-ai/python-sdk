@@ -70,7 +70,7 @@ def test_tutorial006(app_runner):
 
 
 def test_tutorial007(app_runner):
-    partial_rerun_event = PartialRerunMergeEvent(
+    partial_rerun_merge_event = PartialRerunMergeEvent(
         event_type="partial-well-rerun-merge",
         partial_well_rerun_id=123,
         partition=95,
@@ -96,7 +96,7 @@ def test_tutorial007(app_runner):
     )
 
     assert (
-        app_runner(tutorial007.partial_rerun_app, partial_rerun_event)
+        app_runner(tutorial007.partial_rerun_app, partial_rerun_merge_event)
         == "Hello, World!"
     )
     assert (
