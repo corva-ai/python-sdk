@@ -3,7 +3,7 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast, Tuple
 
 import pydantic
 import redis
@@ -57,12 +57,10 @@ def base_handler(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ) as logging_ctx:
-            raw_custom_event_type = _get_custom_event_type_by_raw_aws_event(aws_event)
-            custom_handler = HANDLERS.get(raw_custom_event_type)
-            if raw_custom_event_type and custom_handler is None:
-                CORVA_LOGGER.warning(
-                    f"No handler for event {raw_custom_event_type} is found."
-                )
+            is_generic_app_event = _is_generic_app_event(raw_event_type)
+            raw_custom_event_type, custom_handler = _get_custom_event_type_by_raw_aws_event(aws_event)
+            if custom_handler is None and is_generic_app_event is False:
+                CORVA_LOGGER.warning(f"No handler for event {raw_custom_event_type} is found.")
                 return []
             specific_callable = custom_handler or func
 
@@ -515,14 +513,25 @@ def partial_rerun_merge(
 
 def _get_custom_event_type_by_raw_aws_event(
     aws_event: Any,
-) -> Optional[Type[RawPartialRerunMergeEvent]]:
+) -> Tuple[Optional[Type[RawBaseEvent]], Optional[Callable]]:
     events = None
     # Here we do not know what schema will future custom events have,
     # so trying to parse all registered custom types.
-    for event_type in HANDLERS.keys():
+    for event_type, handler in HANDLERS.items():
         if event_type is not None:  # Making MyPy happy.
             with contextlib.suppress(pydantic.ValidationError, AttributeError):
                 events = event_type.from_raw_event(aws_event)
         if events:
-            return event_type
-    return None
+            return event_type, handler
+    return None, None
+
+
+def _is_generic_app_event(raw_event_type: Type[RawBaseEvent]) -> bool:
+    """Returns true for generic event.
+
+    3 generic event types are:
+        * RawStreamEvent
+        * RawScheduledEvent
+        * RawTaskEvent
+    """
+    return raw_event_type in [RawStreamEvent, RawScheduledEvent, RawTaskEvent]
