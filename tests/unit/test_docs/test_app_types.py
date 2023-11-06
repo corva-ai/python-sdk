@@ -70,7 +70,7 @@ def test_tutorial006(app_runner):
 
 
 def test_tutorial007(app_runner):
-    event = PartialRerunMergeEvent(
+    partial_rerun_event = PartialRerunMergeEvent(
         event_type="partial-well-rerun-merge",
         partial_well_rerun_id=123,
         partition=95,
@@ -91,5 +91,15 @@ def test_tutorial007(app_runner):
         log_type="time",
         run_until=1543847760,
     )
+    stream_time_event = StreamTimeEvent(
+        asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
+    )
 
-    assert app_runner(tutorial007.partial_rerun_app, event) == "Hello, World!"
+    assert (
+        app_runner(tutorial007.partial_rerun_app, partial_rerun_event)
+        == "Hello, World!"
+    )
+    assert (
+        app_runner(tutorial007.stream_app, stream_time_event)
+        == "Handling stream event..."
+    )
