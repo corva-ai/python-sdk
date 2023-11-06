@@ -38,6 +38,7 @@ from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, User
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
 HANDLERS: Dict[Type[RawBaseEvent], Callable] = {}
+GENERIC_APP_EVENT_TYPES = [RawStreamEvent, RawScheduledEvent, RawTaskEvent]
 
 
 def get_cache_key(
@@ -72,11 +73,6 @@ def base_handler(
                 raw_custom_event_type,
                 custom_handler,
             ) = _get_custom_event_type_by_raw_aws_event(aws_event)
-            if custom_handler is None and aws_event.get("event_type"):
-                CORVA_LOGGER.warning(
-                    f"No handler for event {raw_custom_event_type} is found."
-                )
-                return []
             specific_callable = custom_handler or func
 
             try:
@@ -89,6 +85,12 @@ def base_handler(
                 )
                 data_transformation_type = raw_custom_event_type or raw_event_type
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
+
+                if custom_handler is None and data_transformation_type not in GENERIC_APP_EVENT_TYPES:
+                    CORVA_LOGGER.warning(
+                        f"No handler for event {data_transformation_type} is found."
+                    )
+                    return []
 
                 results = [
                     specific_callable(
