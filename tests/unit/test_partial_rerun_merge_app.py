@@ -1,4 +1,4 @@
-"""Module contains functional requirements for partial_merge_event event handler."""
+"""Module contains functional requirements for partial rerun merge event handler."""
 
 from uuid import uuid4
 
