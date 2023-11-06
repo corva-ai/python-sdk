@@ -60,16 +60,14 @@ def base_handler(
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
     def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
-        with (
-            LoggingContext(
-                aws_request_id=aws_context.aws_request_id,
-                asset_id=None,
-                app_connection_id=None,
-                handler=logging.StreamHandler(stream=sys.stdout),
-                user_handler=handler,
-                logger=CORVA_LOGGER,
-            ) as logging_ctx
-        ):
+        with LoggingContext(
+            aws_request_id=aws_context.aws_request_id,
+            asset_id=None,
+            app_connection_id=None,
+            handler=logging.StreamHandler(stream=sys.stdout),
+            user_handler=handler,
+            logger=CORVA_LOGGER,
+        ) as logging_ctx:
             is_generic_app_event = _is_generic_app_event(raw_event_type)
             (
                 raw_custom_event_type,
