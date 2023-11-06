@@ -68,12 +68,11 @@ def base_handler(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ) as logging_ctx:
-            is_generic_app_event = _is_generic_app_event(raw_event_type)
             (
                 raw_custom_event_type,
                 custom_handler,
             ) = _get_custom_event_type_by_raw_aws_event(aws_event)
-            if custom_handler is None and is_generic_app_event is False:
+            if custom_handler is None and aws_event.get("event_type"):
                 CORVA_LOGGER.warning(
                     f"No handler for event {raw_custom_event_type} is found."
                 )
@@ -540,14 +539,3 @@ def _get_custom_event_type_by_raw_aws_event(
         if events:
             return event_type, handler
     return None, None
-
-
-def _is_generic_app_event(raw_event_type: Type[RawBaseEvent]) -> bool:
-    """Returns true for generic event.
-
-    3 generic event types are:
-        * RawStreamEvent
-        * RawScheduledEvent
-        * RawTaskEvent
-    """
-    return raw_event_type in [RawStreamEvent, RawScheduledEvent, RawTaskEvent]
