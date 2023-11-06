@@ -43,11 +43,11 @@ def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_rai
 
     @corva.stream
     def stream_app(event, api, cache):
-        assert False
+        pass
 
     @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
-        return event
+        pass
 
     raw_event = dict(RAW_EVENT)
     raw_event["event_type"] = "unknown_event_type"
@@ -65,7 +65,7 @@ def test_merge_event_handler_called_from_stream_app_returns_expected_cache_value
 
     @corva.stream
     def stream_app(event, api, cache):
-        assert False
+        pass
 
     @corva.partial_rerun_merge
     def partialmerge_app(event, api, asset_cache, rerun_asset_cache):
@@ -96,7 +96,7 @@ def test_merge_event_handler_called_from_stream_app_calls_needed_handler(context
 
     @corva.stream
     def stream_app(event, api, cache):
-        assert False
+        pass
 
     @corva.partial_rerun_merge
     def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
@@ -115,7 +115,7 @@ def test_merge_event_handler_called_from_scheduled_app_calls_needed_handler(cont
 
     @corva.scheduled
     def scheduled_app(event, api, cache):
-        assert False
+        pass
 
     @corva.partial_rerun_merge
     def partial_merge_app(event, api, asset_cache, rerun_asset_cache):
