@@ -26,7 +26,7 @@ from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, User
 
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
-HANDLERS: Dict[Optional[Type[Union[RawPartialRerunMergeEvent]]], Callable] = {}
+HANDLERS: Dict[Type[RawBaseEvent], Callable] = {}
 
 
 def get_cache_key(
@@ -57,9 +57,7 @@ def base_handler(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ) as logging_ctx:
-            raw_custom_event_type: Optional[
-                Type[RawPartialRerunMergeEvent]
-            ] = _get_custom_event_type_by_raw_aws_event(aws_event)
+            raw_custom_event_type = _get_custom_event_type_by_raw_aws_event(aws_event)
             custom_handler = HANDLERS.get(raw_custom_event_type)
             if raw_custom_event_type and custom_handler is None:
                 CORVA_LOGGER.warning(

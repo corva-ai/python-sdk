@@ -87,7 +87,7 @@ def test_merge_event_handler_called_from_stream_app_returns_expected_cache_value
     assert asset_cached_value != rerun_asset_cached_value
 
 
-def test_merge_event_handler_called_from_stream_app_calls_needle_handler(context):
+def test_merge_event_handler_called_from_stream_app_calls_needed_handler(context):
     """When calling stream event with merge event handler defined,
     partial merge handler should be called only.
     """
