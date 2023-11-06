@@ -1,9 +1,16 @@
-from corva import Api, Cache, PartialRerunMergeEvent, partial_rerun_merge, stream, StreamTimeRecord  # <1>
+from corva import (  # <1>
+    Api,
+    Cache,
+    PartialRerunMergeEvent,
+    StreamTimeEvent,
+    partial_rerun_merge,
+    stream,
+)
 
 
 @stream
 def stream_app(
-        event: StreamTimeRecord,
+        event: StreamTimeEvent,
         api: Api,
         cache: Cache
 ):

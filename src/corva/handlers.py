@@ -3,7 +3,18 @@ import functools
 import logging
 import sys
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast, Tuple
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import pydantic
 import redis
@@ -49,18 +60,25 @@ def base_handler(
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
     def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
-        with LoggingContext(
-            aws_request_id=aws_context.aws_request_id,
-            asset_id=None,
-            app_connection_id=None,
-            handler=logging.StreamHandler(stream=sys.stdout),
-            user_handler=handler,
-            logger=CORVA_LOGGER,
-        ) as logging_ctx:
+        with (
+            LoggingContext(
+                aws_request_id=aws_context.aws_request_id,
+                asset_id=None,
+                app_connection_id=None,
+                handler=logging.StreamHandler(stream=sys.stdout),
+                user_handler=handler,
+                logger=CORVA_LOGGER,
+            ) as logging_ctx
+        ):
             is_generic_app_event = _is_generic_app_event(raw_event_type)
-            raw_custom_event_type, custom_handler = _get_custom_event_type_by_raw_aws_event(aws_event)
+            (
+                raw_custom_event_type,
+                custom_handler,
+            ) = _get_custom_event_type_by_raw_aws_event(aws_event)
             if custom_handler is None and is_generic_app_event is False:
-                CORVA_LOGGER.warning(f"No handler for event {raw_custom_event_type} is found.")
+                CORVA_LOGGER.warning(
+                    f"No handler for event {raw_custom_event_type} is found."
+                )
                 return []
             specific_callable = custom_handler or func
 
