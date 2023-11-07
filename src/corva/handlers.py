@@ -91,7 +91,8 @@ def base_handler(
                     and data_transformation_type not in GENERIC_APP_EVENT_TYPES
                 ):
                     CORVA_LOGGER.warning(
-                        f"No handler for event {data_transformation_type} is found."
+                        f"Handler for {data_transformation_type.__name__!r} "
+                        f"event not found. Skipping..."
                     )
                     return []
 
@@ -533,14 +534,13 @@ def partial_rerun_merge(
 
 def _get_custom_event_type_by_raw_aws_event(
     aws_event: Any,
-) -> Tuple[Optional[Type[RawBaseEvent]], Optional[Callable]]:
+) -> Union[Tuple[Type[RawBaseEvent], Callable], Tuple[None, None]]:
     events = None
     # Here we do not know what schema will future custom events have,
     # so trying to parse all registered custom types.
     for event_type, handler in HANDLERS.items():
-        if event_type is not None:  # Making MyPy happy.
-            with contextlib.suppress(pydantic.ValidationError, AttributeError):
-                events = event_type.from_raw_event(aws_event)
+        with contextlib.suppress(pydantic.ValidationError):
+            events = event_type.from_raw_event(aws_event)
         if events:
             return event_type, handler
     return None, None
