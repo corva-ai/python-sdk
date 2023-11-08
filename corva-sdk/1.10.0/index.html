@@ -16,7 +16,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="corva-sdk" data-version="1.9.2">
+<div class="nav-container" data-component="corva-sdk" data-version="1.10.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -36,14 +36,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">corva-sdk</span>
-    <span class="version">1.9.2</span>
+    <span class="version">1.10.0</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <a class="title" href="index.html">corva-sdk</a>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">1.9.2</a>
+          <a href="index.html">1.10.0</a>
         </li>
       </ul>
     </li>
@@ -62,7 +62,7 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
-<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.9.2/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.10.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="5">
@@ -73,7 +73,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>1.9.2</strong>.</p>
+<p>Documentation for version <strong>1.10.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -116,18 +116,10 @@
 </li>
 </ol>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-Use type hints like in examples below
-for better support from editors and tools.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>Each app type can have optional <a href="#partial_merge_rerun"><code>handler</code></a> to process partial rerun merge events.
+TIP: Use type hints like in examples below
+for better support from editors and tools.</p>
 </div>
 <div class="sect2">
 <h3 id="stream"><a class="anchor" href="#stream"></a>2.1. Stream</h3>
@@ -338,6 +330,59 @@ The arguments serve as building blocks for your app.</td>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Decorate your function using <code>task</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Add app logic here.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="partial_merge_rerun"><a class="anchor" href="#partial_merge_rerun"></a>2.4. Partial Rerun Merge Handler (Optional)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import (  <i class="conum" data-value="1"></i><b>(1)</b>
+    Api,
+    Cache,
+    PartialRerunMergeEvent,
+    StreamTimeEvent,
+    partial_rerun_merge,
+    stream,
+)
+
+
+@stream
+def stream_app(event: StreamTimeEvent, api: Api, cache: Cache):
+    return "Handling stream event..."
+
+
+@partial_rerun_merge  <i class="conum" data-value="3"></i><b>(3)</b>
+def partial_rerun_app(
+    event: PartialRerunMergeEvent,
+    api: Api,
+    asset_cache: Cache,
+    rerun_asset_cache: Cache,
+):  <i class="conum" data-value="2"></i><b>(2)</b>
+    return "Hello, World!"  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Import required functionality.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define your function.
+It must receive 4 arguments:
+<a href="#event">event</a>, <a href="#api">api</a>, <a href="#cache">cache</a>, <a href="#cache">cache</a>.
+The arguments serve as building blocks for your app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Decorate your function using <code>partial_rerun_merge</code>.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
