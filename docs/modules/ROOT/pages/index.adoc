@@ -48,6 +48,7 @@ There are three app types that you can build:
 (e.g., once a minute, once every 3 ft.).
 3. <<task,`task`>> - works with data on-demand.
 
+Each app type can have optional <<partial_merge_rerun,`handler`>> to process partial rerun merge events.
 TIP: Use type hints like in examples below
 for better support from editors and tools.
 
@@ -138,6 +139,21 @@ It must receive two arguments:
 <<event,event>> and <<api,api>>.
 The arguments serve as building blocks for your app.
 <.> {app-step3} `task`.
+<.> {app-step4}
+
+[#partial_merge_rerun]
+=== Partial Rerun Merge Handler (Optional)
+
+[source,python]
+----
+include::example$app_types/tutorial007.py[]
+----
+<.> {app-step1}
+<.> Define your function.
+It must receive 4 arguments:
+<<event,event>>, <<api,api>>, <<cache,cache>>, <<cache,cache>>.
+The arguments serve as building blocks for your app.
+<.> {app-step3} `partial_rerun_merge`.
 <.> {app-step4}
 
 [#event]
