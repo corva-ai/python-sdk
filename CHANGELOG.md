@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+# [1.10.0] - 2023-11-08
+
+### Added
+-  New handler to process partial rerun merge events
+
+
 ## [1.9.2] - 2023-10-25
 
 ### Fixed
