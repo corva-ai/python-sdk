@@ -18,11 +18,11 @@ class Api:
     TIMEOUT_LIMITS = (3, 30)  # seconds
     DEFAULT_MAX_RETRIES = 5
     HTTP_STATUS_CODES_TO_RETRY = [
-        HTTPStatus.TOO_MANY_REQUESTS,       # 428
-        HTTPStatus.INTERNAL_SERVER_ERROR,   # 500
-        HTTPStatus.BAD_GATEWAY,             # 502
-        HTTPStatus.SERVICE_UNAVAILABLE,     # 503
-        HTTPStatus.GATEWAY_TIMEOUT          # 504
+        HTTPStatus.TOO_MANY_REQUESTS,  # 428
+        HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
+        HTTPStatus.BAD_GATEWAY,  # 502
+        HTTPStatus.SERVICE_UNAVAILABLE,  # 503
+        HTTPStatus.GATEWAY_TIMEOUT,  # 504
     ]
 
     def __init__(
@@ -46,24 +46,24 @@ class Api:
     @property
     def default_headers(self):
         return {
-            'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_key,
+            "Authorization": f"API {self.api_key}",
+            "X-Corva-App": self.app_key,
         }
 
     def get(self, path: str, **kwargs):
-        return self._request('GET', path, **kwargs)
+        return self._request("GET", path, **kwargs)
 
     def post(self, path: str, **kwargs):
-        return self._request('POST', path, **kwargs)
+        return self._request("POST", path, **kwargs)
 
     def patch(self, path: str, **kwargs):
-        return self._request('PATCH', path, **kwargs)
+        return self._request("PATCH", path, **kwargs)
 
     def put(self, path: str, **kwargs):
-        return self._request('PUT', path, **kwargs)
+        return self._request("PUT", path, **kwargs)
 
     def delete(self, path: str, **kwargs):
-        return self._request('DELETE', path, **kwargs)
+        return self._request("DELETE", path, **kwargs)
 
     def _get_url(self, path: str):
         """Builds complete url.
@@ -77,15 +77,15 @@ class Api:
           3 corva api url, if above points are False.
         """
 
-        if path.startswith('http'):
+        if path.startswith("http"):
             return path
 
         path = path.lstrip(
-            '/'
+            "/"
         )  # delete leading forward slash for posixpath.join to work correctly
 
         # search text like api/v1 or api/v10 in path
-        if bool(re.search(r'api/v\d+', path)):
+        if bool(re.search(r"api/v\d+", path)):
             return posixpath.join(self.data_api_url, path)
 
         return posixpath.join(self.api_url, path)
@@ -136,15 +136,15 @@ class Api:
             )
             if response.status_code not in self.HTTP_STATUS_CODES_TO_RETRY:
                 break
-            time.sleep(2 ** retry_attempt / 4)
+            time.sleep(2**retry_attempt / 4)
 
         return response
 
     def _validate_timeout(self, timeout: int) -> None:
         if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
             raise ValueError(
-                f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and '
-                f'{self.TIMEOUT_LIMITS[1]} seconds.'
+                f"Timeout must be between {self.TIMEOUT_LIMITS[0]} and "
+                f"{self.TIMEOUT_LIMITS[1]} seconds."
             )
 
     def get_dataset(
@@ -182,13 +182,13 @@ class Api:
         """
 
         response = self.get(
-            f'/api/v1/data/{provider}/{dataset}/',
+            f"/api/v1/data/{provider}/{dataset}/",
             params={
-                'query': json.dumps(query),
-                'sort': json.dumps(sort),
-                'fields': fields,
-                'limit': limit,
-                'skip': skip,
+                "query": json.dumps(query),
+                "sort": json.dumps(sort),
+                "fields": fields,
+                "limit": limit,
+                "skip": skip,
             },
         )
         response.raise_for_status()
@@ -211,8 +211,8 @@ class Api:
         """
 
         response = self.post(
-            '/api/v1/message_producer/',
-            json={'app_connection_id': self.app_connection_id, 'data': data},
+            "/api/v1/message_producer/",
+            json={"app_connection_id": self.app_connection_id, "data": data},
         )
         response.raise_for_status()
 
@@ -242,13 +242,13 @@ class Api:
 
         if produce:
             body = {
-                'data': list(data),
-                'producer': {'app_connection_id': self.app_connection_id},
+                "data": list(data),
+                "producer": {"app_connection_id": self.app_connection_id},
             }
         else:
             body = list(data)
 
-        response = self.post(f'/api/v1/data/{provider}/{dataset}/', data=body)
+        response = self.post(f"/api/v1/data/{provider}/{dataset}/", data=body)
         response.raise_for_status()
 
         return response.json()
