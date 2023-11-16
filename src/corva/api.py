@@ -1,6 +1,8 @@
 import json
 import posixpath
 import re
+import time
+from http import HTTPStatus
 from typing import List, Optional, Sequence, Union
 
 import requests
@@ -14,6 +16,14 @@ class Api:
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
+    DEFAULT_MAX_RETRIES = 5
+    HTTP_STATUS_CODES_TO_RETRY = [
+        HTTPStatus.TOO_MANY_REQUESTS,       # 428
+        HTTPStatus.INTERNAL_SERVER_ERROR,   # 500
+        HTTPStatus.BAD_GATEWAY,             # 502
+        HTTPStatus.SERVICE_UNAVAILABLE,     # 503
+        HTTPStatus.GATEWAY_TIMEOUT          # 504
+    ]
 
     def __init__(
         self,
@@ -31,6 +41,7 @@ class Api:
         self.app_key = app_key
         self.app_connection_id = app_connection_id
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
+        self.max_retries = self.DEFAULT_MAX_RETRIES
 
     @property
     def default_headers(self):
@@ -103,6 +114,7 @@ class Api:
           requests.Response instance.
         """
 
+        response = requests.Response()
         timeout = timeout or self.timeout
         self._validate_timeout(timeout)
 
@@ -113,14 +125,18 @@ class Api:
             **(headers or {}),
         }
 
-        response = requests.request(
-            method=method,
-            url=url,
-            params=params,
-            json=data,
-            headers=headers,
-            timeout=timeout,
-        )
+        for retry_attempt in range(max(int(self.max_retries), 1)):
+            response = requests.request(
+                method=method,
+                url=url,
+                params=params,
+                json=data,
+                headers=headers,
+                timeout=timeout,
+            )
+            if response.status_code not in self.HTTP_STATUS_CODES_TO_RETRY:
+                break
+            time.sleep(2 ** retry_attempt / 4)
 
         return response
 
