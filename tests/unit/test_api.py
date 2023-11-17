@@ -156,7 +156,9 @@ def test_get_dataset_raises(api, requests_mock: RequestsMocker):
     )
 
 
-def test_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
+def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
+    max_retries = 5
+    api.max_retries = max_retries
     path = "/"
     url = f"{SETTINGS.API_ROOT_URL}{path}"
 
@@ -197,7 +199,8 @@ def test_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
 def test_retrying_logic_for_custom_max_retries_makes_n_calls(
     api, requests_mock: RequestsMocker
 ):
-    custom_max_retries = 2
+    max_retries = 2
+    api.max_retries = max_retries
     path = "/"
     url = f"{SETTINGS.API_ROOT_URL}{path}"
 
@@ -216,11 +219,10 @@ def test_retrying_logic_for_custom_max_retries_makes_n_calls(
         ],
     )
 
-    assert len(bad_requests_statuses_codes) >= custom_max_retries
+    assert len(bad_requests_statuses_codes) >= max_retries
 
-    api.max_retries = custom_max_retries
     api.get(path)
 
     assert (
-        len(requests_mock.request_history) == custom_max_retries
-    ), f"When all requests fail only {custom_max_retries} requests should be made."
+        len(requests_mock.request_history) == max_retries
+    ), f"When all requests fail only {max_retries} requests should be made."

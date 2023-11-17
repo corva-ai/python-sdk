@@ -16,7 +16,7 @@ class Api:
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
-    DEFAULT_MAX_RETRIES = 5
+    DEFAULT_MAX_RETRIES = 0
     HTTP_STATUS_CODES_TO_RETRY = [
         HTTPStatus.TOO_MANY_REQUESTS,  # 428
         HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
