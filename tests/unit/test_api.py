@@ -222,4 +222,4 @@ def test_disabled_by_default_retrying_logic_works_as_expected(
 
     assert (
         len(requests_mock.request_history) == 1
-    ), f"For disabled by default retrying functionality only 1 request should happen."
+    ), "For disabled by default retrying functionality only 1 request should happen."
