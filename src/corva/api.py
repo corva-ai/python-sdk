@@ -16,7 +16,7 @@ class Api:
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
-    DEFAULT_MAX_RETRIES = 0
+    DEFAULT_MAX_RETRIES = int(0)
     HTTP_STATUS_CODES_TO_RETRY = [
         HTTPStatus.TOO_MANY_REQUESTS,  # 428
         HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
@@ -51,12 +51,12 @@ class Api:
         }
 
     @property
-    def max_retries(self):
+    def max_retries(self) -> int:
         return self._max_retries
 
     @max_retries.setter
-    def max_retries(self, value):
-        if not (isinstance(value, int) and 0 <= value <= 10):
+    def max_retries(self, value: int):
+        if not (0 <= value <= 10):
             raise ValueError("Values between 0 and 10 are allowed")
         self._max_retries = value
 
@@ -147,7 +147,7 @@ class Api:
             if response.status_code not in self.HTTP_STATUS_CODES_TO_RETRY:
                 break
             if self._max_retries:
-                time.sleep(2**retry_attempt / 4)  # 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, ...
+                time.sleep(2**retry_attempt / 4)  # 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, ...
 
         return response
 
