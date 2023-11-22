@@ -41,7 +41,7 @@ class Api:
         self.app_key = app_key
         self.app_connection_id = app_connection_id
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
-        self.max_retries = self.DEFAULT_MAX_RETRIES
+        self._max_retries = self.DEFAULT_MAX_RETRIES
 
     @property
     def default_headers(self):
@@ -49,6 +49,16 @@ class Api:
             "Authorization": f"API {self.api_key}",
             "X-Corva-App": self.app_key,
         }
+
+    @property
+    def max_retries(self):
+        return self._max_retries
+
+    @max_retries.setter
+    def max_retries(self, value):
+        if not (isinstance(value, int) and 0 <= value <= 10):
+            raise ValueError("Values between 0 and 10 are allowed")
+        self._max_retries = value
 
     def get(self, path: str, **kwargs):
         return self._request("GET", path, **kwargs)
@@ -125,7 +135,7 @@ class Api:
             **(headers or {}),
         }
 
-        for retry_attempt in range(max(int(self.max_retries), 1)):
+        for retry_attempt in range(max(self._max_retries, 1)):
             response = requests.request(
                 method=method,
                 url=url,
@@ -136,7 +146,8 @@ class Api:
             )
             if response.status_code not in self.HTTP_STATUS_CODES_TO_RETRY:
                 break
-            time.sleep(2**retry_attempt / 4)
+            if self._max_retries:
+                time.sleep(2**retry_attempt / 4)  # 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, ...
 
         return response
 

@@ -157,8 +157,7 @@ def test_get_dataset_raises(api, requests_mock: RequestsMocker):
 
 
 def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
-    max_retries = 5
-    api.max_retries = max_retries
+    api.max_retries = 5  # Enabling retrying functionality to make up to 5 attempts.
     path = "/"
     url = f"{SETTINGS.API_ROOT_URL}{path}"
 
@@ -196,11 +195,9 @@ def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMo
     )
 
 
-def test_retrying_logic_for_custom_max_retries_makes_n_calls(
+def test_disabled_by_default_retrying_logic_works_as_expected(
     api, requests_mock: RequestsMocker
 ):
-    max_retries = 2
-    api.max_retries = max_retries
     path = "/"
     url = f"{SETTINGS.API_ROOT_URL}{path}"
 
@@ -219,10 +216,10 @@ def test_retrying_logic_for_custom_max_retries_makes_n_calls(
         ],
     )
 
-    assert len(bad_requests_statuses_codes) >= max_retries
+    assert len(bad_requests_statuses_codes) > 0
 
     api.get(path)
 
     assert (
-        len(requests_mock.request_history) == max_retries
-    ), f"When all requests fail only {max_retries} requests should be made."
+        len(requests_mock.request_history) == 1
+    ), f"For disabled by default retrying functionality only 1 request should happen."
