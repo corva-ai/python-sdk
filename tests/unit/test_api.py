@@ -187,8 +187,7 @@ def test_disabled_by_default_retrying_logic_works_as_expected(
 
 
 def test_enabled_retrying_logic_with_all_failed_retries_returns_http_response_object(
-        api,
-        requests_mock: RequestsMocker
+    api, requests_mock: RequestsMocker
 ):
     api.max_retries = 1
     path = "/"
