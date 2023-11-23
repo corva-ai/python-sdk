@@ -269,6 +269,22 @@ include::example$api/tutorial007.py[]
 <.> You can enable this flag
 to save and <<produce_messages,`produce`>> the data at once.
 
+[#enabling_retries]
+=== Enabling re-tries
+
+When request fails due to HTTP error, re-trying functionality can be used.
+It will try to re-send the same request again with exponential back-off for HTTP status codes below:
+
+* 428
+* 500
+* 502
+* 503
+* 504
+
+[source,python]
+----
+include::example$api/tutorial008.py[]
+
 [#cache]
 == Cache
 Apps might need to share some data between invokes.

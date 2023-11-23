@@ -156,45 +156,6 @@ def test_get_dataset_raises(api, requests_mock: RequestsMocker):
     )
 
 
-def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
-    api.max_retries = 5  # Enabling retrying functionality to make up to 5 attempts.
-    path = "/"
-    url = f"{SETTINGS.API_ROOT_URL}{path}"
-
-    bad_requests_statuses_codes = [
-        HTTPStatus.TOO_MANY_REQUESTS,
-        HTTPStatus.INTERNAL_SERVER_ERROR,
-        HTTPStatus.BAD_GATEWAY,
-    ]
-    good_requests_statuses_codes = [HTTPStatus.OK]
-
-    requests_sequence_return_status_codes = (
-        bad_requests_statuses_codes + good_requests_statuses_codes
-    )
-
-    requests_mock.register_uri(
-        "GET",
-        url,
-        [
-            {"status_code": int(status_code)}
-            for status_code in requests_sequence_return_status_codes
-        ],
-    )
-
-    start_time = time.time()
-    response = api.get(path)
-    end_time = time.time()
-
-    assert response.status_code in good_requests_statuses_codes
-    assert len(requests_mock.request_history) == len(
-        requests_sequence_return_status_codes
-    )
-    assert end_time - start_time > 1, (
-        f"At least 1 second retry delay should be applied for "
-        f"{len(bad_requests_statuses_codes)} retries."
-    )
-
-
 def test_disabled_by_default_retrying_logic_works_as_expected(
     api, requests_mock: RequestsMocker
 ):
@@ -223,3 +184,74 @@ def test_disabled_by_default_retrying_logic_works_as_expected(
     assert (
         len(requests_mock.request_history) == 1
     ), "For disabled by default retrying functionality only 1 request should happen."
+
+
+def test_enabled_retrying_logic_with_all_failed_retries_returns_http_response_object(
+        api,
+        requests_mock: RequestsMocker
+):
+    api.max_retries = 1
+    path = "/"
+    url = f"{SETTINGS.API_ROOT_URL}{path}"
+
+    bad_requests_statuses_codes = [
+        HTTPStatus.BAD_GATEWAY,
+        HTTPStatus.SERVICE_UNAVAILABLE,
+    ]
+
+    requests_mock.register_uri(
+        "GET",
+        url,
+        [
+            {"status_code": int(status_code)}
+            for status_code in bad_requests_statuses_codes
+        ],
+    )
+
+    # Making sure all retrying attempts were failed.
+    assert api.max_retries < len(bad_requests_statuses_codes)
+
+    response = api.get(path)
+
+    assert response.status_code == bad_requests_statuses_codes[0]
+
+
+def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMocker):
+    api.max_retries = 6  # Enabling retrying functionality to make up to 6 attempts.
+    path = "/"
+    url = f"{SETTINGS.API_ROOT_URL}{path}"
+
+    bad_requests_statuses_codes = [
+        HTTPStatus.TOO_MANY_REQUESTS,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        HTTPStatus.BAD_GATEWAY,
+        HTTPStatus.SERVICE_UNAVAILABLE,
+        HTTPStatus.GATEWAY_TIMEOUT,
+    ]
+    good_requests_statuses_codes = [HTTPStatus.OK]
+
+    requests_sequence_return_status_codes = (
+        bad_requests_statuses_codes + good_requests_statuses_codes
+    )
+
+    requests_mock.register_uri(
+        "GET",
+        url,
+        [
+            {"status_code": int(status_code)}
+            for status_code in requests_sequence_return_status_codes
+        ],
+    )
+
+    start_time = time.time()
+    response = api.get(path)
+    end_time = time.time()
+
+    assert response.status_code in good_requests_statuses_codes
+    assert len(requests_mock.request_history) == len(
+        requests_sequence_return_status_codes
+    )
+    assert end_time - start_time > 1, (
+        f"At least 1 second retry delay should be applied for "
+        f"{len(bad_requests_statuses_codes)} retries."
+    )

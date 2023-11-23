@@ -1,11 +1,11 @@
 import json
 import posixpath
 import re
-import time
 from http import HTTPStatus
 from typing import List, Optional, Sequence, Union
 
 import requests
+from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_result, RetryError
 
 
 class Api:
@@ -17,13 +17,6 @@ class Api:
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
     DEFAULT_MAX_RETRIES = int(0)
-    HTTP_STATUS_CODES_TO_RETRY = [
-        HTTPStatus.TOO_MANY_REQUESTS,  # 428
-        HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
-        HTTPStatus.BAD_GATEWAY,  # 502
-        HTTPStatus.SERVICE_UNAVAILABLE,  # 503
-        HTTPStatus.GATEWAY_TIMEOUT,  # 504
-    ]
 
     def __init__(
         self,
@@ -100,6 +93,37 @@ class Api:
 
         return posixpath.join(self.api_url, path)
 
+    @staticmethod
+    def _execute_request(
+            method: str,
+            url: str,
+            params: Optional[dict],
+            data: Optional[dict],
+            headers: Optional[dict] = None,
+            timeout: Optional[int] = None
+    ):
+        """Executes the request.
+
+        Args:
+            method: HTTP method.
+            path: url to call.
+            data: request body, that will be casted to json.
+            params: url query string params.
+            headers: additional headers to include in request.
+            timeout: custom request timeout in seconds.
+
+        Returns:
+            requests.Response instance.
+        """
+        return requests.request(
+            method=method,
+            url=url,
+            params=params,
+            json=data,
+            headers=headers,
+            timeout=timeout,
+        )
+
     def _request(
         self,
         method: str,
@@ -110,7 +134,7 @@ class Api:
         headers: Optional[dict] = None,
         timeout: Optional[int] = None,
     ) -> requests.Response:
-        """Executes the request.
+        """Prepares HTTP request.
 
         Args:
           method: HTTP method.
@@ -123,8 +147,14 @@ class Api:
         Returns:
           requests.Response instance.
         """
+        retryable_status_codes = [
+            HTTPStatus.TOO_MANY_REQUESTS,  # 428
+            HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
+            HTTPStatus.BAD_GATEWAY,  # 502
+            HTTPStatus.SERVICE_UNAVAILABLE,  # 503
+            HTTPStatus.GATEWAY_TIMEOUT,  # 504
+        ]
 
-        response = requests.Response()
         timeout = timeout or self.timeout
         self._validate_timeout(timeout)
 
@@ -135,19 +165,22 @@ class Api:
             **(headers or {}),
         }
 
-        for retry_attempt in range(max(self._max_retries, 1)):
-            response = requests.request(
-                method=method,
-                url=url,
-                params=params,
-                json=data,
-                headers=headers,
-                timeout=timeout,
+        if self.max_retries > 0:
+            retry_decorator = retry(
+                stop=stop_after_attempt(self.max_retries),
+                wait=wait_random_exponential(multiplier=0.25, max=10),
+                retry=retry_if_result(lambda r: r.status_code in retryable_status_codes)
             )
-            if response.status_code not in self.HTTP_STATUS_CODES_TO_RETRY:
-                break
-            if self._max_retries:
-                time.sleep(2**retry_attempt / 4)  # 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, ...
+            retrying_request = retry_decorator(self._execute_request)
+            try:
+                response = retrying_request(method, url, params, data, headers, timeout)
+            except RetryError as e:
+                if not e.last_attempt.failed:
+                    response = e.last_attempt.result()
+                else:
+                    raise
+        else:
+            response = self._execute_request(method, url, params, data, headers, timeout)
 
         return response
 
