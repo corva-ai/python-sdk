@@ -1,4 +1,4 @@
-from corva import Api, Cache, ScheduledDataTimeEvent, ScheduledDepthEvent, scheduled
+from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
 
 
 @scheduled

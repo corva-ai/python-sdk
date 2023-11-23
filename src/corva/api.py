@@ -5,7 +5,13 @@ from http import HTTPStatus
 from typing import List, Optional, Sequence, Union
 
 import requests
-from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_result, RetryError
+from tenacity import (
+    RetryError,
+    retry,
+    retry_if_result,
+    stop_after_attempt,
+    wait_random_exponential,
+)
 
 
 class Api:
