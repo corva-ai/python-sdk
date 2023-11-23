@@ -101,12 +101,12 @@ class Api:
 
     @staticmethod
     def _execute_request(
-            method: str,
-            url: str,
-            params: Optional[dict],
-            data: Optional[dict],
-            headers: Optional[dict] = None,
-            timeout: Optional[int] = None
+        method: str,
+        url: str,
+        params: Optional[dict],
+        data: Optional[dict],
+        headers: Optional[dict] = None,
+        timeout: Optional[int] = None,
     ):
         """Executes the request.
 
@@ -175,18 +175,34 @@ class Api:
             retry_decorator = retry(
                 stop=stop_after_attempt(self.max_retries),
                 wait=wait_random_exponential(multiplier=0.25, max=10),
-                retry=retry_if_result(lambda r: r.status_code in retryable_status_codes)
+                retry=retry_if_result(
+                    lambda r: r.status_code in retryable_status_codes
+                ),
             )
             retrying_request = retry_decorator(self._execute_request)
             try:
-                response = retrying_request(method, url, params, data, headers, timeout)
+                response = retrying_request(
+                    method=method,
+                    url=url,
+                    params=params,
+                    data=data,
+                    headers=headers,
+                    timeout=timeout,
+                )
             except RetryError as e:
                 if not e.last_attempt.failed:
                     response = e.last_attempt.result()
                 else:
                     raise
         else:
-            response = self._execute_request(method, url, params, data, headers, timeout)
+            response = self._execute_request(
+                method=method,
+                url=url,
+                params=params,
+                data=data,
+                headers=headers,
+                timeout=timeout,
+            )
 
         return response
 
