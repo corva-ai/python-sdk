@@ -156,6 +156,19 @@ def test_get_dataset_raises(api, requests_mock: RequestsMocker):
     )
 
 
+def test_produce_messages_raises(api, requests_mock: RequestsMocker):
+    requests_mock.post(
+        "/api/v1/message_producer/",
+        status_code=400,
+    )
+
+    pytest.raises(
+        requests.HTTPError,
+        api.produce_messages,
+        data={},
+    )
+
+
 def test_disabled_by_default_retrying_logic_works_as_expected(
     api, requests_mock: RequestsMocker
 ):

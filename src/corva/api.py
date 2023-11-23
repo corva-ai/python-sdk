@@ -278,7 +278,7 @@ class Api:
 
         response = self.post(
             "/api/v1/message_producer/",
-            json={"app_connection_id": self.app_connection_id, "data": data},
+            data={"app_connection_id": self.app_connection_id, "data": data},
         )
         response.raise_for_status()
 
