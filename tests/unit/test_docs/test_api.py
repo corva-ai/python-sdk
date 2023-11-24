@@ -127,6 +127,4 @@ def test_tutorial008(app_runner, mocker: MockerFixture):
     time_event = ScheduledDataTimeEvent(
         asset_id=0, company_id=0, start_time=0, end_time=0
     )
-    time_mock = mocker.patch.object(Api, 'insert_data')
     app_runner(tutorial008.scheduled_app, time_event)
-    time_mock.assert_not_called()

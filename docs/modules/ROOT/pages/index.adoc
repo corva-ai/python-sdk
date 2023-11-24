@@ -284,6 +284,7 @@ It will try to re-send the same request again with exponential back-off for HTTP
 [source,python]
 ----
 include::example$api/tutorial008.py[]
+----
 
 [#cache]
 == Cache
