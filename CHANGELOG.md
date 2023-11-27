@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Optional merge_events parameter to @stream and @scheduled decorators.
+Default is False, if True - merge all incoming events into one.
+
 
 # [1.10.0] - 2023-11-08
 
