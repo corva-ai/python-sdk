@@ -621,8 +621,10 @@ def test_merge_events_stream_event(context):
     """
     merge_events parameter is merging records for "stream" apps
 
-    When 3 events with 2 records each are sent and @stream decorator has optional "merge_events" param set to True -
-    we're supposed to merge incoming events into one event with all records(6 in our case) combined
+    When 3 events with 2 records each are sent and @stream decorator
+    has optional "merge_events" param set to True - we're supposed
+    to merge incoming events into one event with all records(6 in our
+    case) combined
     """
     @stream(merge_events=True)
     def stream_app(event, api, cache):
@@ -634,12 +636,14 @@ def test_merge_events_stream_event(context):
                 RawTimeRecord(
                     collection=str(),
                     timestamp=1,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 ),
                 RawTimeRecord(
                     collection=str(),
                     timestamp=2,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 ),
             ],
             metadata=RawMetadata(
@@ -653,12 +657,14 @@ def test_merge_events_stream_event(context):
                 RawTimeRecord(
                     collection=str(),
                     timestamp=3,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 ),
                 RawTimeRecord(
                     collection=str(),
                     timestamp=4,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 )
             ],
             metadata=RawMetadata(
@@ -672,12 +678,14 @@ def test_merge_events_stream_event(context):
                 RawTimeRecord(
                     collection=str(),
                     timestamp=5,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 ),
                 RawTimeRecord(
                     collection=str(),
                     timestamp=6,
-                    **{"asset_id": 1, "company_id": 1},
+                    asset_id=1,
+                    company_id=1,
                 )
             ],
             metadata=RawMetadata(

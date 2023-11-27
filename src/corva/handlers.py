@@ -28,8 +28,7 @@ from corva.models.context import CorvaContext
 from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.merge.raw import RawPartialRerunMergeEvent
 from corva.models.scheduled.raw import RawScheduledEvent
-from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent, ScheduledDataTimeEvent, \
-    ScheduledDepthEvent
+from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
@@ -132,14 +131,20 @@ def stream(
 
     Arguments:
         handler: logging handler to include in Corva logger.
-        merge_events: if True - merge all incoming events into one before passing them to func
+        merge_events: if True - merge all incoming events into one before
+        passing them to func
     """
 
     if func is None:
         return functools.partial(stream, handler=handler, merge_events=merge_events)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawStreamEvent, handler=handler, merge_events=merge_events)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawStreamEvent,
+        handler=handler,
+        merge_events=merge_events
+    )
     def wrapper(
         event: RawStreamEvent,
         api_key: str,
@@ -241,7 +246,12 @@ def scheduled(
         return functools.partial(scheduled, handler=handler, merge_events=merge_events)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawScheduledEvent, handler=handler, merge_events=merge_events)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawScheduledEvent,
+        handler=handler,
+        merge_events=merge_events
+    )
     def wrapper(
         event: RawScheduledEvent,
         api_key: str,
@@ -564,12 +574,18 @@ def _merge_events(aws_event: Any, data_transformation_type: RawBaseEvent) -> Any
         if not isinstance(aws_event[0], dict):
             aws_event: List[dict] = list(itertools.chain(*aws_event))
         is_depth = aws_event[0]["scheduler_type"] == SchedulerType.data_depth_milestone
-        event_start, event_end = ("top_depth", "bottom_depth") if is_depth else ("schedule_start", "schedule_end")
-        min_event_start, max_event_end = aws_event[0][event_start], aws_event[0].get(event_end)
+        event_start, event_end = ("top_depth", "bottom_depth")\
+            if is_depth else ("schedule_start", "schedule_end")
+        min_event_start, max_event_end = (aws_event[0][event_start],
+                                          aws_event[0].get(event_end))
         for event in aws_event[1:]:
             if event[event_start] < min_event_start:
                 min_event_start = event[event_start]
-            if max_event_end and event[event_end] > max_event_end:
+            if (
+                max_event_end
+                and event.get(event_end)
+                and event[event_end] > max_event_end
+            ):
                 max_event_end = event[event_end]
 
         aws_event[0][event_start] = min_event_start
