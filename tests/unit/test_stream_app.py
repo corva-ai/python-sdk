@@ -626,6 +626,7 @@ def test_merge_events_stream_event(context):
     to merge incoming events into one event with all records(6 in our
     case) combined
     """
+
     @stream(merge_events=True)
     def stream_app(event, api, cache):
         return event
@@ -665,7 +666,7 @@ def test_merge_events_stream_event(context):
                     timestamp=4,
                     asset_id=1,
                     company_id=1,
-                )
+                ),
             ],
             metadata=RawMetadata(
                 app_stream_id=1,
@@ -686,15 +687,15 @@ def test_merge_events_stream_event(context):
                     timestamp=6,
                     asset_id=1,
                     company_id=1,
-                )
+                ),
             ],
             metadata=RawMetadata(
                 app_stream_id=1,
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
                 log_type=LogType.time,
             ),
-        ).dict()
+        ).dict(),
     ]
 
-    result_event: StreamEvent = stream_app(event, context)[0]
+    result_event: StreamTimeEvent = stream_app(event, context)[0]
     assert len(result_event.records) == 6, "records were not merged into a single event"

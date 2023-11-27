@@ -60,7 +60,7 @@ def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
     handler: Optional[logging.Handler],
-    merge_events: Optional[bool] = False
+    merge_events: Optional[bool] = False,
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
     def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
@@ -125,7 +125,7 @@ def stream(
     func: Optional[Callable[[StreamEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
-    merge_events: Optional[bool] = False
+    merge_events: Optional[bool] = False,
 ) -> Callable:
     """Runs stream app.
 
@@ -143,7 +143,7 @@ def stream(
         base_handler,
         raw_event_type=RawStreamEvent,
         handler=handler,
-        merge_events=merge_events
+        merge_events=merge_events,
     )
     def wrapper(
         event: RawStreamEvent,
@@ -234,7 +234,7 @@ def scheduled(
     func: Optional[Callable[[ScheduledEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
-    merge_events: Optional[bool] = False
+    merge_events: Optional[bool] = False,
 ) -> Callable:
     """Runs scheduled app.
 
@@ -250,7 +250,7 @@ def scheduled(
         base_handler,
         raw_event_type=RawScheduledEvent,
         handler=handler,
-        merge_events=merge_events
+        merge_events=merge_events,
     )
     def wrapper(
         event: RawScheduledEvent,
@@ -565,19 +565,24 @@ def _get_custom_event_type_by_raw_aws_event(
     return None, None
 
 
-def _merge_events(aws_event: Any, data_transformation_type: RawBaseEvent) -> Any:
+def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) -> Any:
     """
     Merges incoming aws_events into one.
     Merge happens differently, depending on app type.
     """
     if data_transformation_type == RawScheduledEvent:
         if not isinstance(aws_event[0], dict):
-            aws_event: List[dict] = list(itertools.chain(*aws_event))
+            aws_event = list(itertools.chain(*aws_event))
         is_depth = aws_event[0]["scheduler_type"] == SchedulerType.data_depth_milestone
-        event_start, event_end = ("top_depth", "bottom_depth")\
-            if is_depth else ("schedule_start", "schedule_end")
-        min_event_start, max_event_end = (aws_event[0][event_start],
-                                          aws_event[0].get(event_end))
+        event_start, event_end = (
+            ("top_depth", "bottom_depth")
+            if is_depth
+            else ("schedule_start", "schedule_end")
+        )
+        min_event_start, max_event_end = (
+            aws_event[0][event_start],
+            aws_event[0].get(event_end),
+        )
         for event in aws_event[1:]:
             if event[event_start] < min_event_start:
                 min_event_start = event[event_start]
