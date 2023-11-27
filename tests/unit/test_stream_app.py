@@ -631,71 +631,35 @@ def test_merge_events_stream_event(context):
     def stream_app(event, api, cache):
         return event
 
-    event = [
-        RawStreamTimeEvent(
-            records=[
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=1,
-                    asset_id=1,
-                    company_id=1,
-                ),
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=2,
-                    asset_id=1,
-                    company_id=1,
-                ),
-            ],
-            metadata=RawMetadata(
-                app_stream_id=1,
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
-                log_type=LogType.time,
-            ),
-        ).dict(),
-        RawStreamTimeEvent(
-            records=[
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=3,
-                    asset_id=1,
-                    company_id=1,
-                ),
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=4,
-                    asset_id=1,
-                    company_id=1,
-                ),
-            ],
-            metadata=RawMetadata(
-                app_stream_id=1,
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
-                log_type=LogType.time,
-            ),
-        ).dict(),
-        RawStreamTimeEvent(
-            records=[
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=5,
-                    asset_id=1,
-                    company_id=1,
-                ),
-                RawTimeRecord(
-                    collection=str(),
-                    timestamp=6,
-                    asset_id=1,
-                    company_id=1,
-                ),
-            ],
-            metadata=RawMetadata(
-                app_stream_id=1,
-                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
-                log_type=LogType.time,
-            ),
-        ).dict(),
-    ]
+    event = []
+    timestamp = 1
+    for _ in range(1, 4):
+        event.extend(
+            [
+                RawStreamTimeEvent(
+                    records=[
+                        RawTimeRecord(
+                            collection=str(),
+                            timestamp=timestamp,
+                            asset_id=1,
+                            company_id=1,
+                        ),
+                        RawTimeRecord(
+                            collection=str(),
+                            timestamp=timestamp + 1,
+                            asset_id=1,
+                            company_id=1,
+                        ),
+                    ],
+                    metadata=RawMetadata(
+                        app_stream_id=1,
+                        apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+                        log_type=LogType.time,
+                    ),
+                ).dict()
+            ]
+        )
+        timestamp += 2
 
     result_event: StreamTimeEvent = stream_app(event, context)[0]
     assert len(result_event.records) == 6, "records were not merged into a single event"
