@@ -532,3 +532,66 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
 
     with pytest.raises(redis.exceptions.ConnectionError):
         scheduled_app(event, context)
+
+
+def test_merge_events_scheduled_event(context, requests_mock):
+    @scheduled(merge_events=True)
+    def scheduled_app(event, api, state):
+        return event
+
+    event = [
+        [
+            RawScheduledDataTimeEvent(
+                asset_id=int(),
+                interval=60,
+                schedule=int(),
+                schedule_start=60,
+                schedule_end=120,
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            ),
+            RawScheduledDataTimeEvent(
+                asset_id=int(),
+                interval=60,
+                schedule=int(),
+                schedule_start=61,
+                schedule_end=121,
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            ),
+            RawScheduledDataTimeEvent(
+                asset_id=int(),
+                interval=60,
+                schedule=int(),
+                schedule_start=62,
+                schedule_end=122,
+                app_connection=int(),
+                app_stream=int(),
+                company=int(),
+                scheduler_type=SchedulerType.data_time,
+            ).dict(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        ]
+    ]
+
+    # patch post request, that sets scheduled task as completed
+    # looks for url path like /scheduler/123/completed
+    post_mock = requests_mock.post(re.compile(r'/scheduler/\d+/completed'))
+
+    result_event: ScheduledDataTimeEvent = scheduled_app(event, context)[0]
+
+    assert result_event.start_time == 1
+    assert result_event.end_time == 60
+    assert result_event.schedule_end == 122

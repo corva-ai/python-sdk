@@ -615,3 +615,78 @@ def test_stream_depth_app_gets_log_identifier(context):
     result_event: StreamDepthEvent = stream_app(event, context)[0]
 
     assert result_event.log_identifier == 'log_identifier'
+
+
+def test_merge_events_stream_event(context):
+    """
+    merge_events parameter is merging records for "stream" apps
+
+    When 3 events with 2 records each are sent and @stream decorator has optional "merge_events" param set to True -
+    we're supposed to merge incoming events into one event with all records(6 in our case) combined
+    """
+    @stream(merge_events=True)
+    def stream_app(event, api, cache):
+        return event
+
+    event = [
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=1,
+                    **{"asset_id": 1, "company_id": 1},
+                ),
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=2,
+                    **{"asset_id": 1, "company_id": 1},
+                ),
+            ],
+            metadata=RawMetadata(
+                app_stream_id=1,
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+                log_type=LogType.time,
+            ),
+        ).dict(),
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=3,
+                    **{"asset_id": 1, "company_id": 1},
+                ),
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=4,
+                    **{"asset_id": 1, "company_id": 1},
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=1,
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+                log_type=LogType.time,
+            ),
+        ).dict(),
+        RawStreamTimeEvent(
+            records=[
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=5,
+                    **{"asset_id": 1, "company_id": 1},
+                ),
+                RawTimeRecord(
+                    collection=str(),
+                    timestamp=6,
+                    **{"asset_id": 1, "company_id": 1},
+                )
+            ],
+            metadata=RawMetadata(
+                app_stream_id=1,
+                apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+                log_type=LogType.time,
+            ),
+        ).dict()
+    ]
+
+    result_event: StreamEvent = stream_app(event, context)[0]
+    assert len(result_event.records) == 6, "records were not merged into a single event"
