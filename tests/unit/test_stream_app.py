@@ -634,7 +634,7 @@ def test_merge_events_stream_event(context):
     event = []
     timestamp = 1
     # generate 3 events with 2 records each
-    for _ in range(1, 4):
+    for _ in range(3):
         event.extend(
             [
                 RawStreamTimeEvent(

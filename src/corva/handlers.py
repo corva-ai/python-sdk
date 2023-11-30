@@ -571,6 +571,7 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
     Merge happens differently, depending on app type.
     """
     if data_transformation_type == RawScheduledEvent:
+        # scheduled event
         if not isinstance(aws_event[0], dict):
             aws_event = list(itertools.chain(*aws_event))
         is_depth = aws_event[0]["scheduler_type"] == SchedulerType.data_depth_milestone
