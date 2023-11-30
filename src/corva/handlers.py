@@ -460,7 +460,6 @@ def partial_rerun_merge(
         logging_ctx: LoggingContext,
         redis_client: redis.Redis,
     ) -> Any:
-
         logging_ctx.asset_id = event.data.asset_id
         logging_ctx.app_connection_id = event.data.app_connection_id
 
@@ -569,6 +568,8 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
     """
     Merges incoming aws_events into one.
     Merge happens differently, depending on app type.
+    Only "scheduled" and "stream" type of apps can be processed here.
+    If somehow any other type is passed - raise an exception
     """
     if data_transformation_type == RawScheduledEvent:
         # scheduled event
@@ -600,8 +601,16 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
         aws_event = aws_event[0]
         return aws_event
 
-    # stream event
-    for event in aws_event[1:]:
-        aws_event[0]["records"].extend(event["records"])
-    aws_event = [aws_event[0]]
-    return aws_event
+    elif data_transformation_type == RawStreamEvent:
+        # stream event
+        for event in aws_event[1:]:
+            aws_event[0]["records"].extend(event["records"])
+        aws_event = [aws_event[0]]
+        return aws_event
+
+    # unexpected event type, raise an exception
+    raise RuntimeError(
+        "merge_events parameter was passed to app type other than scheduled "
+        "or stream. Merge strategy is not implemented for "
+        f"{data_transformation_type} event types."
+    )
