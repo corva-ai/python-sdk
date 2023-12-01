@@ -435,12 +435,10 @@ include::example$logging/tutorial001.py[]
 <.> Use `Logger` as every other Python logger.
 
 === Customizations
-You might want to customize app behavior in a several ways,
-for example merge incoming events or send logs to other places
+You might want to send logs to other places
 (e.g., to error reporting systems like
 <<sentry, `Sentry`>> or <<rollbar, `Rollbar`>>).
-
-Sending custom logs can be achieved by providing an instance of
+This can be achieved by providing an instance of
 {python-log-handlers-link}[logging handler]
 as an argument to app decorator.
 Custom handler will be used alongside {corva-sdk}'s default one.
