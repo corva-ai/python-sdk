@@ -1,4 +1,5 @@
-from corva import Api, ScheduledNaturalTimeEvent, scheduled, Cache
+from corva import Api  # <.>
+from corva import Cache, ScheduledNaturalTimeEvent, scheduled
 
 
 @scheduled(merge_events=True)

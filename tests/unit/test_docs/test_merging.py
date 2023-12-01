@@ -1,13 +1,18 @@
-from typing import List, Union, Dict
+from typing import Dict, List, Union
 
 import pytest
 
-from corva import StreamTimeEvent, ScheduledDataTimeEvent
+from corva import ScheduledDataTimeEvent, StreamTimeEvent
 from corva.configuration import SETTINGS
 from corva.models.scheduled.raw import RawScheduledDataTimeEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.log_type import LogType
-from corva.models.stream.raw import RawStreamTimeEvent, RawTimeRecord, RawMetadata, RawAppMetadata
+from corva.models.stream.raw import (
+    RawAppMetadata,
+    RawMetadata,
+    RawStreamTimeEvent,
+    RawTimeRecord,
+)
 from docs.modules.ROOT.examples.merging import tutorial001, tutorial002
 
 
