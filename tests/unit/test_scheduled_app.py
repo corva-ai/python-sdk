@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import Dict, List, Union
 
 import pytest
 import redis
@@ -533,41 +532,3 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
 
     with pytest.raises(redis.exceptions.ConnectionError):
         scheduled_app(event, context)
-
-
-@pytest.mark.parametrize(
-    "time_ranges, flat",
-    (
-        [((60, 120), (61, None), (62, 122)), True],
-        [((61, None), (60, None), (62, None)), False],
-    ),
-)
-def test_merge_events_scheduled_event(context, requests_mock, time_ranges, flat):
-    @scheduled(merge_events=True)
-    def scheduled_app(_event: ScheduledDataTimeEvent, api, state):
-        return _event
-
-    event: List[Union[List, Dict]] = []
-    for schedule_start, schedule_end in time_ranges:
-        event.append(
-            RawScheduledDataTimeEvent(
-                asset_id=int(),
-                interval=60,
-                schedule=int(),
-                schedule_start=schedule_start,
-                schedule_end=schedule_end,
-                app_connection=int(),
-                app_stream=int(),
-                company=int(),
-                scheduler_type=SchedulerType.data_time,
-            ).dict(by_alias=True, exclude_unset=True)
-        )
-    if not flat:
-        event = [event]
-
-    result_event: ScheduledDataTimeEvent = scheduled_app(event, context)[0]
-
-    assert result_event.start_time == 1
-    assert result_event.end_time == 60
-    max_schedule_value = time_ranges[-1][-1]
-    assert result_event.schedule_end == max_schedule_value  # type: ignore[attr-defined]

@@ -539,6 +539,10 @@ Optionally we can ask to merge them into one event by providing `merge_events=Tr
 ----
 include::example$merging/tutorial001.py[]
 ----
+[source,python]
+----
+include::example$merging/tutorial002.py[]
+----
 Usually this is needed to save some IO operations by processing data in bigger batches.
 Use this parameter with care, in pessimistic scenario you can receive too much data, try to
 process it in "one go" and fail with timeout. In that case your app will be automatically

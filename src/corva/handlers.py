@@ -19,6 +19,7 @@ from typing import (
 
 import pydantic
 import redis
+from typing_extensions import assert_never
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -60,7 +61,7 @@ def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
     handler: Optional[logging.Handler],
-    merge_events: Optional[bool] = False,
+    merge_events: bool = False,
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
     def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
@@ -125,14 +126,14 @@ def stream(
     func: Optional[Callable[[StreamEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
-    merge_events: Optional[bool] = False,
+    merge_events: bool = False,
 ) -> Callable:
     """Runs stream app.
 
     Arguments:
         handler: logging handler to include in Corva logger.
         merge_events: if True - merge all incoming events into one before
-        passing them to func
+          passing them to func
     """
 
     if func is None:
@@ -234,12 +235,14 @@ def scheduled(
     func: Optional[Callable[[ScheduledEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
-    merge_events: Optional[bool] = False,
+    merge_events: bool = False,
 ) -> Callable:
     """Runs scheduled app.
 
     Arguments:
         handler: logging handler to include in Corva logger.
+        merge_events: if True - merge all incoming events into one before
+          passing them to func
     """
 
     if func is None:
@@ -581,20 +584,11 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
             if is_depth
             else ("schedule_start", "schedule_end")
         )
-        min_event_start, max_event_end = (
-            aws_event[0][event_start],
-            aws_event[0].get(event_end),
+        min_event_start = min(e[event_start] for e in aws_event)
+        max_event_end = max(
+            (e[event_end] for e in aws_event if e.get(event_end) is not None),
+            default=None,
         )
-        for event in aws_event[1:]:
-            if event[event_start] < min_event_start:
-                min_event_start = event[event_start]
-            if (
-                max_event_end
-                and event.get(event_end)
-                and event[event_end] > max_event_end
-            ):
-                max_event_end = event[event_end]
-
         aws_event[0][event_start] = min_event_start
         if max_event_end:
             aws_event[0][event_end] = max_event_end
@@ -608,9 +602,6 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
         aws_event = [aws_event[0]]
         return aws_event
 
-    # unexpected event type, raise an exception
-    raise RuntimeError(
-        "merge_events parameter was passed to app type other than scheduled "
-        "or stream. Merge strategy is not implemented for "
-        f"{data_transformation_type} event types."
-    )
+    else:
+        # unexpected event type, raise an exception
+        assert_never(data_transformation_type)  # type: ignore
