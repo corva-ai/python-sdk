@@ -1,5 +1,4 @@
-from corva import Api  # <.>
-from corva import Cache, StreamTimeEvent, stream
+from corva import Api, Cache, StreamTimeEvent, stream
 
 
 # imagine we actually have 3 incoming events with 3 records each
