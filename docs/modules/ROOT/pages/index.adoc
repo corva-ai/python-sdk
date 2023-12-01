@@ -533,7 +533,7 @@ and <<scheduled,`scheduled`>>
 apps can use this feature.
 ====
 
-Sometimes Corva can send more than one event to @scheduled and @stream apps.
+Sometimes Corva can send more than one event to <<scheduled,`scheduled`>> and <<stream,`stream`>> apps.
 Optionally we can ask to merge them into one event by providing `merge_events=True` parameter.
 [source,python]
 ----
