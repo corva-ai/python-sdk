@@ -435,10 +435,12 @@ include::example$logging/tutorial001.py[]
 <.> Use `Logger` as every other Python logger.
 
 === Customizations
-You might want to send logs to other places
+You might want to customize app behavior in a several ways,
+for example merge incoming events or send logs to other places
 (e.g., to error reporting systems like
 <<sentry, `Sentry`>> or <<rollbar, `Rollbar`>>).
-This can be achieved by providing an instance of
+
+Sending custom logs can be achieved by providing an instance of
 {python-log-handlers-link}[logging handler]
 as an argument to app decorator.
 Custom handler will be used alongside {corva-sdk}'s default one.
@@ -523,6 +525,30 @@ Just initialize
 and pass corresponding logging handler
 as a keyword argument to the app decorator.
 Use code samples above as the examples.
+
+== Merging incoming events
+
+[TIP]
+====
+Only <<stream,`stream`>>
+and <<scheduled,`scheduled`>>
+apps can use this feature.
+====
+
+Sometimes Corva can send more than one event to @scheduled and @stream apps.
+Optionally we can ask to merge them into one event by providing `merge_events=True` parameter.
+[source,python]
+----
+include::example$merging/tutorial001.py[]
+----
+Usually this is needed to save some IO operations by processing data in bigger batches.
+Use this parameter with care, in pessimistic scenario you can receive too much data, try to
+process it in "one go" and fail with timeout. In that case your app will be automatically
+restarted and you will start from the beginning and fail again.
+Without this parameter after each processed event corva-sdk will "remember" that event was processed.
+So, for example, if you will fail at event #5 and your app will be restarted - app will start processing
+from event #5(and not #1 like in case of `merge_events=True`)
+
 
 == Followable apps
 
