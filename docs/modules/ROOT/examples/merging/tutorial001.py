@@ -6,5 +6,5 @@ from corva import Api, Cache, StreamTimeEvent, stream
 def app(event: StreamTimeEvent, api: Api, cache: Cache):
     # since we passed merge_events=True all 3 incoming events
     # and their records will be merged into a single event with 9 records
-    assert len(event.records) != 9  # this will not fail
+    assert len(event.records) == 9  # this will not fail
     return event

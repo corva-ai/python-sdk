@@ -19,7 +19,6 @@ from typing import (
 
 import pydantic
 import redis
-from typing_extensions import assert_never
 
 from corva.api import Api
 from corva.configuration import SETTINGS
@@ -89,7 +88,13 @@ def base_handler(
                 )
                 data_transformation_type = raw_custom_event_type or raw_event_type
                 if merge_events:
-                    aws_event = _merge_events(aws_event, data_transformation_type)
+                    aws_event = _merge_events(
+                        aws_event,
+                        cast(
+                            Union[Type[RawScheduledEvent], Type[RawStreamEvent]],
+                            data_transformation_type,
+                        ),
+                    )
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 if (
@@ -567,7 +572,10 @@ def _get_custom_event_type_by_raw_aws_event(
     return None, None
 
 
-def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) -> Any:
+def _merge_events(
+    aws_event: Any,
+    data_transformation_type: Union[Type[RawScheduledEvent], Type[RawStreamEvent]],
+) -> Any:
     """
     Merges incoming aws_events into one.
     Merge happens differently, depending on app type.
@@ -578,7 +586,10 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
         # scheduled event
         if not isinstance(aws_event[0], dict):
             aws_event = list(itertools.chain(*aws_event))
-        is_depth = aws_event[0]["scheduler_type"] == SchedulerType.data_depth_milestone
+        scheduler_type = aws_event[0]["scheduler_type"]
+        if isinstance(scheduler_type, SchedulerType):
+            scheduler_type = scheduler_type.value
+        is_depth = scheduler_type == SchedulerType.data_depth_milestone.value
         event_start, event_end = (
             ("top_depth", "bottom_depth")
             if is_depth
@@ -595,13 +606,8 @@ def _merge_events(aws_event: Any, data_transformation_type: Type[RawBaseEvent]) 
         aws_event = aws_event[0]
         return aws_event
 
-    elif data_transformation_type == RawStreamEvent:
-        # stream event
-        for event in aws_event[1:]:
-            aws_event[0]["records"].extend(event["records"])
-        aws_event = [aws_event[0]]
-        return aws_event
-
-    else:
-        # unexpected event type, raise an exception
-        assert_never(data_transformation_type)  # type: ignore
+    # stream event
+    for event in aws_event[1:]:
+        aws_event[0]["records"].extend(event["records"])
+    aws_event = [aws_event[0]]
+    return aws_event

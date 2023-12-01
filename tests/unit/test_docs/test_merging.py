@@ -46,6 +46,12 @@ def test_tutorial001(context):
                             asset_id=1,
                             company_id=1,
                         ),
+                        RawTimeRecord(
+                            collection=str(),
+                            timestamp=timestamp + 2,
+                            asset_id=1,
+                            company_id=1,
+                        ),
                     ],
                     metadata=RawMetadata(
                         app_stream_id=1,
@@ -55,10 +61,10 @@ def test_tutorial001(context):
                 ).dict()
             ]
         )
-        timestamp += 2
+        timestamp += 3
 
     result_event: StreamTimeEvent = tutorial001.app(event, context)[0]
-    assert len(result_event.records) == 6, "records were not merged into a single event"
+    assert len(result_event.records) == 9, "records were not merged into a single event"
 
 
 @pytest.mark.parametrize(
