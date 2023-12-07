@@ -1,9 +1,17 @@
 import json
 import posixpath
 import re
+from http import HTTPStatus
 from typing import List, Optional, Sequence, Union
 
 import requests
+from tenacity import (
+    RetryError,
+    retry,
+    retry_if_result,
+    stop_after_attempt,
+    wait_random_exponential,
+)
 
 
 class Api:
@@ -14,6 +22,7 @@ class Api:
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
+    DEFAULT_MAX_RETRIES = int(0)
 
     def __init__(
         self,
@@ -31,28 +40,39 @@ class Api:
         self.app_key = app_key
         self.app_connection_id = app_connection_id
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
+        self._max_retries = self.DEFAULT_MAX_RETRIES
 
     @property
     def default_headers(self):
         return {
-            'Authorization': f'API {self.api_key}',
-            'X-Corva-App': self.app_key,
+            "Authorization": f"API {self.api_key}",
+            "X-Corva-App": self.app_key,
         }
 
+    @property
+    def max_retries(self) -> int:
+        return self._max_retries
+
+    @max_retries.setter
+    def max_retries(self, value: int):
+        if not (0 <= value <= 10):
+            raise ValueError("Values between 0 and 10 are allowed")
+        self._max_retries = value
+
     def get(self, path: str, **kwargs):
-        return self._request('GET', path, **kwargs)
+        return self._request("GET", path, **kwargs)
 
     def post(self, path: str, **kwargs):
-        return self._request('POST', path, **kwargs)
+        return self._request("POST", path, **kwargs)
 
     def patch(self, path: str, **kwargs):
-        return self._request('PATCH', path, **kwargs)
+        return self._request("PATCH", path, **kwargs)
 
     def put(self, path: str, **kwargs):
-        return self._request('PUT', path, **kwargs)
+        return self._request("PUT", path, **kwargs)
 
     def delete(self, path: str, **kwargs):
-        return self._request('DELETE', path, **kwargs)
+        return self._request("DELETE", path, **kwargs)
 
     def _get_url(self, path: str):
         """Builds complete url.
@@ -66,18 +86,49 @@ class Api:
           3 corva api url, if above points are False.
         """
 
-        if path.startswith('http'):
+        if path.startswith("http"):
             return path
 
         path = path.lstrip(
-            '/'
+            "/"
         )  # delete leading forward slash for posixpath.join to work correctly
 
         # search text like api/v1 or api/v10 in path
-        if bool(re.search(r'api/v\d+', path)):
+        if bool(re.search(r"api/v\d+", path)):
             return posixpath.join(self.data_api_url, path)
 
         return posixpath.join(self.api_url, path)
+
+    @staticmethod
+    def _execute_request(
+        method: str,
+        url: str,
+        params: Optional[dict],
+        data: Optional[dict],
+        headers: Optional[dict] = None,
+        timeout: Optional[int] = None,
+    ):
+        """Executes the request.
+
+        Args:
+            method: HTTP method.
+            path: url to call.
+            data: request body, that will be casted to json.
+            params: url query string params.
+            headers: additional headers to include in request.
+            timeout: custom request timeout in seconds.
+
+        Returns:
+            requests.Response instance.
+        """
+        return requests.request(
+            method=method,
+            url=url,
+            params=params,
+            json=data,
+            headers=headers,
+            timeout=timeout,
+        )
 
     def _request(
         self,
@@ -89,7 +140,7 @@ class Api:
         headers: Optional[dict] = None,
         timeout: Optional[int] = None,
     ) -> requests.Response:
-        """Executes the request.
+        """Prepares HTTP request.
 
         Args:
           method: HTTP method.
@@ -102,6 +153,13 @@ class Api:
         Returns:
           requests.Response instance.
         """
+        retryable_status_codes = [
+            HTTPStatus.TOO_MANY_REQUESTS,  # 428
+            HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
+            HTTPStatus.BAD_GATEWAY,  # 502
+            HTTPStatus.SERVICE_UNAVAILABLE,  # 503
+            HTTPStatus.GATEWAY_TIMEOUT,  # 504
+        ]
 
         timeout = timeout or self.timeout
         self._validate_timeout(timeout)
@@ -113,22 +171,46 @@ class Api:
             **(headers or {}),
         }
 
-        response = requests.request(
-            method=method,
-            url=url,
-            params=params,
-            json=data,
-            headers=headers,
-            timeout=timeout,
-        )
+        if self.max_retries > 0:
+            retry_decorator = retry(
+                stop=stop_after_attempt(self.max_retries),
+                wait=wait_random_exponential(multiplier=0.25, max=10),
+                retry=retry_if_result(
+                    lambda r: r.status_code in retryable_status_codes
+                ),
+            )
+            retrying_request = retry_decorator(self._execute_request)
+            try:
+                response = retrying_request(
+                    method=method,
+                    url=url,
+                    params=params,
+                    data=data,
+                    headers=headers,
+                    timeout=timeout,
+                )
+            except RetryError as e:
+                if not e.last_attempt.failed:
+                    response = e.last_attempt.result()
+                else:
+                    raise
+        else:
+            response = self._execute_request(
+                method=method,
+                url=url,
+                params=params,
+                data=data,
+                headers=headers,
+                timeout=timeout,
+            )
 
         return response
 
     def _validate_timeout(self, timeout: int) -> None:
         if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
             raise ValueError(
-                f'Timeout must be between {self.TIMEOUT_LIMITS[0]} and '
-                f'{self.TIMEOUT_LIMITS[1]} seconds.'
+                f"Timeout must be between {self.TIMEOUT_LIMITS[0]} and "
+                f"{self.TIMEOUT_LIMITS[1]} seconds."
             )
 
     def get_dataset(
@@ -166,13 +248,13 @@ class Api:
         """
 
         response = self.get(
-            f'/api/v1/data/{provider}/{dataset}/',
+            f"/api/v1/data/{provider}/{dataset}/",
             params={
-                'query': json.dumps(query),
-                'sort': json.dumps(sort),
-                'fields': fields,
-                'limit': limit,
-                'skip': skip,
+                "query": json.dumps(query),
+                "sort": json.dumps(sort),
+                "fields": fields,
+                "limit": limit,
+                "skip": skip,
             },
         )
         response.raise_for_status()
@@ -195,8 +277,8 @@ class Api:
         """
 
         response = self.post(
-            '/api/v1/message_producer/',
-            json={'app_connection_id': self.app_connection_id, 'data': data},
+            "/api/v1/message_producer/",
+            data={"app_connection_id": self.app_connection_id, "data": data},
         )
         response.raise_for_status()
 
@@ -226,13 +308,13 @@ class Api:
 
         if produce:
             body = {
-                'data': list(data),
-                'producer': {'app_connection_id': self.app_connection_id},
+                "data": list(data),
+                "producer": {"app_connection_id": self.app_connection_id},
             }
         else:
             body = list(data)
 
-        response = self.post(f'/api/v1/data/{provider}/{dataset}/', data=body)
+        response = self.post(f"/api/v1/data/{provider}/{dataset}/", data=body)
         response.raise_for_status()
 
         return response.json()
