@@ -16,11 +16,12 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="corva-sdk" data-version="1.10.0">
+<div class="nav-container" data-component="corva-sdk" data-version="1.11.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">corva-sdk</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -36,14 +37,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">corva-sdk</span>
-    <span class="version">1.10.0</span>
+    <span class="version">1.11.0</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <a class="title" href="index.html">corva-sdk</a>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">1.10.0</a>
+          <a href="index.html">1.11.0</a>
         </li>
       </ul>
     </li>
@@ -62,7 +63,7 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
-<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.10.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v1.11.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="5">
@@ -73,7 +74,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>1.10.0</strong>.</p>
+<p>Documentation for version <strong>1.11.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -669,6 +670,43 @@ def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
 to save and <a href="#produce_messages"><code>produce</code></a> the data at once.</td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="enabling_retries"><a class="anchor" href="#enabling_retries"></a>4.6. Enabling re-tries</h3>
+<div class="paragraph">
+<p>When request fails due to HTTP error, re-trying functionality can be used.
+It will try to re-send the same request again with exponential back-off for HTTP status codes below:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>428</p>
+</li>
+<li>
+<p>500</p>
+</li>
+<li>
+<p>502</p>
+</li>
+<li>
+<p>503</p>
+</li>
+<li>
+<p>504</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
+
+
+@scheduled
+def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
+    api.max_retries = 5  # Enabling up to 5 retries when HTTP error happens.
+    ...</code></pre>
 </div>
 </div>
 </div>
@@ -1366,7 +1404,65 @@ Use code samples above as the examples.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_followable_apps"><a class="anchor" href="#_followable_apps"></a>7. Followable apps</h2>
+<h2 id="_merging_incoming_events"><a class="anchor" href="#_merging_incoming_events"></a>7. Merging incoming events</h2>
+<div class="sectionbody">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Only <a href="#stream"><code>stream</code></a>
+and <a href="#scheduled"><code>scheduled</code></a>
+apps can use this feature.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Sometimes Corva can send more than one event to <a href="#scheduled"><code>scheduled</code></a> and <a href="#stream"><code>stream</code></a> apps.
+Optionally we can ask to merge them into one event by providing <code>merge_events=True</code> parameter.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, StreamTimeEvent, stream
+
+
+# imagine we actually have 3 incoming events with 3 records each
+@stream(merge_events=True)
+def app(event: StreamTimeEvent, api: Api, cache: Cache):
+    # since we passed merge_events=True all 3 incoming events
+    # and their records will be merged into a single event with 9 records
+    assert len(event.records) == 9  # this will not fail
+    return event</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledNaturalTimeEvent, scheduled
+
+
+@scheduled(merge_events=True)
+def app(event: ScheduledNaturalTimeEvent, api: Api, cache: Cache):
+    return event</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Usually this is needed to save some IO operations by processing data in bigger batches.
+Use this parameter with care, in pessimistic scenario you can receive too much data, try to
+process it in "one go" and fail with timeout. In that case your app will be automatically
+restarted and you will start from the beginning and fail again.
+Without this parameter after each processed event corva-sdk will "remember" that event was processed.
+So, for example, if you will fail at event #5 and your app will be restarted - app will start processing
+from event #5(and not #1 like in case of <code>merge_events=True</code>)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_followable_apps"><a class="anchor" href="#_followable_apps"></a>8. Followable apps</h2>
 <div class="sectionbody">
 <div class="admonitionblock tip">
 <table>
@@ -1522,7 +1618,7 @@ from the event. No api calls needed.</td>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_secrets"><a class="anchor" href="#_secrets"></a>8. Secrets</h2>
+<h2 id="_secrets"><a class="anchor" href="#_secrets"></a>9. Secrets</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You can store sensitive data such as passwords,
@@ -1571,7 +1667,7 @@ Example shows how to get the integer.</td>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_testing"><a class="anchor" href="#_testing"></a>9. Testing</h2>
+<h2 id="_testing"><a class="anchor" href="#_testing"></a>10. Testing</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Testing apps is easy and enjoyable.</p>
@@ -1592,9 +1688,9 @@ Example shows how to get the integer.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stream"><a class="anchor" href="#_stream"></a>9.1. Stream</h3>
+<h3 id="_stream"><a class="anchor" href="#_stream"></a>10.1. Stream</h3>
 <div class="sect3">
-<h4 id="_time"><a class="anchor" href="#_time"></a>9.1.1. Time</h4>
+<h4 id="_time"><a class="anchor" href="#_time"></a>10.1.1. Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, StreamTimeEvent, StreamTimeRecord, stream
@@ -1641,7 +1737,7 @@ def test_stream_time_app(app_runner):  <i class="conum" data-value="2"></i><b>(2
 </div>
 </div>
 <div class="sect3">
-<h4 id="_depth"><a class="anchor" href="#_depth"></a>9.1.2. Depth</h4>
+<h4 id="_depth"><a class="anchor" href="#_depth"></a>10.1.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, StreamDepthEvent, StreamDepthRecord, stream
@@ -1689,9 +1785,9 @@ def test_stream_depth_app(app_runner):  <i class="conum" data-value="2"></i><b>(
 </div>
 </div>
 <div class="sect2">
-<h3 id="_scheduled"><a class="anchor" href="#_scheduled"></a>9.2. Scheduled</h3>
+<h3 id="_scheduled"><a class="anchor" href="#_scheduled"></a>10.2. Scheduled</h3>
 <div class="sect3">
-<h4 id="_data_time"><a class="anchor" href="#_data_time"></a>9.2.1. Data Time</h4>
+<h4 id="_data_time"><a class="anchor" href="#_data_time"></a>10.2.1. Data Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledDataTimeEvent, scheduled
@@ -1738,7 +1834,7 @@ def test_scheduled_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)<
 </div>
 </div>
 <div class="sect3">
-<h4 id="_depth_2"><a class="anchor" href="#_depth_2"></a>9.2.2. Depth</h4>
+<h4 id="_depth_2"><a class="anchor" href="#_depth_2"></a>10.2.2. Depth</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledDepthEvent, scheduled
@@ -1790,7 +1886,7 @@ def test_scheduled_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)<
 </div>
 </div>
 <div class="sect3">
-<h4 id="_natural_time"><a class="anchor" href="#_natural_time"></a>9.2.3. Natural Time</h4>
+<h4 id="_natural_time"><a class="anchor" href="#_natural_time"></a>10.2.3. Natural Time</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, ScheduledNaturalTimeEvent, scheduled
@@ -1838,7 +1934,7 @@ def test_scheduled_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)<
 </div>
 </div>
 <div class="sect2">
-<h3 id="_task"><a class="anchor" href="#_task"></a>9.3. Task</h3>
+<h3 id="_task"><a class="anchor" href="#_task"></a>10.3. Task</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, TaskEvent, task
@@ -1883,7 +1979,7 @@ def test_task_app(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
 </div>
 </div>
 <div class="sect2">
-<h3 id="testing_secrets"><a class="anchor" href="#testing_secrets"></a>9.4. Secrets</h3>
+<h3 id="testing_secrets"><a class="anchor" href="#testing_secrets"></a>10.4. Secrets</h3>
 <div class="paragraph">
 <p>This section shows
 how to test an app that uses secrets.</p>
@@ -1936,7 +2032,7 @@ as <code>secrets</code> parameter.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_cache"><a class="anchor" href="#_cache"></a>9.5. Cache</h3>
+<h3 id="_cache"><a class="anchor" href="#_cache"></a>10.5. Cache</h3>
 <div class="paragraph">
 <p>This section shows how to test an app that uses cache;
 reuse the same cache or reset it.</p>
@@ -2042,7 +2138,7 @@ Since the same cache object is used, the results are changing.</td>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_app_rerun"><a class="anchor" href="#_app_rerun"></a>10. App rerun</h2>
+<h2 id="_app_rerun"><a class="anchor" href="#_app_rerun"></a>11. App rerun</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You might want to implement custom logic for app rerun,
@@ -2073,13 +2169,13 @@ as the base for the initial calculation.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_development_contributing"><a class="anchor" href="#_development_contributing"></a>11. Development - Contributing</h2>
+<h2 id="_development_contributing"><a class="anchor" href="#_development_contributing"></a>12. Development - Contributing</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Here are some guidelines to set up your environment.</p>
 </div>
 <div class="sect2">
-<h3 id="_create_and_activate_virtual_environment"><a class="anchor" href="#_create_and_activate_virtual_environment"></a>11.1. Create and activate virtual environment</h3>
+<h3 id="_create_and_activate_virtual_environment"><a class="anchor" href="#_create_and_activate_virtual_environment"></a>12.1. Create and activate virtual environment</h3>
 <div class="paragraph">
 <p>What&#8217;s needed:</p>
 </div>
@@ -2131,7 +2227,7 @@ when working with the project.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_install_dependencies_and_run_tests"><a class="anchor" href="#_install_dependencies_and_run_tests"></a>11.2. Install dependencies and run tests</h3>
+<h3 id="_install_dependencies_and_run_tests"><a class="anchor" href="#_install_dependencies_and_run_tests"></a>12.2. Install dependencies and run tests</h3>
 <div class="paragraph">
 <p>What&#8217;s needed:</p>
 </div>
@@ -2163,7 +2259,7 @@ to verify that the project was set up properly.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_whats_next"><a class="anchor" href="#_whats_next"></a>11.3. What&#8217;s next?</h3>
+<h3 id="_whats_next"><a class="anchor" href="#_whats_next"></a>12.3. What&#8217;s next?</h3>
 <div class="paragraph">
 <p>After completing steps above
 you can explore the project
