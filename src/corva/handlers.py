@@ -1,5 +1,6 @@
 import contextlib
 import functools
+import itertools
 import logging
 import sys
 import warnings
@@ -28,6 +29,7 @@ from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.merge.raw import RawPartialRerunMergeEvent
 from corva.models.scheduled.raw import RawScheduledEvent
 from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
+from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
@@ -58,6 +60,7 @@ def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
     handler: Optional[logging.Handler],
+    merge_events: bool = False,
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
     def wrapper(aws_event: Any, aws_context: Any) -> List[Any]:
@@ -84,6 +87,8 @@ def base_handler(
                     url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1
                 )
                 data_transformation_type = raw_custom_event_type or raw_event_type
+                if merge_events:
+                    aws_event = _merge_events(aws_event, data_transformation_type)
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 if (
@@ -120,18 +125,26 @@ def stream(
     func: Optional[Callable[[StreamEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
+    merge_events: bool = False,
 ) -> Callable:
     """Runs stream app.
 
     Arguments:
         handler: logging handler to include in Corva logger.
+        merge_events: if True - merge all incoming events into one before
+          passing them to func
     """
 
     if func is None:
-        return functools.partial(stream, handler=handler)
+        return functools.partial(stream, handler=handler, merge_events=merge_events)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawStreamEvent, handler=handler)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawStreamEvent,
+        handler=handler,
+        merge_events=merge_events,
+    )
     def wrapper(
         event: RawStreamEvent,
         api_key: str,
@@ -221,18 +234,26 @@ def scheduled(
     func: Optional[Callable[[ScheduledEventT, Api, UserRedisSdk], Any]] = None,
     *,
     handler: Optional[logging.Handler] = None,
+    merge_events: bool = False,
 ) -> Callable:
     """Runs scheduled app.
 
     Arguments:
         handler: logging handler to include in Corva logger.
+        merge_events: if True - merge all incoming events into one before
+          passing them to func
     """
 
     if func is None:
-        return functools.partial(scheduled, handler=handler)
+        return functools.partial(scheduled, handler=handler, merge_events=merge_events)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawScheduledEvent, handler=handler)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawScheduledEvent,
+        handler=handler,
+        merge_events=merge_events,
+    )
     def wrapper(
         event: RawScheduledEvent,
         api_key: str,
@@ -441,7 +462,6 @@ def partial_rerun_merge(
         logging_ctx: LoggingContext,
         redis_client: redis.Redis,
     ) -> Any:
-
         logging_ctx.asset_id = event.data.asset_id
         logging_ctx.app_connection_id = event.data.app_connection_id
 
@@ -544,3 +564,51 @@ def _get_custom_event_type_by_raw_aws_event(
         if events:
             return event_type, handler
     return None, None
+
+
+def _merge_events(
+    aws_event: Any,
+    data_transformation_type: Type[RawBaseEvent],
+) -> Any:
+    """
+    Merges incoming aws_events into one.
+    Merge happens differently, depending on app type.
+    Only "scheduled" and "stream" type of apps can be processed here.
+    If somehow any other type is passed - raise an exception
+    """
+    if data_transformation_type is RawScheduledEvent:
+        # scheduled event
+        if not isinstance(aws_event[0], dict):
+            aws_event = list(itertools.chain(*aws_event))
+        scheduler_type = aws_event[0]["scheduler_type"]
+        if isinstance(scheduler_type, SchedulerType):
+            scheduler_type = scheduler_type.value
+        is_depth = scheduler_type == SchedulerType.data_depth_milestone.value
+        event_start, event_end = (
+            ("top_depth", "bottom_depth")
+            if is_depth
+            else ("schedule_start", "schedule_end")
+        )
+        min_event_start = min(e[event_start] for e in aws_event)
+        max_event_end = max(
+            (e[event_end] for e in aws_event if e.get(event_end) is not None),
+            default=None,
+        )
+        aws_event[0][event_start] = min_event_start
+        if max_event_end:
+            aws_event[0][event_end] = max_event_end
+        aws_event = aws_event[0]
+
+    elif data_transformation_type is RawStreamEvent:
+        # stream event
+        for event in aws_event[1:]:
+            aws_event[0]["records"].extend(event["records"])
+        aws_event = [aws_event[0]]
+
+    else:
+        CORVA_LOGGER.warning(
+            f"{data_transformation_type.__name__} does not support `merge event` "
+            "parameter."
+        )
+
+    return aws_event
