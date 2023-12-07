@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.11.0] - 2023-12-07
+
 ### Added
 - Optional merge_events parameter to @stream and @scheduled decorators. Default is False, if True - merge all incoming events into one.
 - Added functionality to make retries for the failed HTTP requests.
@@ -354,7 +357,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.10.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.11.0...master
+[1.11.0] https://github.com/corva-ai/python-sdk/compare/v1.10.0...v1.11.0
 [1.10.0] https://github.com/corva-ai/python-sdk/compare/v1.9.2...v1.10.0
 [1.9.2] https://github.com/corva-ai/python-sdk/compare/v1.9.1...v1.9.2
 [1.9.1] https://github.com/corva-ai/python-sdk/compare/v1.9.0...v1.9.1
