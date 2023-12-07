@@ -88,13 +88,7 @@ def base_handler(
                 )
                 data_transformation_type = raw_custom_event_type or raw_event_type
                 if merge_events:
-                    aws_event = _merge_events(
-                        aws_event,
-                        cast(
-                            Union[Type[RawScheduledEvent], Type[RawStreamEvent]],
-                            data_transformation_type,
-                        ),
-                    )
+                    aws_event = _merge_events(aws_event, data_transformation_type)
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 if (
@@ -574,7 +568,7 @@ def _get_custom_event_type_by_raw_aws_event(
 
 def _merge_events(
     aws_event: Any,
-    data_transformation_type: Union[Type[RawScheduledEvent], Type[RawStreamEvent]],
+    data_transformation_type: Type[RawBaseEvent],
 ) -> Any:
     """
     Merges incoming aws_events into one.
@@ -582,7 +576,7 @@ def _merge_events(
     Only "scheduled" and "stream" type of apps can be processed here.
     If somehow any other type is passed - raise an exception
     """
-    if data_transformation_type == RawScheduledEvent:
+    if data_transformation_type is RawScheduledEvent:
         # scheduled event
         if not isinstance(aws_event[0], dict):
             aws_event = list(itertools.chain(*aws_event))
@@ -604,10 +598,17 @@ def _merge_events(
         if max_event_end:
             aws_event[0][event_end] = max_event_end
         aws_event = aws_event[0]
-        return aws_event
 
-    # stream event
-    for event in aws_event[1:]:
-        aws_event[0]["records"].extend(event["records"])
-    aws_event = [aws_event[0]]
+    elif data_transformation_type is RawStreamEvent:
+        # stream event
+        for event in aws_event[1:]:
+            aws_event[0]["records"].extend(event["records"])
+        aws_event = [aws_event[0]]
+
+    else:
+        CORVA_LOGGER.warning(
+            f"{data_transformation_type.__name__} does not support `merge event` "
+            "parameter."
+        )
+
     return aws_event
