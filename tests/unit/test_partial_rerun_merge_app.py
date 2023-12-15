@@ -13,8 +13,6 @@ RAW_EVENT = {
     "event_type": "partial-well-rerun-merge",
     "data": {
         "partial_well_rerun_id": 123,
-        "partition": 95,
-        "rerun_partition": 2,
         "rerun_mode": "realtime",
         "start": 1543847760,
         "end": 1543847760,

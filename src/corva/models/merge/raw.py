@@ -10,8 +10,6 @@ from corva.models.merge.enums import EventType, RerunMode, SourceType
 
 class RawPartialMergeEventData(pydantic.BaseModel):
     partial_well_rerun_id: int
-    partition: int
-    rerun_partition: int
     rerun_mode: RerunMode
     start: int
     end: int
@@ -29,6 +27,9 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     source_type: SourceType
     log_type: str
     run_until: int
+
+    class Config:
+        extra = "allow"
 
 
 class RawPartialRerunMergeEvent(CorvaBaseEvent, RawBaseEvent):

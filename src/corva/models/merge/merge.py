@@ -8,8 +8,6 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
     Attributes:
         event_type: EventType.PARTIAL_WELL_RERUN_MERGE
         partial_well_rerun_id: partial well rerun id
-        partition: partition
-        rerun_partition: rerun partition
         rerun_mode: rerun mode
         start: start
         end: end
@@ -29,8 +27,6 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
 
     event_type: EventType
     partial_well_rerun_id: int
-    partition: int
-    rerun_partition: int
     rerun_mode: RerunMode
     start: int
     end: int
@@ -46,3 +42,6 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
     source_type: SourceType
     log_type: str
     run_until: int
+
+    class Config:
+        extra = "allow"
