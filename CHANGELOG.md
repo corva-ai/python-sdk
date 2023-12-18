@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [1.11.1] - 2023-12-18
+
+### Added
 - Fields `partition` and `rerun_partition` are not expected in partial merge event payload.
 - Data structure under `data` key  of partial merge event payload can accept additional fields.
 
@@ -359,7 +364,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.11.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.11.1...master
+[1.11.1] https://github.com/corva-ai/python-sdk/compare/v1.11.0...v1.11.1
 [1.11.0] https://github.com/corva-ai/python-sdk/compare/v1.10.0...v1.11.0
 [1.10.0] https://github.com/corva-ai/python-sdk/compare/v1.9.2...v1.10.0
 [1.9.2] https://github.com/corva-ai/python-sdk/compare/v1.9.1...v1.9.2
