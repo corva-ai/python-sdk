@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.11.2] - 2024-01-05
+
 ### Fixed
 - Most of the fields in partial merge events should be optional.
 
@@ -367,7 +370,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.11.1...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.11.2...master
+[1.11.2] https://github.com/corva-ai/python-sdk/compare/v1.11.1...v1.11.2
 [1.11.1] https://github.com/corva-ai/python-sdk/compare/v1.11.0...v1.11.1
 [1.11.0] https://github.com/corva-ai/python-sdk/compare/v1.10.0...v1.11.0
 [1.10.0] https://github.com/corva-ai/python-sdk/compare/v1.9.2...v1.10.0
