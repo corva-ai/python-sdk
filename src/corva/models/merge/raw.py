@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pydantic
 
@@ -9,10 +9,10 @@ from corva.models.merge.enums import EventType, RerunMode, SourceType
 
 
 class RawPartialMergeEventData(pydantic.BaseModel):
-    partial_well_rerun_id: int
-    rerun_mode: RerunMode
-    start: int
-    end: int
+    partial_well_rerun_id: Optional[int]
+    rerun_mode: Optional[RerunMode]
+    start: Optional[int]
+    end: Optional[int]
     asset_id: int
     rerun_asset_id: int
     app_stream_id: int
@@ -20,13 +20,13 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     version: int = pydantic.Field(
         ..., le=1, ge=1
     )  # Currently handler supports only 1-st version of this event.
-    app_id: int
-    app_key: str
+    app_id: Optional[int]
+    app_key: Optional[str]
     app_connection_id: int
     rerun_app_connection_id: int
-    source_type: SourceType
-    log_type: str
-    run_until: int
+    source_type: Optional[SourceType]
+    log_type: Optional[str]
+    run_until: Optional[int]
 
     class Config:
         extra = "allow"

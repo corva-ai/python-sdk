@@ -576,6 +576,11 @@ def _merge_events(
     Only "scheduled" and "stream" type of apps can be processed here.
     If somehow any other type is passed - raise an exception
     """
+    if not isinstance(
+        aws_event, list
+    ):  # if aws_event is not a list - there is nothing to merge, so do nothing.
+        return aws_event
+
     if data_transformation_type is RawScheduledEvent:
         # scheduled event
         if not isinstance(aws_event[0], dict):

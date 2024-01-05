@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Most of the fields in partial merge events should be optional.
+
 
 ## [1.11.1] - 2023-12-18
 

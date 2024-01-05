@@ -1,3 +1,5 @@
+from typing import Optional
+
 from corva.models.base import CorvaBaseEvent
 from corva.models.merge.enums import EventType, RerunMode, SourceType
 
@@ -25,23 +27,23 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
         run_until: run until
     """
 
-    event_type: EventType
-    partial_well_rerun_id: int
-    rerun_mode: RerunMode
-    start: int
-    end: int
+    event_type: Optional[EventType]
+    partial_well_rerun_id: Optional[int]
+    rerun_mode: Optional[RerunMode]
+    start: Optional[int]
+    end: Optional[int]
     asset_id: int
     rerun_asset_id: int
     app_stream_id: int
     rerun_app_stream_id: int
-    version: int
-    app_id: int
-    app_key: str
+    version: Optional[int]
+    app_id: Optional[int]
+    app_key: Optional[str]
     app_connection_id: int
     rerun_app_connection_id: int
-    source_type: SourceType
-    log_type: str
-    run_until: int
+    source_type: Optional[SourceType]
+    log_type: Optional[str]
+    run_until: Optional[int]
 
     class Config:
         extra = "allow"
