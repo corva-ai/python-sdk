@@ -17,7 +17,7 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     rerun_asset_id: int
     app_stream_id: int
     rerun_app_stream_id: int
-    version: Optional[int] = pydantic.Field(
+    version: int = pydantic.Field(
         ..., le=1, ge=1
     )  # Currently handler supports only 1-st version of this event.
     app_id: Optional[int]

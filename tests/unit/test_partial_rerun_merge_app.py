@@ -143,7 +143,7 @@ def test_event_parsing_not_failing_on_missing_field(context):
     assert partial_merge_app_response is True
 
 
-def test_merge_events_parameter_ignored_for_partial_rerun_merge(context):
+def test_merge_events_does_not_fail_for_partial_rerun_merge_events(context, mocker):
     """
     merge_events parameter is ignored when incoming aws_event is not a list
     """
