@@ -145,8 +145,8 @@ def test_event_parsing_not_failing_on_missing_field(context):
 
 def test_merge_events_does_not_fail_for_partial_rerun_merge_events(context, mocker):
     """
-    partial rerun merge events shouldn't fail to be processed when used in combination with
-    merge_events parameter
+    partial rerun merge events shouldn't fail to be processed when used in combination
+    with merge_events parameter
     """
 
     @corva.scheduled(merge_events=True)
