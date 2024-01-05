@@ -33,7 +33,7 @@ RAW_EVENT = {
 
 
 def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_raises_exc(
-        context,
+    context,
 ):
     """Partial merge app must raise Pydantic validation exception
     while processing event of unexpected type.
@@ -55,7 +55,7 @@ def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_rai
 
 
 def test_merge_event_handler_called_from_stream_app_returns_expected_cache_values(
-        context,
+    context,
 ):
     """Partial merge app must provide functional(working) cache objects
     for asset and rerun asset.
@@ -124,8 +124,9 @@ def test_merge_event_handler_called_from_scheduled_app_calls_needed_handler(cont
 
 
 def test_event_parsing_not_failing_on_missing_field(context):
-    """When calling scheduled event with merge event handler defined,
-    partial merge handler should be called only.
+    """
+    When field is missing we're still able to parse the event and invoke correct
+    function
     """
 
     @corva.scheduled(merge_events=True)
@@ -136,15 +137,15 @@ def test_event_parsing_not_failing_on_missing_field(context):
     def partial_rerun_merge_app(event, api, asset_cache, rerun_asset_cache):
         return True
 
-    event_with_missing_parameter = deepcopy(RAW_EVENT)
+    event_with_missing_parameter: dict = deepcopy(RAW_EVENT)
     event_with_missing_parameter["data"]["end"] = None
     partial_merge_app_response = scheduled_app(event_with_missing_parameter, context)[0]
     assert partial_merge_app_response is True
 
 
 def test_merge_events_parameter_ignored_for_partial_rerun_merge(context):
-    """When calling scheduled event with merge event handler defined,
-    partial merge handler should be called only.
+    """
+    merge_events parameter is ignored when incoming aws_event is not a list
     """
 
     @corva.scheduled(merge_events=True)
@@ -157,3 +158,7 @@ def test_merge_events_parameter_ignored_for_partial_rerun_merge(context):
 
     partial_merge_app_response = scheduled_app(RAW_EVENT, context)[0]
     assert partial_merge_app_response is True
+
+
+def test_partial_rerun_decorator_can_be_called_directly(context):
+    corva.partial_rerun_merge()

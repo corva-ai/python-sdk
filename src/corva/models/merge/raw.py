@@ -13,17 +13,17 @@ class RawPartialMergeEventData(pydantic.BaseModel):
     rerun_mode: Optional[RerunMode]
     start: Optional[int]
     end: Optional[int]
-    asset_id: Optional[int]
-    rerun_asset_id: Optional[int]
-    app_stream_id: Optional[int]
-    rerun_app_stream_id: Optional[int]
+    asset_id: int
+    rerun_asset_id: int
+    app_stream_id: int
+    rerun_app_stream_id: int
     version: Optional[int] = pydantic.Field(
         ..., le=1, ge=1
     )  # Currently handler supports only 1-st version of this event.
     app_id: Optional[int]
     app_key: Optional[str]
-    app_connection_id: Optional[int]
-    rerun_app_connection_id: Optional[int]
+    app_connection_id: int
+    rerun_app_connection_id: int
     source_type: Optional[SourceType]
     log_type: Optional[str]
     run_until: Optional[int]
