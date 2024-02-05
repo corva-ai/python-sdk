@@ -615,3 +615,40 @@ def test_stream_depth_app_gets_log_identifier(context):
     result_event: StreamDepthEvent = stream_app(event, context)[0]
 
     assert result_event.log_identifier == 'log_identifier'
+
+
+def test_raw_stream_event_with_none_data_field_returns_expected_result(context):
+    """Make sure that raw stream event with empty data field
+    can be handled without validation exception.
+    """
+
+    @stream
+    def stream_app(event, api, cache):
+        return event
+
+    event = [
+        {
+            "metadata": {
+                "app_stream_id": 123,
+                "apps": {"test-provider.test-app-name": {"app_connection_id": 456}},
+                "log_type": "time",
+                "source_type": "drilling",
+            },
+            "records": [
+                {
+                    "app": "corva.wits-historical-import",
+                    "asset_id": 1,
+                    "collection": "wits.completed",
+                    "company_id": 80,
+                    "data": None,
+                    "provider": "corva",
+                    "timestamp": 1688999883,
+                    "version": 1,
+                }
+            ],
+        }
+    ]
+
+    result_event: StreamTimeEvent = stream_app(event, context)[0]
+
+    assert result_event is None
