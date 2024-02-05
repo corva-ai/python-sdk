@@ -19,7 +19,7 @@ class RawBaseRecord(CorvaBaseEvent, abc.ABC):
     company_id: int
     collection: str
 
-    data: dict = {}
+    data: Optional[dict] = {}
     metadata: dict = {}
 
     @property

@@ -16,7 +16,7 @@ class StreamTimeRecord(CorvaBaseEvent):
     """
 
     timestamp: int
-    data: dict = {}
+    data: Optional[dict] = {}
     metadata: dict = {}
 
 
