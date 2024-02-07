@@ -19,7 +19,7 @@ class RawBaseRecord(CorvaBaseEvent, abc.ABC):
     company_id: int
     collection: str
 
-    data: Optional[dict] = {}
+    data: dict = {}
     metadata: dict = {}
 
     @property
@@ -73,7 +73,7 @@ if TYPE_CHECKING:
     RecordsDepth = Sequence[RawDepthRecord]
 else:
     RecordsBase = pydantic.conlist(RawBaseRecord, min_items=1)
-    RecordsTime = pydantic.conlist(RawTimeRecord, min_items=1)
+    RecordsTime = pydantic.conlist(RawTimeRecord, min_items=0)
     RecordsDepth = pydantic.conlist(RawDepthRecord, min_items=1)
 
 
@@ -105,7 +105,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         There can only be 1 completed record always located at the end of the list.
         """
 
-        return self.records[-1].collection == 'wits.completed'
+        if not self.records:
+            return False
+
+        return self.records[-1].collection == "wits.completed"
 
     @property
     def max_record_value(self) -> Union[int, float]:
@@ -145,7 +148,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     ) -> List[RawBaseRecord]:
         new_records = copy.deepcopy(self.records)
 
-        if self.is_completed:
+        if self.is_completed and new_records:
             new_records = new_records[:-1]  # remove "completed" record
 
         if old_max_record_value is None:
@@ -165,9 +168,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     def set_asset_id(cls, values: dict) -> dict:
         """Calculates asset_id field."""
 
-        records: List[RawBaseRecord] = values['records']
+        records: List[RawBaseRecord] = values["records"]
 
-        values["asset_id"] = int(records[0].asset_id)
+        if records:
+            values["asset_id"] = int(records[0].asset_id)
 
         return values
 
@@ -175,23 +179,37 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     def set_company_id(cls, values: dict) -> dict:
         """Calculates company_id field."""
 
-        records: List[RawBaseRecord] = values['records']
+        records: List[RawBaseRecord] = values["records"]
 
-        values["company_id"] = int(records[0].company_id)
+        if records:
+            values["company_id"] = int(records[0].company_id)
 
         return values
+
+    @pydantic.validator("records", pre=True)
+    def validate_records(cls, v):
+        if isinstance(v, List):
+            return [
+                record
+                for record in v
+                if (
+                    (isinstance(record, dict) and record.get("data") is not None)
+                    or (hasattr(record, "data") and record.data is not None)
+                )
+            ]
+        return v
 
 
 class RawStreamTimeEvent(RawStreamEvent):
     records: RecordsTime
     rerun: Optional[RerunTime] = None
-    _max_record_value_cache_key: ClassVar[str] = 'last_processed_timestamp'
+    _max_record_value_cache_key: ClassVar[str] = "last_processed_timestamp"
 
 
 class RawStreamDepthEvent(RawStreamEvent):
     records: RecordsDepth
     rerun: Optional[RerunDepth] = None
-    _max_record_value_cache_key: ClassVar[str] = 'last_processed_depth'
+    _max_record_value_cache_key: ClassVar[str] = "last_processed_depth"
     log_identifier: str = None  # type: ignore
 
     @pydantic.root_validator(pre=False, skip_on_failure=True)

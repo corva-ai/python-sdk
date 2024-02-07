@@ -624,7 +624,10 @@ def test_raw_stream_event_with_none_data_field_returns_expected_result(context):
 
     @stream
     def stream_app(event, api, cache):
-        return event
+        pytest.fail(
+            "Stream app call should be skipped "
+            "because there is no data to build an event"
+        )
 
     event = [
         {
@@ -644,11 +647,10 @@ def test_raw_stream_event_with_none_data_field_returns_expected_result(context):
                     "provider": "corva",
                     "timestamp": 1688999883,
                     "version": 1,
-                }
+                }  # DEVC-627. This record should be filtered out because data is None.
             ],
         }
     ]
 
-    result_event: StreamTimeEvent = stream_app(event, context)[0]
-
-    assert result_event is None
+    _ = stream_app(event, context)[0]
+    assert True, "App call should be skipped"
