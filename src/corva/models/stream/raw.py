@@ -148,7 +148,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
     ) -> List[RawBaseRecord]:
         new_records = copy.deepcopy(self.records)
 
-        if self.is_completed and new_records:
+        if self.is_completed:
             new_records = new_records[:-1]  # remove "completed" record
 
         if old_max_record_value is None:
