@@ -20,7 +20,7 @@ RAW_EVENT = {
         "rerun_asset_id": 2323245,
         "app_stream_id": 9585,
         "rerun_app_stream_id": 4745,
-        "version": 1,
+        "version": 2,  # That is the partial re-run version, not schema version.
         "app_id": 46,
         "app_key": "corva.enrichment-wrapper",
         "app_connection_id": 2457,
