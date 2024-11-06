@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Unset the `CORVA_LOGGER.propagate = False`, so the OTel handler will be able to collect and send those logs as well
+  refs https://github.com/corva-ai/otel/pull/37
+
 
 
 ## [1.11.4] - 2024-02-08
