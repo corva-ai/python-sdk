@@ -11,7 +11,11 @@ logging.Formatter.converter = time.gmtime  # log time as UTC
 
 CORVA_LOGGER = logging.getLogger('corva')
 CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
-CORVA_LOGGER.propagate = False  # do not pass messages to ancestor loggers
+
+# unset to pass messages to ancestor loggers, including OTel Log Sending handler
+# see https://github.com/corva-ai/otel/pull/37
+# see https://corvaqa.atlassian.net/browse/EE-31
+# CORVA_LOGGER.propagate = False
 
 
 def get_formatter(
