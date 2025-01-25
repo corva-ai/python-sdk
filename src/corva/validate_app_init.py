@@ -29,6 +29,7 @@ def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
         with contextlib.suppress(pydantic.ValidationError):
             child_cls.from_raw_event(aws_event)
             return child_cls
+    return None
 
 
 def validate_manifested_type(manifest: Dict[str, Any], app_decorator_type: str) -> None:
@@ -49,13 +50,12 @@ def validate_event_payload(aws_event, app_decorator_type) -> None:
 
     if event_cls := guess_event_type(aws_event):
         if issubclass(event_cls, RawPartialRerunMergeEvent):
-            # RawPartialRerunMergeEvent(-s) should be ignored here since it is not new app type itself, it's just a
-            #   run mode for existing app types
+            # RawPartialRerunMergeEvent(-s) should be ignored here since
+            # it is not new app type itself it's just a run mode for existing app types
             return
 
-        if not issubclass(
-            event_cls, base_event_cls_to_app_type_mapping.get(app_decorator_type)
-        ):
+        expected_base_event_cls = base_event_cls_to_app_type_mapping[app_decorator_type]
+        if not issubclass(event_cls, expected_base_event_cls):
             raise RuntimeError(
                 f'Application with type "{app_decorator_type}" '
                 f'was invoked with "{event_cls}" event type'
@@ -73,6 +73,7 @@ def read_manifest() -> Optional[Dict[str, Any]]:
     if os.path.exists(manifest_json_path):
         with open(manifest_json_path, "r") as manifest_json_file:
             return json.load(manifest_json_file)
+    return None
 
 
 def validate_app_type_context(aws_event: Any, app_decorator_type: str) -> None:
