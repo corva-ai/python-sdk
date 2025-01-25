@@ -36,6 +36,7 @@ from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
+from corva.validate_app_init import validate_app_type_context
 
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
@@ -60,6 +61,7 @@ def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
     handler: Optional[logging.Handler],
+    app_decorator_type: str,
     merge_events: bool = False,
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
@@ -89,6 +91,8 @@ def base_handler(
                 data_transformation_type = raw_custom_event_type or raw_event_type
                 if merge_events:
                     aws_event = _merge_events(aws_event, data_transformation_type)
+
+                validate_app_type_context(aws_event, app_decorator_type)
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 if (
@@ -144,6 +148,7 @@ def stream(
         raw_event_type=RawStreamEvent,
         handler=handler,
         merge_events=merge_events,
+        app_decorator_type="stream",
     )
     def wrapper(
         event: RawStreamEvent,
@@ -253,6 +258,7 @@ def scheduled(
         raw_event_type=RawScheduledEvent,
         handler=handler,
         merge_events=merge_events,
+        app_decorator_type="scheduled",
     )
     def wrapper(
         event: RawScheduledEvent,
@@ -354,7 +360,12 @@ def task(
         return functools.partial(task, handler=handler)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawTaskEvent, handler=handler)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawTaskEvent,
+        handler=handler,
+        app_decorator_type="task",
+    )
     def wrapper(
         event: RawTaskEvent,
         api_key: str,
