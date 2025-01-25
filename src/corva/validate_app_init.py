@@ -2,7 +2,7 @@ import contextlib
 import functools
 import json
 import os
-from typing import Any, Optional, Type, Dict
+from typing import Any, Dict, Optional, Type
 
 import pydantic
 
@@ -34,15 +34,17 @@ def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
 def validate_manifested_type(manifest: Dict[str, Any], app_decorator_type: str) -> None:
     manifest_app_type = manifest.get("application", {}).get("type")
     if manifest_app_type and manifest_app_type != app_decorator_type:
-        raise RuntimeError(f'Application with type "{manifest_app_type}" '
-                           f'can\'t invoke a "{app_decorator_type}" handler')
+        raise RuntimeError(
+            f'Application with type "{manifest_app_type}" '
+            f'can\'t invoke a "{app_decorator_type}" handler'
+        )
 
 
 def validate_event_payload(aws_event, app_decorator_type) -> None:
     base_event_cls_to_app_type_mapping: Dict[str, Type[RawBaseEvent]] = {
         "task": RawTaskEvent,
         "stream": RawStreamEvent,
-        "scheduled": RawScheduledEvent
+        "scheduled": RawScheduledEvent,
     }
 
     if event_cls := guess_event_type(aws_event):
@@ -51,7 +53,9 @@ def validate_event_payload(aws_event, app_decorator_type) -> None:
             #   run mode for existing app types
             return
 
-        if not issubclass(event_cls, base_event_cls_to_app_type_mapping.get(app_decorator_type)):
+        if not issubclass(
+            event_cls, base_event_cls_to_app_type_mapping.get(app_decorator_type)
+        ):
             raise RuntimeError(
                 f'Application with type "{app_decorator_type}" '
                 f'was invoked with "{event_cls}" event type'

@@ -3,7 +3,6 @@ from copy import deepcopy
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
 
 import corva
 
@@ -52,7 +51,10 @@ def test_merge_event_handler_called_from_stream_app_on_unexpected_event_type_rai
 
     with pytest.raises(RuntimeError) as e:
         stream_app(raw_event, context)
-    assert 'Application with type "stream" was invoked with "unknown" event type' in str(e.value)
+    assert (
+        'Application with type "stream" was invoked with "unknown" event type'
+        in str(e.value)
+    )
 
 
 def test_merge_event_handler_called_from_stream_app_returns_expected_cache_values(

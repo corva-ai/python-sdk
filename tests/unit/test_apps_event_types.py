@@ -99,14 +99,11 @@ def test__lambda_with_mismatched_manifested_type__raise_error(
 
     particular_app = app_decorator(lambda_handler)
 
-    mocked_manifest = {
-        "application":
-            {
-                "type": manifested_app_type
-            }
-    }
+    mocked_manifest = {"application": {"type": manifested_app_type}}
 
-    with mock.patch("corva.validate_app_init.read_manifest", return_value=mocked_manifest):
+    with mock.patch(
+        "corva.validate_app_init.read_manifest", return_value=mocked_manifest
+    ):
         with pytest.raises(RuntimeError):
             particular_app(
                 {},
