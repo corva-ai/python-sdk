@@ -2,13 +2,18 @@ from unittest import mock
 
 import pytest
 
-from corva import StreamDepthEvent, StreamDepthRecord, StreamTimeEvent, StreamTimeRecord
 from corva.handlers import scheduled, stream, task
 from corva.models.scheduled.raw import (
     RawScheduledDepthEvent,
     RawScheduledNaturalTimeEvent,
 )
 from corva.models.scheduled.scheduler_type import SchedulerType
+from corva.models.stream.stream import (
+    StreamDepthEvent,
+    StreamDepthRecord,
+    StreamTimeEvent,
+    StreamTimeRecord,
+)
 from corva.models.task import RawTaskEvent
 
 raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
