@@ -12,6 +12,12 @@ from corva.models.scheduled.raw import RawScheduledEvent
 from corva.models.stream.raw import RawStreamEvent
 from corva.models.task import RawTaskEvent
 
+BASE_EVENT_CLS_TO_APP_TYPE_MAPPING: Dict[str, Type[RawBaseEvent]] = {
+    "task": RawTaskEvent,
+    "stream": RawStreamEvent,
+    "scheduled": RawScheduledEvent,
+}
+
 
 def find_leaf_subclasses(base_class):
     leaf_classes = []
@@ -42,11 +48,6 @@ def validate_manifested_type(manifest: Dict[str, Any], app_decorator_type: str) 
 
 
 def validate_event_payload(aws_event, app_decorator_type) -> None:
-    base_event_cls_to_app_type_mapping: Dict[str, Type[RawBaseEvent]] = {
-        "task": RawTaskEvent,
-        "stream": RawStreamEvent,
-        "scheduled": RawScheduledEvent,
-    }
 
     if event_cls := guess_event_type(aws_event):
         if issubclass(event_cls, RawPartialRerunMergeEvent):
@@ -54,7 +55,7 @@ def validate_event_payload(aws_event, app_decorator_type) -> None:
             # it is not new app type itself it's just a run mode for existing app types
             return
 
-        expected_base_event_cls = base_event_cls_to_app_type_mapping[app_decorator_type]
+        expected_base_event_cls = BASE_EVENT_CLS_TO_APP_TYPE_MAPPING[app_decorator_type]
         if not issubclass(event_cls, expected_base_event_cls):
             raise RuntimeError(
                 f'Application with type "{app_decorator_type}" '
