@@ -22,20 +22,16 @@ jobs:
         run: make lint
 
   test:
-    name: Automated Testing on Python ${{ matrix.python-version }}
+    name: Automated testing
+
     runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
 
       - name: Install
         run: make install-test
