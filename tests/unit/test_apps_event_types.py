@@ -73,13 +73,12 @@ def test__lambda_call_with_mismatched_event_type__raise_error(
     event_payload,
     context,
 ):
+    @app_decorator
     def lambda_handler(_event, _api):
         ...
 
-    particular_app = app_decorator(lambda_handler)
-
     with pytest.raises(RuntimeError):
-        particular_app(
+        lambda_handler(
             event_payload.dict(),
             context,
         )
@@ -101,10 +100,9 @@ def test__lambda_with_mismatched_manifested_type__raise_error(
     manifested_app_type,
     context,
 ):
+    @app_decorator
     def lambda_handler(_event, _api):
         ...
-
-    particular_app = app_decorator(lambda_handler)
 
     mocked_manifest = {"application": {"type": manifested_app_type}}
 
@@ -112,7 +110,7 @@ def test__lambda_with_mismatched_manifested_type__raise_error(
         "corva.validate_app_init.read_manifest", return_value=mocked_manifest
     ):
         with pytest.raises(RuntimeError):
-            particular_app(
+            lambda_handler(
                 {},
                 context,
             )
