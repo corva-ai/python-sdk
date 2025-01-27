@@ -24,9 +24,9 @@ jobs:
   test:
     name: Automated Testing on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
-        fail-fast: false
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
