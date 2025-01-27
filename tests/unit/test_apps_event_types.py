@@ -133,7 +133,9 @@ def test__read_correct_manifest_file__success(context):
     manifest_payload_json = json.dumps(manifest_payload)
 
     with mock.patch("os.path.exists", return_value=True):
-        with mock.patch("builtins.open", mock.mock_open(read_data=manifest_payload_json)):
+        with mock.patch(
+            "builtins.open", mock.mock_open(read_data=manifest_payload_json)
+        ):
             result = read_manifest()
             assert result == manifest_payload
 
@@ -143,7 +145,9 @@ def test__read_invalid_json_manifest_file__error(context):
     manifest_invalid_json = "{invalid: json}"
 
     with mock.patch("os.path.exists", return_value=True):
-        with mock.patch("builtins.open", mock.mock_open(read_data=manifest_invalid_json)):
+        with mock.patch(
+            "builtins.open", mock.mock_open(read_data=manifest_invalid_json)
+        ):
             with pytest.raises(json.JSONDecodeError):
                 read_manifest()
 
