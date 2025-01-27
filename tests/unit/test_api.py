@@ -278,9 +278,7 @@ def test__trying_to_set_wrong_max_retries__value_error_raised(api):
 def test__app_insert_data__improves_coverage(api, requests_mock: RequestsMocker):
 
     post_mock = requests_mock.post(
-        re.compile('/api/v1/data/'),
-        status_code=200,
-        json={}
+        re.compile('/api/v1/data/'), status_code=200, json={}
     )
 
     api.insert_data(
