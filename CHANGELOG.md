@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [1.12.1] - 2025-01-27
+### Fixed
+- Add app logic for meaningful error when mismatched app type is used either declared at `manifest.json` or according 
+  to used event payload passed to app
+
+
 ## [1.12.0] - 2024-10-06
 ### Fixed
 - Unset the `CORVA_LOGGER.propagate = False`, so the OTel handler will be able to collect and send those logs as well
