@@ -1,5 +1,6 @@
 import contextlib
 import json
+import re
 import time
 import urllib.parse
 from http import HTTPStatus
@@ -267,3 +268,21 @@ def test_enabled_retrying_logic_works_as_expected(api, requests_mock: RequestsMo
         f"At least 1 second retry delay should be applied for "
         f"{len(bad_requests_statuses_codes)} retries."
     )
+
+
+def test__trying_to_set_wrong_max_retries__value_error_raised(api):
+    with pytest.raises(ValueError):
+        api.max_retries = 15
+
+
+def test__app_insert_data__improves_coverage(api, requests_mock: RequestsMocker):
+
+    post_mock = requests_mock.post(re.compile('/api/v1/data/'), status_code=200, json={})
+
+    api.insert_data(
+        provider='any',
+        dataset='any',
+        data=[{'any': 'any'}, {'any': 'any'}],
+    )
+
+    assert post_mock.called_once is True
