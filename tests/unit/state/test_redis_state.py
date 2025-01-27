@@ -48,6 +48,21 @@ def test_delete(redis):
         mock_func.assert_called_once_with(keys=['1'], name=None)
 
 
+def test__user_redis_cache__main_methods_works(redis):
+    redis.set(key='key1', value='text1')
+    redis.set(key='key2', value='text2')
+    redis.set(key='key3', value='text3')
+
+    assert redis.get(key='key1') == 'text1'
+    assert redis.get_many(keys=['key2', 'key3']) == {'key2': 'text2', 'key3': 'text3'}
+
+    redis.delete(key='key1')
+    assert redis.get(key='key1') is None
+
+    redis.delete_many(keys=['key2', 'key3'])
+    assert redis.get_many(keys=['key2', 'key3']) == {'key2': None, 'key3': None}
+
+
 def test_exists(redis):
     with patch.object(redis.old_cache_repo, 'exists') as mock_func:
         redis.exists(*NAMES)
