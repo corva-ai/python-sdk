@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 from enum import Enum
-from typing import Any, Optional, Sequence
+from typing import Any, Sequence
 
 import pydantic
 
@@ -26,5 +26,5 @@ class RawBaseEvent(abc.ABC):
         pass
 
     @classmethod
-    def get_app_type(cls) -> Optional[AppType]:
-        return None
+    def get_app_type(cls) -> AppType:
+        ...
