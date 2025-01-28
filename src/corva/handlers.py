@@ -61,7 +61,6 @@ def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
     handler: Optional[logging.Handler],
-    app_decorator_type: str,
     merge_events: bool = False,
 ) -> Callable[[Any, Any], List[Any]]:
     @functools.wraps(func)
@@ -79,7 +78,6 @@ def base_handler(
                 custom_handler,
             ) = _get_custom_event_type_by_raw_aws_event(aws_event)
             specific_callable = custom_handler or func
-
             try:
                 context = CorvaContext.from_aws(
                     aws_event=aws_event, aws_context=aws_context
@@ -92,7 +90,7 @@ def base_handler(
                 if merge_events:
                     aws_event = _merge_events(aws_event, data_transformation_type)
 
-                validate_app_type_context(aws_event, app_decorator_type)
+                validate_app_type_context(aws_event, raw_event_type)
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
 
                 if (
@@ -148,7 +146,6 @@ def stream(
         raw_event_type=RawStreamEvent,
         handler=handler,
         merge_events=merge_events,
-        app_decorator_type="stream",
     )
     def wrapper(
         event: RawStreamEvent,
@@ -258,7 +255,6 @@ def scheduled(
         raw_event_type=RawScheduledEvent,
         handler=handler,
         merge_events=merge_events,
-        app_decorator_type="scheduled",
     )
     def wrapper(
         event: RawScheduledEvent,
@@ -364,7 +360,6 @@ def task(
         base_handler,
         raw_event_type=RawTaskEvent,
         handler=handler,
-        app_decorator_type="task",
     )
     def wrapper(
         event: RawTaskEvent,

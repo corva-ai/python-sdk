@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union
 import pydantic
 
 from corva.configuration import SETTINGS
-from corva.models.base import CorvaBaseEvent, RawBaseEvent
+from corva.models.base import CorvaBaseEvent, RawBaseEvent, AppType
 from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
@@ -85,6 +85,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
     # private attributes
     _max_record_value_cache_key: ClassVar[str]
+
+    @classmethod
+    def get_app_type(cls) -> AppType:
+        return AppType.STREAM
 
     @property
     def app_connection_id(self) -> int:

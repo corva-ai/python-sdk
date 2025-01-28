@@ -6,9 +6,10 @@ import pytest
 from corva.handlers import scheduled, stream, task
 from corva.models.scheduled.raw import (
     RawScheduledDepthEvent,
-    RawScheduledNaturalTimeEvent,
+    RawScheduledNaturalTimeEvent, RawScheduledEvent,
 )
 from corva.models.scheduled.scheduler_type import SchedulerType
+from corva.models.stream.raw import RawStreamEvent
 from corva.models.stream.stream import (
     StreamDepthEvent,
     StreamDepthRecord,
@@ -16,7 +17,7 @@ from corva.models.stream.stream import (
     StreamTimeRecord,
 )
 from corva.models.task import RawTaskEvent
-from corva.validate_app_init import read_manifest, validate_app_type_context
+from corva.validate_app_init import read_manifest, validate_app_type_context, validate_event_payload
 
 raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
     asset_id=1,
@@ -116,13 +117,52 @@ def test__lambda_with_mismatched_manifested_type__raise_error(
             )
 
 
-def test__validate_app_type_with_missed_app_type_at_manifested__does_not_fails(context):
+def test__if_manifested_app_type_is_none__payload_based_validation_called(context):
     mocked_manifest = {"application": {"type": None}}
 
     with mock.patch(
         "corva.validate_app_init.read_manifest", return_value=mocked_manifest
     ):
-        validate_app_type_context(aws_event="mocked", app_decorator_type="mocked")
+        with mock.patch(
+                "corva.validate_app_init.validate_event_payload",
+                wraps=validate_event_payload
+        ) as mocked_validate_event_payload:
+            validate_app_type_context(
+                aws_event=task_event.dict(),
+                raw_event_type=RawTaskEvent
+            )
+
+    mocked_validate_event_payload.assert_called_once()
+
+
+def test__validate_app_type_with_wrong_app_type_at_manifest__raise_error(context):
+    mocked_manifest = {"application": {"type": "wrong_type"}}
+
+    with mock.patch(
+        "corva.validate_app_init.read_manifest", return_value=mocked_manifest
+    ):
+        with pytest.raises(ValueError, match="'wrong_type' is not a valid AppType"):
+            validate_app_type_context(aws_event=None, raw_event_type=RawTaskEvent)
+
+
+@pytest.mark.parametrize(
+    'manifested_app_type, raw_base_event_type',
+    (
+        ("task", RawTaskEvent),
+        ("stream", RawStreamEvent),
+        ("scheduled", RawScheduledEvent),
+    ),
+)
+def test__right_manifested_app_type_and_raw_event_type_passed__success(
+    manifested_app_type,
+    raw_base_event_type,
+):
+    mocked_manifest = {"application": {"type": manifested_app_type}}
+
+    with mock.patch(
+        "corva.validate_app_init.read_manifest", return_value=mocked_manifest
+    ):
+        validate_app_type_context(aws_event="any", raw_event_type=raw_base_event_type)
 
 
 def test__read_correct_manifest_file__success(context):

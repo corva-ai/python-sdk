@@ -6,17 +6,8 @@ from typing import Any, Dict, Optional, Type
 
 import pydantic
 
-from corva.models.base import RawBaseEvent
+from corva.models.base import AppType, RawBaseEvent
 from corva.models.merge.raw import RawPartialRerunMergeEvent
-from corva.models.scheduled.raw import RawScheduledEvent
-from corva.models.stream.raw import RawStreamEvent
-from corva.models.task import RawTaskEvent
-
-BASE_EVENT_CLS_TO_APP_TYPE_MAPPING: Dict[str, Type[RawBaseEvent]] = {
-    "task": RawTaskEvent,
-    "stream": RawStreamEvent,
-    "scheduled": RawScheduledEvent,
-}
 
 
 def find_leaf_subclasses(base_class):
@@ -38,16 +29,18 @@ def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
     return None
 
 
-def validate_manifested_type(manifest: Dict[str, Any], app_decorator_type: str) -> None:
-    manifest_app_type = manifest.get("application", {}).get("type")
-    if manifest_app_type and manifest_app_type != app_decorator_type:
+def validate_manifested_type(
+        manifest_app_type: AppType,
+        raw_event_type: Type[RawBaseEvent]
+) -> None:
+    if manifest_app_type != raw_event_type.get_app_type():
         raise RuntimeError(
-            f'Application with type "{manifest_app_type}" '
-            f'can\'t invoke a "{app_decorator_type}" handler'
+            f'Application with type "{manifest_app_type.value}" '
+            f'can\'t invoke a "{raw_event_type.get_app_type().value}" handler'
         )
 
 
-def validate_event_payload(aws_event, app_decorator_type) -> None:
+def validate_event_payload(aws_event: Any, raw_event_type: Type[RawBaseEvent]) -> None:
 
     if event_cls := guess_event_type(aws_event):
         if issubclass(event_cls, RawPartialRerunMergeEvent):
@@ -55,15 +48,14 @@ def validate_event_payload(aws_event, app_decorator_type) -> None:
             # it is not new app type itself it's just a run mode for existing app types
             return
 
-        expected_base_event_cls = BASE_EVENT_CLS_TO_APP_TYPE_MAPPING[app_decorator_type]
-        if not issubclass(event_cls, expected_base_event_cls):
+        if not issubclass(event_cls, raw_event_type):
             raise RuntimeError(
-                f'Application with type "{app_decorator_type}" '
+                f'Application with type "{raw_event_type.get_app_type().value}" '
                 f'was invoked with "{event_cls}" event type'
             )
     else:
         raise RuntimeError(
-            f'Application with type "{app_decorator_type}" '
+            f'Application with type "{raw_event_type.get_app_type().value}" '
             'was invoked with "unknown" event type'
         )
 
@@ -77,8 +69,15 @@ def read_manifest() -> Optional[Dict[str, Any]]:
     return None
 
 
-def validate_app_type_context(aws_event: Any, app_decorator_type: str) -> None:
+def get_manifested_type() -> Optional[AppType]:
     if manifest := read_manifest():
-        validate_manifested_type(manifest, app_decorator_type)
+        application_type = manifest.get("application", {}).get("type")
+        return AppType(application_type) if application_type else None
+    return None
+
+
+def validate_app_type_context(aws_event: Any, raw_event_type: Type[RawBaseEvent]) -> None:
+    if manifested_type := get_manifested_type():
+        validate_manifested_type(manifested_type, raw_event_type)
     else:
-        validate_event_payload(aws_event, app_decorator_type)
+        validate_event_payload(aws_event, raw_event_type)

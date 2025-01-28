@@ -7,7 +7,7 @@ import pydantic
 
 from corva.api import Api
 from corva.models import validators
-from corva.models.base import CorvaBaseEvent, RawBaseEvent
+from corva.models.base import CorvaBaseEvent, RawBaseEvent, AppType
 from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.scheduled.scheduler_type import SchedulerType
 
@@ -31,6 +31,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     app_stream_id: int = pydantic.Field(..., alias='app_stream')
     scheduler_type: SchedulerType
     has_secrets: bool = False
+
+    @classmethod
+    def get_app_type(cls) -> AppType:
+        return AppType.SCHEDULED
 
     @staticmethod
     def from_raw_event(event: Union[dict, List[List[dict]]]) -> List[RawScheduledEvent]:

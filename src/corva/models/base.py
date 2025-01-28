@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Sequence
+from enum import Enum
+from typing import Any, Sequence, Optional
 
 import pydantic
+
+
+class AppType(str, Enum):
+    STREAM = "stream"
+    TASK = "task"
+    SCHEDULED = "scheduled"
 
 
 class CorvaBaseEvent(pydantic.BaseModel):
@@ -13,7 +20,12 @@ class CorvaBaseEvent(pydantic.BaseModel):
 
 
 class RawBaseEvent(abc.ABC):
+
     @staticmethod
     @abc.abstractmethod
     def from_raw_event(event: Any) -> Sequence[RawBaseEvent]:
         pass
+
+    @classmethod
+    def get_app_type(cls) -> Optional[AppType]:
+        return None
