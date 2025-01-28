@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 from enum import Enum
-from typing import Any, Sequence, Optional
+from typing import Any, Optional, Sequence
 
 import pydantic
 
@@ -20,7 +20,6 @@ class CorvaBaseEvent(pydantic.BaseModel):
 
 
 class RawBaseEvent(abc.ABC):
-
     @staticmethod
     @abc.abstractmethod
     def from_raw_event(event: Any) -> Sequence[RawBaseEvent]:

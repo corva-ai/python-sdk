@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union
 import pydantic
 
 from corva.configuration import SETTINGS
-from corva.models.base import CorvaBaseEvent, RawBaseEvent, AppType
+from corva.models.base import AppType, CorvaBaseEvent, RawBaseEvent
 from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType

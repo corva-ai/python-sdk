@@ -30,8 +30,7 @@ def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
 
 
 def validate_manifested_type(
-        manifest_app_type: AppType,
-        raw_event_type: Type[RawBaseEvent]
+    manifest_app_type: AppType, raw_event_type: Type[RawBaseEvent]
 ) -> None:
     if manifest_app_type != raw_event_type.get_app_type():
         raise RuntimeError(
@@ -76,7 +75,9 @@ def get_manifested_type() -> Optional[AppType]:
     return None
 
 
-def validate_app_type_context(aws_event: Any, raw_event_type: Type[RawBaseEvent]) -> None:
+def validate_app_type_context(
+    aws_event: Any, raw_event_type: Type[RawBaseEvent]
+) -> None:
     if manifested_type := get_manifested_type():
         validate_manifested_type(manifested_type, raw_event_type)
     else:

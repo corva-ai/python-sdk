@@ -7,7 +7,7 @@ import pydantic
 
 from corva.api import Api
 from corva.models import validators
-from corva.models.base import CorvaBaseEvent, RawBaseEvent, AppType
+from corva.models.base import AppType, CorvaBaseEvent, RawBaseEvent
 from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.scheduled.scheduler_type import SchedulerType
 

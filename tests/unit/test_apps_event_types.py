@@ -6,7 +6,8 @@ import pytest
 from corva.handlers import scheduled, stream, task
 from corva.models.scheduled.raw import (
     RawScheduledDepthEvent,
-    RawScheduledNaturalTimeEvent, RawScheduledEvent,
+    RawScheduledEvent,
+    RawScheduledNaturalTimeEvent,
 )
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.raw import RawStreamEvent
@@ -17,7 +18,11 @@ from corva.models.stream.stream import (
     StreamTimeRecord,
 )
 from corva.models.task import RawTaskEvent
-from corva.validate_app_init import read_manifest, validate_app_type_context, validate_event_payload
+from corva.validate_app_init import (
+    read_manifest,
+    validate_app_type_context,
+    validate_event_payload,
+)
 
 raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
     asset_id=1,
@@ -124,12 +129,11 @@ def test__if_manifested_app_type_is_none__payload_based_validation_called(contex
         "corva.validate_app_init.read_manifest", return_value=mocked_manifest
     ):
         with mock.patch(
-                "corva.validate_app_init.validate_event_payload",
-                wraps=validate_event_payload
+            "corva.validate_app_init.validate_event_payload",
+            wraps=validate_event_payload,
         ) as mocked_validate_event_payload:
             validate_app_type_context(
-                aws_event=task_event.dict(),
-                raw_event_type=RawTaskEvent
+                aws_event=task_event.dict(), raw_event_type=RawTaskEvent
             )
 
     mocked_validate_event_payload.assert_called_once()

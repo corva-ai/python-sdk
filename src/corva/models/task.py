@@ -7,7 +7,7 @@ import pydantic
 import requests
 
 from corva.api import Api
-from corva.models.base import CorvaBaseEvent, RawBaseEvent, AppType
+from corva.models.base import AppType, CorvaBaseEvent, RawBaseEvent
 
 
 class TaskStatus(enum.Enum):
