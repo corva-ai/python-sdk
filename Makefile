@@ -40,7 +40,7 @@ install-lint: install-test
 
 ## test: Run tests.
 .PHONY: test
-test: down-cache pip-freeze up-cache unit-tests integration-tests down-cache
+test: pip-freeze up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
 unit-tests: test_path = tests/unit
