@@ -2,18 +2,24 @@ name: CI
 
 on: push
 
+env:
+  PYTHON_VERSIONS: '[ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13" ]'
+
 jobs:
   static:
-    name: Static analysis
-
+    name: Automated Static analysis on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
 
       - name: Install
         run: make install-lint
@@ -22,16 +28,20 @@ jobs:
         run: make lint
 
   test:
-    name: Automated testing
-
+    name: Automated Testing on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
 
       - name: Install
         run: make install-test

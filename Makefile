@@ -18,10 +18,6 @@ help: Makefile
 .PHONY: install
 install: install-corva-sdk install-test install-lint
 
-.PHONY: pip-freeze
-pip-freeze:
-	@pip freeze
-
 ## install-corva-sdk: Install corva-sdk requirements.
 .PHONY: install-corva-sdk
 install-corva-sdk:
@@ -40,7 +36,7 @@ install-lint: install-test
 
 ## test: Run tests.
 .PHONY: test
-test: pip-freeze up-cache unit-tests integration-tests down-cache
+test: up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
 unit-tests: test_path = tests/unit

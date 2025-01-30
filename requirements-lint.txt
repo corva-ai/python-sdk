@@ -1,7 +1,7 @@
 autoflake==1.4
 black==22.3.0
-flake8==3.9.2
-flake8-isort==4.0.0
+flake8==7.1.1
+flake8-isort==6.1.1
 isort==5.8.0
 mypy==0.950
 types-freezegun~=1.1.9
