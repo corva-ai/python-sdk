@@ -45,8 +45,7 @@ jobs:
     strategy:
       fail-fast: false  # Ensure all matrix jobs run to completion
       matrix:
-        python-version: [ "3.8", "3.9", "3.10" ]
-        # python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
+         python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
 
     steps:
       - uses: actions/checkout@v2
