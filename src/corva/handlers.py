@@ -41,7 +41,11 @@ from corva.validate_app_init import validate_app_type_context
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
 HANDLERS: Dict[Type[RawBaseEvent], Callable] = {}
-GENERIC_APP_EVENT_TYPES = (RawStreamEvent, RawScheduledEvent, RawTaskEvent,)
+GENERIC_APP_EVENT_TYPES = (
+    RawStreamEvent,
+    RawScheduledEvent,
+    RawTaskEvent,
+)
 
 
 def get_cache_key(
@@ -89,8 +93,8 @@ def base_handler(
                 validate_app_type_context(aws_event, raw_event_type)
 
             if (
-                    is_direct_app_call
-                    and data_transformation_type not in GENERIC_APP_EVENT_TYPES
+                is_direct_app_call
+                and data_transformation_type not in GENERIC_APP_EVENT_TYPES
             ):
                 CORVA_LOGGER.warning(
                     f"Handler for {data_transformation_type.__name__!r} "

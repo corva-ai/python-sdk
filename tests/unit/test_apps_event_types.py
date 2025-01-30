@@ -12,8 +12,15 @@ from corva.models.scheduled.raw import (
 )
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.log_type import LogType
-from corva.models.stream.raw import RawStreamEvent, RawStreamTimeEvent, RawTimeRecord, RawMetadata, RawAppMetadata, \
-    RawStreamDepthEvent, RawDepthRecord
+from corva.models.stream.raw import (
+    RawAppMetadata,
+    RawDepthRecord,
+    RawMetadata,
+    RawStreamDepthEvent,
+    RawStreamEvent,
+    RawStreamTimeEvent,
+    RawTimeRecord,
+)
 from corva.models.task import RawTaskEvent
 from corva.validate_app_init import (
     read_manifest,
@@ -160,9 +167,7 @@ def test__if_manifested_app_type_is_none__payload_based_validation_called(contex
             "corva.validate_app_init.validate_event_payload",
             wraps=validate_event_payload,
         ) as mocked_validate_event_payload:
-            validate_app_type_context(
-                aws_event=task_event, raw_event_type=RawTaskEvent
-            )
+            validate_app_type_context(aws_event=task_event, raw_event_type=RawTaskEvent)
 
     mocked_validate_event_payload.assert_called_once()
 

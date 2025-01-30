@@ -7,7 +7,6 @@ from typing import Any, Dict, Optional, Type
 import pydantic
 
 from corva.models.base import AppType, RawBaseEvent
-from corva.models.merge.raw import RawPartialRerunMergeEvent
 
 
 def find_leaf_subclasses(base_class):
