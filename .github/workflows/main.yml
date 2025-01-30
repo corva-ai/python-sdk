@@ -6,13 +6,23 @@ env:
   PYTHON_VERSIONS: '[ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13" ]'
 
 jobs:
+
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ env.PYTHON_VERSIONS }}  # Pass the env variable as an output
+    steps:
+      - name: Export PYTHON_VERSIONS
+        run: echo "PYTHON_VERSIONS=$PYTHON_VERSIONS" >> $GITHUB_ENV
+
   static:
     name: Automated Static analysis on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    needs: set-matrix
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
 
     steps:
       - uses: actions/checkout@v2
@@ -31,10 +41,11 @@ jobs:
   test:
     name: Automated Testing on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    needs: set-matrix
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
 
     steps:
       - uses: actions/checkout@v2
