@@ -12,7 +12,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
