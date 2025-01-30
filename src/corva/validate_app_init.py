@@ -42,24 +42,14 @@ def validate_manifested_type(
 def validate_event_payload(aws_event: Any, raw_event_type: Type[RawBaseEvent]) -> None:
 
     if event_cls := guess_event_type(aws_event):
-        if issubclass(event_cls, RawPartialRerunMergeEvent):
-            # RawPartialRerunMergeEvent(-s) should be ignored here since
-            # it is not new app type itself it's just a run mode for existing app types
-            return
-
         if not issubclass(event_cls, raw_event_type):
             raise RuntimeError(
                 f'Application with type "{raw_event_type.get_app_type().value}" '
                 f'was invoked with "{event_cls}" event type'
             )
-    else:
-        raise RuntimeError(
-            f'Application with type "{raw_event_type.get_app_type().value}" '
-            'was invoked with "unknown" event type'
-        )
 
 
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=1)
 def read_manifest() -> Optional[Dict[str, Any]]:
     manifest_json_path = os.path.join(os.getcwd(), "manifest.json")
     if os.path.exists(manifest_json_path):

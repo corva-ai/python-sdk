@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from corva.configuration import SETTINGS
 from corva.handlers import scheduled, stream, task
 from corva.models.scheduled.raw import (
     RawScheduledDepthEvent,
@@ -10,13 +11,9 @@ from corva.models.scheduled.raw import (
     RawScheduledNaturalTimeEvent,
 )
 from corva.models.scheduled.scheduler_type import SchedulerType
-from corva.models.stream.raw import RawStreamEvent
-from corva.models.stream.stream import (
-    StreamDepthEvent,
-    StreamDepthRecord,
-    StreamTimeEvent,
-    StreamTimeRecord,
-)
+from corva.models.stream.log_type import LogType
+from corva.models.stream.raw import RawStreamEvent, RawStreamTimeEvent, RawTimeRecord, RawMetadata, RawAppMetadata, \
+    RawStreamDepthEvent, RawDepthRecord
 from corva.models.task import RawTaskEvent
 from corva.validate_app_init import (
     read_manifest,
@@ -25,38 +22,69 @@ from corva.validate_app_init import (
 )
 
 raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
-    asset_id=1,
-    interval=1,
-    schedule=1,
-    app_connection=1,
-    app_stream=1,
-    company=1,
+    asset_id=int(),
+    interval=int(),
+    schedule=int(),
+    app_connection=int(),
+    app_stream=int(),
+    company=int(),
     scheduler_type=SchedulerType.natural_time,
-    schedule_start=1,
+    schedule_start=int(),
+).dict(
+    by_alias=True,
+    exclude_unset=True,
 )
 
 raw_scheduled_depth_event = RawScheduledDepthEvent(
-    asset_id=1,
-    depth_milestone=1.0,
-    schedule=1,
-    app_connection=1,
-    app_stream=1,
-    company=1,
+    asset_id=int(),
+    depth_milestone=float(),
+    schedule=int(),
+    app_connection=int(),
+    app_stream=int(),
+    company=int(),
     scheduler_type=SchedulerType.data_depth_milestone,
     top_depth=0.0,
     bottom_depth=1.0,
     log_identifier='',
+).dict(
+    by_alias=True,
+    exclude_unset=True,
 )
 
-stream_time_event = StreamTimeEvent(
-    asset_id=0, company_id=0, records=[StreamTimeRecord(timestamp=0)]
-)
+stream_time_event = RawStreamTimeEvent(
+    records=[
+        RawTimeRecord(
+            asset_id=0,
+            company_id=int(),
+            collection=str(),
+            timestamp=int(),
+        ),
+    ],
+    metadata=RawMetadata(
+        app_stream_id=int(),
+        apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
+        log_type=LogType.time,
+    ),
+).dict()
 
-stream_depth_event = StreamDepthEvent(
-    asset_id=0, company_id=0, records=[StreamDepthRecord(measured_depth=0)]
-)
+stream_depth_event = RawStreamDepthEvent(
+    records=[
+        RawDepthRecord(
+            asset_id=int(),
+            company_id=int(),
+            collection=str(),
+            measured_depth=float(),
+        )
+    ],
+    metadata=RawMetadata(
+        app_stream_id=int(),
+        apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
+        log_type=LogType.depth,
+        log_identifier='log_identifier',
+    ),
+).dict()
 
-task_event = RawTaskEvent(task_id='0', version=2)
+task_event = RawTaskEvent(task_id='0', version=2).dict()
 
 
 @pytest.mark.parametrize(
@@ -64,11 +92,11 @@ task_event = RawTaskEvent(task_id='0', version=2)
     (
         (task, raw_scheduled_natural_time_event),
         (task, raw_scheduled_depth_event),
-        (task, stream_time_event),
-        (task, stream_depth_event),
+        (task, [stream_time_event]),
+        (task, [stream_depth_event]),
         (scheduled, task_event),
-        (scheduled, stream_time_event),
-        (scheduled, stream_depth_event),
+        (scheduled, [stream_time_event]),
+        (scheduled, [stream_depth_event]),
         (stream, task_event),
         (stream, raw_scheduled_natural_time_event),
         (stream, raw_scheduled_depth_event),
@@ -85,7 +113,7 @@ def test__lambda_call_with_mismatched_event_type__raise_error(
 
     with pytest.raises(RuntimeError):
         lambda_handler(
-            event_payload.dict(),
+            event_payload,
             context,
         )
 
@@ -133,7 +161,7 @@ def test__if_manifested_app_type_is_none__payload_based_validation_called(contex
             wraps=validate_event_payload,
         ) as mocked_validate_event_payload:
             validate_app_type_context(
-                aws_event=task_event.dict(), raw_event_type=RawTaskEvent
+                aws_event=task_event, raw_event_type=RawTaskEvent
             )
 
     mocked_validate_event_payload.assert_called_once()
