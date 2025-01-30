@@ -1,4 +1,4 @@
-coverage==5.3
+coverage==7.6.1
 freezegun==1.5.1
 pytest==6.2.5
 pytest-mock==3.3.1

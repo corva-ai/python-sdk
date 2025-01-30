@@ -54,7 +54,7 @@ integration-tests:
 .PHONY: coverage
 coverage: test
 	@coverage combine
-	@coverage report
+	@coverage report --sort=cover
 
 ## coverage-html: Display code coverage in the browser.
 .PHONY: coverage-html
