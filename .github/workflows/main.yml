@@ -12,12 +12,13 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -33,7 +34,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ${{ fromJSON(env.PYTHON_VERSIONS) }}
+        python-version: ${{ fromJSON(vars.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v2
