@@ -10,7 +10,7 @@ import pydantic
 class AppType(str, Enum):
     STREAM = "stream"
     TASK = "task"
-    SCHEDULED = "scheduled"
+    SCHEDULER = "scheduler"
 
 
 class CorvaBaseEvent(pydantic.BaseModel):

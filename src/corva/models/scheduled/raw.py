@@ -34,7 +34,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
 
     @classmethod
     def get_app_type(cls) -> AppType:
-        return AppType.SCHEDULED
+        return AppType.SCHEDULER
 
     @staticmethod
     def from_raw_event(event: Union[dict, List[List[dict]]]) -> List[RawScheduledEvent]:

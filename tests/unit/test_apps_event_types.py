@@ -129,11 +129,11 @@ def test__lambda_call_with_mismatched_event_type__raise_error(
     'app_decorator,manifested_app_type',
     (
         (task, "stream"),
-        (task, "scheduled"),
+        (task, "scheduler"),
         (scheduled, "task"),
         (scheduled, "stream"),
         (stream, "task"),
-        (stream, "scheduled"),
+        (stream, "scheduler"),
     ),
 )
 def test__lambda_with_mismatched_manifested_type__raise_error(
@@ -187,7 +187,7 @@ def test__validate_app_type_with_wrong_app_type_at_manifest__raise_error(context
     (
         ("task", RawTaskEvent),
         ("stream", RawStreamEvent),
-        ("scheduled", RawScheduledEvent),
+        ("scheduler", RawScheduledEvent),
     ),
 )
 def test__right_manifested_app_type_and_raw_event_type_passed__success(
