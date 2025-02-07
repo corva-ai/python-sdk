@@ -14,7 +14,7 @@ from corva.models.task import RawTaskEvent
 MANIFESTED_APP_TYPE_TO_RAW_BASE_EVENT = {
     AppType.TASK: RawTaskEvent,
     AppType.STREAM: RawStreamEvent,
-    AppType.SCHEDULER: RawScheduledEvent
+    AppType.SCHEDULER: RawScheduledEvent,
 }
 
 
