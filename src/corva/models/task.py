@@ -7,7 +7,7 @@ import pydantic
 import requests
 
 from corva.api import Api
-from corva.models.base import AppType, CorvaBaseEvent, RawBaseEvent
+from corva.models.base import CorvaBaseEvent, RawBaseEvent
 
 
 class TaskStatus(enum.Enum):
@@ -33,10 +33,6 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
     task_id: str
     has_secrets: bool = False
     version: int = pydantic.Field(..., le=2, ge=2)  # only utils API v2 supported
-
-    @classmethod
-    def get_app_type(cls) -> AppType:
-        return AppType.TASK
 
     @staticmethod
     def from_raw_event(event: dict) -> List[RawTaskEvent]:

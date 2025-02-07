@@ -88,10 +88,6 @@ def base_handler(
             if merge_events:
                 aws_event = _merge_events(aws_event, data_transformation_type)
 
-            if is_direct_app_call:
-                # Means current app call is not RawPartialRerunMergeEvent or similar
-                validate_app_type_context(aws_event, raw_event_type)
-
             if (
                 is_direct_app_call
                 and data_transformation_type not in GENERIC_APP_EVENT_TYPES
@@ -101,6 +97,10 @@ def base_handler(
                     f"event not found. Skipping..."
                 )
                 return []
+
+            if is_direct_app_call:
+                # Means current app call is not RawPartialRerunMergeEvent or similar
+                validate_app_type_context(aws_event, raw_event_type)
 
             try:
                 context = CorvaContext.from_aws(

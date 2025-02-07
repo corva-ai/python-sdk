@@ -24,7 +24,3 @@ class RawBaseEvent(abc.ABC):
     @abc.abstractmethod
     def from_raw_event(event: Any) -> Sequence[RawBaseEvent]:
         pass
-
-    @classmethod
-    def get_app_type(cls) -> AppType:
-        ...

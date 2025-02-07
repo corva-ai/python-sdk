@@ -7,6 +7,15 @@ from typing import Any, Dict, Optional, Type
 import pydantic
 
 from corva.models.base import AppType, RawBaseEvent
+from corva.models.scheduled.raw import RawScheduledEvent
+from corva.models.stream.raw import RawStreamEvent
+from corva.models.task import RawTaskEvent
+
+MANIFESTED_APP_TYPE_TO_RAW_BASE_EVENT = {
+    AppType.TASK: RawTaskEvent,
+    AppType.STREAM: RawStreamEvent,
+    AppType.SCHEDULER: RawScheduledEvent
+}
 
 
 def find_leaf_subclasses(base_class):
@@ -19,7 +28,7 @@ def find_leaf_subclasses(base_class):
     return leaf_classes
 
 
-def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
+def get_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
     all_children = find_leaf_subclasses(RawBaseEvent)
     for child_cls in all_children:
         with contextlib.suppress(pydantic.ValidationError):
@@ -29,21 +38,22 @@ def guess_event_type(aws_event: Any) -> Optional[Type[RawBaseEvent]]:
 
 
 def validate_manifested_type(
-    manifest_app_type: AppType, raw_event_type: Type[RawBaseEvent]
+    manifest_app_type: 'AppType', raw_event_type: Type[RawBaseEvent]
 ) -> None:
-    if manifest_app_type != raw_event_type.get_app_type():
+    expected_base_event_cls = MANIFESTED_APP_TYPE_TO_RAW_BASE_EVENT[manifest_app_type]
+    if expected_base_event_cls != raw_event_type:
         raise RuntimeError(
             f'Application with type "{manifest_app_type.value}" '
-            f'can\'t invoke a "{raw_event_type.get_app_type().value}" handler'
+            f'can\'t invoke a "{raw_event_type}" handler'
         )
 
 
 def validate_event_payload(aws_event: Any, raw_event_type: Type[RawBaseEvent]) -> None:
 
-    if event_cls := guess_event_type(aws_event):
+    if event_cls := get_event_type(aws_event):
         if not issubclass(event_cls, raw_event_type):
             raise RuntimeError(
-                f'Application with type "{raw_event_type.get_app_type().value}" '
+                f'Application with type "{raw_event_type}" '
                 f'was invoked with "{event_cls}" event type'
             )
 
@@ -57,7 +67,7 @@ def read_manifest() -> Optional[Dict[str, Any]]:
     return None
 
 
-def get_manifested_type() -> Optional[AppType]:
+def get_manifested_type() -> Optional['AppType']:
     if manifest := read_manifest():
         application_type = manifest.get("application", {}).get("type")
         return AppType(application_type) if application_type else None
