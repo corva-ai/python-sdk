@@ -36,11 +36,16 @@ from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
 from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
+from corva.validate_app_init import validate_app_type_context
 
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
 ScheduledEventT = TypeVar("ScheduledEventT", bound=ScheduledEvent)
 HANDLERS: Dict[Type[RawBaseEvent], Callable] = {}
-GENERIC_APP_EVENT_TYPES = [RawStreamEvent, RawScheduledEvent, RawTaskEvent]
+GENERIC_APP_EVENT_TYPES = (
+    RawStreamEvent,
+    RawScheduledEvent,
+    RawTaskEvent,
+)
 
 
 def get_cache_key(
@@ -72,11 +77,30 @@ def base_handler(
             user_handler=handler,
             logger=CORVA_LOGGER,
         ) as logging_ctx:
+            # Verify either current call from app_decorator or not
+            # for instance from partial rerun merge
             (
                 raw_custom_event_type,
                 custom_handler,
             ) = _get_custom_event_type_by_raw_aws_event(aws_event)
-            specific_callable = custom_handler or func
+            is_direct_app_call: bool = not custom_handler
+            data_transformation_type = raw_custom_event_type or raw_event_type
+            if merge_events:
+                aws_event = _merge_events(aws_event, data_transformation_type)
+
+            if (
+                is_direct_app_call
+                and data_transformation_type not in GENERIC_APP_EVENT_TYPES
+            ):
+                CORVA_LOGGER.warning(
+                    f"Handler for {data_transformation_type.__name__!r} "
+                    f"event not found. Skipping..."
+                )
+                return []
+
+            if is_direct_app_call:
+                # Means current app call is not RawPartialRerunMergeEvent or similar
+                validate_app_type_context(aws_event, raw_event_type)
 
             try:
                 context = CorvaContext.from_aws(
@@ -86,20 +110,8 @@ def base_handler(
                 redis_client = redis.Redis.from_url(
                     url=SETTINGS.CACHE_URL, decode_responses=True, max_connections=1
                 )
-                data_transformation_type = raw_custom_event_type or raw_event_type
-                if merge_events:
-                    aws_event = _merge_events(aws_event, data_transformation_type)
                 raw_events = data_transformation_type.from_raw_event(event=aws_event)
-
-                if (
-                    custom_handler is None
-                    and data_transformation_type not in GENERIC_APP_EVENT_TYPES
-                ):
-                    CORVA_LOGGER.warning(
-                        f"Handler for {data_transformation_type.__name__!r} "
-                        f"event not found. Skipping..."
-                    )
-                    return []
+                specific_callable = custom_handler or func
 
                 results = [
                     specific_callable(
@@ -354,7 +366,11 @@ def task(
         return functools.partial(task, handler=handler)
 
     @functools.wraps(func)
-    @functools.partial(base_handler, raw_event_type=RawTaskEvent, handler=handler)
+    @functools.partial(
+        base_handler,
+        raw_event_type=RawTaskEvent,
+        handler=handler,
+    )
     def wrapper(
         event: RawTaskEvent,
         api_key: str,

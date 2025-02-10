@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import abc
+from enum import Enum
 from typing import Any, Sequence
 
 import pydantic
+
+
+class AppType(str, Enum):
+    STREAM = "stream"
+    TASK = "task"
+    SCHEDULER = "scheduler"
 
 
 class CorvaBaseEvent(pydantic.BaseModel):
