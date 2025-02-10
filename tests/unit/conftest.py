@@ -31,6 +31,7 @@ def clean_fake_redis():
     redis_client.flushall()
 
 
+@pytest.fixture(scope='function', autouse=True)
 def clean_read_manifest_lru_cache():
     read_manifest.cache_clear()
     yield
