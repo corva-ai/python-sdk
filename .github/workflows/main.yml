@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false  # Ensure all matrix jobs run to completion
       matrix:
-        python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
+        python-version: ${{ fromJSON(needs.set-python-matrix.outputs.python_versions) }}
 
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false  # Ensure all matrix jobs run to completion
       matrix:
-         python-version: ${{ fromJSON(needs.set-matrix.outputs.python_versions) }}
+         python-version: ${{ fromJSON(needs.set-python-matrix.outputs.python_versions) }}
 
     steps:
       - uses: actions/checkout@v2
