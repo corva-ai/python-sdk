@@ -39,7 +39,6 @@ install-lint: install-test
 test: up-cache unit-tests integration-tests down-cache
 
 ## unit-tests: Run unit tests.
-.PHONY: unit-tests
 unit-tests: test_path = tests/unit
 unit-tests:
 	@coverage run -m pytest $(test_path)
@@ -55,7 +54,7 @@ integration-tests:
 .PHONY: coverage
 coverage: test
 	@coverage combine
-	@coverage report
+	@coverage report --sort=cover
 
 ## coverage-html: Display code coverage in the browser.
 .PHONY: coverage-html

@@ -36,6 +36,7 @@ def pytest_load_initial_conftests(args, early_config, parser):
         'CACHE_URL': 'redis://localhost:6379',
         'APP_KEY': f'{provider}.test-app-name',
         'PROVIDER': provider,
+        'FAKEREDIS_LUA_VERSION': "5.2",
         **os.environ,  # override env values if provided by user
     }
     os.environ.update(env)

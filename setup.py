@@ -39,10 +39,10 @@ setuptools.setup(
     packages=setuptools.find_packages("src"),
     package_dir={"": "src"},
     install_requires=[
-        "fakeredis[lua] >=1.4.5, <2.0.0",
+        "fakeredis[lua] >=2.26.2, <3.0.0",
         "pydantic >=1.8.2, <2.0.0",
-        "redis >=3.5.3, <4.0.0",
-        "requests >=2.25.0, <3.0.0",
+        "redis >=5.2.1, <6.0.0",
+        "requests >=2.32.3, <3.0.0",
         "urllib3 <2",  # lambda doesnt support version 2 yet
         "tenacity >=8.2.3, <9.0.0",
     ],

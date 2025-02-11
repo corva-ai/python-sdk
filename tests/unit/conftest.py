@@ -1,4 +1,7 @@
+from typing import cast
+
 import pytest
+from fakeredis import FakeRedis
 from redis import Redis
 
 from corva.configuration import SETTINGS
@@ -7,8 +10,19 @@ from corva.validate_app_init import read_manifest
 
 
 @pytest.fixture(scope='function', autouse=True)
-def clean_redis():
+def clean_real_redis():
     redis_client = Redis.from_url(url=SETTINGS.CACHE_URL)
+
+    redis_client.flushall()
+
+    yield
+
+    redis_client.flushall()
+
+
+@pytest.fixture(scope='function', autouse=True)
+def clean_fake_redis():
+    redis_client = cast(FakeRedis, FakeRedis.from_url(url=SETTINGS.CACHE_URL))
 
     redis_client.flushall()
 
