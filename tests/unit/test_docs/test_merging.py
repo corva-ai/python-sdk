@@ -70,8 +70,8 @@ def test_tutorial001(context):
 @pytest.mark.parametrize(
     "time_ranges, flat",
     (
-        [((60, 120), (61, None), (62, 122)), True],
-        [((61, None), (60, None), (62, None)), False],
+        [((60, 120), (120, 180), (180, 240)), True],
+        [((120, 180), (60, 120), (180, 240)), False],
     ),
 )
 def test_tutorial002(context, time_ranges, flat):
@@ -97,6 +97,6 @@ def test_tutorial002(context, time_ranges, flat):
     result_event: ScheduledDataTimeEvent = tutorial002.app(event, context)[0]
 
     assert result_event.start_time == 1
-    assert result_event.end_time == 60
+    assert result_event.end_time == 180
     max_schedule_value = time_ranges[-1][-1]
     assert result_event.schedule_end == max_schedule_value  # type: ignore[attr-defined]
