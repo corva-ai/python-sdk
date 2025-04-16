@@ -56,6 +56,17 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         api.post(path=f'scheduler/{self.schedule_id}/completed')
 
 
+class DataTimeMergeMetadata(CorvaBaseEvent):
+    """
+    For data time events we may need to store information about event merging
+    (if merge_events=True is used in @scheduled)
+    """
+
+    start_time: int
+    end_time: int
+    number_of_merged_events: int
+
+
 class RawScheduledDataTimeEvent(RawScheduledEvent):
     """Raw data time scheduled event data.
 
@@ -71,6 +82,7 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     start_time: int = None  # type: ignore
     interval: float
     rerun: Optional[RerunTime] = None
+    merge_metadata: Optional[DataTimeMergeMetadata] = None
 
     # validators
     _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
@@ -83,6 +95,14 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
 
         values["start_time"] = int(values["schedule_start"] - values["interval"] + 1)
         return values
+
+    def rebuild_with_modified_times(
+        self, start_time: int, end_time: int
+    ) -> RawScheduledDataTimeEvent:
+        raw_dict = self.dict(exclude_none=True, by_alias=True)
+        raw_dict["start_time"] = start_time
+        raw_dict["end_time"] = end_time
+        return RawScheduledDataTimeEvent.parse_obj(raw_dict)
 
 
 class RawScheduledDepthEvent(RawScheduledEvent):

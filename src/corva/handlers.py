@@ -23,11 +23,12 @@ import redis
 from corva.api import Api
 from corva.configuration import SETTINGS
 from corva.logger import CORVA_LOGGER, CorvaLoggerHandler, LoggingContext
+from corva.models import validators
 from corva.models.base import RawBaseEvent
 from corva.models.context import CorvaContext
 from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.merge.raw import RawPartialRerunMergeEvent
-from corva.models.scheduled.raw import RawScheduledEvent
+from corva.models.scheduled.raw import RawScheduledDataTimeEvent, RawScheduledEvent
 from corva.models.scheduled.scheduled import ScheduledEvent, ScheduledNaturalTimeEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
 from corva.models.stream.raw import RawStreamEvent
@@ -299,6 +300,11 @@ def scheduled(
         internal_cache_sdk = InternalRedisSdk(
             hash_name=hash_name, redis_client=redis_client
         )
+
+        if isinstance(event, RawScheduledDataTimeEvent) and event.merge_metadata:
+            event = event.rebuild_with_modified_times(
+                event.merge_metadata.start_time, event.merge_metadata.end_time
+            )
 
         app_event = event.scheduler_type.event.parse_obj(event)
 
@@ -589,7 +595,9 @@ def _merge_events(
     """
     Merges incoming aws_events into one.
     Merge happens differently, depending on app type.
-    Only "scheduled" and "stream" type of apps can be processed here.
+    Only "scheduled"(data and depth) and "stream" type of apps can be processed here.
+    Scheduled Natural events don't need a merge since they will never receive multiple
+    events in batch.
     If somehow any other type is passed - raise an exception
     """
     if not isinstance(
@@ -610,11 +618,24 @@ def _merge_events(
             if is_depth
             else ("schedule_start", "schedule_end")
         )
-        min_event_start = min(e[event_start] for e in aws_event)
+        min_event_start: int = min(e[event_start] for e in aws_event)
         max_event_end = max(
             (e[event_end] for e in aws_event if e.get(event_end) is not None),
             default=None,
         )
+        if not is_depth:
+            # we're working with ScheduledDataTimeEvent
+            max_event_start: int = max(e[event_start] for e in aws_event)
+            interval = aws_event[0]["interval"]
+            # cast from ms to s if needed
+            min_value = validators.from_ms_to_s(min_event_start)
+            max_value = validators.from_ms_to_s(max_event_start)
+            aws_event[0]["merge_metadata"] = {
+                "start_time": int(min_value - interval + 1),
+                "end_time": int(max_value),
+                "number_of_merged_events": len(aws_event),
+            }
+
         aws_event[0][event_start] = min_event_start
         if max_event_end:
             aws_event[0][event_end] = max_event_end
