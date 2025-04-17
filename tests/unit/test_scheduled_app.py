@@ -1,5 +1,6 @@
 import logging
 import re
+from copy import deepcopy
 
 import pytest
 import redis
@@ -532,3 +533,73 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
 
     with pytest.raises(redis.exceptions.ConnectionError):
         scheduled_app(event, context)
+
+
+@pytest.mark.parametrize("merge_events", [True, False])
+def test_merge_events_parameter(merge_events, context, mocker):
+    @scheduled(merge_events=merge_events)
+    def scheduled_app(event, api, state):
+        # For this test, just return the processed event list for inspection.
+        return event
+
+    # Create two separate events with different schedule_start values.
+    # Note: schedule_start is provided in milliseconds.
+    event1 = RawScheduledDataTimeEvent(
+        asset_id=1,
+        interval=60,  # interval value in seconds
+        schedule=123,
+        schedule_start=1744718400000,  # 2025-04-15T12:00:00 in milliseconds
+        schedule_end=1744718460000,  # 2025-04-15T12:01:00 in milliseconds
+        app_connection=1,
+        app_stream=2,
+        company=1,
+        scheduler_type=SchedulerType.data_time,
+    ).dict(by_alias=True, exclude_unset=True)
+
+    event2 = RawScheduledDataTimeEvent(
+        asset_id=1,
+        interval=60,
+        schedule=124,
+        schedule_start=1744718460000,  # 2025-04-15T12:01:00 in milliseconds
+        schedule_end=1744718520000,  # 2025-04-15T12:02:00 in milliseconds
+        app_connection=1,
+        app_stream=2,
+        company=1,
+        scheduler_type=SchedulerType.data_time,
+    ).dict(by_alias=True, exclude_unset=True)
+    original_event1 = deepcopy(event1)
+
+    # Combine the events in the input structure
+    events = [[event1, event2]]
+
+    # Call the scheduled app which should process the events.
+    result = scheduled_app(events, context)
+
+    if merge_events:
+        # When merging is enabled, the app should merge the input events
+        # into a single event.
+        assert (
+            len(result) == 1
+        ), "Expected a single merged event when merge_events is true."
+        merged_event = result[0]
+
+        # Calculate the expected start_time and end_time.
+        expected_start_time = (
+            original_event1["schedule_start"] - original_event1["interval"] + 1
+        )
+        expected_end_time = event2["schedule_start"]
+
+        assert (
+            merged_event.start_time == expected_start_time
+        ), f"Expected time {expected_start_time}, got {merged_event.start_time}."
+        # The merged event is expected to have an 'end_time' attribute set.
+        actual_end_time = getattr(merged_event, "end_time", None)
+        assert (
+            actual_end_time == expected_end_time
+        ), f"Expected merged end_time {expected_end_time}, got {actual_end_time}."
+    else:
+        # When merging is disabled, the app should return the events as-is
+        # (i.e. two separate events).
+        assert (
+            len(result) == 2
+        ), "Expected two separate events when merge_events is false."
