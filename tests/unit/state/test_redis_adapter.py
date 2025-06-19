@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import fakeredis
 import pytest
 from freezegun import freeze_time
-from redis import ConnectionError, Redis
 
 from corva.cache_adapter import DeprecatedRedisAdapter
 from corva.configuration import SETTINGS
@@ -23,13 +22,6 @@ MAPPING = {'key1': 'val1', 'key2': 'val2'}
 
 def test_connect(redis_adapter):
     assert redis_adapter.client.ping()
-
-
-def test_init_connect_exc():
-    fake_cache_url = 'redis://random:123'
-
-    with pytest.raises(ConnectionError):
-        DeprecatedRedisAdapter(hash_name='name', client=Redis.from_url(fake_cache_url))
 
 
 @pytest.mark.parametrize('name', (None, NAME))

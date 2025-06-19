@@ -267,8 +267,6 @@ class DeprecatedRedisAdapter:
         self.default_name = hash_name
         self.client = client
 
-        self.client.ping()
-
     @overload
     def hset(
         self,
