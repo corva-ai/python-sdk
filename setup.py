@@ -39,7 +39,7 @@ setuptools.setup(
     packages=setuptools.find_packages("src"),
     package_dir={"": "src"},
     install_requires=[
-        "fakeredis[lua] >=2.26.2, <3.0.0",
+        "fakeredis[lua] >=2.26.2, <2.30.0",
         "pydantic >=1.8.2, <2.0.0",
         "redis >=5.2.1, <6.0.0",
         "requests >=2.32.3, <3.0.0",
