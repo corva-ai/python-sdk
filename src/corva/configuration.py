@@ -26,7 +26,7 @@ class Settings(pydantic.BaseSettings):
     # keep-alive
     POOL_CONNECTIONS_COUNT: int = 20    # Total pools count
     POOL_MAX_SIZE: int = 20             # Max connections count per pool/host
-    POOL_BLOCK: bool = True             # If all conn ack - wait until pool connection released
+    POOL_BLOCK: bool = True             # Wait until connection released
 
     # retry
     MAX_RETRY_COUNT: int = 3            # If `0` then retires will be disabled

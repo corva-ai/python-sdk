@@ -6,7 +6,7 @@ from typing import List, Optional, Sequence, Union
 import requests
 from urllib3 import Retry
 
-from corva.api_utils import get_retry_strategy, get_requests_session
+from corva.api_utils import get_requests_session, get_retry_strategy
 from corva.configuration import SETTINGS
 
 
@@ -160,11 +160,11 @@ class Api:
         }
 
         return self._execute_request(
-                method=method,
-                url=url,
-                params=params,
-                data=data,
-                headers=headers,
+            method=method,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
         )
 
     def get_dataset(
