@@ -25,24 +25,24 @@ class Api:
         api_key: str,
         app_key: str,
         app_connection_id: Optional[int] = None,
-        max_retries: Optional[int] = SETTINGS.MAX_RETRY_COUNT,
-        pool_connections_count: Optional[int] = SETTINGS.POOL_CONNECTIONS_COUNT,
-        pool_max_size: Optional[int] = SETTINGS.POOL_MAX_SIZE,
-        pool_block: Optional[bool] = SETTINGS.POOL_BLOCK,
+        max_retries: Optional[int] = None,
+        pool_conn_count: Optional[int] = None,
+        pool_max_size: Optional[int] = None,
+        pool_block: Optional[bool] = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_key = app_key
         self.app_connection_id = app_connection_id
-        self._retry_strategy: Optional[Retry] = (
-            get_retry_strategy(max_retries) if max_retries not in (None, 0) else None
+        self._retry_strategy: Retry = get_retry_strategy(
+            max_retries or SETTINGS.MAX_RETRY_COUNT
         )
-        self._session: requests.Session = get_requests_session(
+        self._session = get_requests_session(
             retry_strategy=self._retry_strategy,
-            pool_connections_count=pool_connections_count,
-            pool_max_size=pool_max_size,
-            pool_block=pool_block,
+            pool_connections_count=(pool_conn_count or SETTINGS.POOL_CONNECTIONS_COUNT),
+            pool_max_size=pool_max_size or SETTINGS.POOL_MAX_SIZE,
+            pool_block=pool_block or SETTINGS.POOL_BLOCK,
         )
 
     @property
