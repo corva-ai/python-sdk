@@ -1,17 +1,13 @@
 import json
 import posixpath
 import re
-from http import HTTPStatus
+
 from typing import List, Optional, Sequence, Union
 
 import requests
-from tenacity import (
-    RetryError,
-    retry,
-    retry_if_result,
-    stop_after_attempt,
-    wait_random_exponential,
-)
+
+from corva.api_utils import get_retry_strategy, get_requests_session
+from corva.configuration import SETTINGS
 
 
 class Api:
@@ -21,9 +17,6 @@ class Api:
     convenient URL usage and reasonable timeouts to API requests.
     """
 
-    TIMEOUT_LIMITS = (3, 30)  # seconds
-    DEFAULT_MAX_RETRIES = int(0)
-
     def __init__(
         self,
         *,
@@ -31,16 +24,24 @@ class Api:
         data_api_url: str,
         api_key: str,
         app_key: str,
-        timeout: Optional[int] = None,
         app_connection_id: Optional[int] = None,
+        max_retries: Optional[int] = SETTINGS.MAX_RETRY_COUNT,
+        pool_connections_count: Optional[int] = SETTINGS.POOL_CONNECTIONS_COUNT,
+        pool_max_size: Optional[int] = SETTINGS.POOL_MAX_SIZE,
+        pool_block: Optional[bool] = SETTINGS.POOL_BLOCK,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_key = app_key
         self.app_connection_id = app_connection_id
-        self.timeout = timeout or self.TIMEOUT_LIMITS[1]
-        self._max_retries = self.DEFAULT_MAX_RETRIES
+        self._retry_strategy = get_retry_strategy(max_retries) if max_retries not in (None, 0) else None
+        self._session = get_requests_session(
+            retry_strategy=self._retry_strategy,
+            pool_connections_count=pool_connections_count,
+            pool_max_size=pool_max_size,
+            pool_block=pool_block,
+        )
 
     @property
     def default_headers(self):
@@ -99,15 +100,14 @@ class Api:
 
         return posixpath.join(self.api_url, path)
 
-    @staticmethod
     def _execute_request(
+        self,
         method: str,
         url: str,
         params: Optional[dict],
         data: Optional[dict],
         headers: Optional[dict] = None,
-        timeout: Optional[int] = None,
-    ):
+    ) -> requests.Response:
         """Executes the request.
 
         Args:
@@ -116,18 +116,17 @@ class Api:
             data: request body, that will be casted to json.
             params: url query string params.
             headers: additional headers to include in request.
-            timeout: custom request timeout in seconds.
 
         Returns:
             requests.Response instance.
         """
-        return requests.request(
+
+        return self._session.request(
             method=method,
             url=url,
             params=params,
             json=data,
             headers=headers,
-            timeout=timeout,
         )
 
     def _request(
@@ -138,7 +137,6 @@ class Api:
         data: Optional[dict] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
-        timeout: Optional[int] = None,
     ) -> requests.Response:
         """Prepares HTTP request.
 
@@ -148,22 +146,10 @@ class Api:
           data: request body, that will be casted to json.
           params: url query string params.
           headers: additional headers to include in request.
-          timeout: custom request timeout in seconds.
 
         Returns:
           requests.Response instance.
         """
-        retryable_status_codes = [
-            HTTPStatus.TOO_MANY_REQUESTS,  # 428
-            HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
-            HTTPStatus.BAD_GATEWAY,  # 502
-            HTTPStatus.SERVICE_UNAVAILABLE,  # 503
-            HTTPStatus.GATEWAY_TIMEOUT,  # 504
-        ]
-
-        timeout = timeout or self.timeout
-        self._validate_timeout(timeout)
-
         url = self._get_url(path)
 
         headers = {
@@ -171,47 +157,13 @@ class Api:
             **(headers or {}),
         }
 
-        if self.max_retries > 0:
-            retry_decorator = retry(
-                stop=stop_after_attempt(self.max_retries),
-                wait=wait_random_exponential(multiplier=0.25, max=10),
-                retry=retry_if_result(
-                    lambda r: r.status_code in retryable_status_codes
-                ),
-            )
-            retrying_request = retry_decorator(self._execute_request)
-            try:
-                response = retrying_request(
-                    method=method,
-                    url=url,
-                    params=params,
-                    data=data,
-                    headers=headers,
-                    timeout=timeout,
-                )
-            except RetryError as e:
-                if not e.last_attempt.failed:
-                    response = e.last_attempt.result()
-                else:
-                    raise
-        else:
-            response = self._execute_request(
+        return self._execute_request(
                 method=method,
                 url=url,
                 params=params,
                 data=data,
                 headers=headers,
-                timeout=timeout,
-            )
-
-        return response
-
-    def _validate_timeout(self, timeout: int) -> None:
-        if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
-            raise ValueError(
-                f"Timeout must be between {self.TIMEOUT_LIMITS[0]} and "
-                f"{self.TIMEOUT_LIMITS[1]} seconds."
-            )
+        )
 
     def get_dataset(
         self,
