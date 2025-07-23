@@ -24,10 +24,10 @@ def get_retry_strategy(max_retries: int) -> Retry:
 
 
 def get_requests_session(
-        pool_connections_count: int,
-        pool_max_size: int,
-        pool_block: bool,
-        retry_strategy: Optional[Retry] = None,
+    pool_connections_count: int,
+    pool_max_size: int,
+    pool_block: bool,
+    retry_strategy: Optional[Retry] = None,
 ) -> requests.Session:
     adapter = HTTPAdapter(
         max_retries=retry_strategy,

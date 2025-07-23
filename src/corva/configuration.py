@@ -24,12 +24,12 @@ class Settings(pydantic.BaseSettings):
     SECRETS_CACHE_TTL: int = int(datetime.timedelta(minutes=5).total_seconds())
 
     # keep-alive
-    POOL_CONNECTIONS_COUNT: int = 20    # Total pools count
-    POOL_MAX_SIZE: int = 20             # Max connections count per pool/host
-    POOL_BLOCK: bool = True             # Wait until connection released
+    POOL_CONNECTIONS_COUNT: int = 20  # Total pools count
+    POOL_MAX_SIZE: int = 20  # Max connections count per pool/host
+    POOL_BLOCK: bool = True  # Wait until connection released
 
     # retry
-    MAX_RETRY_COUNT: int = 3            # If `0` then retires will be disabled
+    MAX_RETRY_COUNT: int = 3  # If `0` then retires will be disabled
 
 
 SETTINGS = Settings()
