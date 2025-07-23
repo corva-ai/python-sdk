@@ -1,10 +1,10 @@
 import json
 import posixpath
 import re
-
 from typing import List, Optional, Sequence, Union
 
 import requests
+from urllib3 import Retry
 
 from corva.api_utils import get_retry_strategy, get_requests_session
 from corva.configuration import SETTINGS
@@ -35,8 +35,10 @@ class Api:
         self.api_key = api_key
         self.app_key = app_key
         self.app_connection_id = app_connection_id
-        self._retry_strategy = get_retry_strategy(max_retries) if max_retries not in (None, 0) else None
-        self._session = get_requests_session(
+        self._retry_strategy: Optional[Retry] = (
+            get_retry_strategy(max_retries) if max_retries not in (None, 0) else None
+        )
+        self._session: requests.Session = get_requests_session(
             retry_strategy=self._retry_strategy,
             pool_connections_count=pool_connections_count,
             pool_max_size=pool_max_size,
