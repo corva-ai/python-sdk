@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.1] - 2025-07-25
+### Added
+- Session mechanism for significantly decrease number of an http load on data-api for apps with intensive calling 
+- Added possibility to adjust some params related to connection pool
+  - `POOL_CONNECTIONS_COUNT`: Total pools count
+  - `POOL_MAX_SIZE`: Max connections count per pool/host 
+  - `POOL_BLOCK`: Wait until connection released or not (instantly raise an exception)
+  - `MAX_RETRY_COUNT`: If 0 then retires will be disabled, otherwise retrying logic will be used
+- Move retrying logic from `tenacity` to internal `urllib3.util.Retry(...)`
+- Removed redundant dependency `tenacity` from `python-sdk`
+- Bump version for `py3.13` to `py3.13.3` at CI version matrix in order to fix broken tests for logging
+- Bump version for `fakeredis` to fix some tests
+
+
 ## [1.14.0] - 2025-04-17
 ### Fixed
 - merge_events parameter for scheduled data time apps should result in correct start/end times in a final app event.
@@ -405,7 +419,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.14.0...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.14.1...master
+[1.14.1] https://github.com/corva-ai/python-sdk/compare/v1.14.0...v1.14.1
 [1.14.0] https://github.com/corva-ai/python-sdk/compare/v1.13.1...v1.14.0
 [1.13.1] https://github.com/corva-ai/python-sdk/compare/v1.13.0...v1.13.1
 [1.13.0] https://github.com/corva-ai/python-sdk/compare/v1.12.1...v1.13.0

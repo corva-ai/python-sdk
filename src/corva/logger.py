@@ -12,6 +12,8 @@ logging.Formatter.converter = time.gmtime  # log time as UTC
 CORVA_LOGGER = logging.getLogger('corva')
 CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 
+logging.getLogger("urllib3.connectionpool").setLevel(SETTINGS.LOG_LEVEL)
+
 # unset to pass messages to ancestor loggers, including OTel Log Sending handler
 # see https://github.com/corva-ai/otel/pull/37
 # see https://corvaqa.atlassian.net/browse/EE-31
