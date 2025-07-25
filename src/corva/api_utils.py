@@ -14,7 +14,17 @@ RETRYABLE_STATUS_CODES = (
 
 # All HTTP methods allowed, see this discussion:
 # https://corva.slack.com/archives/C0411LUPVL6/p1753451234091869
-ALLOWED_RETRY_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE")
+ALLOWED_RETRY_METHODS = (
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "HEAD",
+    "TRACE",
+)
+
 
 def get_retry_strategy(max_retries: int, backoff_factor: float = 1) -> Retry:
     return Retry(
