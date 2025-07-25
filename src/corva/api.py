@@ -25,7 +25,7 @@ class Api:
         api_key: str,
         app_key: str,
         app_connection_id: Optional[int] = None,
-        max_retries: Optional[int] = None,
+        max_retries: Optional[int] = 0,
         pool_conn_count: Optional[int] = None,
         pool_max_size: Optional[int] = None,
         pool_block: Optional[bool] = None,
@@ -51,16 +51,6 @@ class Api:
             "Authorization": f"API {self.api_key}",
             "X-Corva-App": self.app_key,
         }
-
-    @property
-    def max_retries(self) -> int:
-        return self._max_retries
-
-    @max_retries.setter
-    def max_retries(self, value: int):
-        if not (0 <= value <= 10):
-            raise ValueError("Values between 0 and 10 are allowed")
-        self._max_retries = value
 
     def get(self, path: str, **kwargs):
         return self._request("GET", path, **kwargs)
@@ -109,6 +99,7 @@ class Api:
         params: Optional[dict],
         data: Optional[dict],
         headers: Optional[dict] = None,
+        timeout: Optional[int] = None,
     ) -> requests.Response:
         """Executes the request.
 
@@ -129,6 +120,7 @@ class Api:
             params=params,
             json=data,
             headers=headers,
+            timeout=timeout,
         )
 
     def _request(
@@ -139,6 +131,7 @@ class Api:
         data: Optional[dict] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
+        timeout: Optional[int] = None,
     ) -> requests.Response:
         """Prepares HTTP request.
 
@@ -165,6 +158,7 @@ class Api:
             params=params,
             data=data,
             headers=headers,
+            timeout=timeout,
         )
 
     def get_dataset(

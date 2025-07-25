@@ -15,7 +15,6 @@ from docs.modules.ROOT.examples.api import (
     tutorial005,
     tutorial006,
     tutorial007,
-    tutorial008,
 )
 
 
@@ -122,9 +121,3 @@ def test_tutorial007(app_runner, mocker: MockerFixture):
     app_runner(tutorial007.scheduled_app, time_event)
     time_mock.assert_called_once()
 
-
-def test_tutorial008(app_runner, mocker: MockerFixture):
-    time_event = ScheduledDataTimeEvent(
-        asset_id=0, company_id=0, start_time=0, end_time=0
-    )
-    app_runner(tutorial008.scheduled_app, time_event)
