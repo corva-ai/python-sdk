@@ -32,7 +32,7 @@ def get_retry_strategy(max_retries: int, backoff_factor: float = 1) -> Retry:
         backoff_factor=backoff_factor,
         status_forcelist=RETRYABLE_STATUS_CODES,
         raise_on_status=False,
-        allowed_methods=ALLOWED_RETRY_METHODS
+        allowed_methods=ALLOWED_RETRY_METHODS,
     )
 
 
