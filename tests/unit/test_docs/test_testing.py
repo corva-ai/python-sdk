@@ -8,7 +8,6 @@ from docs.modules.ROOT.examples.testing import (
     tutorial005,
     tutorial006,
     tutorial007,
-    tutorial008,
 )
 
 
