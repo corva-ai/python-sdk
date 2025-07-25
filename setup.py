@@ -44,7 +44,6 @@ setuptools.setup(
         "redis >=5.2.1, <6.0.0",
         "requests >=2.32.3, <3.0.0",
         "urllib3 <2",  # lambda doesnt support version 2 yet
-        "tenacity >=8.2.3, <9.0.0",
     ],
     python_requires='>=3.8, <4.0',
     license='The Unlicense',
