@@ -12,14 +12,17 @@ RETRYABLE_STATUS_CODES = (
     504,  # HTTPStatus.GATEWAY_TIMEOUT
 )
 
+# All HTTP methods allowed, see this discussion:
+# https://corva.slack.com/archives/C0411LUPVL6/p1753451234091869
+ALLOWED_RETRY_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE")
 
-def get_retry_strategy(max_retries: int) -> Retry:
+def get_retry_strategy(max_retries: int, backoff_factor: float = 1) -> Retry:
     return Retry(
         total=max_retries,
-        backoff_factor=0.3,
+        backoff_factor=backoff_factor,
         status_forcelist=RETRYABLE_STATUS_CODES,
-        allowed_methods={'GET', 'POST'},  # Support both
         raise_on_status=False,
+        allowed_methods=ALLOWED_RETRY_METHODS
     )
 
 

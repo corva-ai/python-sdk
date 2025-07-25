@@ -4,7 +4,6 @@ import re
 from typing import List, Optional, Sequence, Union
 
 import requests
-from urllib3 import Retry
 
 from corva.api_utils import get_requests_session, get_retry_strategy
 from corva.configuration import SETTINGS
@@ -25,7 +24,8 @@ class Api:
         api_key: str,
         app_key: str,
         app_connection_id: Optional[int] = None,
-        max_retries: Optional[int] = 0,
+        max_retries: Optional[int] = 3,
+        backoff_factor_retries: Optional[float] = 1,
         pool_conn_count: Optional[int] = None,
         pool_max_size: Optional[int] = None,
         pool_block: Optional[bool] = None,
@@ -35,11 +35,11 @@ class Api:
         self.api_key = api_key
         self.app_key = app_key
         self.app_connection_id = app_connection_id
-        self._retry_strategy: Retry = get_retry_strategy(
-            max_retries or SETTINGS.MAX_RETRY_COUNT
-        )
         self._session = get_requests_session(
-            retry_strategy=self._retry_strategy,
+            retry_strategy=get_retry_strategy(
+                max_retries=max_retries or SETTINGS.MAX_RETRY_COUNT,
+                backoff_factor=backoff_factor_retries or SETTINGS.BACKOFF_FACTOR,
+            ),
             pool_connections_count=(pool_conn_count or SETTINGS.POOL_CONNECTIONS_COUNT),
             pool_max_size=pool_max_size or SETTINGS.POOL_MAX_SIZE,
             pool_block=pool_block or SETTINGS.POOL_BLOCK,

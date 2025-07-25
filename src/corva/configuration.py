@@ -29,7 +29,8 @@ class Settings(pydantic.BaseSettings):
     POOL_BLOCK: bool = True  # Wait until connection released
 
     # retry
-    MAX_RETRY_COUNT: int = 3  # If `0` then retires will be disabled
+    MAX_RETRY_COUNT: int = 3  # If `0` then retries will be disabled
+    BACKOFF_FACTOR: float = 1.0
 
 
 SETTINGS = Settings()
