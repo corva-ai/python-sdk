@@ -155,10 +155,7 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
     assert capsys.readouterr().out == expected
 
 
-@pytest.mark.skipif(
-    condition=sys.version_info >= (3, 13),
-    reason="Fails on 3.13 due to logging/capsys issue"
-)
+@pytest.mark.skipif(sys.version_info >= (3, 13), reason="Fails on 3.13 due to logging/capsys issue")
 def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixture):
     @stream
     def app(event, api, cache):
@@ -239,10 +236,7 @@ def test_long_message_gets_truncated(
     assert capsys.readouterr().out == expected
 
 
-@pytest.mark.skipif(
-    condition=sys.version_info >= (3, 13),
-    reason="Fails on 3.13 due to logging/capsys issue"
-)
+@pytest.mark.skipif(sys.version_info >= (3, 13), reason="Fails on 3.13 due to logging/capsys issue")
 @pytest.mark.parametrize(
     'max_message_count, expected',
     [
