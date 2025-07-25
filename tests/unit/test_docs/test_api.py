@@ -120,4 +120,3 @@ def test_tutorial007(app_runner, mocker: MockerFixture):
     time_mock = mocker.patch.object(Api, 'insert_data')
     app_runner(tutorial007.scheduled_app, time_event)
     time_mock.assert_called_once()
-
