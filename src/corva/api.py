@@ -7,6 +7,7 @@ import requests
 
 from corva.api_utils import get_requests_session, get_retry_strategy
 from corva.configuration import SETTINGS
+from corva.logger import CORVA_LOGGER
 
 
 class Api:
@@ -15,6 +16,8 @@ class Api:
     Api wraps the Python `requests` library and adds automatic authorization,
     convenient URL usage and reasonable timeouts to API requests.
     """
+    
+    TIMEOUT_LIMITS = (3, 30)  # seconds
 
     def __init__(
         self,
@@ -24,20 +27,23 @@ class Api:
         api_key: str,
         app_key: str,
         app_connection_id: Optional[int] = None,
-        max_retries: Optional[int] = 3,
+        max_retries: Optional[int] = 0,
         backoff_factor_retries: Optional[float] = 1,
         pool_conn_count: Optional[int] = None,
         pool_max_size: Optional[int] = None,
         pool_block: Optional[bool] = None,
+        timeout: Optional[int] = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
         self.api_key = api_key
         self.app_key = app_key
         self.app_connection_id = app_connection_id
+        self.timeout = timeout or self.TIMEOUT_LIMITS[1]
+        self._max_retries = max_retries or SETTINGS.MAX_RETRY_COUNT
         self._session = get_requests_session(
             retry_strategy=get_retry_strategy(
-                max_retries=max_retries or SETTINGS.MAX_RETRY_COUNT,
+                max_retries=self._max_retries,
                 backoff_factor=backoff_factor_retries or SETTINGS.BACKOFF_FACTOR,
             ),
             pool_connections_count=(pool_conn_count or SETTINGS.POOL_CONNECTIONS_COUNT),
@@ -51,6 +57,22 @@ class Api:
             "Authorization": f"API {self.api_key}",
             "X-Corva-App": self.app_key,
         }
+
+    @property
+    def max_retries(self) -> int:
+        return self._max_retries
+
+    @max_retries.setter
+    def max_retries(self, value: int):
+        """
+        max_retries are passed into Session object, so modifying it here won't have
+        any effect, raise warning and quit
+        """
+        CORVA_LOGGER.warning(
+            "Do not modify max_retries attribute in existing object, create new Api "
+            "object with your custom max_retries param or set MAX_RETRY_COUNT env "
+            "variable in your environment"
+        )
 
     def get(self, path: str, **kwargs):
         return self._request("GET", path, **kwargs)
@@ -113,6 +135,7 @@ class Api:
         Returns:
             requests.Response instance.
         """
+        _timeout = timeout or self.timeout
 
         return self._session.request(
             method=method,
@@ -120,7 +143,7 @@ class Api:
             params=params,
             json=data,
             headers=headers,
-            timeout=timeout,
+            timeout=_timeout,
         )
 
     def _request(
