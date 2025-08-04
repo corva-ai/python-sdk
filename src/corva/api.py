@@ -16,7 +16,7 @@ class Api:
     Api wraps the Python `requests` library and adds automatic authorization,
     convenient URL usage and reasonable timeouts to API requests.
     """
-    
+
     TIMEOUT_LIMITS = (3, 30)  # seconds
 
     def __init__(
