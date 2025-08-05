@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.2] - 2025-08-04
+### Fixed
+- added back Api attributes removed in a previous release, this should fix potential breaking changes introduced in 1.14.1;
+
 ## [1.14.1] - 2025-07-25
 ### Added
 - Session mechanism for significantly decrease number of an http load on data-api for apps with intensive calling 
