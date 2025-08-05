@@ -423,7 +423,8 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.14.1...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.14.2...master
+[1.14.2] https://github.com/corva-ai/python-sdk/compare/v1.14.1...v1.14.2
 [1.14.1] https://github.com/corva-ai/python-sdk/compare/v1.14.0...v1.14.1
 [1.14.0] https://github.com/corva-ai/python-sdk/compare/v1.13.1...v1.14.0
 [1.13.1] https://github.com/corva-ai/python-sdk/compare/v1.13.0...v1.13.1
