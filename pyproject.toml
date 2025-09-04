@@ -1,0 +1,124 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "corva-sdk"
+description = "SDK for building Corva DevCenter Python apps."
+readme = "README.md"
+version = "1.14.2"
+license = { text = "The Unlicense" }
+authors = [
+  { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
+]
+keywords = ["corva", "sdk"]
+requires-python = ">=3.9,<4.0"
+dependencies = [
+  "fakeredis[lua] >=2.26.2, <2.30.0",
+  "pydantic >=1.8.2, <2.0.0",
+  "redis >=5.2.1, <6.0.0",
+  "requests >=2.32.3, <3.0.0",
+  "urllib3==2.5.0"
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Software Development :: Libraries"
+]
+
+[project.urls]
+Homepage = "https://github.com/corva-ai/python-sdk"
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.12.11",
+  "mypy==0.950",
+  "types-freezegun~=1.1.9",
+  "types-redis~=4.2.4",
+  "types-requests~=2.27.27",
+  "coverage==7.6.1",
+  "freezegun==1.5.1",
+  "pytest==6.2.5",
+  "pytest-mock==3.3.1",
+  "requests-mock==1.8.0",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = { find = { where = ["src"] } }
+py-modules = ["plugin"]
+
+[project.entry-points."pytest11"]
+corva = "plugin"
+
+[tool.ruff]
+line-length = 88
+exclude = ["__init__.py"]
+lint.select = ["C", "E", "W", "F", "I"]
+lint.extend-ignore = ["E203", "Q000"]
+format.exclude = ["__init__.py"]
+
+[tool.coverage.run]
+source = ["corva", "docs/modules/ROOT/examples", "tests"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+precision = 2
+fail_under = 97.68
+skip_covered = true
+show_missing = true
+exclude_lines = [
+  "@abc.abstractmethod",
+  "if TYPE_CHECKING",
+  "class .*Protocol.*",
+  "@overload"
+]
+omit = [
+  "docs/modules/ROOT/examples/logging/tutorial003.py",
+  "docs/modules/ROOT/examples/logging/tutorial004.py",
+  "docs/modules/ROOT/examples/logging/tutorial005.py",
+  "docs/modules/ROOT/examples/followable/tutorial001.py",
+  "src/corva/__init__.py",
+  "src/version.py",
+  "src/plugin.py"
+]
+
+[tool.mypy]
+exclude = '''(?x)(
+    ^docs/modules/ROOT/examples/cache/tutorial004\.py$
+    | ^docs/modules/ROOT/examples/cache/tutorial005\.py$
+)'''
+
+[[tool.mypy.overrides]]
+module = "setuptools.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "docs.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "requests_mock.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "raygun4py.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "rollbar.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sentry_sdk.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fakeredis.*"
+ignore_missing_imports = true
+
