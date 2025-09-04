@@ -6,16 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2025-09-04
+### Security
+- Upgraded internal dependency `urllib3` to version `2.5.0`
+### Removed
+- Removed support of Python version `3.8`
+
+
 ## [1.14.2] - 2025-08-04
 ### Fixed
 - added back Api attributes removed in a previous release, this should fix potential breaking changes introduced in 1.14.1;
 
 ## [1.14.1] - 2025-07-25
 ### Added
-- Session mechanism for significantly decrease number of an http load on data-api for apps with intensive calling 
+- Session mechanism for significantly decrease number of an http load on data-api for apps with intensive calling
 - Added possibility to adjust some params related to connection pool
   - `POOL_CONNECTIONS_COUNT`: Total pools count
-  - `POOL_MAX_SIZE`: Max connections count per pool/host 
+  - `POOL_MAX_SIZE`: Max connections count per pool/host
   - `POOL_BLOCK`: Wait until connection released or not (instantly raise an exception)
   - `MAX_RETRY_COUNT`: If 0 then retires will be disabled, otherwise retrying logic will be used
 - Move retrying logic from `tenacity` to internal `urllib3.util.Retry(...)`
@@ -40,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.12.1] - 2025-01-27
 ### Fixed
-- Add app logic for meaningful error when mismatched app type is used either declared at `manifest.json` or according 
+- Add app logic for meaningful error when mismatched app type is used either declared at `manifest.json` or according
   to used event payload passed to app
 
 
@@ -122,7 +129,7 @@ instead of suppressing them.
 ### Added
 - `insert_data` method to `Api`.
 See `Insert data` section in docs.
-- Example usage for followable apps. 
+- Example usage for followable apps.
 See `Followable apps` section in docs.
 
 
@@ -131,7 +138,7 @@ See `Followable apps` section in docs.
 ### Added
 - `produce_messages` method to `Api`.
 See `Produce messages` section in docs.
-- Documentation on followable apps. 
+- Documentation on followable apps.
 See `Followable apps` section in docs.
 
 
@@ -146,7 +153,7 @@ to reuse the cache object.
 
 ### Changed
 - Set status as completed
-for failed scheduled natural time apps. 
+for failed scheduled natural time apps.
 
 
 ## [1.5.2] - 2022-07-11
@@ -234,7 +241,7 @@ See corresponding section in docs.
 
 ## [1.2.1] - 2021-10-29
 
-### Deprecated 
+### Deprecated
 - Returning dict result from task app
 to get it stored in task payload.
 Send the request to update the payload explicitly in your app.
@@ -244,7 +251,7 @@ Send the request to update the payload explicitly in your app.
 
 ### Added
 - Subtypes of scheduled event:
-`ScheduledDataTimeEvent`, `ScheduledDepthEvent` and `ScheduledNaturalTimeEvent`  
+`ScheduledDataTimeEvent`, `ScheduledDepthEvent` and `ScheduledNaturalTimeEvent`
 
 ### Deprecated
 - `ScheduledEvent` usage
@@ -280,9 +287,9 @@ to app decorators using `handler` keyword argument.
 ## [1.0.0] - 2021-04-29
 
 ### Added
-- `corva.stream`, `corva.scheduled` and `corva.task` app decorators. 
+- `corva.stream`, `corva.scheduled` and `corva.task` app decorators.
   See readme for usage examples.
-- `ScheduledEvent.company_id` field.  
+- `ScheduledEvent.company_id` field.
 
 ### Removed
 - `corva.Corva` class.
@@ -383,13 +390,13 @@ env variables, that should be used to configure logging.
 - `api_key` extraction from `context`.
 
 
-## [0.0.7] - 2021-02-04 
+## [0.0.7] - 2021-02-04
 
 ### Fixed
 - `StreamEvent` queue event parsing.
 
 
-## [0.0.5] - 2021-02-04 
+## [0.0.5] - 2021-02-04
 
 ### Added
 - Required `context` parameter to `Corva`.
