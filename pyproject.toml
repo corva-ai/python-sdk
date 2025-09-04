@@ -88,9 +88,6 @@ omit = [
   "src/plugin.py"
 ]
 
-[tool.isort]
-profile = "black"
-
 [tool.mypy]
 exclude = '''(?x)(
     ^docs/modules/ROOT/examples/cache/tutorial004\.py$
