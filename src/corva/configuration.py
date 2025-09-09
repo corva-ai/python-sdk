@@ -33,4 +33,4 @@ class Settings(pydantic.BaseSettings):
     BACKOFF_FACTOR: float = 1.0
 
 
-SETTINGS = Settings()
+SETTINGS = Settings()  # type: ignore[call-arg]

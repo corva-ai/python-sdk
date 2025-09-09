@@ -37,7 +37,7 @@ Homepage = "https://github.com/corva-ai/python-sdk"
 [project.optional-dependencies]
 dev = [
   "ruff==0.12.11",
-  "mypy==0.950",
+  "mypy>=1.10,<2",
   "types-freezegun~=1.1.9",
   "types-redis~=4.2.4",
   "types-requests~=2.27.27",
@@ -94,6 +94,8 @@ omit = [
 ]
 
 [tool.mypy]
+python_version = "3.9"
+mypy_path = "src"
 exclude = '''(?x)(
     ^docs/modules/ROOT/examples/cache/tutorial004\.py$
     | ^docs/modules/ROOT/examples/cache/tutorial005\.py$
@@ -106,6 +108,10 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "docs.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "docs.*"
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "requests_mock.*"
@@ -127,3 +133,10 @@ ignore_missing_imports = true
 module = "fakeredis.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "mock.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true

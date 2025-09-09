@@ -330,7 +330,7 @@ def scheduled(
                     cache_sdk=internal_cache_sdk,
                     app=functools.partial(
                         cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
-                        app_event,
+                        cast(ScheduledEvent, app_event),
                         api,
                         user_cache_sdk,
                     ),
