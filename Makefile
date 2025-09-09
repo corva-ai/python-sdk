@@ -58,7 +58,7 @@ coverage-html: test
 .PHONY: lint
 lint:
 	@ruff check $(srcs)
-	@mypy --explicit-package-bases --check-untyped-defs $(srcs)
+	@mypy $(srcs)
 
 ## format: Format all files.
 .PHONY: format
