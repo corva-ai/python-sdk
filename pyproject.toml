@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
-version = "1.15.0"
+version = "1.15.1"
 license = { text = "The Unlicense" }
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
@@ -27,7 +27,8 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
-  "Topic :: Software Development :: Libraries"
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed"
 ]
 
 [project.urls]
@@ -48,9 +49,13 @@ dev = [
 ]
 
 [tool.setuptools]
+include-package-data = true
 package-dir = { "" = "src" }
 packages = { find = { where = ["src"] } }
 py-modules = ["plugin"]
+
+[tool.setuptools.package-data]
+corva = ["py.typed"]
 
 [project.entry-points."pytest11"]
 corva = "plugin"
