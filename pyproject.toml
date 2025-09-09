@@ -98,10 +98,6 @@ python_version = "3.9"
 mypy_path = "src"
 explicit_package_bases = true
 check_untyped_defs = true
-exclude = '''(?x)(
-    ^docs/modules/ROOT/examples/cache/tutorial004\.py$
-    | ^docs/modules/ROOT/examples/cache/tutorial005\.py$
-)'''
 
 [[tool.mypy.overrides]]
 module = "setuptools.*"
