@@ -1,9 +1,10 @@
 import datetime
 
 import pydantic
+import pydantic_settings
 
 
-class Settings(pydantic.BaseSettings):
+class Settings(pydantic_settings.BaseSettings):
     # api
     API_ROOT_URL: pydantic.AnyHttpUrl
     DATA_API_ROOT_URL: pydantic.AnyHttpUrl

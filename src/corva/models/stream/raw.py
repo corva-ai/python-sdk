@@ -117,8 +117,10 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
     @staticmethod
     def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
-        initial_events: List[InitialStreamEvent] = (pydantic.TypeAdapter(List[InitialStreamEvent])
-                                                    .validate_python(event))
+        initial_events: List[InitialStreamEvent] = (
+            pydantic.TypeAdapter(List[InitialStreamEvent])
+            .validate_python(event)
+        )
 
         result = [
             initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
