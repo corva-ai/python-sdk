@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union, Any, Dict
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union, Any, Dict, Self
 
 import pydantic
 
@@ -167,31 +167,31 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return new_records
 
     @pydantic.model_validator(mode="after")
-    def set_asset_id(self, values: dict) -> dict:
+    def set_asset_id(self) -> Self:
         """Calculates asset_id field."""
 
-        records: List[RawBaseRecord] = values["records"]
+        records: Sequence[RawBaseRecord] = self.records
 
         if records:
-            values["asset_id"] = int(records[0].asset_id)
+            self.asset_id = int(records[0].asset_id)
 
-        return values
+        return self
 
     @pydantic.model_validator(mode="after")
-    def set_company_id(self, values: dict) -> dict:
+    def set_company_id(self) -> Self:
         """Calculates company_id field."""
 
-        records: List[RawBaseRecord] = values["records"]
+        records: Sequence[RawBaseRecord] = self.records
 
         if records:
-            values["company_id"] = int(records[0].company_id)
+            self.company_id = int(records[0].company_id)
 
-        return values
+        return self
 
     @pydantic.model_validator(mode="before")
     def validate_records(self: Dict[str, Any]):
-        if isinstance(self['records'], List):
-            return [
+        if isinstance(self.get('records'), list):
+            self['records'] = [
                 record
                 for record in self['records']
                 if (
@@ -199,7 +199,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
                     or (hasattr(record, "data") and record.data is not None)
                 )
             ]
-        return self['records']
+        return self
 
 
 class RawStreamTimeEvent(RawStreamEvent):
@@ -215,11 +215,11 @@ class RawStreamDepthEvent(RawStreamEvent):
     log_identifier: str = None  # type: ignore
 
     @pydantic.model_validator(mode="after")
-    def set_log_identifier(self, values: dict) -> dict:
+    def set_log_identifier(self) -> Self:
         """Calculates log_identifier field."""
 
-        metadata: RawMetadata = values["metadata"]
+        metadata: RawMetadata = self.metadata
 
-        values["log_identifier"] = metadata.log_identifier
+        self.log_identifier = metadata.log_identifier
 
-        return values
+        return self

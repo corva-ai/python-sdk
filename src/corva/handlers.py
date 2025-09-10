@@ -524,7 +524,7 @@ def partial_rerun_merge(
             redis_client=redis_client,
         )
         app_event = PartialRerunMergeEvent(
-            **event.data.dict(), event_type=event.event_type
+            **event.data.model_dump(), event_type=event.event_type
         )
 
         with LoggingContext(

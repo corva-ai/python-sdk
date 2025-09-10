@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Self
 
 import pydantic
 
@@ -86,16 +86,16 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     _set_schedule_start = pydantic.field_validator('schedule_start')(validators.from_ms_to_s)
 
     @pydantic.model_validator(mode="after")
-    def set_start_time(cls, values: dict) -> dict:
+    def set_start_time(self) -> Self:
         """Calculates start_time field."""
 
-        values["start_time"] = int(values["schedule_start"] - values["interval"] + 1)
-        return values
+        self.start_time = int(self.schedule_start - self.interval + 1)
+        return self
 
     def rebuild_with_modified_times(
         self, start_time: int, end_time: int
     ) -> RawScheduledDataTimeEvent:
-        raw_dict = self.dict(exclude_none=True, by_alias=True)
+        raw_dict = self.model_dump(exclude_none=True, by_alias=True)
         raw_dict["start_time"] = start_time
         raw_dict["end_time"] = end_time
         return RawScheduledDataTimeEvent.parse_obj(raw_dict)

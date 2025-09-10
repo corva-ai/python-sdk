@@ -15,7 +15,7 @@ class AppType(str, Enum):
 
 
 class CorvaBaseEvent(pydantic.BaseModel):
-    model_config = ConfigDict(extra="allow", frozen=True)
+    model_config = ConfigDict(extra="allow", frozen=False)
 
 
 class RawBaseEvent(abc.ABC):
