@@ -129,9 +129,5 @@ module = "fakeredis.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "mock.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
 module = "tests.*"
 ignore_errors = true
