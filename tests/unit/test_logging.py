@@ -44,7 +44,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         app(
             [
                 [
-                    event.dict(
+                    event.model_dump(
                         by_alias=True,
                         exclude_unset=True,
                     )

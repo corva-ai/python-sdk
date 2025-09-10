@@ -123,7 +123,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         )
 
         result = [
-            initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
+            initial_event.metadata.log_type.raw_event.model_validate(sub_event)
             for initial_event, sub_event in zip(initial_events, event)
         ]
 
@@ -212,7 +212,7 @@ class RawStreamDepthEvent(RawStreamEvent):
     records: RecordsDepth
     rerun: Optional[RerunDepth] = None
     _max_record_value_cache_key: ClassVar[str] = "last_processed_depth"
-    log_identifier: str = None  # type: ignore
+    log_identifier: Optional[str] = None
 
     @pydantic.model_validator(mode="after")
     def set_log_identifier(self) -> Self:

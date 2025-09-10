@@ -199,8 +199,8 @@ def stream(
             # we've got the duplicate data if there are no records left after filtering
             return
 
-        app_event = event.metadata.log_type.event.parse_obj(
-            event.copy(update={"records": records}, deep=True)
+        app_event = event.metadata.log_type.event.model_validate(
+            event.copy(update={"records": records}, deep=True).model_dump()
         )
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -304,7 +304,7 @@ def scheduled(
                 event.merge_metadata.start_time, event.merge_metadata.end_time
             )
 
-        app_event = event.scheduler_type.event.parse_obj(event)
+        app_event = event.scheduler_type.event.model_validate(event.model_dump())
 
         with LoggingContext(
             aws_request_id=aws_request_id,

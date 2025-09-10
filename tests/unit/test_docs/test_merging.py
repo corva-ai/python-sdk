@@ -89,7 +89,7 @@ def test_tutorial002(context, time_ranges, flat):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(by_alias=True, exclude_unset=True)
+            ).model_dump(by_alias=True, exclude_unset=True)
         )
     if not flat:
         event = [event]

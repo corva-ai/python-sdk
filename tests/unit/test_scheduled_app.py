@@ -41,7 +41,7 @@ def test_set_completed_status(context, requests_mock):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(
+            ).model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
@@ -116,7 +116,7 @@ def test_set_completed_status_for_failed_apps(
 
     app_event = [
         [
-            event.dict(
+            event.model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
@@ -149,7 +149,7 @@ def test_set_completed_status_for_failed_apps(
             app_stream=int(),
             company=int(),
             scheduler_type=SchedulerType.data_time,
-        ).dict(
+        ).model_dump(
             by_alias=True,
             exclude_unset=True,
         ),
@@ -164,7 +164,7 @@ def test_set_completed_status_for_failed_apps(
             top_depth=0.0,
             bottom_depth=1.0,
             log_identifier='',
-        ).dict(
+        ).model_dump(
             by_alias=True,
             exclude_unset=True,
         ),
@@ -177,7 +177,7 @@ def test_set_completed_status_for_failed_apps(
             company=int(),
             scheduler_type=SchedulerType.natural_time,
             schedule_start=int(),
-        ).dict(
+        ).model_dump(
             by_alias=True,
             exclude_unset=True,
         ),
@@ -257,13 +257,13 @@ def test_set_schedule_start(
     event = event.copy(update={'schedule_start': value})
     app_event = (
         type(event)
-        .parse_obj(
-            event.dict(
+        .model_validate(
+            event.model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
         )
-        .dict(
+        .model_dump(
             by_alias=True,
             exclude_unset=True,
         )
@@ -301,7 +301,7 @@ def test_set_start_time(
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(
+            ).model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
@@ -331,7 +331,7 @@ def test_set_completed_status_should_not_fail_lambda(context, mocker: MockerFixt
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(
+            ).model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
@@ -363,7 +363,7 @@ def test_log_if_unable_to_set_completed_status(context, mocker: MockerFixture, c
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(
+            ).model_dump(
                 by_alias=True,
                 exclude_unset=True,
             )
@@ -404,7 +404,7 @@ def test_custom_log_handler(context, capsys, mocker: MockerFixture):
     app(
         [
             [
-                event.dict(
+                event.model_dump(
                     by_alias=True,
                     exclude_unset=True,
                 )
@@ -447,7 +447,7 @@ def test_rerun_data_time_cast_from_ms_to_s(
         rerun=RerunTime(
             range=RerunTimeRange(start=time, end=time), invoke=70, total=80
         ),
-    ).dict(by_alias=True, exclude_unset=True)
+    ).model_dump(by_alias=True, exclude_unset=True)
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
@@ -486,7 +486,7 @@ def test_rerun_natural_time_cast_from_ms_to_s(
         rerun=RerunTime(
             range=RerunTimeRange(start=time, end=time), invoke=70, total=80
         ),
-    ).dict(by_alias=True, exclude_unset=True)
+    ).model_dump(by_alias=True, exclude_unset=True)
 
     mocker.patch.object(RawScheduledEvent, 'set_schedule_as_completed')
 
@@ -511,7 +511,7 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
         app_stream=int(),
         company=int(),
         scheduler_type=SchedulerType.data_time,
-    ).dict(
+    ).model_dump(
         by_alias=True,
         exclude_unset=True,
     )
@@ -554,7 +554,7 @@ def test_merge_events_parameter(merge_events, context, mocker):
         app_stream=2,
         company=1,
         scheduler_type=SchedulerType.data_time,
-    ).dict(by_alias=True, exclude_unset=True)
+    ).model_dump(by_alias=True, exclude_unset=True)
 
     event2 = RawScheduledDataTimeEvent(
         asset_id=1,
@@ -566,7 +566,7 @@ def test_merge_events_parameter(merge_events, context, mocker):
         app_stream=2,
         company=1,
         scheduler_type=SchedulerType.data_time,
-    ).dict(by_alias=True, exclude_unset=True)
+    ).model_dump(by_alias=True, exclude_unset=True)
     original_event1 = deepcopy(event1)
 
     # Combine the events in the input structure

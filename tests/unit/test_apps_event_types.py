@@ -37,7 +37,7 @@ raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
     company=int(),
     scheduler_type=SchedulerType.natural_time,
     schedule_start=int(),
-).dict(
+).model_dump(
     by_alias=True,
     exclude_unset=True,
 )
@@ -53,7 +53,7 @@ raw_scheduled_depth_event = RawScheduledDepthEvent(
     top_depth=0.0,
     bottom_depth=1.0,
     log_identifier='',
-).dict(
+).model_dump(
     by_alias=True,
     exclude_unset=True,
 )

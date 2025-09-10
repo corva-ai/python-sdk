@@ -43,7 +43,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         parsed_raw_events = pydantic.TypeAdapter(List[RawScheduledEvent]).validate_python(flattened_event)
 
         events = [
-            parsed_raw_event.scheduler_type.raw_event.parse_obj(sub_event)
+            parsed_raw_event.scheduler_type.raw_event.model_validate(sub_event)
             for parsed_raw_event, sub_event in zip(parsed_raw_events, flattened_event)
         ]
 
@@ -87,9 +87,10 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
 
     @pydantic.model_validator(mode="after")
     def set_start_time(self) -> Self:
-        """Calculates start_time field."""
+        """Calculates start_time field if not provided."""
 
-        self.start_time = int(self.schedule_start - self.interval + 1)
+        if self.start_time is None:
+            self.start_time = int(self.schedule_start - self.interval + 1)
         return self
 
     def rebuild_with_modified_times(
@@ -98,7 +99,10 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
         raw_dict = self.model_dump(exclude_none=True, by_alias=True)
         raw_dict["start_time"] = start_time
         raw_dict["end_time"] = end_time
-        return RawScheduledDataTimeEvent.parse_obj(raw_dict)
+        # Ensure downstream ScheduledDataTimeEvent (which maps end_time from 'schedule_start' alias)
+        # receives the correct end_time value
+        raw_dict["schedule_start"] = end_time
+        return RawScheduledDataTimeEvent.model_validate(raw_dict)
 
 
 class RawScheduledDepthEvent(RawScheduledEvent):
