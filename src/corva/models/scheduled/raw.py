@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Optional, Self, Union
+from typing import List, Optional, Union
 
 from pydantic import Field, TypeAdapter, field_validator, model_validator
+from typing_extensions import Self
 
 from corva.api import Api
 from corva.models import validators

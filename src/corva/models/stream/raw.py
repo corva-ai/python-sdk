@@ -9,13 +9,12 @@ from typing import (
     Dict,
     List,
     Optional,
-    Self,
     Sequence,
     Union,
 )
 
 from pydantic import Field, TypeAdapter, create_model, model_validator
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Self
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
