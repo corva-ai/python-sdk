@@ -2,6 +2,7 @@ from typing import Optional
 
 from corva.models.base import CorvaBaseEvent
 from corva.models.merge.enums import EventType, RerunMode, SourceType
+from pydantic import ConfigDict
 
 
 class PartialRerunMergeEvent(CorvaBaseEvent):
@@ -27,6 +28,8 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
         run_until: run until
     """
 
+    model_config = ConfigDict(extra="allow")
+
     event_type: Optional[EventType]
     partial_well_rerun_id: Optional[int]
     rerun_mode: Optional[RerunMode]
@@ -44,6 +47,3 @@ class PartialRerunMergeEvent(CorvaBaseEvent):
     source_type: Optional[SourceType]
     log_type: Optional[str]
     run_until: Optional[int]
-
-    class Config:
-        extra = "allow"

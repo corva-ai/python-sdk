@@ -40,9 +40,7 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         # flatten the event into 1d array
         flattened_event: List[dict] = list(itertools.chain(*event))
 
-        parsed_raw_events = pydantic.parse_obj_as(
-            List[RawScheduledEvent], flattened_event
-        )
+        parsed_raw_events = pydantic.TypeAdapter(List[RawScheduledEvent]).validate_python(flattened_event)
 
         events = [
             parsed_raw_event.scheduler_type.raw_event.parse_obj(sub_event)
@@ -85,11 +83,9 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     merge_metadata: Optional[DataTimeMergeMetadata] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        validators.from_ms_to_s
-    )
+    _set_schedule_start = pydantic.field_validator('schedule_start')(validators.from_ms_to_s)
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
+    @pydantic.model_validator(mode="after")
     def set_start_time(cls, values: dict) -> dict:
         """Calculates start_time field."""
 
@@ -138,6 +134,4 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     rerun: Optional[RerunTime] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        validators.from_ms_to_s
-    )
+    _set_schedule_start = pydantic.field_validator('schedule_start')(validators.from_ms_to_s)

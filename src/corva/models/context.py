@@ -5,6 +5,7 @@ from typing import Any, ContextManager
 from unittest import mock
 
 import pydantic
+from pydantic import ConfigDict
 
 
 class AwsEventWithClientContext(pydantic.BaseModel):
@@ -16,17 +17,14 @@ class Env(pydantic.BaseModel):
 
 
 class ClientContext(pydantic.BaseModel):
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
     env: Env
 
 
 class CorvaContext(pydantic.BaseModel):
     """AWS context, expected by Corva."""
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
     aws_request_id: str
     client_context: ClientContext
@@ -43,8 +41,8 @@ class CorvaContext(pydantic.BaseModel):
             parse_ctx = mock.patch.object(
                 aws_context,
                 'client_context',
-                AwsEventWithClientContext.parse_obj(aws_event).client_context,
+                AwsEventWithClientContext.model_validate(aws_event).client_context,
             )
 
         with parse_ctx:
-            return CorvaContext.from_orm(aws_context)
+            return CorvaContext.model_validate(aws_context)

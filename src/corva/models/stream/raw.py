@@ -12,6 +12,7 @@ from corva.models.rerun import RerunDepth, RerunTime
 from corva.models.stream.initial import InitialStreamEvent
 from corva.models.stream.log_type import LogType
 from corva.service.cache_sdk import UserCacheSdkProtocol
+from typing_extensions import Annotated
 
 
 class RawBaseRecord(CorvaBaseEvent, abc.ABC):
@@ -72,9 +73,9 @@ if TYPE_CHECKING:
     RecordsTime = Sequence[RawTimeRecord]
     RecordsDepth = Sequence[RawDepthRecord]
 else:
-    RecordsBase = pydantic.conlist(RawBaseRecord, min_items=1)
-    RecordsTime = pydantic.conlist(RawTimeRecord, min_items=0)
-    RecordsDepth = pydantic.conlist(RawDepthRecord, min_items=1)
+    RecordsBase = Annotated[List[RawBaseRecord], pydantic.Field(min_items=1)]
+    RecordsTime = Annotated[List[RawTimeRecord], pydantic.Field(min_items=0)]
+    RecordsDepth = Annotated[List[RawDepthRecord], pydantic.Field(min_items=1)]
 
 
 class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
@@ -116,9 +117,8 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
     @staticmethod
     def from_raw_event(event: List[dict]) -> List[RawStreamEvent]:
-        initial_events: List[InitialStreamEvent] = pydantic.parse_obj_as(
-            List[InitialStreamEvent], event
-        )
+        initial_events: List[InitialStreamEvent] = (pydantic.TypeAdapter(List[InitialStreamEvent])
+                                                    .validate_python(event))
 
         result = [
             initial_event.metadata.log_type.raw_event.parse_obj(sub_event)
@@ -164,8 +164,8 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
         return new_records
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def set_asset_id(cls, values: dict) -> dict:
+    @pydantic.model_validator(mode="after")
+    def set_asset_id(self, values: dict) -> dict:
         """Calculates asset_id field."""
 
         records: List[RawBaseRecord] = values["records"]
@@ -175,8 +175,8 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
         return values
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def set_company_id(cls, values: dict) -> dict:
+    @pydantic.model_validator(mode="after")
+    def set_company_id(self, values: dict) -> dict:
         """Calculates company_id field."""
 
         records: List[RawBaseRecord] = values["records"]
@@ -186,18 +186,18 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
 
         return values
 
-    @pydantic.validator("records", pre=True)
-    def validate_records(cls, v):
-        if isinstance(v, List):
+    @pydantic.model_validator(mode="before")
+    def validate_records(self):
+        if isinstance(self.records, List):
             return [
                 record
-                for record in v
+                for record in self.records
                 if (
                     (isinstance(record, dict) and record.get("data") is not None)
                     or (hasattr(record, "data") and record.data is not None)
                 )
             ]
-        return v
+        return self.records
 
 
 class RawStreamTimeEvent(RawStreamEvent):
@@ -212,8 +212,8 @@ class RawStreamDepthEvent(RawStreamEvent):
     _max_record_value_cache_key: ClassVar[str] = "last_processed_depth"
     log_identifier: str = None  # type: ignore
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def set_log_identifier(cls, values: dict) -> dict:
+    @pydantic.model_validator(mode="after")
+    def set_log_identifier(self, values: dict) -> dict:
         """Calculates log_identifier field."""
 
         metadata: RawMetadata = values["metadata"]

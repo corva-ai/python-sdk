@@ -15,7 +15,8 @@ keywords = ["corva", "sdk"]
 requires-python = ">=3.9,<4.0"
 dependencies = [
   "fakeredis[lua] >=2.26.2, <2.30.0",
-  "pydantic >=1.8.2, <2.0.0",
+  "pydantic >= 2.0, <3.0",
+  "pydantic-settings >=2.0, <3.0",
   "redis >=5.2.1, <6.0.0",
   "requests >=2.32.3, <3.0.0",
   "urllib3==2.5.0"

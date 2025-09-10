@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING, Optional, Sequence
-
-import pydantic
+from typing import List, TYPE_CHECKING, Optional, Sequence
 
 from corva.models.base import CorvaBaseEvent
 from corva.models.rerun import RerunDepth, RerunTime
+from pydantic import Field
+from typing_extensions import Annotated
 
 
 class StreamTimeRecord(CorvaBaseEvent):
@@ -38,8 +38,8 @@ if TYPE_CHECKING:
     RecordsTime = Sequence[StreamTimeRecord]
     RecordsDepth = Sequence[StreamDepthRecord]
 else:
-    RecordsTime = pydantic.conlist(StreamTimeRecord, min_items=1)
-    RecordsDepth = pydantic.conlist(StreamDepthRecord, min_items=1)
+    RecordsTime = Annotated[List[StreamTimeRecord], Field(min_items=1)]
+    RecordsDepth = Annotated[List[StreamDepthRecord], Field(min_items=1)]
 
 
 class StreamEvent(CorvaBaseEvent):
