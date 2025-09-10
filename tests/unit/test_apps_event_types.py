@@ -72,7 +72,7 @@ stream_time_event = RawStreamTimeEvent(
         apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
         log_type=LogType.time,
     ),
-).dict()
+).model_dump()
 
 stream_depth_event = RawStreamDepthEvent(
     records=[
@@ -89,9 +89,9 @@ stream_depth_event = RawStreamDepthEvent(
         log_type=LogType.depth,
         log_identifier='log_identifier',
     ),
-).dict()
+).model_dump()
 
-task_event = RawTaskEvent(task_id='0', version=2).dict()
+task_event = RawTaskEvent(task_id='0', version=2).model_dump()
 
 
 @pytest.mark.parametrize(

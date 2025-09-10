@@ -58,7 +58,7 @@ def test_tutorial001(context):
                         apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ]
         )
         timestamp += 3

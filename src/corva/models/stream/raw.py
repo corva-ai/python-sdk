@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Union, Any, Dict
 
 import pydantic
 
@@ -189,17 +189,17 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return values
 
     @pydantic.model_validator(mode="before")
-    def validate_records(self):
-        if isinstance(self.records, List):
+    def validate_records(self: Dict[str, Any]):
+        if isinstance(self['records'], List):
             return [
                 record
-                for record in self.records
+                for record in self['records']
                 if (
                     (isinstance(record, dict) and record.get("data") is not None)
                     or (hasattr(record, "data") and record.data is not None)
                 )
             ]
-        return self.records
+        return self['records']
 
 
 class RawStreamTimeEvent(RawStreamEvent):

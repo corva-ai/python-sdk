@@ -19,7 +19,7 @@ def task_app(event, api):
     'aws_event,aws_context,exc_ctx,expected',
     (
         [
-            RawTaskEvent(task_id='', version=2).dict(),
+            RawTaskEvent(task_id='', version=2).model_dump(),
             SimpleNamespace(
                 aws_request_id='', client_context=SimpleNamespace(env={'API_KEY': ''})
             ),
@@ -29,7 +29,7 @@ def task_app(event, api):
         [
             RawTaskEvent(
                 task_id='', version=2, client_context={'env': {'API_KEY': ''}}
-            ).dict(),
+            ).model_dump(),
             SimpleNamespace(aws_request_id='', client_context=None),
             contextlib.nullcontext(),
             '',
@@ -37,7 +37,7 @@ def task_app(event, api):
         [
             RawTaskEvent(
                 task_id='', version=2, client_context={'env': {'API_KEY': '0'}}
-            ).dict(),
+            ).model_dump(),
             SimpleNamespace(
                 aws_request_id='', client_context=SimpleNamespace(env={'API_KEY': '1'})
             ),
@@ -45,7 +45,7 @@ def task_app(event, api):
             '1',
         ],
         [
-            RawTaskEvent(task_id='', version=2).dict(),
+            RawTaskEvent(task_id='', version=2).model_dump(),
             SimpleNamespace(aws_request_id='', client_context=None),
             pytest.raises(pydantic.ValidationError),
             '',
@@ -66,7 +66,7 @@ def test_context(
     requests_mock.request(
         requests_mock_lib.ANY,
         requests_mock_lib.ANY,
-        json=TaskEvent(asset_id=0, company_id=0).dict(),
+        json=TaskEvent(asset_id=0, company_id=0).model_dump(),
     )
 
     with exc_ctx:
