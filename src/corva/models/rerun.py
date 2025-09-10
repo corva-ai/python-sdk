@@ -43,7 +43,7 @@ class RerunTime(base.CorvaBaseEvent):
         total: total invoke count for the rerun.
     """
 
-    id: Optional[int] = None  # TODO: remove optional in v2, it was added for backward comp
+    id: Optional[int] = None
     range: RerunTimeRange
     invoke: int
     total: int
@@ -59,7 +59,7 @@ class RerunDepth(base.CorvaBaseEvent):
         total: total invoke count for the rerun.
     """
 
-    id: Optional[int] = None  # TODO: remove optional in v2, it was added for backward comp
+    id: Optional[int] = None
     range: RerunDepthRange
     invoke: int
     total: int

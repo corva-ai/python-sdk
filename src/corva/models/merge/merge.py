@@ -1,8 +1,9 @@
 from typing import Optional
 
+from pydantic import ConfigDict
+
 from corva.models.base import CorvaBaseEvent
 from corva.models.merge.enums import EventType, RerunMode, SourceType
-from pydantic import ConfigDict
 
 
 class PartialRerunMergeEvent(CorvaBaseEvent):

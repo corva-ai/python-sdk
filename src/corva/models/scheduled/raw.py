@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import itertools
-from typing import List, Optional, Union, Self
+from typing import List, Optional, Self, Union
 
-import pydantic
+from pydantic import Field, TypeAdapter, field_validator, model_validator
 
 from corva.api import Api
 from corva.models import validators
@@ -25,10 +25,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     """
 
     asset_id: int
-    company_id: int = pydantic.Field(..., alias='company')
-    schedule_id: int = pydantic.Field(..., alias='schedule')
-    app_connection_id: int = pydantic.Field(..., alias='app_connection')
-    app_stream_id: int = pydantic.Field(..., alias='app_stream')
+    company_id: int = Field(..., alias='company')
+    schedule_id: int = Field(..., alias='schedule')
+    app_connection_id: int = Field(..., alias='app_connection')
+    app_stream_id: int = Field(..., alias='app_stream')
     scheduler_type: SchedulerType
     has_secrets: bool = False
 
@@ -40,7 +40,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         # flatten the event into 1d array
         flattened_event: List[dict] = list(itertools.chain(*event))
 
-        parsed_raw_events = pydantic.TypeAdapter(List[RawScheduledEvent]).validate_python(flattened_event)
+        parsed_raw_events = (
+            TypeAdapter(List[RawScheduledEvent])
+            .validate_python(flattened_event)
+        )
 
         events = [
             parsed_raw_event.scheduler_type.raw_event.model_validate(sub_event)
@@ -83,9 +86,12 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     merge_metadata: Optional[DataTimeMergeMetadata] = None
 
     # validators
-    _set_schedule_start = pydantic.field_validator('schedule_start')(validators.from_ms_to_s)
+    _set_schedule_start = (
+        field_validator('schedule_start')
+        (validators.from_ms_to_s)
+    )
 
-    @pydantic.model_validator(mode="after")
+    @model_validator(mode="after")
     def set_start_time(self) -> Self:
         """Calculates start_time field if not provided."""
 
@@ -99,8 +105,6 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
         raw_dict = self.model_dump(exclude_none=True, by_alias=True)
         raw_dict["start_time"] = start_time
         raw_dict["end_time"] = end_time
-        # Ensure downstream ScheduledDataTimeEvent (which maps end_time from 'schedule_start' alias)
-        # receives the correct end_time value
         raw_dict["schedule_start"] = end_time
         return RawScheduledDataTimeEvent.model_validate(raw_dict)
 
@@ -120,7 +124,7 @@ class RawScheduledDepthEvent(RawScheduledEvent):
     top_depth: float
     bottom_depth: float
     log_identifier: str
-    interval: float = pydantic.Field(..., alias='depth_milestone')
+    interval: float = Field(..., alias='depth_milestone')
     rerun: Optional[RerunDepth] = None
 
 
@@ -138,4 +142,7 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     rerun: Optional[RerunTime] = None
 
     # validators
-    _set_schedule_start = pydantic.field_validator('schedule_start')(validators.from_ms_to_s)
+    _set_schedule_start = (
+        field_validator('schedule_start')
+        (validators.from_ms_to_s)
+    )

@@ -37,5 +37,4 @@ class RawPartialRerunMergeEvent(CorvaBaseEvent, RawBaseEvent):
 
     @staticmethod
     def from_raw_event(event: Dict[str, Any]) -> List[RawPartialRerunMergeEvent]:
-        # Incoming merge event is a single dict; return as a single-item list for consistency
         return [TypeAdapter(RawPartialRerunMergeEvent).validate_python(event)]

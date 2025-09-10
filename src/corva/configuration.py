@@ -1,8 +1,8 @@
 import datetime
-from typing_extensions import Annotated
 
-from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
 import pydantic_settings
+from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
+from typing_extensions import Annotated
 
 
 def validate_http_url_to_str(v: str) -> str:

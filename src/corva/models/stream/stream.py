@@ -1,9 +1,10 @@
-from typing import List, TYPE_CHECKING, Optional, Sequence
+from typing import TYPE_CHECKING, List, Optional, Sequence
+
+from pydantic import Field
+from typing_extensions import Annotated
 
 from corva.models.base import CorvaBaseEvent
 from corva.models.rerun import RerunDepth, RerunTime
-from pydantic import Field
-from typing_extensions import Annotated
 
 
 class StreamTimeRecord(CorvaBaseEvent):
