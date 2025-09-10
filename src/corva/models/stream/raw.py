@@ -4,7 +4,9 @@ import abc
 import copy
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
+    Dict,
     List,
     Optional,
     Sequence,
@@ -196,17 +198,18 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return self
 
     @model_validator(mode="before")
-    def validate_records(self) -> 'RawStreamEvent':
-        if isinstance(self.get('records'), list):
-            self['records'] = [
+    @classmethod
+    def validate_records(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(data.get('records'), list):
+            data['records'] = [
                 record
-                for record in self['records']
+                for record in data['records']
                 if (
                     (isinstance(record, dict) and record.get("data") is not None)
                     or (hasattr(record, "data") and record.data is not None)
                 )
             ]
-        return self
+        return data
 
 
 class RawStreamTimeEvent(RawStreamEvent):
