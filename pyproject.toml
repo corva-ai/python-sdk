@@ -105,11 +105,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "docs.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "docs.*"
 ignore_errors = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "requests_mock.*"
