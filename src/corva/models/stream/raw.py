@@ -4,9 +4,7 @@ import abc
 import copy
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
-    Dict,
     List,
     Optional,
     Sequence,
@@ -14,7 +12,7 @@ from typing import (
 )
 
 from pydantic import Field, TypeAdapter, create_model, model_validator
-from typing_extensions import Annotated, Self
+from typing_extensions import Annotated
 
 from corva.configuration import SETTINGS
 from corva.models.base import CorvaBaseEvent, RawBaseEvent
@@ -176,7 +174,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return new_records
 
     @model_validator(mode="after")
-    def set_asset_id(self) -> Self:
+    def set_asset_id(self) -> 'RawStreamEvent':
         """Calculates asset_id field."""
 
         records: Sequence[RawBaseRecord] = self.records
@@ -187,7 +185,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return self
 
     @model_validator(mode="after")
-    def set_company_id(self) -> Self:
+    def set_company_id(self) -> 'RawStreamEvent':
         """Calculates company_id field."""
 
         records: Sequence[RawBaseRecord] = self.records
@@ -198,7 +196,7 @@ class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):
         return self
 
     @model_validator(mode="before")
-    def validate_records(self: Dict[str, Any]):
+    def validate_records(self) -> 'RawStreamEvent':
         if isinstance(self.get('records'), list):
             self['records'] = [
                 record
@@ -224,7 +222,7 @@ class RawStreamDepthEvent(RawStreamEvent):
     log_identifier: Optional[str] = None
 
     @model_validator(mode="after")
-    def set_log_identifier(self) -> Self:
+    def set_log_identifier(self) -> 'RawStreamDepthEvent':
         """Calculates log_identifier field."""
 
         metadata: RawMetadata = self.metadata
