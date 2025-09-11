@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2025-09-11
+### Changed
+- Full migration from old `v1`of `pydantic` to `v2`dependencies:
+  - `pydantic` itself: `"pydantic >= 2.0, <3.0"`
+  - `pydantic-settings`: `"pydantic-settings >=2.0, <3.0"`
+
+
 ## [1.15.0] - 2025-09-04
 ### Security
 - Upgraded internal dependency `urllib3` to version `2.5.0`
