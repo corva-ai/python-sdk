@@ -1,17 +1,13 @@
 import json
 import posixpath
 import re
-from http import HTTPStatus
 from typing import List, Optional, Sequence, Union
 
 import requests
-from tenacity import (
-    RetryError,
-    retry,
-    retry_if_result,
-    stop_after_attempt,
-    wait_random_exponential,
-)
+
+from corva.api_utils import get_requests_session, get_retry_strategy
+from corva.configuration import SETTINGS
+from corva.logger import CORVA_LOGGER
 
 
 class Api:
@@ -22,7 +18,6 @@ class Api:
     """
 
     TIMEOUT_LIMITS = (3, 30)  # seconds
-    DEFAULT_MAX_RETRIES = int(0)
 
     def __init__(
         self,
@@ -31,8 +26,13 @@ class Api:
         data_api_url: str,
         api_key: str,
         app_key: str,
-        timeout: Optional[int] = None,
         app_connection_id: Optional[int] = None,
+        max_retries: Optional[int] = 0,
+        backoff_factor_retries: Optional[float] = 1,
+        pool_conn_count: Optional[int] = None,
+        pool_max_size: Optional[int] = None,
+        pool_block: Optional[bool] = None,
+        timeout: Optional[int] = None,
     ):
         self.api_url = api_url
         self.data_api_url = data_api_url
@@ -40,7 +40,16 @@ class Api:
         self.app_key = app_key
         self.app_connection_id = app_connection_id
         self.timeout = timeout or self.TIMEOUT_LIMITS[1]
-        self._max_retries = self.DEFAULT_MAX_RETRIES
+        self._max_retries = max_retries or SETTINGS.MAX_RETRY_COUNT
+        self._session = get_requests_session(
+            retry_strategy=get_retry_strategy(
+                max_retries=self._max_retries,
+                backoff_factor=backoff_factor_retries or SETTINGS.BACKOFF_FACTOR,
+            ),
+            pool_connections_count=(pool_conn_count or SETTINGS.POOL_CONNECTIONS_COUNT),
+            pool_max_size=pool_max_size or SETTINGS.POOL_MAX_SIZE,
+            pool_block=pool_block or SETTINGS.POOL_BLOCK,
+        )
 
     @property
     def default_headers(self):
@@ -55,9 +64,15 @@ class Api:
 
     @max_retries.setter
     def max_retries(self, value: int):
-        if not (0 <= value <= 10):
-            raise ValueError("Values between 0 and 10 are allowed")
-        self._max_retries = value
+        """
+        max_retries are passed into Session object, so modifying it here won't have
+        any effect, raise warning and quit
+        """
+        CORVA_LOGGER.warning(
+            "Do not modify max_retries attribute in existing object, create new Api "
+            "object with your custom max_retries param or set MAX_RETRY_COUNT env "
+            "variable in your environment"
+        )
 
     def get(self, path: str, **kwargs):
         return self._request("GET", path, **kwargs)
@@ -99,15 +114,15 @@ class Api:
 
         return posixpath.join(self.api_url, path)
 
-    @staticmethod
     def _execute_request(
+        self,
         method: str,
         url: str,
         params: Optional[dict],
         data: Optional[dict],
         headers: Optional[dict] = None,
         timeout: Optional[int] = None,
-    ):
+    ) -> requests.Response:
         """Executes the request.
 
         Args:
@@ -116,18 +131,19 @@ class Api:
             data: request body, that will be casted to json.
             params: url query string params.
             headers: additional headers to include in request.
-            timeout: custom request timeout in seconds.
 
         Returns:
             requests.Response instance.
         """
-        return requests.request(
+        _timeout = timeout or self.timeout
+
+        return self._session.request(
             method=method,
             url=url,
             params=params,
             json=data,
             headers=headers,
-            timeout=timeout,
+            timeout=_timeout,
         )
 
     def _request(
@@ -148,22 +164,10 @@ class Api:
           data: request body, that will be casted to json.
           params: url query string params.
           headers: additional headers to include in request.
-          timeout: custom request timeout in seconds.
 
         Returns:
           requests.Response instance.
         """
-        retryable_status_codes = [
-            HTTPStatus.TOO_MANY_REQUESTS,  # 428
-            HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
-            HTTPStatus.BAD_GATEWAY,  # 502
-            HTTPStatus.SERVICE_UNAVAILABLE,  # 503
-            HTTPStatus.GATEWAY_TIMEOUT,  # 504
-        ]
-
-        timeout = timeout or self.timeout
-        self._validate_timeout(timeout)
-
         url = self._get_url(path)
 
         headers = {
@@ -171,47 +175,14 @@ class Api:
             **(headers or {}),
         }
 
-        if self.max_retries > 0:
-            retry_decorator = retry(
-                stop=stop_after_attempt(self.max_retries),
-                wait=wait_random_exponential(multiplier=0.25, max=10),
-                retry=retry_if_result(
-                    lambda r: r.status_code in retryable_status_codes
-                ),
-            )
-            retrying_request = retry_decorator(self._execute_request)
-            try:
-                response = retrying_request(
-                    method=method,
-                    url=url,
-                    params=params,
-                    data=data,
-                    headers=headers,
-                    timeout=timeout,
-                )
-            except RetryError as e:
-                if not e.last_attempt.failed:
-                    response = e.last_attempt.result()
-                else:
-                    raise
-        else:
-            response = self._execute_request(
-                method=method,
-                url=url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=timeout,
-            )
-
-        return response
-
-    def _validate_timeout(self, timeout: int) -> None:
-        if self.TIMEOUT_LIMITS[0] > timeout or self.TIMEOUT_LIMITS[1] < timeout:
-            raise ValueError(
-                f"Timeout must be between {self.TIMEOUT_LIMITS[0]} and "
-                f"{self.TIMEOUT_LIMITS[1]} seconds."
-            )
+        return self._execute_request(
+            method=method,
+            url=url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=timeout,
+        )
 
     def get_dataset(
         self,

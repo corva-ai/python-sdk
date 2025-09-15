@@ -1,9 +1,4 @@
-srcs = src docs/modules/ROOT/examples tests setup.py
-isort = isort --quiet \
-		--skip docs/modules/ROOT/examples/app_types \
-		--skip docs/modules/ROOT/examples/logging/tutorial001.py \
-		$(srcs)
-black = black --skip-string-normalization $(srcs)
+srcs = src docs/modules/ROOT/examples tests
 
 ## all: Run linter and tests.
 .PHONY: all
@@ -16,7 +11,7 @@ help: Makefile
 
 ## install: Install all requirements.
 .PHONY: install
-install: install-corva-sdk install-test install-lint
+install: install-corva-sdk install-dev
 
 ## install-corva-sdk: Install corva-sdk requirements.
 .PHONY: install-corva-sdk
@@ -24,15 +19,11 @@ install-corva-sdk:
 	@pip install -U pip
 	@pip install -U -e .
 
-## install-test: Install test requirements.
-.PHONY: install-test
-install-test: install-corva-sdk
-	@pip install -U -r requirements-test.txt
+## install-dev: Install dev requirements.
+.PHONY: install-dev
+install-dev: install-corva-sdk
+	@pip install -U '.[dev]'
 
-## install-lint: Install lint requirements.
-.PHONY: install-lint
-install-lint: install-test
-	@pip install -U -r requirements-lint.txt
 
 ## test: Run tests.
 .PHONY: test
@@ -66,18 +57,14 @@ coverage-html: test
 ## lint: Run linter.
 .PHONY: lint
 lint:
-	@flake8 $(srcs)
-	@$(black) --check
+	@ruff check $(srcs)
 	@mypy --check-untyped-defs $(srcs)
 
 ## format: Format all files.
 .PHONY: format
 format:
-	@$(isort) --force-single-line-imports
-	@autoflake --remove-all-unused-imports --recursive --remove-unused-variables \
-		--in-place $(srcs)
-	@$(black) --quiet
-	@$(isort)
+	@ruff check --fix $(srcs)
+	@ruff format $(srcs)
 
 ## docs: Generate docs.
 .PHONY: docs
@@ -107,6 +94,7 @@ clean:
 release:
 	@echo "Checkout the master branch."
 	@echo "Update src/version.py with new version."
+	@echo "Update pyproject.toml version"
 	@echo "Update docs/antora.yml 'version' with new version like '1.6.0'."
 	@echo "Update docs/antora-playbook.yml 'content.sources.tags'."
 	@echo "Update CHANGELOG.md."

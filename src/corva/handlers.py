@@ -173,7 +173,6 @@ def stream(
             data_api_url=SETTINGS.DATA_API_ROOT_URL,
             api_key=api_key,
             app_key=SETTINGS.APP_KEY,
-            timeout=None,
             app_connection_id=event.app_connection_id,
         )
 
@@ -282,7 +281,6 @@ def scheduled(
             data_api_url=SETTINGS.DATA_API_ROOT_URL,
             api_key=api_key,
             app_key=SETTINGS.APP_KEY,
-            timeout=None,
             app_connection_id=event.app_connection_id,
         )
 
@@ -392,7 +390,6 @@ def task(
             data_api_url=SETTINGS.DATA_API_ROOT_URL,
             api_key=api_key,
             app_key=SETTINGS.APP_KEY,
-            timeout=None,
             app_connection_id=None,
         )
 

@@ -29,7 +29,7 @@ Documentation for version *{page-version}*.
 
 == Install
 
-{corva-sdk} requires Python 3.8.
+{corva-sdk} requires Python 3.9.
 
 Installation is as simple as:
 
@@ -802,7 +802,7 @@ Here are some guidelines to set up your environment.
 
 What's needed:
 
-* Python 3.8.
+* Python 3.9.
 * Opened terminal inside cloned {corva-sdk} repository.
 
 [source,bash]
