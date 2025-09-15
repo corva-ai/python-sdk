@@ -11,7 +11,7 @@ from corva.models.stream.stream import StreamEvent
 from corva.models.task import TaskEvent
 from corva.service import service
 from corva.service.api_sdk import FakeApiSdk
-from corva.service.cache_sdk import FakeInternalCacheSdk, UserRedisSdk
+from corva.service.cache_sdk import UserRedisSdk
 
 
 class TestClient:
@@ -81,6 +81,5 @@ class TestClient:
             has_secrets=True,
             app_key="test_app_key",
             api_sdk=FakeApiSdk(secrets={"test_app_key": secrets or {}}),
-            cache_sdk=FakeInternalCacheSdk(),
             app=app,
         )

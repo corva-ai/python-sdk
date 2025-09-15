@@ -14,12 +14,12 @@ authors = [
 keywords = ["corva", "sdk"]
 requires-python = ">=3.9,<4.0"
 dependencies = [
-  "fakeredis[lua] >=2.26.2, <2.30.0",
+  "fakeredis >=2.30.0, <2.32.0",
   "pydantic >= 2.0, <3.0",
   "pydantic-settings >=2.0, <3.0",
-  "redis >=5.2.1, <6.0.0",
+  "redis == 6.2.0",
   "requests >=2.32.3, <3.0.0",
-  "urllib3==2.5.0"
+  "urllib3 == 2.5.0"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -40,7 +40,7 @@ dev = [
   "ruff==0.12.11",
   "mypy>=1.10,<2",
   "types-freezegun~=1.1.9",
-  "types-redis~=4.2.4",
+  "types-redis~=4.6.0",
   "types-requests~=2.27.27",
   "coverage==7.6.1",
   "freezegun==1.5.1",

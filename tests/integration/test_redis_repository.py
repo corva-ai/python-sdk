@@ -1,5 +1,4 @@
-import datetime
-from typing import Dict, Iterable, Mapping, Optional, Sequence
+from typing import Dict, Iterable, Mapping, Sequence
 
 import pytest
 import redis
@@ -31,36 +30,6 @@ def redis_adapter(
     )
 
     yield redis_adapter
-
-
-class TestVacuumScript:
-    def test_vacuum(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_adapter.set(key='key1', value='value1', ttl=1)
-        redis_adapter.set(key='key2', value='value2', ttl=-1)
-        redis_adapter.set(key='key3', value='value3', ttl=-2)
-
-        redis_adapter.vacuum(delete_count=1)
-        assert redis_client.hgetall(name=redis_adapter.hash_name) == {
-            'key1': 'value1',
-            'key2': 'value2',
-        }
-        assert set(
-            redis_client.zrange(name=redis_adapter.zset_name, start=0, end=-1)
-        ) == {'key2', 'key1'}
-
-    def test_does_not_fail_for_empty_cache(
-        self,
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-        redis_adapter.vacuum(delete_count=1)
 
 
 class TestGetScript:
@@ -137,43 +106,6 @@ class TestGetScript:
 
         assert redis_adapter.get('k') == '1'
 
-    @pytest.mark.parametrize(
-        'pexpireat, expected',
-        [
-            pytest.param(
-                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-                + 9000,
-                '1',
-                id='Now < expireat',
-            ),
-            pytest.param(
-                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-                + 0,
-                None,
-                id='Now == expireat',
-            ),
-            pytest.param(
-                int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp() * 1000)
-                - 9000,
-                None,
-                id='Now > expireat',
-            ),
-        ],
-    )
-    def test_expiration(
-        self,
-        pexpireat: int,
-        expected: Optional[str],
-        redis_client: redis.Redis,
-        redis_adapter: cache_adapter.RedisRepository,
-    ):
-        assert not redis_client.keys(pattern='*')
-
-        redis_client.zadd(name=redis_adapter.zset_name, mapping={'k': pexpireat})
-        redis_client.hset(redis_adapter.hash_name, mapping={'k': 1})
-
-        assert redis_adapter.get('k') == expected
-
 
 class TestSetScript:
     def test_set(
@@ -209,13 +141,24 @@ class TestSetScript:
         assert not redis_client.keys(pattern='*')
 
         redis_adapter.set_many(data=[('k', 'v', 1)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 1
-        assert redis_client.ttl(redis_adapter.zset_name) == 1
+
+        # TODO: replace code after redis lib will be upgraded with
+        #  definition for .httl(...) do migration
+        # assert redis_client.httl(redis_adapter.hash_name, "k") == [1]
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k"
+        ) == [1]
+
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'k': 'v'}
 
         redis_adapter.set_many(data=[('k', 'v2', 2)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 2
-        assert redis_client.ttl(redis_adapter.zset_name) == 2
+
+        # TODO: replace code after redis lib will be upgraded with
+        #  definition for .httl(...) do migration
+        # assert redis_client.httl(redis_adapter.hash_name, "k") == [2]
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k"
+        ) == [2]
         assert redis_client.hgetall(name=redis_adapter.hash_name) == {'k': 'v2'}
 
     def test_expiration(
@@ -226,8 +169,14 @@ class TestSetScript:
         assert not redis_client.keys(pattern='*')
 
         redis_adapter.set_many(data=[('k', 'v', 1)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 1
-        assert redis_client.ttl(redis_adapter.zset_name) == 1
+
+        # TODO: replace code after redis lib will be upgraded with
+        #  definition for .httl(...) do migration
+        # assert redis_client.httl(redis_adapter.hash_name, "k") == [1]
+
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k"
+        ) == [1]
 
         redis_adapter.delete(key='k')
 
@@ -240,17 +189,31 @@ class TestSetScript:
     ):
         assert not redis_client.keys(pattern='*')
 
-        redis_adapter.set_many(data=[('k1', 'v1', 3), ('k2', 'v2', 1), ('k3', 'v3', 2)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 3
-        assert redis_client.ttl(redis_adapter.zset_name) == 3
+        redis_adapter.set_many(
+            data=[
+                ('k1', 'v1', 3),
+                ('k2', 'v2', 1),
+                ('k3', 'v3', 2)
+            ]
+        )
 
-        redis_adapter.set_many(data=[('k4', 'v4', 1)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 3  # k1 has max expiration
-        assert redis_client.ttl(redis_adapter.zset_name) == 3
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k1"
+        ) == [3]
 
-        redis_adapter.set_many(data=[('k1', 'v1', 0)])
-        assert redis_client.ttl(redis_adapter.hash_name) == 2  # k3 has max expiration
-        assert redis_client.ttl(redis_adapter.zset_name) == 2
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k2"
+        ) == [1]
+
+        assert redis_client.execute_command(
+            "HTTL", redis_adapter.hash_name, "FIELDS", 1, "k3"
+        ) == [2]
+
+        # TODO: replace code after redis lib will be upgraded with
+        #  definition for .httl(...) do migration
+        # assert redis_client.httl(redis_adapter.hash_name, "k1") == [3]
+        # assert redis_client.httl(redis_adapter.hash_name, "k2") == [1]
+        # assert redis_client.httl(redis_adapter.hash_name, "k3") == [2]
 
 
 class TestDelete:
@@ -311,10 +274,10 @@ class TestDeleteAllScript:
 
         redis_adapter.set_many([('k1', 'v1', 1), ('k2', 'v2', 1), ('k3', 'v3', 1)])
         assert (
-            redis_client.exists(redis_adapter.hash_name, redis_adapter.zset_name) == 2
+            redis_client.exists(redis_adapter.hash_name) == 1
         )
 
         redis_adapter.delete_all()
         assert (
-            redis_client.exists(redis_adapter.hash_name, redis_adapter.zset_name) == 0
+            redis_client.exists(redis_adapter.hash_name) == 0
         )

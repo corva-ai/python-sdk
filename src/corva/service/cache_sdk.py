@@ -63,21 +63,18 @@ class UserRedisSdk:
         use_fakes: bool = False,
         redis_client: Optional[redis.Redis] = None,
     ):
-        use_lua_52 = False
         # use either provided redis client, or initialize "fake" client
         # (usually used for tests), or initialize real new client
         if use_fakes:
             redis_client = fakeredis.FakeRedis.from_url(
                 url=redis_dsn, decode_responses=True
             )
-            use_lua_52 = True
         elif redis_client is None:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=hash_name,
             client=cast(redis.Redis, redis_client),
-            use_lua_52=use_lua_52,
         )
         self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
             hash_name=hash_name, client=cast(redis.Redis, redis_client)
@@ -206,31 +203,3 @@ class UserRedisSdk:
             FutureWarning,
         )
         return self.old_cache_repo.exists(*names)
-
-
-class InternalCacheSdkProtocol(Protocol):
-    def vacuum(self, delete_count: int) -> None:
-        ...
-
-
-class InternalRedisSdk:
-    def __init__(
-        self,
-        hash_name: str,
-        redis_client: redis.Redis,
-    ):
-        self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name,
-            client=redis_client,
-        )
-
-    def vacuum(self, delete_count: int) -> None:
-        self.cache_repo.vacuum(delete_count=delete_count)
-
-
-class FakeInternalCacheSdk:
-    def __init__(self):
-        self.vacuum_called = False
-
-    def vacuum(self, delete_count: int) -> None:
-        self.vacuum_called = True
