@@ -65,11 +65,11 @@ class RedisRepository:
         return None if val is None else str(val)
 
     def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
-        if not keys:
-            return {}
-        values = self.client.hmget(self.hash_name, keys)
-        # redis-py returns a list of values where non-existent/expired are None
-        return {k: (None if v is None else str(v)) for k, v in zip(keys, values)}
+        if keys:
+            values = self.client.hmget(self.hash_name, keys)
+            # redis-py returns a list of values where non-existent/expired are None
+            return {k: (None if v is None else str(v)) for k, v in zip(keys, values)}
+        return {}
 
     def get_all(self) -> Dict[str, str]:
         raw = self.client.hgetall(self.hash_name)
