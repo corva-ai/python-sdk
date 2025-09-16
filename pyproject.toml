@@ -88,6 +88,7 @@ omit = [
   "docs/modules/ROOT/examples/logging/tutorial003.py",
   "docs/modules/ROOT/examples/logging/tutorial004.py",
   "docs/modules/ROOT/examples/logging/tutorial005.py",
+  "docs/modules/ROOT/examples/testing/tutorial008.py",
   "docs/modules/ROOT/examples/followable/tutorial001.py",
   "src/corva/__init__.py",
   "src/version.py",
