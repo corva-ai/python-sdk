@@ -518,16 +518,13 @@ def test_cache_connection_limit(requests_mock: RequestsMocker, context):
 
     @scheduled
     def scheduled_app(event, api, cache):
-        """
-        try to open additional connection to cache
-        """
         pool = cache.cache_repo.client.connection_pool
-        # save existing connections
-        pool._in_use_connections = pool._available_connections
-        pool._available_connections = []
-        # try to init new connection, this line should fail with redis
-        # ConnectionError exception
-        pool.get_connection("_")
+
+        # unique single conn
+        pool.get_connection()
+
+        # Should be an error here since `max_connections=1` is passed to a Redis client
+        pool.get_connection()
 
     requests_mock.post(requests_mock_lib.ANY)
 
