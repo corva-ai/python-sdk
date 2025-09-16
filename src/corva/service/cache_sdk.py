@@ -13,6 +13,7 @@ import fakeredis
 import redis
 
 from corva import cache_adapter
+from corva.cache_adapter import HashMigrator
 
 
 class UserCacheSdkProtocol(Protocol):
@@ -73,6 +74,12 @@ class UserRedisSdk:
             hash_name=hash_name,
             client=cast(redis.Redis, redis_client),
         )
+
+        try:
+            migrator = HashMigrator(hash_name, redis_client)
+            migrator.run()
+        except Exception:
+            pass
 
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
         self.cache_repo.set(key=key, value=value, ttl=ttl)

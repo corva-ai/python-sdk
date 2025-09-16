@@ -19,7 +19,8 @@ dependencies = [
   "pydantic-settings >=2.0, <3.0",
   "redis == 6.2.0",
   "requests >=2.32.3, <3.0.0",
-  "urllib3 == 2.5.0"
+  "urllib3 == 2.5.0",
+  "semver==3.0.4"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",

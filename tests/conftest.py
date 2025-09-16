@@ -11,11 +11,11 @@ from corva.validate_app_init import read_manifest
 
 @pytest.fixture(scope='function', autouse=True)
 def clean_real_redis():
-    redis_client = Redis.from_url(url=SETTINGS.CACHE_URL)
+    redis_client = Redis.from_url(url=SETTINGS.CACHE_URL, decode_responses=True)
 
     redis_client.flushall()
 
-    yield
+    yield redis_client
 
     redis_client.flushall()
 
