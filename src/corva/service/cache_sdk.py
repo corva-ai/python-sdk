@@ -1,15 +1,12 @@
 import datetime
-import warnings
 from typing import (
     Dict,
-    List,
     Optional,
     Protocol,
     Sequence,
     Tuple,
     Union,
     cast,
-    overload,
 )
 
 import fakeredis
@@ -76,9 +73,6 @@ class UserRedisSdk:
             hash_name=hash_name,
             client=cast(redis.Redis, redis_client),
         )
-        self.old_cache_repo = cache_adapter.DeprecatedRedisAdapter(
-            hash_name=hash_name, client=cast(redis.Redis, redis_client)
-        )
 
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
         self.cache_repo.set(key=key, value=value, ttl=ttl)
@@ -103,103 +97,17 @@ class UserRedisSdk:
     def get_all(self) -> Dict[str, str]:
         return self.cache_repo.get_all()
 
-    @overload
     def delete(self, *, key: str) -> None:
-        ...
-
-    @overload
-    def delete(self, keys: List[str], name: Optional[str] = ...) -> int:
-        ...
-
-    def delete(
-        self,
-        keys=None,
-        name=None,
-        *,
-        key=None,
-    ):
-        if keys is not None:
-            warnings.warn(
-                "The `keys` and `name` kwargs of `delete` cache method are deprecated "
-                "and will be removed from corva in the next major version. "
-                "Use `key` kwarg instead.",
-                FutureWarning,
-            )
-            return self.old_cache_repo.hdel(keys=keys, name=name)
-
-        if key is not None:
-            self.cache_repo.delete(key=key)
-            return None
-
-        raise TypeError("Bad arguments")
+        self.cache_repo.delete(key=key)
 
     def delete_many(self, keys: Sequence[str]) -> None:
         self.cache_repo.delete_many(keys=keys)
 
-    @overload
     def delete_all(self) -> None:
-        ...
+        self.cache_repo.delete_all()
 
-    @overload
-    def delete_all(self, *names: str):
-        ...
 
-    def delete_all(self, *names):
-        if names:
-            warnings.warn(
-                "`delete_all` with `*names` parameter cache method is deprecated and"
-                " will be removed from corva in the next major version. Use "
-                "`delete_many` cache method instead.",
-                FutureWarning,
-            )
-            return self.old_cache_repo.delete(*names)
-        else:
-            self.cache_repo.delete_all()
 
-    def store(self, **kwargs):
-        warnings.warn(
-            "`store` cache method is deprecated and will be removed from corva in the"
-            " next major version. Use `set` or `set_many` cache methods instead.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.hset(**kwargs)
 
-    def load(self, **kwargs):
-        warnings.warn(
-            "`load` cache method is deprecated and will be removed from corva in the"
-            " next major version. Use `get` or `get_many` cache methods instead.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.hget(**kwargs)
 
-    def load_all(self, **kwargs):
-        warnings.warn(
-            "`load_all` cache method is deprecated and will be removed from corva in "
-            "the next major version. Use `get_all` cache method instead.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.hgetall(**kwargs)
 
-    def ttl(self, **kwargs):
-        warnings.warn(
-            "`ttl` cache method is deprecated and will be removed from corva in the"
-            " next major version.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.ttl(**kwargs)
-
-    def pttl(self, **kwargs):
-        warnings.warn(
-            "`pttl` cache method is deprecated and will be removed from corva in the"
-            " next major version.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.pttl(**kwargs)
-
-    def exists(self, *names):
-        warnings.warn(
-            "`exists` cache method is deprecated and will be removed from corva in the"
-            " next major version.",
-            FutureWarning,
-        )
-        return self.old_cache_repo.exists(*names)
