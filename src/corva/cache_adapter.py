@@ -91,6 +91,20 @@ class HashMigrator:
         self.zset_name = f'{hash_name}.EXPIREAT'
         self.client = client
 
+    def _proper_redis_server_version(self) -> bool:
+        # Require Redis 7.4+ for per-field TTL commands
+        redis_version_str = self.client.info(section="server").get("redis_version")
+
+        if not redis_version_str:
+            return False
+
+        server_version = semver.Version.parse(version=redis_version_str)
+
+        if server_version < self.MINIMUM_ALLOWED_REDIS_SERVER:
+            return False
+
+        return True
+
     def run(self) -> bool:
         """Migrate from old Lua+ZSET per-field TTL to Redis built-in per-field TTL.
 
@@ -109,14 +123,7 @@ class HashMigrator:
         if not self.client.exists(self.zset_name):
             return False
 
-        # Require Redis 7.4+ for per-field TTL commands
-        redis_version_str = self.client.info(section="server").get("redis_version")
-        if not redis_version_str:
-            return False
-
-        server_version = semver.Version.parse(version=redis_version_str)
-
-        if server_version < self.MINIMUM_ALLOWED_REDIS_SERVER:
+        if not self._proper_redis_server_version():
             return False
 
         from corva import Logger
