@@ -9,8 +9,6 @@ from typing import (
 import redis
 import semver
 
-from version import VERSION
-
 
 class CacheRepositoryProtocol(Protocol):
     def set(
@@ -91,10 +89,12 @@ class HashMigrator:
         server_version = semver.Version.parse(version=redis_version_str)
 
         if server_version < self.MINIMUM_ALLOWED_REDIS_SERVER:
+            from importlib.metadata import version
+
             raise RuntimeError(
                 f"Redis server version {server_version} "
                 f"less then {self.MINIMUM_ALLOWED_REDIS_SERVER} -> "
-                f"incompatible with used python SDK version `{VERSION}`")
+                f"incompatible with used python SDK version `{version('corva-sdk')}`")
 
     def run(self) -> bool:
         """Prepare parallel new-style cache while keeping legacy structures.
