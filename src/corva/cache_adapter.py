@@ -9,6 +9,8 @@ from typing import (
 import redis
 import semver
 
+from version import VERSION
+
 
 class CacheRepositoryProtocol(Protocol):
     def set(
@@ -16,33 +18,24 @@ class CacheRepositoryProtocol(Protocol):
         key: str,
         value: str,
         ttl: int,
-    ) -> None:
-        ...
+    ) -> None: ...
 
-    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None:
-        ...
+    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None: ...
 
-    def get(self, key: str) -> Optional[str]:
-        ...
+    def get(self, key: str) -> Optional[str]: ...
 
-    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
-        ...
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]: ...
 
-    def get_all(self) -> Dict[str, str]:
-        ...
+    def get_all(self) -> Dict[str, str]: ...
 
-    def delete(self, key: str) -> None:
-        ...
+    def delete(self, key: str) -> None: ...
 
-    def delete_many(self, keys: Sequence[str]) -> None:
-        ...
+    def delete_many(self, keys: Sequence[str]) -> None: ...
 
-    def delete_all(self) -> None:
-        ...
+    def delete_all(self) -> None: ...
 
 
 class RedisRepository:
-
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
         self.client = client
@@ -85,45 +78,49 @@ class RedisRepository:
 
 class HashMigrator:
     MINIMUM_ALLOWED_REDIS_SERVER = semver.Version(major=7, minor=4, patch=0)
+    NEW_HASH_PREFIX = "/new"
 
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
-        self.zset_name = f'{hash_name}.EXPIREAT'
+        self.zset_name = f"{hash_name}.EXPIREAT"
         self.client = client
 
-    def _proper_redis_server_version(self) -> bool:
+    def check_redis_server_version(self) -> None:
         # Require Redis 7.4+ for per-field TTL commands
-        redis_version_str = self.client.info(section="server").get("redis_version")
-
-        if not redis_version_str:
-            return False
-
+        redis_version_str = self.client.info(section="server")["redis_version"]
         server_version = semver.Version.parse(version=redis_version_str)
 
         if server_version < self.MINIMUM_ALLOWED_REDIS_SERVER:
-            return False
-
-        return True
+            raise RuntimeError(
+                f"Redis server version {server_version} "
+                f"less then {self.MINIMUM_ALLOWED_REDIS_SERVER} -> "
+                f"incompatible with used python SDK version `{VERSION}`")
 
     def run(self) -> bool:
-        """Migrate from old Lua+ZSET per-field TTL to Redis built-in per-field TTL.
+        """Prepare parallel new-style cache while keeping legacy structures.
 
-        Safe to call multiple times. Behavior:
-          - If the legacy ZSET ("<hash>.EXPIREAT") does not exist → return False.
-          - Requires Redis server version >= 7.4.0 (built-in per-field hash TTLs).
+        Behavior (idempotent):
+          - If legacy ZSET ("<hash>.EXPIREAT") does not exist → return False.
+          - Requires Redis server >= 7.4.0 for per-field hash TTL commands.
+          - Creates a new hash key with prefix NEW_HASH_PREFIX + hash_name.
           - For each zset member (field → absolute ms deadline):
-              • Past deadline → HDEL the field.
-              • Future deadline → set per-field TTL via HPEXPIRE (milliseconds).
-          - After processing completes: PERSIST the hash and DELETE the legacy ZSET.
+              • Past deadline → do not copy field to new hash
+              • Future deadline → copy current value from legacy hash to new hash and
+                set per-field TTL via HPEXPIRE (milliseconds) on the new hash.
+          - Legacy hash and legacy ZSET are preserved intact to allow rollback.
 
-        Returns True if migration was attempted on a supported server (i.e., legacy
-        ZSET existed); otherwise False.
+        Returns True if the new-style cache was created during this run
         """
+        self.check_redis_server_version()
+
         # Legacy structure must exist; otherwise nothing to do
         if not self.client.exists(self.zset_name):
             return False
 
-        if not self._proper_redis_server_version():
+        new_hash_name = self.NEW_HASH_PREFIX + self.hash_name
+
+        # If new hash already exists, consider migration already done
+        if self.client.exists(new_hash_name):
             return False
 
         from corva import Logger
@@ -132,27 +129,35 @@ class HashMigrator:
         sec, micro = self.client.time()
         now_ms = int(sec) * 1000 + int(micro) // 1000
 
-        # Queue all operations in a single pipeline and execute once
+        # Create pipeline for batched ops on the NEW hash
         pipe = self.client.pipeline()
 
+        # Ensure the new hash key exists
+        # Copy fields from old hash into the new one based on ZSET deadlines
         for field, score in self.client.zscan_iter(self.zset_name):
             # score is the absolute deadline in ms
             deadline_ms = int(float(score))
-            ttl_ms = deadline_ms - now_ms
-            if ttl_ms <= 0:
-                pipe.hdel(self.hash_name, field)
-            else:
-                pipe.execute_command(
-                    "HPEXPIRE", self.hash_name, ttl_ms, "FIELDS", 1, field
-                )
+            remaining_ttl_ms = deadline_ms - now_ms
+            if remaining_ttl_ms <= 0:
+                continue
+
+            value = self.client.hget(self.hash_name, field)
+            if value is None:
+                # No value to copy (may have been removed already)
+                continue
+
+            # Write to the new hash and apply per-field TTL there
+            pipe.hset(new_hash_name, field, value)
+            pipe.execute_command(
+                "HPEXPIRE", new_hash_name, remaining_ttl_ms, "FIELDS", 1, field
+            )
 
         # Execute queued field operations (no-op if nothing queued)
         pipe.execute()
 
-        # Remove key-level TTL and legacy ZSET now that fields are migrated
-        self.client.persist(self.hash_name)
-        self.client.delete(self.zset_name)
-
-        # Migration was attempted because legacy ZSET existed
-        Logger.info(f"Migration success: hash_name = '{self.hash_name}'")
+        # Do NOT modify/persist legacy structures; keep them for rollback
+        Logger.info(
+            f"Migration prepared parallel cache: legacy='{self.hash_name}', "
+            f"new='{new_hash_name}'"
+        )
         return True

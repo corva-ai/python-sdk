@@ -17,32 +17,24 @@ from corva.cache_adapter import HashMigrator
 
 
 class UserCacheSdkProtocol(Protocol):
-    def set(self, key: str, value: str, ttl: int = ...) -> None:
-        ...
+    def set(self, key: str, value: str, ttl: int = ...) -> None: ...
 
     def set_many(
         self, data: Sequence[Union[Tuple[str, str], Tuple[str, str, int]]]
-    ) -> None:
-        ...
+    ) -> None: ...
 
-    def get(self, key: str) -> Optional[str]:
-        ...
+    def get(self, key: str) -> Optional[str]: ...
 
-    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
-        ...
+    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]: ...
 
-    def get_all(self) -> Dict[str, str]:
-        ...
+    def get_all(self) -> Dict[str, str]: ...
 
     # TODO: remove asterisk in v2 - it was added for backward compatibility
-    def delete(self, *, key: str) -> None:
-        ...
+    def delete(self, *, key: str) -> None: ...
 
-    def delete_many(self, keys: Sequence[str]) -> None:
-        ...
+    def delete_many(self, keys: Sequence[str]) -> None: ...
 
-    def delete_all(self) -> None:
-        ...
+    def delete_all(self) -> None: ...
 
 
 class UserRedisSdk:
@@ -70,16 +62,14 @@ class UserRedisSdk:
         elif redis_client is None:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
+        migrator = HashMigrator(hash_name, redis_client)
+        migrator.run()
+        hash_name = HashMigrator.NEW_HASH_PREFIX + hash_name
+
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=hash_name,
             client=cast(redis.Redis, redis_client),
         )
-
-        try:
-            migrator = HashMigrator(hash_name, redis_client)
-            migrator.run()
-        except Exception:
-            pass
 
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
         self.cache_repo.set(key=key, value=value, ttl=ttl)
@@ -112,9 +102,3 @@ class UserRedisSdk:
 
     def delete_all(self) -> None:
         self.cache_repo.delete_all()
-
-
-
-
-
-
