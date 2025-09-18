@@ -1,36 +1,12 @@
 from typing import (
     Dict,
     Optional,
-    Protocol,
     Sequence,
     Tuple,
 )
 
 import redis
 import semver
-
-
-class CacheRepositoryProtocol(Protocol):
-    def set(
-        self,
-        key: str,
-        value: str,
-        ttl: int,
-    ) -> None: ...
-
-    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None: ...
-
-    def get(self, key: str) -> Optional[str]: ...
-
-    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]: ...
-
-    def get_all(self) -> Dict[str, str]: ...
-
-    def delete(self, key: str) -> None: ...
-
-    def delete_many(self, keys: Sequence[str]) -> None: ...
-
-    def delete_all(self) -> None: ...
 
 
 class RedisRepository:
