@@ -33,7 +33,7 @@ def _is_otel_handler(handler: logging.Handler) -> bool:
     """
     try:
         module = getattr(handler.__class__, "__module__", "") or ""
-        name = handler.__class__.__name__ or ""
+        name = handler.__class__.__name__
         ident = f"{module}.{name}".lower()
         return ("otel" in ident) or ("opentelemetry" in ident)
     except Exception:
