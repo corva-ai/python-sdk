@@ -26,6 +26,10 @@ def _is_truthy(value: Optional[str]) -> bool:
     return str(value).strip().lower() in {"1", "true", "t", "yes", "y", "on"}
 
 
+# Cache at import time: env rarely changes at runtime
+_OTEL_X_LOG_SENDING_DISABLED = _is_truthy(os.getenv("OTEL_X_LOG_SENDING_DISABLED"))
+
+
 def _is_otel_handler(handler: logging.Handler) -> bool:
     """Best-effort detection of OTel log sending handlers.
 
@@ -259,7 +263,7 @@ class LoggingContext(contextlib.ContextDecorator):
         # If OTel log sending is enabled and an OTel handler exists on root,
         # attach it to CORVA_LOGGER as well so propagation can remain disabled
         # (avoids AWS root duplication) while still exporting logs via OTel.
-        if not _is_truthy(os.getenv("OTEL_X_LOG_SENDING_DISABLED")):
+        if not _OTEL_X_LOG_SENDING_DISABLED:
             try:
                 for h in _gather_otel_handlers_from_root():
                     if h not in handlers:
