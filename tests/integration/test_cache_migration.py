@@ -71,7 +71,6 @@ def test_migrate_creates_new_hash_and_keeps_legacy(
 
 
 def test_migrate_is_idempotent(redis_client, current_redis_server_time):
-    redis_client.delete(hash_name, zset_name)
 
     redis_client.hset(hash_name, mapping={"k": "v"})
     redis_client.zadd(zset_name, mapping={"k": current_redis_server_time + 5000})
@@ -87,7 +86,6 @@ def test_migrate_is_idempotent(redis_client, current_redis_server_time):
 def test_migrate_large_batch_processes_all_fields(
     redis_client, current_redis_server_time
 ):
-    redis_client.delete(hash_name, zset_name)
 
     # Create 300 fields to exceed default batch=256
     mapping: Dict[str, str] = {f"k{i}": f"v{i}" for i in range(300)}
