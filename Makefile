@@ -112,7 +112,7 @@ up-cache:
 	-d \
 	--name python-sdk-redis \
 	-p 6379:6379 \
-	redis:7.4.3		# The same as on PROD, at least at the 15.09.2025 moment
+	redis:7.4.3
 
 # down-cache: Stop Redis.
 .PHONY: down-cache
