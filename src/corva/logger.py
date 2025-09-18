@@ -1,7 +1,6 @@
 import contextlib
-import os
 import logging
-import logging.config
+import os
 import sys
 import time
 from typing import Optional
