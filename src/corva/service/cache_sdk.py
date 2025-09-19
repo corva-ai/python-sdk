@@ -1,6 +1,6 @@
 import datetime
 from functools import wraps
-from typing import Dict, Optional, Protocol, Sequence, Tuple, Union, cast
+from typing import Callable, Dict, Optional, Protocol, Sequence, Tuple, Union, cast
 
 import fakeredis
 import redis
@@ -27,6 +27,42 @@ class UserCacheSdkProtocol(Protocol):
     def delete_many(self, keys: Sequence[str]) -> None: ...
 
     def delete_all(self) -> None: ...
+
+
+def ensure_migrated_once(method: Callable) -> Callable:
+    """
+    Decorator that ensures a specific migration process
+     has been executed before invoking the decorated method. Once the
+     migration is attempted, the decorator marks it as complete,
+     regardless of the outcome, to optimize subsequent calls.
+
+    Args:
+        method (Callable): The `UserRedisSdk.method` to be decorated.
+
+    Returns:
+        Callable: The wrapped method which ensures that the migration process
+        has been attempted before execution.
+    """
+
+    @wraps(method)
+    def wrapper(self: 'UserRedisSdk', *args, **kwargs):
+
+        if not self._migrated:
+            migrator = cache_adapter.HashMigrator(
+                hash_name=self._original_hash_name,
+                client=self._redis_client,
+            )
+            try:
+                migrator.run()
+            finally:
+                # Regardless of outcome (True/False), mark as attempted to avoid
+                # repeating the check on every call. Subsequent calls operate on
+                # the new-hash namespace.
+                self._migrated = True
+
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class UserRedisSdk:
@@ -63,42 +99,6 @@ class UserRedisSdk:
             hash_name=cache_adapter.HashMigrator.NEW_HASH_PREFIX + hash_name,
             client=self._redis_client,
         )
-
-    @staticmethod
-    def ensure_migrated_once(method):
-        """
-        A static method decorator that ensures a specific migration process
-         has been executed before invoking the decorated method. Once the
-         migration is attempted, the decorator marks it as complete,
-         regardless of the outcome, to optimize subsequent calls.
-
-        Args:
-            method (Callable): The `UserRedisSdk.method` to be decorated.
-
-        Returns:
-            Callable: The wrapped method which ensures that the migration process
-            has been attempted before execution.
-        """
-
-        @wraps(method)
-        def wrapper(self, *args, **kwargs):
-
-            if not self._migrated:
-                migrator = cache_adapter.HashMigrator(
-                    hash_name=self._original_hash_name,
-                    client=self._redis_client,
-                )
-                try:
-                    migrator.run()
-                finally:
-                    # Regardless of outcome (True/False), mark as attempted to avoid
-                    # repeating the check on every call. Subsequent calls operate on
-                    # the new-hash namespace.
-                    self._migrated = True
-
-            return method(self, *args, **kwargs)
-
-        return wrapper
 
     @ensure_migrated_once
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
