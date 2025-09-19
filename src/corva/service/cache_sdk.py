@@ -1,19 +1,11 @@
 import datetime
-from typing import (
-    Dict,
-    Optional,
-    Protocol,
-    Sequence,
-    Tuple,
-    Union,
-    cast,
-)
+from functools import wraps
+from typing import Dict, Optional, Protocol, Sequence, Tuple, Union, cast
 
 import fakeredis
 import redis
 
 from corva import cache_adapter
-from corva.cache_adapter import HashMigrator
 
 
 class UserCacheSdkProtocol(Protocol):
@@ -62,18 +54,57 @@ class UserRedisSdk:
         elif redis_client is None:
             redis_client = redis.Redis.from_url(url=redis_dsn, decode_responses=True)
 
-        migrator = HashMigrator(hash_name, redis_client)
-        migrator.run()
-        hash_name = HashMigrator.NEW_HASH_PREFIX + hash_name
+        # Lazy migration: do not run on init; defer until first read/write/delete
+        self._original_hash_name = hash_name
+        self._redis_client = cast(redis.Redis, redis_client)
+        self._migrated = False
 
         self.cache_repo = cache_adapter.RedisRepository(
-            hash_name=hash_name,
-            client=cast(redis.Redis, redis_client),
+            hash_name=cache_adapter.HashMigrator.NEW_HASH_PREFIX + hash_name,
+            client=self._redis_client,
         )
 
+    @staticmethod
+    def ensure_migrated_once(method):
+        """
+        A static method decorator that ensures a specific migration process
+         has been executed before invoking the decorated method. Once the
+         migration is attempted, the decorator marks it as complete,
+         regardless of the outcome, to optimize subsequent calls.
+
+        Args:
+            method (Callable): The `UserRedisSdk.method` to be decorated.
+
+        Returns:
+            Callable: The wrapped method which ensures that the migration process
+            has been attempted before execution.
+        """
+
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+
+            if not self._migrated:
+                migrator = cache_adapter.HashMigrator(
+                    hash_name=self._original_hash_name,
+                    client=self._redis_client,
+                )
+                try:
+                    migrator.run()
+                finally:
+                    # Regardless of outcome (True/False), mark as attempted to avoid
+                    # repeating the check on every call. Subsequent calls operate on
+                    # the new-hash namespace.
+                    self._migrated = True
+
+            return method(self, *args, **kwargs)
+
+        return wrapper
+
+    @ensure_migrated_once
     def set(self, key: str, value: str, ttl: int = SIXTY_DAYS) -> None:
         self.cache_repo.set(key=key, value=value, ttl=ttl)
 
+    @ensure_migrated_once
     def set_many(
         self, data: Sequence[Union[Tuple[str, str], Tuple[str, str, int]]]
     ) -> None:
@@ -85,20 +116,26 @@ class UserRedisSdk:
         ]
         self.cache_repo.set_many(data=prepared_data)
 
+    @ensure_migrated_once
     def get(self, key: str) -> Optional[str]:
         return self.cache_repo.get(key=key)
 
+    @ensure_migrated_once
     def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
         return self.cache_repo.get_many(keys=keys)
 
+    @ensure_migrated_once
     def get_all(self) -> Dict[str, str]:
         return self.cache_repo.get_all()
 
+    @ensure_migrated_once
     def delete(self, *, key: str) -> None:
         self.cache_repo.delete(key=key)
 
+    @ensure_migrated_once
     def delete_many(self, keys: Sequence[str]) -> None:
         self.cache_repo.delete_many(keys=keys)
 
+    @ensure_migrated_once
     def delete_all(self) -> None:
         self.cache_repo.delete_all()

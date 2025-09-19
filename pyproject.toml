@@ -17,7 +17,7 @@ dependencies = [
   "fakeredis >=2.30.0, <2.32.0",
   "pydantic >= 2.0, <3.0",
   "pydantic-settings >=2.0, <3.0",
-  "redis == 6.2.0",
+  "redis == 6.4.0",
   "requests >=2.32.3, <3.0.0",
   "urllib3 == 2.5.0",
   "semver==3.0.4"
