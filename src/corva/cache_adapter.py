@@ -52,7 +52,7 @@ class RedisRepository:
 
 class HashMigrator:
     MINIMUM_ALLOWED_REDIS_SERVER = semver.Version(major=7, minor=4, patch=0)
-    NEW_HASH_PREFIX = "/new"
+    NEW_HASH_PREFIX = "migrated/"
 
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
@@ -89,17 +89,19 @@ class HashMigrator:
         """
         self.check_redis_server_version()
 
+        from corva import Logger
+
         # Legacy structure must exist; otherwise nothing to do
         if not self.client.exists(self.zset_name):
+            Logger.info("Legacy cache does not exist, skip migration")
             return False
 
         new_hash_name = self.NEW_HASH_PREFIX + self.hash_name
 
         # If new hash already exists, consider migration already done
         if self.client.exists(new_hash_name):
+            Logger.info("New cache key already exists, skip migration")
             return False
-
-        from corva import Logger
 
         # Current server time in ms
         sec, micro = self.client.time()
@@ -133,7 +135,7 @@ class HashMigrator:
 
         # Do NOT modify/persist legacy structures; keep them for rollback
         Logger.info(
-            f"Migration prepared parallel cache: legacy='{self.hash_name}', "
+            f"Migration done in parallel cache way: legacy='{self.hash_name}', "
             f"new='{new_hash_name}'"
         )
         return True

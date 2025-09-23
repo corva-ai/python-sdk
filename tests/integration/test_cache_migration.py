@@ -5,9 +5,9 @@ import pytest
 
 from corva.cache_adapter import HashMigrator
 
-hash_name = "/corva/well/test"
+hash_name = "corva/well/test"
 zset_name = f"{hash_name}.EXPIREAT"
-new_hash_name = "/new" + hash_name
+new_hash_name = "migrated/" + hash_name
 
 
 @pytest.fixture(scope="function")

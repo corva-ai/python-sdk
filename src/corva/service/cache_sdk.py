@@ -6,6 +6,7 @@ import fakeredis
 import redis
 
 from corva import cache_adapter
+from corva.configuration import SETTINGS
 
 
 class UserCacheSdkProtocol(Protocol):
@@ -46,14 +47,12 @@ def ensure_migrated_once(method: Callable) -> Callable:
 
     @wraps(method)
     def wrapper(self: 'UserRedisSdk', *args, **kwargs):
+        if SETTINGS.CACHE_SKIP_MIGRATION:
+            return method(self, *args, **kwargs)
 
         if not self._migrated:
-            migrator = cache_adapter.HashMigrator(
-                hash_name=self._original_hash_name,
-                client=self._redis_client,
-            )
             try:
-                migrator.run()
+                self.migrator.run()
             finally:
                 # Regardless of outcome (True/False), mark as attempted to avoid
                 # repeating the check on every call. Subsequent calls operate on
@@ -97,6 +96,10 @@ class UserRedisSdk:
 
         self.cache_repo = cache_adapter.RedisRepository(
             hash_name=cache_adapter.HashMigrator.NEW_HASH_PREFIX + hash_name,
+            client=self._redis_client,
+        )
+        self.migrator = cache_adapter.HashMigrator(
+            hash_name=self._original_hash_name,
             client=self._redis_client,
         )
 
