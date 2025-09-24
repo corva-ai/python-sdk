@@ -20,6 +20,7 @@ class Settings(pydantic_settings.BaseSettings):
 
     # cache
     CACHE_URL: str
+    CACHE_SKIP_MIGRATION: int = 0
 
     # logger
     LOG_LEVEL: str = 'INFO'

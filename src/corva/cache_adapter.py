@@ -1,380 +1,141 @@
-import itertools
-from datetime import timedelta
 from typing import (
     Dict,
-    List,
     Optional,
-    Protocol,
     Sequence,
     Tuple,
-    Union,
-    cast,
-    overload,
 )
 
 import redis
-
-
-class CacheRepositoryProtocol(Protocol):
-    def set(
-        self,
-        key: str,
-        value: str,
-        ttl: int,
-    ) -> None:
-        ...
-
-    def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None:
-        ...
-
-    def get(self, key: str) -> Optional[str]:
-        ...
-
-    def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
-        ...
-
-    def get_all(self) -> Dict[str, str]:
-        ...
-
-    def delete(self, key: str) -> None:
-        ...
-
-    def delete_many(self, keys: Sequence[str]) -> None:
-        ...
-
-    def delete_all(self) -> None:
-        ...
+import semver
 
 
 class RedisRepository:
-    # Deletes M expired keys from the hash.
-    #
-    # Complexity: O(log(N) + M) + O(M) + O(M * log(N)) where N is the size of hash
-    # and M is the number of elements deleted. For constant M (e.g., 3) the complexity
-    # is O(log(N)).
-    #
-    # KEYS:
-    #      hash_name.
-    #      zset_name.
-    #
-    # ARGV:
-    #      delete_count.
-    #
-    # Returns: nil.
-    LUA_VACUUM_SCRIPT = """
-    local hash_name = KEYS[1]
-    local zset_name = KEYS[2]
-    local delete_count = tonumber(ARGV[1])
-    local time = redis.call('TIME')
-    local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
-
-    local keys_to_delete = redis.call(
-            'ZRANGEBYSCORE', zset_name, '-inf', pnow, 'LIMIT', 0, delete_count
-    )
-
-    if not next(keys_to_delete) then
-        return
-    end
-
-    redis.call('HDEL', hash_name, unpack(keys_to_delete))
-    redis.call('ZREM', zset_name, unpack(keys_to_delete))
-    """
-
-    # Gets either all or only requested keys and values from hash.
-    #
-    # Gets all keys if no keys specified in ARGV.
-    #
-    # Complexity: O(N) where N is the number of requested keys.
-    #
-    # KEYS:
-    #     hash_name.
-    #     zset_name.
-    #
-    # Optional ARGV:
-    #     key1.
-    #     key2.
-    #     ...
-    #
-    # Returns: list of names and values for non-expired keys.
-    LUA_GET_SCRIPT = """
-    local hash_name = KEYS[1]
-    local zset_name = KEYS[2]
-    local time = redis.call('TIME')
-    local pnow = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
-
-    local keys = ARGV
-    if next(ARGV) == nil then
-        keys = redis.call('HKEYS', hash_name)
-    end
-
-    if not next(keys) then
-        return {}
-    end
-
-    local hash = redis.call('HMGET', hash_name, unpack(keys))
-
-    local result = {}
-
-    for i, key in ipairs(keys) do
-        local pexpireat = redis.call('ZSCORE', zset_name, key)
-
-        if not pexpireat or pnow < tonumber(pexpireat) then
-            table.insert(result, key)
-            table.insert(result, hash[i])
-        end
-    end
-
-    return result
-    """
-
-    # Inserts list of keys-value-expiration tuples into the hash.
-    #
-    # Complexity: O(N * log(M)), where N is the number of inserted elements and
-    # M is the hash size.
-    #
-    # 1. If hash does not exist, it will automatically create one.
-    # 2. If the field already exists, its value and ttl will be overwritten.
-    # 3. Hash and zset ttl is always set to the biggest field's ttl.
-    # 4. When the field expires it may be deleted by:
-    #    - Manually invoking `vacuum` script.
-    #    - Redis automatically deleting expired hash (see note #3).
-    #
-    # KEYS:
-    #     hash_name.
-    #     zset_name.
-    #
-    # ARGV:
-    #     key.
-    #     value.
-    #     ttl.
-    #     ...
-    #
-    # Returns: nil.
-    LUA_SET_SCRIPT = """
-    local hash_name = KEYS[1]
-    local zset_name = KEYS[2]
-    local time = redis.call('TIME')
-
-    for i, _ in ipairs(ARGV) do
-        if i % 3 == 1 then
-            local key = ARGV[i]
-            local value = ARGV[i + 1]
-            local ttl = ARGV[i + 2]
-            local pexpireat = (
-                (tonumber(time[1]) + ttl) * 1000 + math.floor(tonumber(time[2]) / 1000)
-            )
-
-            redis.call('HSET', hash_name, key, value)
-            redis.call('ZADD', zset_name, pexpireat, key)
-
-        end
-    end
-
-    local max_pexpireat = tonumber(redis.call(
-            'ZREVRANGEBYSCORE', zset_name, '+inf', '-inf', 'WITHSCORES', 'LIMIT', 0, 1
-    )[2])
-
-    redis.call('PEXPIREAT', hash_name, max_pexpireat)
-    redis.call('PEXPIREAT', zset_name, max_pexpireat)
-    """
-
-    # Deletes all data from hash and zset.
-    #
-    # Complexity: O(N) where N is the hash size.
-    #
-    # KEYS:
-    #     hash_name.
-    #     zset_name.
-    #
-    # Returns: nil.
-    LUA_DELETE_ALL_SCRIPT = """
-    local hash_name = KEYS[1]
-    local zset_name = KEYS[2]
-
-    redis.call('DEL', hash_name, zset_name)
-    """
-
-    def __init__(self, hash_name: str, client: redis.Redis, use_lua_52: bool = False):
+    def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
-        self.zset_name = f'{hash_name}.EXPIREAT'
         self.client = client
-        self.lua_set_many = self.client.register_script(self.LUA_SET_SCRIPT)
-
-        lua_get_script = self.LUA_GET_SCRIPT
-        if use_lua_52:
-            # Hack for tests to work with fakeredis, as it uses Lua version > 5.1.
-            # In Lua 5.1, unpack was a global, but in 5.2 it's been moved to
-            # table.unpack.
-            lua_get_script = self.LUA_GET_SCRIPT.replace('unpack', 'table.unpack')
-        self.lua_get = self.client.register_script(lua_get_script)
-
-        self.lua_vacuum = self.client.register_script(self.LUA_VACUUM_SCRIPT)
-        self.lua_delete_all = self.client.register_script(self.LUA_DELETE_ALL_SCRIPT)
 
     def set(self, key: str, value: str, ttl: int) -> None:
         self.set_many(data=[(key, value, ttl)])
 
     def set_many(self, data: Sequence[Tuple[str, str, int]]) -> None:
-        self.lua_set_many(
-            keys=[self.hash_name, self.zset_name],
-            args=list(itertools.chain.from_iterable(data)),
-        )
+        pipe = self.client.pipeline()
+        for key, value, ttl in data:
+            pipe.hset(self.hash_name, key, value)
+            pipe.execute_command("HEXPIRE", self.hash_name, ttl, "FIELDS", 1, key)
+        pipe.execute()
 
     def get(self, key: str) -> Optional[str]:
-        return self.get_many(keys=[key]).get(key)
+        val = self.client.hget(self.hash_name, key)
+        return None if val is None else str(val)
 
     def get_many(self, keys: Sequence[str]) -> Dict[str, Optional[str]]:
-        data = self.lua_get(keys=[self.hash_name, self.zset_name], args=list(keys))
-
-        data = dict(zip(data[::2], data[1::2]))
-
-        for missing_key in set(keys) - set(data):
-            data[missing_key] = None
-
-        return data
+        if keys:
+            values = self.client.hmget(self.hash_name, keys)
+            # redis-py returns a list of values where non-existent/expired are None
+            return {k: (None if v is None else str(v)) for k, v in zip(keys, values)}
+        return {}
 
     def get_all(self) -> Dict[str, str]:
-        return cast(Dict[str, str], self.get_many(keys=[]))
+        raw = self.client.hgetall(self.hash_name)
+        return dict(raw)
 
     def delete(self, key: str) -> None:
-        self.delete_many(keys=[key])
+        self.client.hdel(self.hash_name, key)
 
     def delete_many(self, keys: Sequence[str]) -> None:
-        self.set_many(data=[(key, '', -1) for key in keys])
+        if keys:
+            self.client.hdel(self.hash_name, *keys)
 
     def delete_all(self) -> None:
-        self.lua_delete_all(keys=[self.hash_name, self.zset_name])
-
-    def vacuum(self, delete_count: int) -> None:
-        self.lua_vacuum(keys=[self.hash_name, self.zset_name], args=[delete_count])
+        self.client.delete(self.hash_name)
 
 
-class DeprecatedRedisAdapter:
-    """Expands basic redis functionality
+class HashMigrator:
+    MINIMUM_ALLOWED_REDIS_SERVER = semver.Version(major=7, minor=4, patch=0)
+    NEW_HASH_PREFIX = "migrated/"
 
-    Serves the purpose of adding custom logic on top of basic redis functions
-    (e.g. adding expiry to hset, which is not available out of the box).
-    """
-
-    DEFAULT_EXPIRY: timedelta = timedelta(days=60)
-    REDIS_STORED_VALUE_TYPE = Union[bytes, str, int, float]
-
-    def __init__(
-        self,
-        hash_name: str,
-        client: redis.Redis,
-    ):
-        self.default_name = hash_name
+    def __init__(self, hash_name: str, client: redis.Redis):
+        self.hash_name = hash_name
+        self.zset_name = f"{hash_name}.EXPIREAT"
         self.client = client
 
-        self.client.ping()
+    def check_redis_server_version(self) -> None:
+        # Require Redis 7.4+ for per-field TTL commands
+        redis_version_str = self.client.info(section="server")["redis_version"]
+        server_version = semver.Version.parse(version=redis_version_str)
 
-    @overload
-    def hset(
-        self,
-        name: Optional[str] = ...,
-        key: str = ...,
-        value: REDIS_STORED_VALUE_TYPE = ...,
-        mapping: None = ...,
-        expiry: Union[int, timedelta, None] = ...,
-    ) -> int:
-        ...
+        if server_version < self.MINIMUM_ALLOWED_REDIS_SERVER:
+            from importlib.metadata import version
 
-    @overload
-    def hset(
-        self,
-        name: Optional[str] = ...,
-        key: None = ...,
-        value: None = ...,
-        mapping: Dict[str, REDIS_STORED_VALUE_TYPE] = ...,
-        expiry: Union[int, timedelta, None] = ...,
-    ) -> int:
-        ...
+            raise RuntimeError(
+                f"Redis server version {server_version} "
+                f"less then {self.MINIMUM_ALLOWED_REDIS_SERVER} -> "
+                f"incompatible with used python SDK version `{version('corva-sdk')}`")
 
-    def hset(
-        self,
-        name=None,
-        key=None,
-        value=None,
-        mapping=None,
-        expiry=DEFAULT_EXPIRY,
-    ) -> int:
-        """Stores the data in cache
+    def run(self) -> bool:
+        """Prepare parallel new-style cache while keeping legacy structures.
 
-        params:
-         key: key, which will contain the data
-         value: data to be saved
-         mapping: dict of key:data pairs to be saved
-         expiry: time in seconds for when data will be deleted from cache
-            expiration is reset with every hset call
-            expiration can be disabled by setting expiry to None
-        returns: number of inserted elements
+        Behavior (idempotent):
+          - If legacy ZSET ("<hash>.EXPIREAT") does not exist → return False.
+          - Requires Redis server >= 7.4.0 for per-field hash TTL commands.
+          - Creates a new hash key with prefix NEW_HASH_PREFIX + hash_name.
+          - For each zset member (field → absolute ms deadline):
+              • Past deadline → do not copy field to new hash
+              • Future deadline → copy current value from legacy hash to new hash and
+                set per-field TTL via HPEXPIRE (milliseconds) on the new hash.
+          - Legacy hash and legacy ZSET are preserved intact to allow rollback.
+
+        Returns True if the new-style cache was created during this run
         """
+        self.check_redis_server_version()
 
-        name = name or self.default_name
+        from corva import Logger
 
-        n_set = self.client.hset(name=name, key=key, value=value, mapping=mapping)
+        # Legacy structure must exist; otherwise nothing to do
+        if not self.client.exists(self.zset_name):
+            Logger.info("Legacy cache does not exist, skip migration")
+            return False
 
-        if expiry is None and self.pttl(name=name) > 0:
-            self.client.persist(name=name)
+        new_hash_name = self.NEW_HASH_PREFIX + self.hash_name
 
-        if expiry is not None:
-            self.client.expire(name=name, time=expiry)
+        # If new hash already exists, consider migration already done
+        if self.client.exists(new_hash_name):
+            Logger.info("New cache key already exists, skip migration")
+            return False
 
-        return n_set
+        # Current server time in ms
+        sec, micro = self.client.time()
+        now_ms = int(sec) * 1000 + int(micro) // 1000
 
-    def hget(
-        self, key: str, name: Optional[str] = None
-    ) -> Union[REDIS_STORED_VALUE_TYPE, None]:
-        """Loads data from cache
+        # Create pipeline for batched ops on the NEW hash
+        pipe = self.client.pipeline()
 
-        params:
-         key: key to load data from
-        returns: stored data
-        """
+        # Ensure the new hash key exists
+        # Copy fields from old hash into the new one based on ZSET deadlines
+        for field, score in self.client.zscan_iter(self.zset_name):
+            # score is the absolute deadline in ms
+            deadline_ms = int(float(score))
+            remaining_ttl_ms = deadline_ms - now_ms
+            if remaining_ttl_ms <= 0:
+                continue
 
-        name = name or self.default_name
-        return self.client.hget(name=name, key=key)
+            value = self.client.hget(self.hash_name, field)
+            if value is None:
+                # No value to copy (may have been removed already)
+                continue
 
-    def hgetall(
-        self, name: Optional[str] = None
-    ) -> Dict[str, Union[REDIS_STORED_VALUE_TYPE]]:
-        """Loads all data from cache"""
+            # Write to the new hash and apply per-field TTL there
+            pipe.hset(new_hash_name, field, value)
+            pipe.execute_command(
+                "HPEXPIRE", new_hash_name, remaining_ttl_ms, "FIELDS", 1, field
+            )
 
-        name = name or self.default_name
-        return self.client.hgetall(name=name)
+        # Execute queued field operations (no-op if nothing queued)
+        pipe.execute()
 
-    def hdel(self, keys: List[str], name: Optional[str] = None) -> int:
-        """Deletes some data from cache
-
-        params:
-         keys: list of keys to delete
-        returns: number of deleted elements
-        """
-
-        name = name or self.default_name
-        return self.client.hdel(name, *keys)
-
-    def delete(self, *names: List[str]) -> int:
-        """Deletes all data from cache"""
-
-        delete_names = names or [self.default_name]
-        return self.client.delete(*delete_names)
-
-    def ttl(self, name: Optional[str] = None) -> int:
-        """Returns the number of seconds until expiration"""
-
-        name = name or self.default_name
-        return self.client.ttl(name=name)
-
-    def pttl(self, name: Optional[str] = None) -> int:
-        """Returns the number of milliseconds until expiration"""
-
-        name = name or self.default_name
-        return self.client.pttl(name=name)
-
-    def exists(self, *names: List[str]) -> int:
-        """Returns whether there is data in cache"""
-
-        exists_names = names or [self.default_name]
-        return self.client.exists(*exists_names)
+        # Do NOT modify/persist legacy structures; keep them for rollback
+        Logger.info(
+            f"Migration done in parallel cache way: legacy='{self.hash_name}', "
+            f"new='{new_hash_name}'"
+        )
+        return True
