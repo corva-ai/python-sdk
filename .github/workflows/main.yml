@@ -93,38 +93,38 @@ jobs:
             echo "All jobs passed successfully."
           fi
 
-  deploy:
-    name: Build and publish to PyPI
-
-    needs: check-static-and-test-status
-
-    if: contains(github.ref, 'tags/v')
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: pip install -U setuptools wheel build
-
-      - name: Build the package
-        run: python -m build
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.2
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+#  deploy:
+#    name: Build and publish to PyPI
+#
+#    needs: check-static-and-test-status
+#
+#    if: contains(github.ref, 'tags/v')
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - uses: actions/setup-python@v2
+#        with:
+#          python-version: 3.9
+#
+#      - name: Install dependencies
+#        run: pip install -U setuptools wheel build
+#
+#      - name: Build the package
+#        run: python -m build
+#
+#      - name: Publish to PyPI
+#        uses: pypa/gh-action-pypi-publish@v1.4.2
+#        with:
+#          user: __token__
+#          password: ${{ secrets.PYPI_API_TOKEN }}
 
   docs:
     name: Build and publish docs
 
-    needs: deploy
+    needs: check-static-and-test-status
 
     runs-on: ubuntu-latest
 
