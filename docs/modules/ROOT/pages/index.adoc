@@ -281,11 +281,6 @@ It will try to re-send the same request again with exponential back-off for HTTP
 * 503
 * 504
 
-[source,python]
-----
-include::example$api/tutorial008.py[]
-----
-
 [#cache]
 == Cache
 Apps might need to share some data between invokes.
