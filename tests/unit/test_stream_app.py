@@ -41,7 +41,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
                 log_type=LogType.time,
             ),
-        ).dict()
+        ).model_dump()
     ]
 
     result_event: StreamEvent = stream_app(event, context)[0]
@@ -77,7 +77,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
             [
                 RawTimeRecord(
@@ -113,7 +113,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
             [
                 RawTimeRecord(
@@ -149,7 +149,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
             [
                 RawTimeRecord(
@@ -191,7 +191,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
             [
                 RawTimeRecord(
@@ -233,7 +233,7 @@ def test_set_attr_in_raw_stream_event(attr, value, context):
                         },
                         log_type=LogType.depth,
                     ),
-                ).dict()
+                ).model_dump()
             ],
             [
                 RawDepthRecord(
@@ -288,7 +288,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
                 log_type=LogType.time,
             ),
-        ).dict()
+        ).model_dump()
     ]
 
     filter_patch = mocker.patch.object(
@@ -330,7 +330,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
         ),
         (
@@ -364,7 +364,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                         },
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ],
         ),
         (
@@ -392,7 +392,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                         },
                         log_type=LogType.depth,
                     ),
-                ).dict()
+                ).model_dump()
             ],
         ),
         (
@@ -426,7 +426,7 @@ def test_early_return_if_no_records_after_filtering(mocker: MockerFixture, conte
                         },
                         log_type=LogType.depth,
                     ),
-                ).dict()
+                ).model_dump()
             ],
         ),
     ],
@@ -467,7 +467,7 @@ def test_set_cached_max_record_value_should_not_fail_lambda(
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
                 log_type=LogType.time,
             ),
-        ).dict()
+        ).model_dump()
     ]
 
     patch = mocker.patch.object(
@@ -501,7 +501,7 @@ def test_log_if_unable_to_set_cached_max_record_value(
                 apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=int())},
                 log_type=LogType.time,
             ),
-        ).dict()
+        ).model_dump()
     ]
 
     patch = mocker.patch.object(
@@ -538,7 +538,7 @@ def test_custom_log_handler(context, capsys):
         ),
     )
 
-    app([event.dict()], context)
+    app([event.model_dump()], context)
 
     captured = capsys.readouterr()
 
@@ -579,7 +579,7 @@ def test_rerun_time_cast_from_ms_to_s(time: int, expected: int, context):
         ),
     )
 
-    result_event: StreamTimeEvent = app([event.dict()], context)[0]
+    result_event: StreamTimeEvent = app([event.model_dump()], context)[0]
 
     assert result_event.rerun is not None  # for mypy to not complain.
     assert result_event.rerun.range.start == expected
@@ -609,7 +609,7 @@ def test_stream_depth_app_gets_log_identifier(context):
                 log_type=LogType.depth,
                 log_identifier='log_identifier',
             ),
-        ).dict()
+        ).model_dump()
     ]
 
     result_event: StreamDepthEvent = stream_app(event, context)[0]

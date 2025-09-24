@@ -37,7 +37,7 @@ raw_scheduled_natural_time_event = RawScheduledNaturalTimeEvent(
     company=int(),
     scheduler_type=SchedulerType.natural_time,
     schedule_start=int(),
-).dict(
+).model_dump(
     by_alias=True,
     exclude_unset=True,
 )
@@ -53,7 +53,7 @@ raw_scheduled_depth_event = RawScheduledDepthEvent(
     top_depth=0.0,
     bottom_depth=1.0,
     log_identifier='',
-).dict(
+).model_dump(
     by_alias=True,
     exclude_unset=True,
 )
@@ -72,7 +72,7 @@ stream_time_event = RawStreamTimeEvent(
         apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
         log_type=LogType.time,
     ),
-).dict()
+).model_dump()
 
 stream_depth_event = RawStreamDepthEvent(
     records=[
@@ -89,9 +89,9 @@ stream_depth_event = RawStreamDepthEvent(
         log_type=LogType.depth,
         log_identifier='log_identifier',
     ),
-).dict()
+).model_dump()
 
-task_event = RawTaskEvent(task_id='0', version=2).dict()
+task_event = RawTaskEvent(task_id='0', version=2).model_dump()
 
 
 @pytest.mark.parametrize(

@@ -26,6 +26,6 @@ def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
         'key_with_custom_expiry': 'value_2',
     }
 
-    time.sleep(1)  # <.>
+    time.sleep(1 + 0.01)  # <.>
 
     assert cache.get_all() == {'key': 'value_1'}  # <.>

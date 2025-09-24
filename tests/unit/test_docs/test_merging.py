@@ -58,7 +58,7 @@ def test_tutorial001(context):
                         apps={SETTINGS.APP_KEY: RawAppMetadata(app_connection_id=1)},
                         log_type=LogType.time,
                     ),
-                ).dict()
+                ).model_dump()
             ]
         )
         timestamp += 3
@@ -89,7 +89,7 @@ def test_tutorial002(context, time_ranges, flat):
                 app_stream=int(),
                 company=int(),
                 scheduler_type=SchedulerType.data_time,
-            ).dict(by_alias=True, exclude_unset=True)
+            ).model_dump(by_alias=True, exclude_unset=True)
         )
     if not flat:
         event = [event]

@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any, Sequence
 
 import pydantic
+from pydantic import ConfigDict
 
 
 class AppType(str, Enum):
@@ -14,9 +15,7 @@ class AppType(str, Enum):
 
 
 class CorvaBaseEvent(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.allow
-        allow_mutation = False
+    model_config = ConfigDict(extra="allow", frozen=False)
 
 
 class RawBaseEvent(abc.ABC):

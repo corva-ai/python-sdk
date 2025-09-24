@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
-version = "1.15.0"
+version = "2.0.0"
 license = { text = "The Unlicense" }
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
@@ -14,11 +14,13 @@ authors = [
 keywords = ["corva", "sdk"]
 requires-python = ">=3.9,<4.0"
 dependencies = [
-  "fakeredis[lua] >=2.26.2, <2.30.0",
-  "pydantic >=1.8.2, <2.0.0",
-  "redis >=5.2.1, <6.0.0",
+  "fakeredis >=2.30.0, <2.32.0",
+  "pydantic >= 2.0, <3.0",
+  "pydantic-settings >=2.0, <3.0",
+  "redis == 6.4.0",
   "requests >=2.32.3, <3.0.0",
-  "urllib3==2.5.0"
+  "urllib3 == 2.5.0",
+  "semver==3.0.4"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -27,7 +29,8 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
-  "Topic :: Software Development :: Libraries"
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed"
 ]
 
 [project.urls]
@@ -36,9 +39,9 @@ Homepage = "https://github.com/corva-ai/python-sdk"
 [project.optional-dependencies]
 dev = [
   "ruff==0.12.11",
-  "mypy==0.950",
+  "mypy>=1.10,<2",
   "types-freezegun~=1.1.9",
-  "types-redis~=4.2.4",
+  "types-redis~=4.6.0",
   "types-requests~=2.27.27",
   "coverage==7.6.1",
   "freezegun==1.5.1",
@@ -48,9 +51,13 @@ dev = [
 ]
 
 [tool.setuptools]
+include-package-data = true
 package-dir = { "" = "src" }
 packages = { find = { where = ["src"] } }
 py-modules = ["plugin"]
+
+[tool.setuptools.package-data]
+corva = ["py.typed"]
 
 [project.entry-points."pytest11"]
 corva = "plugin"
@@ -82,6 +89,7 @@ omit = [
   "docs/modules/ROOT/examples/logging/tutorial003.py",
   "docs/modules/ROOT/examples/logging/tutorial004.py",
   "docs/modules/ROOT/examples/logging/tutorial005.py",
+  "docs/modules/ROOT/examples/testing/tutorial008.py",
   "docs/modules/ROOT/examples/followable/tutorial001.py",
   "src/corva/__init__.py",
   "src/version.py",
@@ -89,10 +97,10 @@ omit = [
 ]
 
 [tool.mypy]
-exclude = '''(?x)(
-    ^docs/modules/ROOT/examples/cache/tutorial004\.py$
-    | ^docs/modules/ROOT/examples/cache/tutorial005\.py$
-)'''
+python_version = "3.9"
+mypy_path = "src"
+explicit_package_bases = true
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = "setuptools.*"
@@ -100,6 +108,7 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "docs.*"
+ignore_errors = true
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
@@ -122,3 +131,6 @@ ignore_missing_imports = true
 module = "fakeredis.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true

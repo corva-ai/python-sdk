@@ -1,15 +1,26 @@
 import datetime
 
-import pydantic
+import pydantic_settings
+from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
+from typing_extensions import Annotated
 
 
-class Settings(pydantic.BaseSettings):
+def validate_http_url_to_str(v: str) -> str:
+    TypeAdapter(AnyHttpUrl).validate_python(v)
+    return v
+
+
+HttpUrlStr = Annotated[str, BeforeValidator(validate_http_url_to_str)]
+
+
+class Settings(pydantic_settings.BaseSettings):
     # api
-    API_ROOT_URL: pydantic.AnyHttpUrl
-    DATA_API_ROOT_URL: pydantic.AnyHttpUrl
+    API_ROOT_URL: HttpUrlStr
+    DATA_API_ROOT_URL: HttpUrlStr
 
     # cache
     CACHE_URL: str
+    CACHE_SKIP_MIGRATION: int = 0
 
     # logger
     LOG_LEVEL: str = 'INFO'
@@ -33,4 +44,4 @@ class Settings(pydantic.BaseSettings):
     BACKOFF_FACTOR: float = 1.0
 
 
-SETTINGS = Settings()
+SETTINGS = Settings()  # type: ignore[call-arg]

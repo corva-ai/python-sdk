@@ -3,7 +3,8 @@ from __future__ import annotations
 import itertools
 from typing import List, Optional, Union
 
-import pydantic
+from pydantic import Field, TypeAdapter, field_validator, model_validator
+from typing_extensions import Self
 
 from corva.api import Api
 from corva.models import validators
@@ -25,10 +26,10 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
     """
 
     asset_id: int
-    company_id: int = pydantic.Field(..., alias='company')
-    schedule_id: int = pydantic.Field(..., alias='schedule')
-    app_connection_id: int = pydantic.Field(..., alias='app_connection')
-    app_stream_id: int = pydantic.Field(..., alias='app_stream')
+    company_id: int = Field(..., alias='company')
+    schedule_id: int = Field(..., alias='schedule')
+    app_connection_id: int = Field(..., alias='app_connection')
+    app_stream_id: int = Field(..., alias='app_stream')
     scheduler_type: SchedulerType
     has_secrets: bool = False
 
@@ -40,12 +41,13 @@ class RawScheduledEvent(CorvaBaseEvent, RawBaseEvent):
         # flatten the event into 1d array
         flattened_event: List[dict] = list(itertools.chain(*event))
 
-        parsed_raw_events = pydantic.parse_obj_as(
-            List[RawScheduledEvent], flattened_event
+        parsed_raw_events = (
+            TypeAdapter(List[RawScheduledEvent])
+            .validate_python(flattened_event)
         )
 
         events = [
-            parsed_raw_event.scheduler_type.raw_event.parse_obj(sub_event)
+            parsed_raw_event.scheduler_type.raw_event.model_validate(sub_event)
             for parsed_raw_event, sub_event in zip(parsed_raw_events, flattened_event)
         ]
 
@@ -85,24 +87,27 @@ class RawScheduledDataTimeEvent(RawScheduledEvent):
     merge_metadata: Optional[DataTimeMergeMetadata] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        validators.from_ms_to_s
+    _set_schedule_start = (
+        field_validator('schedule_start')
+        (validators.from_ms_to_s)
     )
 
-    @pydantic.root_validator(pre=False, skip_on_failure=True)
-    def set_start_time(cls, values: dict) -> dict:
-        """Calculates start_time field."""
+    @model_validator(mode="after")
+    def set_start_time(self) -> Self:
+        """Calculates start_time field if not provided."""
 
-        values["start_time"] = int(values["schedule_start"] - values["interval"] + 1)
-        return values
+        if self.start_time is None:
+            self.start_time = int(self.schedule_start - self.interval + 1)
+        return self
 
     def rebuild_with_modified_times(
         self, start_time: int, end_time: int
     ) -> RawScheduledDataTimeEvent:
-        raw_dict = self.dict(exclude_none=True, by_alias=True)
+        raw_dict = self.model_dump(exclude_none=True, by_alias=True)
         raw_dict["start_time"] = start_time
         raw_dict["end_time"] = end_time
-        return RawScheduledDataTimeEvent.parse_obj(raw_dict)
+        raw_dict["schedule_start"] = end_time
+        return RawScheduledDataTimeEvent.model_validate(raw_dict)
 
 
 class RawScheduledDepthEvent(RawScheduledEvent):
@@ -120,7 +125,7 @@ class RawScheduledDepthEvent(RawScheduledEvent):
     top_depth: float
     bottom_depth: float
     log_identifier: str
-    interval: float = pydantic.Field(..., alias='depth_milestone')
+    interval: float = Field(..., alias='depth_milestone')
     rerun: Optional[RerunDepth] = None
 
 
@@ -138,6 +143,7 @@ class RawScheduledNaturalTimeEvent(RawScheduledEvent):
     rerun: Optional[RerunTime] = None
 
     # validators
-    _set_schedule_start = pydantic.validator('schedule_start', allow_reuse=True)(
-        validators.from_ms_to_s
+    _set_schedule_start = (
+        field_validator('schedule_start')
+        (validators.from_ms_to_s)
     )

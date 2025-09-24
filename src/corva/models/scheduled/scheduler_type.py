@@ -1,5 +1,5 @@
 import enum
-from typing import Type
+from typing import Type, cast
 
 import pydantic
 
@@ -37,4 +37,4 @@ class SchedulerType(enum.Enum):
             type(self).data_time: ScheduledDataTimeEvent,
             type(self).data_depth_milestone: ScheduledDepthEvent,
         }
-        return mapping[self]
+        return cast(Type[pydantic.BaseModel], mapping[self])

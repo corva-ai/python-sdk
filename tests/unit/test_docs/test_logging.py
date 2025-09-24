@@ -30,7 +30,7 @@ def test_tutorial001(app_runner, mocker: MockerFixture, capsys):
 
 
 def test_tutorial002(context, mocker: MockerFixture, capsys, caplog):
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id='0', version=2).model_dump()
     event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(

@@ -16,7 +16,7 @@ from corva.models.task import RawTaskEvent, TaskEvent
         [400, None, 'fail'],
         [
             200,
-            TaskEvent(asset_id=int(), company_id=int()).dict(),
+            TaskEvent(asset_id=int(), company_id=int()).model_dump(),
             'success',
         ],
     ),
@@ -32,7 +32,7 @@ def test_lambda_raises_if_unable_to_get_task_event(
     def task_app(event, api):
         return True
 
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'), status_code=status_code, json=json
@@ -63,7 +63,7 @@ def test_lambda_raises_if_user_app_fails(
     mocker: MockerFixture,
     requests_mock: RequestsMocker,
 ):
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         RawTaskEvent,
@@ -99,7 +99,7 @@ def test_lambda_succeeds_if_unable_to_update_task_data(context, mocker: MockerFi
     def task_app(event, api):
         return True
 
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         RawTaskEvent,
@@ -139,11 +139,11 @@ def test_task_app_succeeds(
     def task_app(event, api):
         return app_result
 
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     get_mock = requests_mock.get(
         re.compile('/v2/tasks/0'),
-        json=TaskEvent(asset_id=int(), company_id=int()).dict(),
+        json=TaskEvent(asset_id=int(), company_id=int()).model_dump(),
     )
     put_mock = requests_mock.put(re.compile('/v2/tasks/0/success'))
 
@@ -161,7 +161,7 @@ def test_log_if_unable_to_update_task_data(context, mocker: MockerFixture, capsy
     def task_app(event, api):
         return True
 
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         RawTaskEvent,
@@ -189,7 +189,7 @@ def test_log_if_user_app_fails(
     requests_mock: RequestsMocker,
     capsys,
 ):
-    event = RawTaskEvent(task_id='0', version=2).dict()
+    event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         RawTaskEvent,
@@ -213,7 +213,7 @@ def test_custom_log_handler(context, mocker: MockerFixture, capsys):
     def app(event, api):
         Logger.info('Info message!')
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id='0', version=2).model_dump()
     event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(

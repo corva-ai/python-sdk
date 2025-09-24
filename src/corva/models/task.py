@@ -36,7 +36,7 @@ class RawTaskEvent(CorvaBaseEvent, RawBaseEvent):
 
     @staticmethod
     def from_raw_event(event: dict) -> List[RawTaskEvent]:
-        return [pydantic.parse_obj_as(RawTaskEvent, event)]
+        return [pydantic.TypeAdapter(RawTaskEvent).validate_python(event)]
 
     def get_task_event(self, api: Api) -> TaskEvent:
         response = api.get(path=f'v2/tasks/{self.task_id}')

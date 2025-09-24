@@ -44,7 +44,7 @@ def test_scheduled_logging(context, capsys, mocker: MockerFixture):
         app(
             [
                 [
-                    event.dict(
+                    event.model_dump(
                         by_alias=True,
                         exclude_unset=True,
                     )
@@ -82,7 +82,7 @@ def test_stream_logging(context, capsys):
     )
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        app([event.dict()], context)
+        app([event.model_dump()], context)
 
     assert (
         capsys.readouterr().out
@@ -96,7 +96,7 @@ def test_task_logging(context, capsys, mocker: MockerFixture):
     def app(event, api):
         Logger.warning('Hello, World!')
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id='0', version=2).model_dump()
     event = TaskEvent(asset_id=0, company_id=int())
 
     mocker.patch.object(
@@ -149,7 +149,7 @@ def test_custom_log_level(log_level, expected, context, capsys, mocker: MockerFi
     mocker.patch.object(SETTINGS, 'LOG_LEVEL', log_level)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        app([event.dict()], context)
+        app([event.model_dump()], context)
 
     assert capsys.readouterr().out == expected
 
@@ -183,7 +183,7 @@ def test_each_app_invoke_has_separate_logger(context, capsys, mocker: MockerFixt
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', 1)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        app([event.dict()] * 2, context)
+        app([event.model_dump()] * 2, context)
 
     expected = (
         '2021-01-02T03:04:05.678Z qwerty WARNING ASSET=0 AC=1 | Hello, World!\n'
@@ -229,7 +229,7 @@ def test_long_message_gets_truncated(
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_SIZE', max_message_size)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        app([event.dict()], context)
+        app([event.model_dump()], context)
 
     assert capsys.readouterr().out == expected
 
@@ -278,7 +278,7 @@ def test_max_message_count_reached(
     mocker.patch.object(SETTINGS, 'LOG_THRESHOLD_MESSAGE_COUNT', max_message_count)
 
     with freezegun.freeze_time(datetime.datetime(2021, 1, 2, 3, 4, 5, 678910)):
-        app([event.dict()], context)
+        app([event.model_dump()], context)
 
     assert capsys.readouterr().out == expected
 
@@ -288,7 +288,7 @@ def test_lambda_exceptions_are_logged(context, capsys, mocker: MockerFixture):
     def app(event, api):
         pass
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         CorvaContext,
@@ -311,7 +311,7 @@ def test_lambda_exceptions_are_logged_using_custom_log_handler(
     def app(event, api):
         pass
 
-    raw_event = RawTaskEvent(task_id='0', version=2).dict()
+    raw_event = RawTaskEvent(task_id='0', version=2).model_dump()
 
     mocker.patch.object(
         CorvaContext,

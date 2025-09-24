@@ -28,14 +28,13 @@ class ScheduledDataTimeEvent(ScheduledEvent):
         rerun: rerun metadata.
     """
 
+    model_config = pydantic.ConfigDict(populate_by_name=True)
+
     asset_id: int
     company_id: int
     start_time: int
     end_time: int = pydantic.Field(..., alias='schedule_start')
     rerun: Optional[RerunTime] = None
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 class ScheduledDepthEvent(ScheduledEvent):

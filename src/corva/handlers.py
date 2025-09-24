@@ -36,7 +36,7 @@ from corva.models.stream.stream import StreamEvent
 from corva.models.task import RawTaskEvent, TaskEvent, TaskStatus
 from corva.service import service
 from corva.service.api_sdk import CachingApiSdk, CorvaApiSdk
-from corva.service.cache_sdk import FakeInternalCacheSdk, InternalRedisSdk, UserRedisSdk
+from corva.service.cache_sdk import UserRedisSdk
 from corva.validate_app_init import validate_app_type_context
 
 StreamEventT = TypeVar("StreamEventT", bound=StreamEvent)
@@ -187,9 +187,6 @@ def stream(
         user_cache_sdk = UserRedisSdk(
             hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
         )
-        internal_cache_sdk = InternalRedisSdk(
-            hash_name=hash_name, redis_client=redis_client
-        )
 
         records = event.filter_records(
             old_max_record_value=event.get_cached_max_record_value(cache=user_cache_sdk)
@@ -199,8 +196,8 @@ def stream(
             # we've got the duplicate data if there are no records left after filtering
             return
 
-        app_event = event.metadata.log_type.event.parse_obj(
-            event.copy(update={"records": records}, deep=True)
+        app_event = event.metadata.log_type.event.model_validate(
+            event.copy(update={"records": records}, deep=True).model_dump()
         )
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -222,7 +219,6 @@ def stream(
                     api_sdk=CorvaApiSdk(api_adapter=api),
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
                 ),
-                cache_sdk=internal_cache_sdk,
                 app=functools.partial(
                     cast(Callable[[StreamEvent, Api, UserRedisSdk], Any], func),
                     app_event,
@@ -295,16 +291,13 @@ def scheduled(
         user_cache_sdk = UserRedisSdk(
             hash_name=hash_name, redis_dsn=SETTINGS.CACHE_URL, redis_client=redis_client
         )
-        internal_cache_sdk = InternalRedisSdk(
-            hash_name=hash_name, redis_client=redis_client
-        )
 
         if isinstance(event, RawScheduledDataTimeEvent) and event.merge_metadata:
             event = event.rebuild_with_modified_times(
                 event.merge_metadata.start_time, event.merge_metadata.end_time
             )
 
-        app_event = event.scheduler_type.event.parse_obj(event)
+        app_event = event.scheduler_type.event.model_validate(event.model_dump())
 
         with LoggingContext(
             aws_request_id=aws_request_id,
@@ -327,10 +320,9 @@ def scheduled(
                         api_sdk=CorvaApiSdk(api_adapter=api),
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
-                    cache_sdk=internal_cache_sdk,
                     app=functools.partial(
                         cast(Callable[[ScheduledEvent, Api, UserRedisSdk], Any], func),
-                        app_event,
+                        cast(ScheduledEvent, app_event),
                         api,
                         user_cache_sdk,
                     ),
@@ -380,7 +372,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: redis.Redis,
+        redis_client: Optional[redis.Redis] = None, # noqa, for safe reasons
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}
@@ -418,7 +410,6 @@ def task(
                         api_sdk=CorvaApiSdk(api_adapter=api),
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
-                    cache_sdk=FakeInternalCacheSdk(),
                     app=functools.partial(
                         cast(Callable[[TaskEvent, Api], Any], func), app_event, api
                     ),
@@ -505,14 +496,6 @@ def partial_rerun_merge(
             app_key=SETTINGS.APP_KEY,
             app_connection_id=event.data.rerun_app_connection_id,
         )
-        internal_cache_hash_name = get_cache_key(
-            provider=SETTINGS.PROVIDER,
-            asset_id=event.data.rerun_asset_id,
-            app_stream_id=event.data.rerun_app_stream_id,
-            app_key=SETTINGS.APP_KEY,
-            app_connection_id=event.data.app_connection_id,
-        )
-
         asset_cache = UserRedisSdk(
             hash_name=asset_cache_hash_name,
             redis_dsn=SETTINGS.CACHE_URL,
@@ -524,7 +507,7 @@ def partial_rerun_merge(
             redis_client=redis_client,
         )
         app_event = PartialRerunMergeEvent(
-            **event.data.dict(), event_type=event.event_type
+            **event.data.model_dump(), event_type=event.event_type
         )
 
         with LoggingContext(
@@ -546,9 +529,6 @@ def partial_rerun_merge(
                 api_sdk=CachingApiSdk(
                     api_sdk=CorvaApiSdk(api_adapter=api),
                     ttl=SETTINGS.SECRETS_CACHE_TTL,
-                ),
-                cache_sdk=InternalRedisSdk(
-                    hash_name=internal_cache_hash_name, redis_client=redis_client
                 ),
                 app=functools.partial(
                     cast(
