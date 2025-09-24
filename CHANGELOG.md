@@ -11,11 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full migration from old `v1`of `pydantic` to `v2`dependencies:
   - `pydantic` itself: `"pydantic >= 2.0, <3.0"`
   - `pydantic-settings`: `"pydantic-settings >=2.0, <3.0"`
-
-
-## [1.15.1] - 2025-09-09
-### Added
-- Enabling (& adapting code for) type checking via `mypy`
+- Revamp Redis, get rid of LUA scripts at all
+- Add `py.typed` for type checking
+- Upgrading a bunch of dependencies
 
 
 ## [1.15.0] - 2025-09-04
