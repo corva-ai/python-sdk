@@ -257,7 +257,8 @@ class LoggingContext(contextlib.ContextDecorator):
         # (avoids AWS root duplication) while still exporting logs via OTel.
 
         if not SETTINGS.OTEL_LOG_SENDING_DISABLED:
-            with suppress(Exception):  # Fail-safe: never break logging if detection fails
+            # Fail-safe: never break logging if detection fails
+            with suppress(Exception):
                 for handler in _gather_otel_handlers_from_root():
                     if handler not in handlers:
                         handlers.append(handler)

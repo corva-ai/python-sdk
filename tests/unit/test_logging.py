@@ -330,11 +330,11 @@ def test_lambda_exceptions_are_logged_using_custom_log_handler(
     assert 'The app failed to execute.' in captured.err
 
 
-@pytest.mark.parametrize("handler_cls_name", ("opentelemetry", "otel"))
-def test__otel_handler_passed_to_logging_context__success(monkeypatch, handler_cls_name):
+@pytest.mark.parametrize("cls_name", ("opentelemetry", "otel"))
+def test__otel_handler_passed_to_logging_context__success(monkeypatch, cls_name):
 
     otel_handler = MagicMock()
-    otel_handler.__class__.__name__ = handler_cls_name
+    otel_handler.__class__.__name__ = cls_name
 
     # Attach to the root logger
     logging.getLogger().addHandler(otel_handler)
