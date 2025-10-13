@@ -1,8 +1,8 @@
 import contextlib
 import logging
-import os
 import sys
 import time
+from contextlib import suppress
 from typing import Optional
 
 from corva.configuration import SETTINGS
@@ -20,14 +20,6 @@ logging.getLogger("urllib3.connectionpool").setLevel(SETTINGS.LOG_LEVEL)
 # see https://github.com/corva-ai/otel/pull/37
 # see https://corvaqa.atlassian.net/browse/EE-31
 CORVA_LOGGER.propagate = False
-
-
-def _is_truthy(value: Optional[str]) -> bool:
-    return str(value).strip().lower() in {"1", "true", "t", "yes", "y", "on"}
-
-
-# Cache at import time: env rarely changes at runtime
-_OTEL_X_LOG_SENDING_DISABLED = _is_truthy(os.getenv("OTEL_X_LOG_SENDING_DISABLED"))
 
 
 def _is_otel_handler(handler: logging.Handler) -> bool:
@@ -263,14 +255,12 @@ class LoggingContext(contextlib.ContextDecorator):
         # If OTel log sending is enabled and an OTel handler exists on root,
         # attach it to CORVA_LOGGER as well so propagation can remain disabled
         # (avoids AWS root duplication) while still exporting logs via OTel.
-        if not _OTEL_X_LOG_SENDING_DISABLED:
-            try:
-                for h in _gather_otel_handlers_from_root():
-                    if h not in handlers:
-                        handlers.append(h)
-            except Exception:
-                # Fail-safe: never break logging if detection fails
-                pass
+
+        if not SETTINGS.OTEL_LOG_SENDING_DISABLED:
+            with suppress(Exception):  # Fail-safe: never break logging if detection fails
+                for handler in _gather_otel_handlers_from_root():
+                    if handler not in handlers:
+                        handlers.append(handler)
 
         self.logger.handlers = handlers
 

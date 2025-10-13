@@ -3,6 +3,12 @@ import datetime
 import pydantic
 
 
+def parse_truthy(v):
+    if isinstance(v, bool):
+        return v
+    return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
+
+
 class Settings(pydantic.BaseSettings):
     # api
     API_ROOT_URL: pydantic.AnyHttpUrl
@@ -31,6 +37,12 @@ class Settings(pydantic.BaseSettings):
     # retry
     MAX_RETRY_COUNT: int = 3  # If `0` then retries will be disabled
     BACKOFF_FACTOR: float = 1.0
+
+    OTEL_LOG_SENDING_DISABLED: bool = False
+
+    _validate_otel_log_sending_disabled = pydantic.validator(
+        "OTEL_LOG_SENDING_DISABLED", pre=True, allow_reuse=True
+    )(parse_truthy)
 
 
 SETTINGS = Settings()

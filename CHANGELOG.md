@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.1] - 2025-10-06
+### Fixed
+- Logging duplication on CloudWatch side
+
+
 ## [1.15.0] - 2025-09-04
 ### Security
 - Upgraded internal dependency `urllib3` to version `2.5.0`
