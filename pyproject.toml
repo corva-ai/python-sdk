@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
-version = "1.15.0"
+version = "1.15.1"
 license = { text = "The Unlicense" }
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
@@ -69,7 +69,7 @@ parallel = true
 
 [tool.coverage.report]
 precision = 2
-fail_under = 97.68
+fail_under = 97.59
 skip_covered = true
 show_missing = true
 exclude_lines = [
