@@ -372,7 +372,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None, # noqa, for safe reasons
+        redis_client: Optional[redis.Redis] = None, # noqa
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}

@@ -7,7 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from corva import Logger
-from corva.configuration import SETTINGS, Settings
+from corva.configuration import SETTINGS
 from corva.handlers import scheduled, stream, task
 from corva.logger import LoggingContext
 from corva.models.context import CorvaContext
