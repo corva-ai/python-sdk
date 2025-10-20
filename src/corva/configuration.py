@@ -43,5 +43,8 @@ class Settings(pydantic_settings.BaseSettings):
     MAX_RETRY_COUNT: int = 3  # If `0` then retries will be disabled
     BACKOFF_FACTOR: float = 1.0
 
+    # OTEL
+    OTEL_LOG_SENDING_DISABLED: bool = False
+
 
 SETTINGS = Settings()  # type: ignore[call-arg]

@@ -98,7 +98,7 @@ jobs:
 
     needs: check-static-and-test-status
 
-    if: contains(github.ref, 'tags/v')
+    if: contains(github.ref, 'tags/v')  # both v1.x.x & v2.X.X
 
     runs-on: ubuntu-latest
 
@@ -123,6 +123,8 @@ jobs:
 
   docs:
     name: Build and publish docs
+
+    if: startsWith(github.ref, 'tags/v2.')  # Only for version 2.X.X
 
     needs: deploy
 

@@ -1,5 +1,6 @@
 import datetime
 import logging
+from unittest.mock import MagicMock
 
 import freezegun
 import pytest
@@ -8,6 +9,7 @@ from pytest_mock import MockerFixture
 from corva import Logger
 from corva.configuration import SETTINGS
 from corva.handlers import scheduled, stream, task
+from corva.logger import LoggingContext
 from corva.models.context import CorvaContext
 from corva.models.scheduled.raw import RawScheduledDataTimeEvent, RawScheduledEvent
 from corva.models.scheduled.scheduler_type import SchedulerType
@@ -326,3 +328,27 @@ def test_lambda_exceptions_are_logged_using_custom_log_handler(
 
     assert 'The app failed to execute.' in captured.out
     assert 'The app failed to execute.' in captured.err
+
+
+@pytest.mark.parametrize("cls_name", ("opentelemetry", "otel"))
+def test__otel_handler_passed_to_logging_context__success(monkeypatch, cls_name):
+
+    otel_handler = MagicMock()
+    otel_handler.__class__.__name__ = cls_name
+
+    # Attach to the root logger
+    logging.getLogger().addHandler(otel_handler)
+
+    monkeypatch.setenv("OTEL_SDK_DISABLED", "false")
+
+    with LoggingContext(
+            aws_request_id=MagicMock(),
+            asset_id=MagicMock(),
+            app_connection_id=MagicMock(),
+            handler=MagicMock(),
+            user_handler=MagicMock(),
+            logger=MagicMock(),
+    ) as context:
+        assert otel_handler in context.logger.handlers
+
+    logging.getLogger().removeHandler(otel_handler)

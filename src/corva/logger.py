@@ -1,8 +1,8 @@
 import contextlib
 import logging
-import logging.config
 import sys
 import time
+from contextlib import suppress
 from typing import Optional
 
 from corva.configuration import SETTINGS
@@ -14,10 +14,37 @@ CORVA_LOGGER.setLevel(SETTINGS.LOG_LEVEL)
 
 logging.getLogger("urllib3.connectionpool").setLevel(SETTINGS.LOG_LEVEL)
 
-# unset to pass messages to ancestor loggers, including OTel Log Sending handler
+# Disable propagation to avoid duplicate CloudWatch logs from AWS Lambda's
+# root handler. We will explicitly attach any OTel log handlers directly
+# to CORVA_LOGGER within LoggingContext when log sending is enabled.
 # see https://github.com/corva-ai/otel/pull/37
 # see https://corvaqa.atlassian.net/browse/EE-31
-# CORVA_LOGGER.propagate = False
+CORVA_LOGGER.propagate = False
+
+
+def _is_otel_handler(handler: logging.Handler) -> bool:
+    """Best-effort detection of OTel log sending handlers.
+
+    We match by class/module name to avoid importing OTel directly.
+    """
+    try:
+        module = getattr(handler.__class__, "__module__", "") or ""
+        name = handler.__class__.__name__
+        ident = f"{module}.{name}".lower()
+        return ("otel" in ident) or ("opentelemetry" in ident)
+    except Exception:
+        return False
+
+
+def _gather_otel_handlers_from_root() -> list[logging.Handler]:
+    """Collect OTel handlers already attached to the root logger.
+
+    We reuse existing handler instances and attach them to CORVA_LOGGER
+    to keep OTel log sending while propagation is disabled.
+    """
+    root = logging.getLogger()
+    handlers = getattr(root, "handlers", []) or []
+    return [h for h in handlers if _is_otel_handler(h)]
 
 
 def get_formatter(
@@ -219,9 +246,24 @@ class LoggingContext(contextlib.ContextDecorator):
 
     def __enter__(self):
         self.old_handlers = self.logger.handlers
-        self.logger.handlers = (
-            [self.handler, self.user_handler] if self.user_handler else [self.handler]
-        )
+
+        # Build the handler chain for CORVA_LOGGER.
+        handlers = [self.handler]
+        if self.user_handler:
+            handlers.append(self.user_handler)
+
+        # If OTel log sending is enabled and an OTel handler exists on root,
+        # attach it to CORVA_LOGGER as well so propagation can remain disabled
+        # (avoids AWS root duplication) while still exporting logs via OTel.
+
+        if not SETTINGS.OTEL_LOG_SENDING_DISABLED:
+            # Fail-safe: never break logging if detection fails
+            with suppress(Exception):
+                for handler in _gather_otel_handlers_from_root():
+                    if handler not in handlers:
+                        handlers.append(handler)
+
+        self.logger.handlers = handlers
 
         return self
 
