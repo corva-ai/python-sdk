@@ -124,10 +124,9 @@ jobs:
   docs:
     name: Build and publish docs
 
-#    if: contains(github.ref, 'tags/v2.')  # Only for version 2.X.X
+    if: contains(github.ref, 'tags/v2.')  # Only for version 2.X.X
 
-    needs: check-static-and-test-status
-#    needs: deploy
+    needs: deploy
 
     runs-on: ubuntu-latest
 
