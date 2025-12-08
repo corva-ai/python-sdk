@@ -39,8 +39,8 @@ if TYPE_CHECKING:
     RecordsTime = Sequence[StreamTimeRecord]
     RecordsDepth = Sequence[StreamDepthRecord]
 else:
-    RecordsTime = Annotated[List[StreamTimeRecord], Field(min_items=1)]
-    RecordsDepth = Annotated[List[StreamDepthRecord], Field(min_items=1)]
+    RecordsTime = Annotated[List[StreamTimeRecord], Field(min_length=1)]
+    RecordsDepth = Annotated[List[StreamDepthRecord], Field(min_length=1)]
 
 
 class StreamEvent(CorvaBaseEvent):
