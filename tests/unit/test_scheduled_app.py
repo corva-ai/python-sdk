@@ -254,7 +254,7 @@ def test_set_schedule_start(
     def app(e, api, state):
         return e
 
-    event = event.model_copy(update={'schedule_start': value})
+    event = event.copy(update={'schedule_start': value})
     app_event = (
         type(event)
         .model_validate(

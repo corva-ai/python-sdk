@@ -82,9 +82,9 @@ if TYPE_CHECKING:
     RecordsTime = Sequence[RawTimeRecord]
     RecordsDepth = Sequence[RawDepthRecord]
 else:
-    RecordsBase = Annotated[List[RawBaseRecord], Field(min_length=1)]
-    RecordsTime = Annotated[List[RawTimeRecord], Field(min_length=0)]
-    RecordsDepth = Annotated[List[RawDepthRecord], Field(min_length=1)]
+    RecordsBase = Annotated[List[RawBaseRecord], Field(min_items=1)]
+    RecordsTime = Annotated[List[RawTimeRecord], Field(min_items=0)]
+    RecordsDepth = Annotated[List[RawDepthRecord], Field(min_items=1)]
 
 
 class RawStreamEvent(CorvaBaseEvent, RawBaseEvent):

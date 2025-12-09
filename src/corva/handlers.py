@@ -197,7 +197,7 @@ def stream(
             return
 
         app_event = event.metadata.log_type.event.model_validate(
-            event.model_copy(update={"records": records}, deep=True).model_dump()
+            event.copy(update={"records": records}, deep=True).model_dump()
         )
         with LoggingContext(
             aws_request_id=aws_request_id,
