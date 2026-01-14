@@ -60,8 +60,8 @@ class Settings(BaseSettings):
     POOL_MAX_SIZE: int = 20  # Max connections count per pool/host
     POOL_BLOCK: bool = True  # Wait until connection released
 
-    # retry
-    MAX_RETRY_COUNT: int = DEFAULT_MAX_RETRY_COUNT  # If `0` then retries will be disabled
+    # retry. If `0` then retries will be disabled
+    MAX_RETRY_COUNT: int = DEFAULT_MAX_RETRY_COUNT
     BACKOFF_FACTOR: float = 1.0
 
     OTEL_LOG_SENDING_DISABLED: bool = False
