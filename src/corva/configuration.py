@@ -1,10 +1,8 @@
 import datetime
 
 import pydantic_settings
-from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter, field_validator
+from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
 from typing_extensions import Annotated
-
-from .logger import CORVA_LOGGER
 
 
 def validate_http_url_to_str(v: str) -> str:
@@ -13,6 +11,8 @@ def validate_http_url_to_str(v: str) -> str:
 
 
 def _parse_max_retry_count(value) -> int:
+    from .logger import CORVA_LOGGER
+
     if value is None or value == "":
         return DEFAULT_MAX_RETRY_COUNT
     try:
@@ -65,8 +65,8 @@ class Settings(pydantic_settings.BaseSettings):
     POOL_MAX_SIZE: int = 20  # Max connections count per pool/host
     POOL_BLOCK: bool = True  # Wait until connection released
 
-    # retry
-    MAX_RETRY_COUNT: MaxRetryValidator = DEFAULT_MAX_RETRY_COUNT  # If `0` then retries will be disabled
+    # retry. If `0` then retries will be disabled
+    MAX_RETRY_COUNT: MaxRetryValidator = DEFAULT_MAX_RETRY_COUNT
     BACKOFF_FACTOR: float = 1.0
 
     # OTEL
