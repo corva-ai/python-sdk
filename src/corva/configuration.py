@@ -1,8 +1,11 @@
 import datetime
+import logging
 
 import pydantic_settings
 from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
 from typing_extensions import Annotated
+
+logger = logging.getLogger("corva")
 
 
 def validate_http_url_to_str(v: str) -> str:
@@ -11,7 +14,6 @@ def validate_http_url_to_str(v: str) -> str:
 
 
 def _parse_max_retry_count(value) -> int:
-    from .logger import CORVA_LOGGER
 
     if value is None or value == "":
         return DEFAULT_MAX_RETRY_COUNT
@@ -25,7 +27,7 @@ def _parse_max_retry_count(value) -> int:
     except (TypeError, ValueError):
         pass
 
-    CORVA_LOGGER.warning(
+    logger.warning(
         "Invalid MAX_RETRY_COUNT value %r; using default %d.",
         value,
         DEFAULT_MAX_RETRY_COUNT,
