@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
-version = "2.0.3"
+version = "2.0.4"
 license = { text = "The Unlicense" }
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
@@ -19,7 +19,7 @@ dependencies = [
   "pydantic-settings >= 2.0, <3.0",
   "redis == 6.4.0",
   "requests >= 2.32.3, <3.0.0",
-  "urllib3 == 2.5.0",
+  "urllib3 >= 2.6.3, <3.0.0",
   "semver == 3.0.4"
 ]
 classifiers = [

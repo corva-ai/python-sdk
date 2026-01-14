@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2026-01-14
+### Security
+- Upgraded internal dependency `urllib3` to version `urllib3 >= 2.6.3, <3.0.0` since `2.5.0` has [these](https://security.snyk.io/package/pip/urllib3/2.5.0) vulnerabilities
+### Fixed
+- Fixed issue with `MAX_RETRY_COUNT` 
+
+
 ## [2.0.3] - 2025-12-08
 ### Fixed
 - Fix some deprecation warnings raised by Pydantic V2
