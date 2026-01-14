@@ -1,7 +1,33 @@
 import datetime
+import logging
+from typing import Any
 
-import pydantic
+from pydantic import AnyHttpUrl, BaseSettings, validator
 
+logger = logging.getLogger("corva")
+
+DEFAULT_MAX_RETRY_COUNT = 3
+
+def _parse_max_retry_count(value: Any) -> int:
+    if value is None or value == "":
+        return DEFAULT_MAX_RETRY_COUNT
+
+    try:
+        if isinstance(value, bool):
+            raise TypeError
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            return int(value.strip())
+    except (TypeError, ValueError):
+        pass
+
+    logger.warning(
+        "Invalid MAX_RETRY_COUNT value %r; using default %d.",
+        value,
+        DEFAULT_MAX_RETRY_COUNT,
+    )
+    return DEFAULT_MAX_RETRY_COUNT
 
 def parse_truthy(v):
     if isinstance(v, bool):
@@ -9,10 +35,10 @@ def parse_truthy(v):
     return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
 
 
-class Settings(pydantic.BaseSettings):
+class Settings(BaseSettings):
     # api
-    API_ROOT_URL: pydantic.AnyHttpUrl
-    DATA_API_ROOT_URL: pydantic.AnyHttpUrl
+    API_ROOT_URL: AnyHttpUrl
+    DATA_API_ROOT_URL: AnyHttpUrl
 
     # cache
     CACHE_URL: str
@@ -35,14 +61,18 @@ class Settings(pydantic.BaseSettings):
     POOL_BLOCK: bool = True  # Wait until connection released
 
     # retry
-    MAX_RETRY_COUNT: int = 3  # If `0` then retries will be disabled
+    MAX_RETRY_COUNT: int = DEFAULT_MAX_RETRY_COUNT  # If `0` then retries will be disabled
     BACKOFF_FACTOR: float = 1.0
 
     OTEL_LOG_SENDING_DISABLED: bool = False
 
-    _validate_otel_log_sending_disabled = pydantic.validator(
+    _validate_otel_log_sending_disabled = validator(
         "OTEL_LOG_SENDING_DISABLED", pre=True, allow_reuse=True
     )(parse_truthy)
+
+    @validator("MAX_RETRY_COUNT", pre=True)
+    def parse_max_retry_count(cls, v: Any) -> int:
+        return _parse_max_retry_count(v)
 
 
 SETTINGS = Settings()
