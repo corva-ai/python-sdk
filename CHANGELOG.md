@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-01-15
+### Chore
+- Remove redundant log to reduce noise
+
+
 ## [2.1.0] - 2026-01-15
 ### Dependency
 - Upgraded internal dependency `redis` to version `redis >=7.1.0, <8.0.0`
@@ -468,7 +473,16 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v1.14.2...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v2.1.1...master
+
+[2.1.1] https://github.com/corva-ai/python-sdk/compare/v2.1.0...v2.1.1
+[2.1.0] https://github.com/corva-ai/python-sdk/compare/v1.15.1...v1.16.1
+[2.1.0] https://github.com/corva-ai/python-sdk/compare/v2.0.3...v2.1.0
+[2.0.3] https://github.com/corva-ai/python-sdk/compare/v2.0.2...v2.0.3
+[2.0.2] https://github.com/corva-ai/python-sdk/compare/v2.0.1...v2.0.2
+[2.0.1] https://github.com/corva-ai/python-sdk/compare/v2.0.0...v2.0.1
+[1.15.1] https://github.com/corva-ai/python-sdk/compare/v1.15.0...v1.15.1
+[2.0.0] https://github.com/corva-ai/python-sdk/compare/v1.15.0...v2.0.0
 [1.14.2] https://github.com/corva-ai/python-sdk/compare/v1.14.1...v1.14.2
 [1.14.1] https://github.com/corva-ai/python-sdk/compare/v1.14.0...v1.14.1
 [1.14.0] https://github.com/corva-ai/python-sdk/compare/v1.13.1...v1.14.0

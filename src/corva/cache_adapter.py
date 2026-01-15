@@ -93,14 +93,12 @@ class HashMigrator:
 
         # Legacy structure must exist; otherwise nothing to do
         if not self.client.exists(self.zset_name):
-            Logger.info("Legacy cache does not exist, skip migration")
             return False
 
         new_hash_name = self.NEW_HASH_PREFIX + self.hash_name
 
         # If new hash already exists, consider migration already done
         if self.client.exists(new_hash_name):
-            Logger.info("New cache key already exists, skip migration")
             return False
 
         # Current server time in ms
