@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-01-15
+### Dependency
+- Upgraded internal dependency `redis` to version `redis >=7.1.0, <8.0.0`
+- Bumped a supported SDK runtime version to minimum `3.10` since new redis lib drops support for `3.9`
+
+
 ## [1.15.2] - 2026-01-14
 ### Security
 - Upgraded internal dependency `urllib3` to version `urllib3 >= 2.6.3, <3.0.0` since `2.5.0` has [these](https://security.snyk.io/package/pip/urllib3/2.5.0) vulnerabilities
