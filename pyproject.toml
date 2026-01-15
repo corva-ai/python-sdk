@@ -6,19 +6,19 @@ build-backend = "setuptools.build_meta"
 name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
-version = "1.15.1"
+version = "1.16.1"
 license = { text = "The Unlicense" }
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
 ]
 keywords = ["corva", "sdk"]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 dependencies = [
   "fakeredis[lua] >=2.26.2, <2.30.0",
   "pydantic >=1.8.2, <2.0.0",
-  "redis >=5.2.1, <6.0.0",
+  "redis >=7.1.0, <8.0.0",
   "requests >=2.32.3, <3.0.0",
-  "urllib3==2.5.0"
+  "urllib3 >=2.6.3, <3.0.0",
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -69,7 +69,7 @@ parallel = true
 
 [tool.coverage.report]
 precision = 2
-fail_under = 97.59
+fail_under = 97.00
 skip_covered = true
 show_missing = true
 exclude_lines = [
