@@ -5,6 +5,7 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 RETRYABLE_STATUS_CODES = (
+    408,  # HTTPStatus.REQUEST_TIMEOUT
     429,  # HTTPStatus.TOO_MANY_REQUESTS
     500,  # HTTPStatus.INTERNAL_SERVER_ERROR
     502,  # HTTPStatus.BAD_GATEWAY
