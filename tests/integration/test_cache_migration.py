@@ -17,6 +17,7 @@ def current_redis_server_time(redis_client):
 
 
 def test_server_version_incompatible_with_sdk(redis_client):
+    HashMigrator._version_checked = False
 
     with (pytest.raises(RuntimeError) as exc):
         with mock.patch.object(redis_client, "info",

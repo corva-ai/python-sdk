@@ -53,6 +53,7 @@ class RedisRepository:
 class HashMigrator:
     MINIMUM_ALLOWED_REDIS_SERVER = semver.Version(major=7, minor=4, patch=0)
     NEW_HASH_PREFIX = "migrated/"
+    _version_checked: bool = False
 
     def __init__(self, hash_name: str, client: redis.Redis):
         self.hash_name = hash_name
@@ -60,6 +61,9 @@ class HashMigrator:
         self.client = client
 
     def check_redis_server_version(self) -> None:
+        if HashMigrator._version_checked:
+            return
+
         # Require Redis 7.4+ for per-field TTL commands
         redis_version_str = self.client.info(section="server")["redis_version"]
         server_version = semver.Version.parse(version=redis_version_str)
@@ -71,6 +75,8 @@ class HashMigrator:
                 f"Redis server version {server_version} "
                 f"less then {self.MINIMUM_ALLOWED_REDIS_SERVER} -> "
                 f"incompatible with used python SDK version `{version('corva-sdk')}`")
+
+        HashMigrator._version_checked = True
 
     def run(self) -> bool:
         """Prepare parallel new-style cache while keeping legacy structures.
@@ -91,14 +97,14 @@ class HashMigrator:
 
         from corva import Logger
 
-        # Legacy structure must exist; otherwise nothing to do
-        if not self.client.exists(self.zset_name):
-            return False
-
         new_hash_name = self.NEW_HASH_PREFIX + self.hash_name
 
         # If new hash already exists, consider migration already done
         if self.client.exists(new_hash_name):
+            return False
+
+        # Legacy structure must exist; otherwise nothing to do
+        if not self.client.exists(self.zset_name):
             return False
 
         # Current server time in ms
