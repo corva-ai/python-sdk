@@ -1,4 +1,6 @@
 srcs = src docs/modules/ROOT/examples tests
+UV_SYNC = uv sync --extra dev
+UV_RUN = uv run --extra dev
 
 ## all: Run linter and tests.
 .PHONY: all
@@ -11,18 +13,18 @@ help: Makefile
 
 ## install: Install all requirements.
 .PHONY: install
-install: install-corva-sdk install-dev
+install:
+	@$(UV_SYNC)
 
 ## install-corva-sdk: Install corva-sdk requirements.
 .PHONY: install-corva-sdk
 install-corva-sdk:
-	@pip install -U pip
-	@pip install -U -e .
+	@uv sync
 
 ## install-dev: Install dev requirements.
 .PHONY: install-dev
-install-dev: install-corva-sdk
-	@pip install -U '.[dev]'
+install-dev:
+	@$(UV_SYNC)
 
 
 ## test: Run tests.
@@ -32,39 +34,39 @@ test: up-cache unit-tests integration-tests down-cache
 ## unit-tests: Run unit tests.
 unit-tests: test_path = tests/unit
 unit-tests:
-	@coverage run -m pytest $(test_path)
+	@$(UV_RUN) coverage run -m pytest $(test_path)
 
 ## integration-tests: Run integration tests.
 .PHONY: integration-tests
 integration-tests: export CACHE_URL = redis://localhost:6379
 integration-tests: test_path = tests/integration
 integration-tests:
-	@coverage run -m pytest $(test_path)
+	@$(UV_RUN) coverage run -m pytest $(test_path)
 
 ## coverage: Display code coverage in the console.
 .PHONY: coverage
 coverage: test
-	@coverage combine
-	@coverage report --sort=cover
+	@$(UV_RUN) coverage combine
+	@$(UV_RUN) coverage report --sort=cover
 
 ## coverage-html: Display code coverage in the browser.
 .PHONY: coverage-html
 coverage-html: test
-	@coverage combine
-	@coverage html
+	@$(UV_RUN) coverage combine
+	@$(UV_RUN) coverage html
 	@x-www-browser htmlcov/index.html
 
 ## lint: Run linter.
 .PHONY: lint
 lint:
-	@ruff check $(srcs)
-	@mypy $(srcs)
+	@$(UV_RUN) ruff check $(srcs)
+	@$(UV_RUN) mypy $(srcs)
 
 ## format: Format all files.
 .PHONY: format
 format:
-	@ruff check --fix $(srcs)
-	@ruff format $(srcs)
+	@$(UV_RUN) ruff check --fix $(srcs)
+	@$(UV_RUN) ruff format $(srcs)
 
 ## docs: Generate docs.
 .PHONY: docs
