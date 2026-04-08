@@ -7,7 +7,7 @@ name = "corva-sdk"
 description = "SDK for building Corva DevCenter Python apps."
 readme = "README.md"
 version = "2.1.1"
-license = { text = "The Unlicense" }
+license = "Unlicense"
 authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
 ]
@@ -45,9 +45,9 @@ dev = [
   "types-requests~=2.27.27",
   "coverage==7.6.1",
   "freezegun==1.5.1",
-  "pytest==6.2.5",
-  "pytest-mock==3.3.1",
-  "requests-mock==1.8.0",
+  "pytest~=8.3.5",
+  "pytest-mock~=3.14.0",
+  "requests-mock~=1.12.1",
 ]
 
 [tool.setuptools]
