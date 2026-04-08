@@ -12,7 +12,7 @@ authors = [
   { name = "Jordan Ambra", email = "jordan.ambra@corva.ai" }
 ]
 keywords = ["corva", "sdk"]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 dependencies = [
   "fakeredis >= 2.30.0, <2.32.0",
   "pydantic >= 2.0, <3.0",
@@ -28,7 +28,10 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Libraries",
   "Typing :: Typed"
 ]
@@ -97,7 +100,7 @@ omit = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 mypy_path = "src"
 explicit_package_bases = true
 check_untyped_defs = true

@@ -12,6 +12,10 @@ for more details.
 
 ## Install
 
+`corva-sdk` supports Python `3.11` through `3.14` for app development.
+Local development and CI use Python `3.14` by default.
+Python `3.11` and `3.12` remain supported, but new apps should prefer `3.14`.
+
 Install using `pip install corva-sdk`.
 
 ## Contributing

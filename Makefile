@@ -1,6 +1,7 @@
+PYTHON ?= 3.14
 srcs = src docs/modules/ROOT/examples tests
-UV_SYNC = uv sync --frozen --extra dev
-UV_RUN = uv run --frozen --extra dev
+UV_SYNC = uv sync --frozen --extra dev --python $(PYTHON)
+UV_RUN = uv run --frozen --extra dev --python $(PYTHON)
 
 ## all: Run linter and tests.
 .PHONY: all
@@ -19,7 +20,7 @@ install:
 ## install-corva-sdk: Install corva-sdk requirements.
 .PHONY: install-corva-sdk
 install-corva-sdk:
-	@uv sync --frozen
+	@uv sync --frozen --python $(PYTHON)
 
 ## install-dev: Install dev requirements.
 .PHONY: install-dev
