@@ -1,6 +1,8 @@
 import contextlib
+import contextvars
 import logging
 import sys
+import threading
 import time
 from contextlib import suppress
 from typing import Optional
@@ -167,6 +169,103 @@ class CorvaLoggerHandler(logging.Handler):
         sys.stdout.write(message)
 
 
+class _DispatchHandler(logging.Handler):
+    """Permanent handler of a logger that routes records to the handlers of the
+    active `LoggingContext`.
+
+    `logging.Logger.handlers` is shared by all threads, so swapping it per request
+    breaks as soon as two requests are processed concurrently in one process
+    (e.g. OpenFaaS adapter in `threads` mode): requests log with each other's
+    asset/app connection ids, and handlers leak or get lost on exit. This handler
+    stays on the logger and picks the handlers per execution context instead.
+
+    Handler lookup:
+        1. Handlers of the context entered in the current execution context
+           (thread / asyncio task, see `contextvars`).
+        2. If nothing was entered there (e.g. a thread spawned by the app code
+           without `contextvars.copy_context`), handlers of the most recently
+           entered context that is still active. This is exact when only one
+           context is active and matches the old behavior otherwise.
+        3. If no context is active, `logging.lastResort`, same as for a logger
+           without handlers.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self._current: contextvars.ContextVar[Optional[tuple[logging.Handler, ...]]] = (
+            contextvars.ContextVar('corva_logging_handlers', default=None)
+        )
+        self._active: list['LoggingContext'] = []
+        self._active_lock = threading.Lock()
+
+    def enter(
+        self, context: 'LoggingContext'
+    ) -> contextvars.Token[Optional[tuple[logging.Handler, ...]]]:
+        with self._active_lock:
+            self._active.append(context)
+
+        return self._current.set(context.handlers)
+
+    def exit(
+        self,
+        context: 'LoggingContext',
+        token: contextvars.Token[Optional[tuple[logging.Handler, ...]]],
+    ) -> None:
+        with self._active_lock:
+            # contexts can exit in any order
+            self._active.remove(context)
+
+        try:
+            self._current.reset(token)
+        except ValueError:
+            # token was created in another contextvars.Context
+            self._current.set(None)
+
+    def _get_handlers(self) -> tuple[logging.Handler, ...]:
+        handlers = self._current.get()
+
+        if handlers is not None:
+            return handlers
+
+        with self._active_lock:
+            if self._active:
+                return self._active[-1].handlers
+
+        return ()
+
+    def handle(self, record: logging.LogRecord) -> bool:
+        # Skip Handler.handle on purpose: it holds a lock around emit, which would
+        # serialize logging of all threads. Target handlers lock on their own.
+        handlers = self._get_handlers()
+
+        if not handlers and logging.lastResort is not None:
+            handlers = (logging.lastResort,)
+
+        for handler in handlers:
+            if record.levelno >= handler.level:
+                handler.handle(record)
+
+        return True
+
+
+_DISPATCH_HANDLER_INSTALL_LOCK = threading.Lock()
+
+
+def _get_dispatch_handler(logger: logging.Logger) -> _DispatchHandler:
+    """Returns the logger's dispatch handler, installing it on first use."""
+
+    with _DISPATCH_HANDLER_INSTALL_LOCK:
+        for handler in logger.handlers:
+            if isinstance(handler, _DispatchHandler):
+                return handler
+
+        dispatch_handler = _DispatchHandler()
+        logger.addHandler(dispatch_handler)
+
+        return dispatch_handler
+
+
 class LoggingContext(contextlib.ContextDecorator):
     """Context manager to configure logger to use specified handlers.
 
@@ -180,14 +279,16 @@ class LoggingContext(contextlib.ContextDecorator):
     Context allows changing filter's fields dynamically. It will update logging
     formatter as needed.
 
-    Logger gets its old handlers back at the end of the context.
+    Handlers are applied per execution context (thread / asyncio task), so
+    concurrent contexts on the same logger do not affect each other. See
+    `_DispatchHandler` for details. Use a separate instance per invocation.
 
     Attributes:
         filter: Logging filter that gets set in the handler.
         handler: Logging handler that gets modified and set in the logger.
         user_handler: Logging handler that gets set in the logger without modifications.
         logger: Logger to configure.
-        old_handlers: Logger's own handlers before the update.
+        handlers: Handlers that receive the logger's records inside the context.
     """
 
     def __init__(
@@ -212,6 +313,8 @@ class LoggingContext(contextlib.ContextDecorator):
 
         self.user_handler = user_handler
         self.logger = logger
+
+        self.handlers: tuple[logging.Handler, ...] = ()
 
     @property
     def asset_id(self) -> Optional[int]:
@@ -245,9 +348,7 @@ class LoggingContext(contextlib.ContextDecorator):
         )
 
     def __enter__(self):
-        self.old_handlers = self.logger.handlers
-
-        # Build the handler chain for CORVA_LOGGER.
+        # Build the handler chain for the logger.
         handlers = [self.handler]
         if self.user_handler:
             handlers.append(self.user_handler)
@@ -263,11 +364,14 @@ class LoggingContext(contextlib.ContextDecorator):
                     if handler not in handlers:
                         handlers.append(handler)
 
-        self.logger.handlers = handlers
+        self.handlers = tuple(handlers)
+
+        self._dispatch_handler = _get_dispatch_handler(self.logger)
+        self._token = self._dispatch_handler.enter(self)
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.logger.handlers = self.old_handlers
+        self._dispatch_handler.exit(self, self._token)
 
         return False  # exception will be propagated

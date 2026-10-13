@@ -1,5 +1,9 @@
+import contextvars
 import datetime
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from typing import cast
 from unittest.mock import MagicMock
 
 import freezegun
@@ -341,14 +345,143 @@ def test__otel_handler_passed_to_logging_context__success(monkeypatch, cls_name)
 
     monkeypatch.setenv("OTEL_SDK_DISABLED", "false")
 
-    with LoggingContext(
+    try:
+        with LoggingContext(
             aws_request_id=MagicMock(),
             asset_id=MagicMock(),
             app_connection_id=MagicMock(),
             handler=MagicMock(),
             user_handler=MagicMock(),
             logger=MagicMock(),
-    ) as context:
-        assert otel_handler in context.logger.handlers
+        ) as context:
+            assert otel_handler in context.handlers
+    finally:
+        logging.getLogger().removeHandler(otel_handler)
 
-    logging.getLogger().removeHandler(otel_handler)
+
+class _ListHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.lines: list[str] = []
+
+    def emit(self, record):
+        self.lines.append(f"{record.aws_request_id}:{record.asset_id}:{record.getMessage()}")
+
+
+@pytest.fixture
+def isolated_logger():
+    logger = logging.getLogger("test-logging-context-isolated")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    yield logger
+    logger.handlers = []
+
+
+def _logging_context(request_id: str, asset_id: int, logger: logging.Logger):
+    return LoggingContext(
+        aws_request_id=request_id,
+        asset_id=asset_id,
+        app_connection_id=None,
+        handler=_ListHandler(),
+        user_handler=None,
+        logger=logger,
+    )
+
+
+def _lines(ctx: LoggingContext) -> list[str]:
+    return cast(_ListHandler, ctx.handler).lines
+
+
+@pytest.mark.parametrize("a_exits_first", (False, True))
+def test_concurrent_logging_contexts_do_not_mix(isolated_logger, a_exits_first):
+    """Contexts entered in different threads must not affect each other."""
+    a_entered, b_entered, a_logged, a_exited, b_logged = (
+        threading.Event() for _ in range(5)
+    )
+    ctx_a = _logging_context("A", 1, isolated_logger)
+    ctx_b = _logging_context("B", 2, isolated_logger)
+
+    def thread_a():
+        with ctx_a:
+            isolated_logger.info("a-before")
+            a_entered.set()
+            assert b_entered.wait(5)
+            isolated_logger.info("a-during")
+            a_logged.set()
+            if not a_exits_first:
+                assert b_logged.wait(5)
+        a_exited.set()
+
+    def thread_b():
+        assert a_entered.wait(5)
+        with ctx_b:
+            b_entered.set()
+            assert a_logged.wait(5)
+            isolated_logger.info("b-during")
+            if a_exits_first:
+                assert a_exited.wait(5)
+                isolated_logger.info("b-after-a-exited")
+            b_logged.set()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        for future in [pool.submit(thread_a), pool.submit(thread_b)]:
+            future.result(timeout=15)
+
+    # nothing is left attached to the logger after the contexts exit
+    isolated_logger.info("outside")
+
+    assert _lines(ctx_a) == ["A:1:a-before", "A:1:a-during"]
+    assert _lines(ctx_b) == ["B:2:b-during"] + (
+        ["B:2:b-after-a-exited"] if a_exits_first else []
+    )
+
+
+def test_nested_logging_contexts_restore_outer_context(isolated_logger):
+    outer = _logging_context("outer", 1, isolated_logger)
+    inner = _logging_context("inner", 2, isolated_logger)
+
+    with outer:
+        isolated_logger.info("1")
+        with inner:
+            isolated_logger.info("2")
+        isolated_logger.info("3")
+
+    assert _lines(outer) == ["outer:1:1", "outer:1:3"]
+    assert _lines(inner) == ["inner:2:2"]
+
+
+def test_logging_context_is_used_by_threads_started_inside_it(isolated_logger):
+    """Threads spawned by app code do not inherit contextvars, but still log."""
+    ctx = _logging_context("req", 1, isolated_logger)
+
+    with ctx:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            pool.submit(lambda: isolated_logger.info("from-worker")).result(timeout=5)
+
+    assert _lines(ctx) == ["req:1:from-worker"]
+
+
+def test_logging_context_propagates_to_copied_context_threads(isolated_logger):
+    ctx_a = _logging_context("A", 1, isolated_logger)
+    ctx_b = _logging_context("B", 2, isolated_logger)
+
+    with ctx_a:
+        copied = contextvars.copy_context()
+        with ctx_b:
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                pool.submit(
+                    lambda: copied.run(isolated_logger.info, "from-a-worker")
+                ).result(timeout=5)
+
+    assert _lines(ctx_a) == ["A:1:from-a-worker"]
+    assert _lines(ctx_b) == []
+
+
+def test_logging_context_asset_id_can_be_updated_inside_context(isolated_logger):
+    ctx = _logging_context("req", 1, isolated_logger)
+
+    with ctx:
+        ctx.asset_id = 5
+        isolated_logger.info("msg")
+
+    assert _lines(ctx) == ["req:5:msg"]
