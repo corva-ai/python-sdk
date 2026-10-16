@@ -5,8 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.0] - 2026-10-16
+### Changed
+- **Dropped Python `3.10` support.** `corva-sdk` now requires Python `>=3.11,<4.0` and is supported on Python `3.11` through `3.14`. Apps that run on Python `3.10` stay on `2.1.1`
+- Added `408` (Request Timeout) to the status codes that the API client retries
 ### Fixed
 - Fixed `LoggingContext` mixing logs of concurrent invocations processed in threads of one process: logs got `ASSET`, `AC` and request id of another invocation, and handlers could leak or get lost on exit. Handlers are now selected per execution context (`contextvars`) instead of replacing the shared `logger.handlers`
+- Reduced redundant Redis calls: the Redis server version is now checked once per process, and the cache migration checks for the already migrated hash before the legacy structure
+### Chore
+- Migrated project tooling to `uv` and `ruff`, and updated the CI to use them
+- Upgraded dev dependencies (`pytest`, `pytest-mock`, `requests-mock`)
+
 
 ## [2.1.1] - 2026-01-15
 ### Chore
