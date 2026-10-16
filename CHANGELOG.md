@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.16.2] - 2026-10-16
 ### Fixed
 - Fixed `LoggingContext` mixing logs of concurrent invocations processed in threads of one process: logs got `ASSET`, `AC` and request id of another invocation, and handlers could leak or get lost on exit. Handlers are now selected per execution context (`contextvars`) instead of replacing the shared `logger.handlers`
 
