@@ -107,9 +107,12 @@ jobs:
 
     needs: check-static-and-test-status
 
-    if: contains(github.ref, 'tags/v')  # both v1.x.x & v2.X.X
+    if: startsWith(github.ref, 'refs/tags/v')  # both v1.x.x & v2.X.X
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v6
@@ -124,10 +127,7 @@ jobs:
         run: uv build
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.2
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   docs:
     name: Build and publish docs
