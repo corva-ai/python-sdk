@@ -143,6 +143,9 @@ The arguments serve as building blocks for your app.
 <.> {app-step3} `task`.
 <.> {app-step4}
 
+NOTE: Task apps don't get a <<cache,cache>> parameter by default.
+See <<task_cache>> to opt in.
+
 [#partial_merge_rerun]
 === Partial Rerun Merge Handler (Optional)
 
@@ -303,8 +306,8 @@ To get the most out of `Cache`:
 2. Try to stay below `100kb`.
 ====
 
-NOTE: <<task,Task>> apps don't get a `Cache` parameter
-as they aren't meant to share the data between invokes.
+NOTE: <<task,Task>> apps don't get a `Cache` parameter by default.
+See <<task_cache>> to opt in.
 
 === Get and set
 
@@ -409,6 +412,60 @@ include::example$cache/tutorial007.py[]
 <.> Deleted keys are non-existent anymore.
 <.> Delete all the data.
 <.> Cache is empty.
+
+[#task_cache]
+=== Cache in task apps
+
+<<task,Task>> apps don't get a `Cache` parameter by default.
+To opt in, pass `cache=True` to the `task` decorator:
+
+[source,python]
+----
+include::example$cache/tutorial008.py[]
+----
+<.> Pass `cache=True` to the `task` decorator.
+<.> Define your function with an extra `cache` argument.
+<.> Save `str` data to `Cache`.
+<.> Load the value using its key.
+
+By default the cache hash name is
+`+{provider}/well/{asset_id}/task/{app_key}+`,
+so the data persists across task invokes
+for the same asset and app
+and never collides with the cache
+of <<stream,stream>> and <<scheduled,scheduled>> apps.
+
+To use a custom hash name,
+pass a `cache_hash_name_builder` function
+that receives the <<event,event>>
+and returns the name:
+
+[source,python]
+----
+@task(
+    cache=True,
+    cache_hash_name_builder=lambda event: event.properties['cache_key'],
+)
+def task_app(event: TaskEvent, api: Api, cache: Cache): ...
+----
+
+Other apps can read the cache of a task app
+by building its hash name with `get_task_cache_key`:
+
+[source,python]
+----
+from corva import Cache, get_task_cache_key
+from corva.configuration import SETTINGS
+
+cache = Cache(
+    hash_name=get_task_cache_key(
+        provider=SETTINGS.PROVIDER,
+        asset_id=event.asset_id,
+        app_key='my-provider.my-task-app',  # app key of the task app
+    ),
+    redis_dsn=SETTINGS.CACHE_URL,
+)
+----
 
 
 == Logging
@@ -764,6 +821,26 @@ it will reset everytime it is called.
 Since the cache is reset for each `app_runner` call, the results are the same.
 <.> {test-app-step2}
 In this test case, the cache is reused for each `app_runner` call.
+<.> {test-app-step3}
+<.> Defining a cache object.
+<.> {test-app-step4}
+When the `cache` is passed in the `app_runner`,
+it will be used to run the app.
+<.> {test-app-step5}
+Since the same cache object is used, the results are changing.
+
+<<task,Task>> apps that use <<task_cache,cache>>
+are tested the same way:
+
+[source,python]
+----
+include::example$testing/tutorial009.py[]
+----
+<.> {test-app-step1}
+It is a sample counter function
+that increments a number stored in the cache
+on every invoke.
+<.> {test-app-step2}
 <.> {test-app-step3}
 <.> Defining a cache object.
 <.> {test-app-step4}

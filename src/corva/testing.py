@@ -5,6 +5,7 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
+from corva.handlers import INJECT_CACHE_ATTR
 from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
@@ -12,6 +13,22 @@ from corva.models.task import TaskEvent
 from corva.service import service
 from corva.service.api_sdk import FakeApiSdk
 from corva.service.cache_sdk import UserRedisSdk
+
+
+def _wants_cache(fn: Callable) -> bool:
+    """Detects a with_cache wrapper anywhere in the fn's wrapper chain."""
+
+    seen_ids = set()
+    current: Optional[Callable] = fn
+
+    while current is not None and id(current) not in seen_ids:
+        if getattr(current, INJECT_CACHE_ATTR, False):
+            return True
+
+        seen_ids.add(id(current))
+        current = getattr(current, "__wrapped__", None)
+
+    return False
 
 
 class TestClient:
@@ -44,7 +61,19 @@ class TestClient:
         app: Callable[[], Any]
 
         if isinstance(event, TaskEvent):
-            app = functools.partial(inspect.unwrap(fn), event, TestClient._api)
+            args = [event, TestClient._api]
+
+            if _wants_cache(fn):
+                if not cache:
+                    cache = UserRedisSdk(
+                        hash_name="hash_name",
+                        redis_dsn=SETTINGS.CACHE_URL,
+                        use_fakes=True,
+                    )
+
+                args.append(cache)
+
+            app = functools.partial(inspect.unwrap(fn), *args)
 
         if isinstance(event, (ScheduledEvent, StreamEvent)):
             if not cache:
