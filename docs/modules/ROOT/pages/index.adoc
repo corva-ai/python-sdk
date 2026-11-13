@@ -467,6 +467,16 @@ cache = Cache(
 )
 ----
 
+TIP: Keep a single writer per cache.
+When several apps share a task app's cache,
+let the task app own the data:
+it writes, the others only read.
+Nothing enforces this --
+every app holding the hash name can call `set` --
+but concurrent writers can silently
+overwrite each other's keys,
+and such bugs are hard to trace.
+
 
 == Logging
 
