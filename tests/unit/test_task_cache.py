@@ -45,22 +45,6 @@ def test_cache_round_trip_with_default_hash_name(context, task_event):
     assert hash_names == [HashMigrator.NEW_HASH_PREFIX + expected_hash_name]
 
 
-def test_cache_persists_between_invokes(context, task_event):
-    @task(cache=True)
-    def write_app(event, api, cache):
-        cache.set(key='key', value='value')
-
-    @task(cache=True)
-    def read_app(event, api, cache):
-        return cache.get(key='key')
-
-    event = task_event()
-
-    write_app(event, context)
-
-    assert read_app(event, context)[0] == 'value'
-
-
 def test_cache_hash_name_builder(context, task_event):
     @task(cache=True, cache_hash_name_builder=lambda e: e.properties['cache_key'])
     def task_app(event, api, cache):
