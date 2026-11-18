@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `cache=True` parameter of the `task` decorator that gives task apps opt-in access to `Cache`
 - `get_task_cache_key` helper that builds the cache hash name of a task app, so other apps can read its cache
-- `app_runner` injects a fake cache into task apps that use `cache=True` and honors the `cache` kwarg for them
+- `app_runner` injects a fake cache into task apps that use `cache=True`, builds its hash name the same way the `task` decorator does and honors the `cache` kwarg for them
 
 ## [2.2.0] - 2026-10-16
 ### Changed

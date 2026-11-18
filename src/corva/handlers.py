@@ -66,7 +66,21 @@ def get_task_cache_key(provider: str, asset_id: int, app_key: str) -> str:
     return f"{provider}/well/{asset_id}/task/{app_key}"
 
 
-INJECT_CACHE_ATTR = "__corva_inject_cache__"
+TASK_CACHE_ATTR = "__corva_task_cache__"
+
+
+def _build_task_cache_hash_name(
+    app_event: TaskEvent,
+    cache_hash_name_builder: Optional[Callable[[TaskEvent], str]],
+) -> str:
+    if cache_hash_name_builder is not None:
+        return cache_hash_name_builder(app_event)
+
+    return get_task_cache_key(
+        provider=SETTINGS.PROVIDER,
+        asset_id=app_event.asset_id,
+        app_key=SETTINGS.APP_KEY,
+    )
 
 
 def base_handler(
@@ -395,6 +409,11 @@ def task(
             cache_hash_name_builder=cache_hash_name_builder,
         )
 
+    build_cache_hash_name = functools.partial(
+        _build_task_cache_hash_name,
+        cache_hash_name_builder=cache_hash_name_builder,
+    )
+
     @functools.wraps(func)
     @functools.partial(
         base_handler,
@@ -427,17 +446,8 @@ def task(
             app_args: Tuple[Any, ...] = (app_event, api)
 
             if cache:
-                if cache_hash_name_builder is not None:
-                    hash_name = cache_hash_name_builder(app_event)
-                else:
-                    hash_name = get_task_cache_key(
-                        provider=SETTINGS.PROVIDER,
-                        asset_id=app_event.asset_id,
-                        app_key=SETTINGS.APP_KEY,
-                    )
-
                 user_cache_sdk = UserRedisSdk(
-                    hash_name=hash_name,
+                    hash_name=build_cache_hash_name(app_event),
                     redis_dsn=SETTINGS.CACHE_URL,
                     redis_client=redis_client,
                 )
@@ -498,7 +508,7 @@ def task(
                 CORVA_LOGGER.warning(f"Could not update task data. Details: {str(e)}.")
 
     if cache:
-        setattr(wrapper, INJECT_CACHE_ATTR, True)
+        setattr(wrapper, TASK_CACHE_ATTR, build_cache_hash_name)
 
     return wrapper
 

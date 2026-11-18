@@ -167,6 +167,56 @@ def test_app_runner_injects_fake_cache(app_runner):
     assert app_runner(task_app, event=event) == 'value'
 
 
+def test_app_runner_uses_default_hash_name(app_runner):
+    @task(cache=True)
+    def task_app(event, api, cache):
+        return cache.cache_repo.hash_name
+
+    event = TaskEvent(asset_id=3, company_id=int())
+
+    expected_hash_name = get_task_cache_key(
+        provider=SETTINGS.PROVIDER, asset_id=3, app_key=SETTINGS.APP_KEY
+    )
+    assert (
+        app_runner(task_app, event=event)
+        == HashMigrator.NEW_HASH_PREFIX + expected_hash_name
+    )
+
+
+def test_app_runner_uses_cache_hash_name_builder(app_runner):
+    @task(cache=True, cache_hash_name_builder=lambda e: e.properties['cache_key'])
+    def task_app(event, api, cache):
+        return cache.cache_repo.hash_name
+
+    event = TaskEvent(
+        asset_id=int(), company_id=int(), properties={'cache_key': 'custom/key'}
+    )
+
+    assert (
+        app_runner(task_app, event=event) == HashMigrator.NEW_HASH_PREFIX + 'custom/key'
+    )
+
+
+@pytest.mark.parametrize('provide_cache', (True, False))
+def test_app_runner_fails_if_cache_hash_name_builder_fails(app_runner, provide_cache):
+    """A builder that fails in production must fail under app_runner as well."""
+
+    @task(cache=True, cache_hash_name_builder=lambda e: e.properties['cache_key'])
+    def task_app(event, api, cache):
+        pass
+
+    event = TaskEvent(asset_id=int(), company_id=int())
+
+    cache = (
+        Cache(hash_name='hash_name', redis_dsn=SETTINGS.CACHE_URL, use_fakes=True)
+        if provide_cache
+        else None
+    )
+
+    with pytest.raises(KeyError, match='cache_key'):
+        app_runner(task_app, event=event, cache=cache)
+
+
 def test_app_runner_reuses_provided_cache(app_runner):
     @task(cache=True)
     def task_app(event, api, cache):
@@ -183,7 +233,7 @@ def test_app_runner_reuses_provided_cache(app_runner):
 
 
 def test_app_runner_detects_cache_through_extra_decorator(app_runner):
-    """Decorators applied on top of the handler must not hide the cache marker."""
+    """Decorators applied on top of the handler must not hide the task cache."""
 
     def passthrough(fn):
         @functools.wraps(fn)
