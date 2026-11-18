@@ -378,8 +378,14 @@ def task(
         cache_hash_name_builder: callable that receives the event and
             returns a custom cache hash name. Use it e.g. to read the
             cache of the app that launched the task, passing the hash
-            name through the task properties.
+            name through the task properties. Requires cache=True.
+
+    Raises:
+        ValueError: if cache_hash_name_builder is passed without cache=True.
     """
+
+    if cache_hash_name_builder is not None and not cache:
+        raise ValueError("cache_hash_name_builder requires cache=True")
 
     if func is None:
         return functools.partial(

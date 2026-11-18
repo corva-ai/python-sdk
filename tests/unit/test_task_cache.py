@@ -59,6 +59,21 @@ def test_cache_hash_name_builder(context, task_event):
     assert task_app(event, context)[0] == HashMigrator.NEW_HASH_PREFIX + 'custom/key'
 
 
+@pytest.mark.parametrize('with_parentheses', (True, False))
+def test_cache_hash_name_builder_requires_cache(with_parentheses):
+    def task_app(event, api, cache):
+        pass
+
+    def builder(event):
+        return 'custom/key'
+
+    with pytest.raises(ValueError, match='requires cache=True'):
+        if with_parentheses:
+            task(cache_hash_name_builder=builder)(task_app)
+        else:
+            task(task_app, cache_hash_name_builder=builder)
+
+
 def test_cache_connection_limit(context, task_event, requests_mock: RequestsMocker):
     """
     provided Cache object can't init more than one connection
