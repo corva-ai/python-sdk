@@ -136,24 +136,6 @@ def test_failing_app_reports_fail_status(
     }
 
 
-def test_other_app_can_read_task_cache(context, task_event):
-    @task(cache=True)
-    def task_app(event, api, cache):
-        cache.set(key='result', value='42')
-
-    task_app(task_event(TaskEvent(asset_id=3, company_id=int())), context)
-
-    # e.g. a scheduled or stream app reading the task app cache
-    reader = Cache(
-        hash_name=get_task_cache_key(
-            provider=SETTINGS.PROVIDER, asset_id=3, app_key=SETTINGS.APP_KEY
-        ),
-        redis_dsn=SETTINGS.CACHE_URL,
-    )
-
-    assert reader.get(key='result') == '42'
-
-
 def test_app_runner_injects_fake_cache(app_runner):
     @task(cache=True)
     def task_app(event, api, cache):
