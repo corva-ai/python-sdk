@@ -435,10 +435,23 @@ for the same asset and app
 and never collides with the cache
 of <<stream,stream>> and <<scheduled,scheduled>> apps.
 
+NOTE: The default hash is shared by all invokes
+of the app on the asset,
+including the ones running in parallel.
+A read-modify-write sequence,
+like reading a counter and writing it back incremented,
+can lose updates when tasks overlap:
+two invokes read the same value
+and both write the same result.
+If your tasks can run in parallel,
+give each of them its own hash
+with `cache_hash_name_builder`.
+
 To use a custom hash name,
 pass a `cache_hash_name_builder` function
 that receives the <<event,event>>
-and returns the name:
+and returns the name.
+It requires `cache=True`:
 
 [source,python]
 ----
