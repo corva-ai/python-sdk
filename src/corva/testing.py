@@ -5,6 +5,7 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 
 from corva.api import Api
 from corva.configuration import SETTINGS
+from corva.handlers import TASK_CACHE_ATTR
 from corva.models.merge.merge import PartialRerunMergeEvent
 from corva.models.scheduled.scheduled import ScheduledEvent
 from corva.models.stream.stream import StreamEvent
@@ -44,7 +45,25 @@ class TestClient:
         app: Callable[[], Any]
 
         if isinstance(event, TaskEvent):
-            app = functools.partial(inspect.unwrap(fn), event, TestClient._api)
+            args = [event, TestClient._api]
+
+            build_cache_hash_name = getattr(fn, TASK_CACHE_ATTR, None)
+
+            if build_cache_hash_name is not None:
+                # built even when the cache is provided,
+                # as a failing builder fails the app in production
+                hash_name = build_cache_hash_name(event)
+
+                if not cache:
+                    cache = UserRedisSdk(
+                        hash_name=hash_name,
+                        redis_dsn=SETTINGS.CACHE_URL,
+                        use_fakes=True,
+                    )
+
+                args.append(cache)
+
+            app = functools.partial(inspect.unwrap(fn), *args)
 
         if isinstance(event, (ScheduledEvent, StreamEvent)):
             if not cache:

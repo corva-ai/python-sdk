@@ -1,4 +1,4 @@
-from corva import ScheduledDataTimeEvent
+from corva import ScheduledDataTimeEvent, TaskEvent
 from docs.modules.ROOT.examples.cache import (
     tutorial001,
     tutorial002,
@@ -7,6 +7,7 @@ from docs.modules.ROOT.examples.cache import (
     tutorial005,
     tutorial006,
     tutorial007,
+    tutorial008,
 )
 
 
@@ -50,3 +51,9 @@ def test_tutorial007(app_runner):
     event = ScheduledDataTimeEvent(asset_id=0, start_time=0, end_time=0, company_id=0)
 
     app_runner(tutorial007.scheduled_app, event)
+
+
+def test_tutorial008(app_runner):
+    event = TaskEvent(asset_id=0, company_id=0)
+
+    app_runner(tutorial008.task_app, event)

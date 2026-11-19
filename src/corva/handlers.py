@@ -62,6 +62,27 @@ def get_cache_key(
     )
 
 
+def get_task_cache_key(provider: str, asset_id: int, app_key: str) -> str:
+    return f"{provider}/well/{asset_id}/task/{app_key}"
+
+
+TASK_CACHE_ATTR = "__corva_task_cache__"
+
+
+def _build_task_cache_hash_name(
+    app_event: TaskEvent,
+    cache_hash_name_builder: Optional[Callable[[TaskEvent], str]],
+) -> str:
+    if cache_hash_name_builder is not None:
+        return cache_hash_name_builder(app_event)
+
+    return get_task_cache_key(
+        provider=SETTINGS.PROVIDER,
+        asset_id=app_event.asset_id,
+        app_key=SETTINGS.APP_KEY,
+    )
+
+
 def base_handler(
     func: Callable,
     raw_event_type: Type[RawBaseEvent],
@@ -348,18 +369,50 @@ def set_schedule_as_completed(event: RawScheduledEvent, api: Api) -> None:
 
 
 def task(
-    func: Optional[Callable[[TaskEvent, Api], Any]] = None,
+    func: Optional[
+        Union[
+            Callable[[TaskEvent, Api], Any],
+            Callable[[TaskEvent, Api, UserRedisSdk], Any],
+        ]
+    ] = None,
     *,
     handler: Optional[logging.Handler] = None,
+    cache: bool = False,
+    cache_hash_name_builder: Optional[Callable[[TaskEvent], str]] = None,
 ) -> Callable:
     """Runs task app.
 
     Arguments:
         handler: logging handler to include in Corva logger.
+        cache: set to True to receive a cache as the third argument of
+            the app. By default the cache hash name is
+            "{provider}/well/{asset_id}/task/{app_key}", so the data
+            persists across task invokes for the same asset and app and
+            never collides with the cache of stream and scheduled apps.
+        cache_hash_name_builder: callable that receives the event and
+            returns a custom cache hash name. Use it e.g. to read the
+            cache of the app that launched the task, passing the hash
+            name through the task properties. Requires cache=True.
+
+    Raises:
+        ValueError: if cache_hash_name_builder is passed without cache=True.
     """
 
+    if cache_hash_name_builder is not None and not cache:
+        raise ValueError("cache_hash_name_builder requires cache=True")
+
     if func is None:
-        return functools.partial(task, handler=handler)
+        return functools.partial(
+            task,
+            handler=handler,
+            cache=cache,
+            cache_hash_name_builder=cache_hash_name_builder,
+        )
+
+    build_cache_hash_name = functools.partial(
+        _build_task_cache_hash_name,
+        cache_hash_name_builder=cache_hash_name_builder,
+    )
 
     @functools.wraps(func)
     @functools.partial(
@@ -372,7 +425,7 @@ def task(
         api_key: str,
         aws_request_id: str,
         logging_ctx: LoggingContext,
-        redis_client: Optional[redis.Redis] = None, # noqa
+        redis_client: Optional[redis.Redis] = None,
     ) -> Any:
         status = TaskStatus.fail
         data: Dict[str, Union[dict, str]] = {"payload": {}}
@@ -389,6 +442,17 @@ def task(
             app_event = event.get_task_event(api=api)
 
             logging_ctx.asset_id = app_event.asset_id
+
+            app_args: Tuple[Any, ...] = (app_event, api)
+
+            if cache:
+                user_cache_sdk = UserRedisSdk(
+                    hash_name=build_cache_hash_name(app_event),
+                    redis_dsn=SETTINGS.CACHE_URL,
+                    redis_client=redis_client,
+                )
+
+                app_args = (app_event, api, user_cache_sdk)
 
             with LoggingContext(
                 aws_request_id=aws_request_id,
@@ -410,9 +474,7 @@ def task(
                         api_sdk=CorvaApiSdk(api_adapter=api),
                         ttl=SETTINGS.SECRETS_CACHE_TTL,
                     ),
-                    app=functools.partial(
-                        cast(Callable[[TaskEvent, Api], Any], func), app_event, api
-                    ),
+                    app=functools.partial(cast(Callable[..., Any], func), *app_args),
                 )
 
             if isinstance(result, dict):
@@ -444,6 +506,9 @@ def task(
             except Exception as e:
                 # lambda succeeds if we're unable to update task data
                 CORVA_LOGGER.warning(f"Could not update task data. Details: {str(e)}.")
+
+    if cache:
+        setattr(wrapper, TASK_CACHE_ATTR, build_cache_hash_name)
 
     return wrapper
 

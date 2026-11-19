@@ -9,6 +9,7 @@ from docs.modules.ROOT.examples.testing import (
     tutorial006,
     tutorial007,
     tutorial008,
+    tutorial009,
 )
 
 
@@ -55,3 +56,7 @@ def test_tutorial007(app_runner):
 def test_tutorial008(app_runner):
     tutorial008.test_reset_cache(app_runner)
     tutorial008.test_reuse_cache(app_runner)
+
+
+def test_tutorial009(app_runner):
+    tutorial009.test_task_counter(app_runner)
