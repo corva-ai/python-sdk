@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.3.0] - 2026-11-19
 ### Added
 - `cache=True` parameter of the `task` decorator that gives task apps opt-in access to `Cache`
 - `get_task_cache_key` helper that builds the cache hash name of a task app, so other apps can read its cache
@@ -489,7 +491,9 @@ env variables, that should be used to configure logging.
 - Event classes: `StreamEvent`, `ScheduledEvent` and `TaskEvent`.
 
 
-[Unreleased] https://github.com/corva-ai/python-sdk/compare/v2.1.1...master
+[Unreleased] https://github.com/corva-ai/python-sdk/compare/v2.3.0...master
+[2.3.0] https://github.com/corva-ai/python-sdk/compare/v2.2.0...v2.3.0
+[2.2.0] https://github.com/corva-ai/python-sdk/compare/v2.1.1...v2.2.0
 
 [2.1.1] https://github.com/corva-ai/python-sdk/compare/v2.1.0...v2.1.1
 [2.1.0] https://github.com/corva-ai/python-sdk/compare/v1.15.1...v1.16.1
