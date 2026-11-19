@@ -16,7 +16,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="corva-sdk" data-version="2.2.0">
+<div class="nav-container" data-component="corva-sdk" data-version="2.3.0">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -37,14 +37,14 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">corva-sdk</span>
-    <span class="version">2.2.0</span>
+    <span class="version">2.3.0</span>
   </div>
   <ul class="components">
     <li class="component is-current">
       <div class="title"><a href="index.html">corva-sdk</a></div>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="index.html">2.2.0</a>
+          <a href="index.html">2.3.0</a>
         </li>
       </ul>
     </li>
@@ -63,7 +63,7 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
-<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v2.2.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+<div class="edit-this-page"><a href="https://github.com/corva-ai/python-sdk/blob/v2.3.0/docs/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="5">
@@ -74,7 +74,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Documentation for version <strong>2.2.0</strong>.</p>
+<p>Documentation for version <strong>2.3.0</strong>.</p>
 </div>
 <div class="paragraph">
 <p><strong>corva-sdk</strong> is a framework for building <a href="https://app.corva.ai/dev-center/docs">Corva DevCenter</a> Python apps.</p>
@@ -337,6 +337,19 @@ The arguments serve as building blocks for your app.</td>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>Add app logic here.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Task apps don&#8217;t get a <a href="#cache">cache</a> parameter by default.
+See <a href="#task_cache">Cache in task apps</a> to opt in.
+</td>
 </tr>
 </table>
 </div>
@@ -756,8 +769,8 @@ so the data is stored as <code>key:value</code> pairs.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<a href="#task">Task</a> apps don&#8217;t get a <code>Cache</code> parameter
-as they aren&#8217;t meant to share the data between invokes.
+<a href="#task">Task</a> apps don&#8217;t get a <code>Cache</code> parameter by default.
+See <a href="#task_cache">Cache in task apps</a> to opt in.
 </td>
 </tr>
 </table>
@@ -1096,6 +1109,127 @@ def scheduled_app(event: ScheduledDataTimeEvent, api: Api, cache: Cache):
 </tr>
 </table>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="task_cache"><a class="anchor" href="#task_cache"></a>5.5. Cache in task apps</h3>
+<div class="paragraph">
+<p><a href="#task">Task</a> apps don&#8217;t get a <code>Cache</code> parameter by default.
+To opt in, pass <code>cache=True</code> to the <code>task</code> decorator:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, TaskEvent, task
+
+
+@task(cache=True)  <i class="conum" data-value="1"></i><b>(1)</b>
+def task_app(event: TaskEvent, api: Api, cache: Cache):  <i class="conum" data-value="2"></i><b>(2)</b>
+    cache.set(key='str', value='text')  <i class="conum" data-value="3"></i><b>(3)</b>
+    assert cache.get(key='str') == 'text'  <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Pass <code>cache=True</code> to the <code>task</code> decorator.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define your function with an extra <code>cache</code> argument.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Save <code>str</code> data to <code>Cache</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Load the value using its key.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default the cache hash name is
+<code>{provider}/well/{asset_id}/task/{app_key}</code>,
+so the data persists across task invokes
+for the same asset and app
+and never collides with the cache
+of <a href="#stream">stream</a> and <a href="#scheduled">scheduled</a> apps.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The default hash is shared by all invokes
+of the app on the asset,
+including the ones running in parallel.
+A read-modify-write sequence,
+like reading a counter and writing it back incremented,
+can lose updates when tasks overlap:
+two invokes read the same value
+and both write the same result.
+If your tasks can run in parallel,
+give each of them its own hash
+with <code>cache_hash_name_builder</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To use a custom hash name,
+pass a <code>cache_hash_name_builder</code> function
+that receives the <a href="#event">event</a>
+and returns the name.
+It requires <code>cache=True</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">@task(
+    cache=True,
+    cache_hash_name_builder=lambda event: event.properties['cache_key'],
+)
+def task_app(event: TaskEvent, api: Api, cache: Cache): ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Other apps can read the cache of a task app
+by building its hash name with <code>get_task_cache_key</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Cache, get_task_cache_key
+from corva.configuration import SETTINGS
+
+cache = Cache(
+    hash_name=get_task_cache_key(
+        provider=SETTINGS.PROVIDER,
+        asset_id=event.asset_id,
+        app_key='my-provider.my-task-app',  # app key of the task app
+    ),
+    redis_dsn=SETTINGS.CACHE_URL,
+)</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Keep a single writer per cache.
+When several apps share a task app&#8217;s cache,
+let the task app own the data:
+it writes, the others only read.
+Nothing enforces this&#8201;&#8212;&#8201;every app holding the hash name can call <code>set</code>&#8201;&#8212;&#8201;but concurrent writers can silently
+overwrite each other&#8217;s keys,
+and such bugs are hard to trace.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -2122,6 +2256,69 @@ it will be used to run the app.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>Verify the result.
+Since the same cache object is used, the results are changing.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><a href="#task">Task</a> apps that use <a href="#task_cache">cache</a>
+are tested the same way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from corva import Api, Cache, TaskEvent, task
+
+
+@task(cache=True)
+def task_counter(event: TaskEvent, api: Api, cache: Cache):  <i class="conum" data-value="1"></i><b>(1)</b>
+    counter = int(cache.get(key='counter') or 0) + 1
+    cache.set(key='counter', value=str(counter))
+
+    return counter
+
+
+def test_task_counter(app_runner):  <i class="conum" data-value="2"></i><b>(2)</b>
+    event = TaskEvent(asset_id=0, company_id=0)  <i class="conum" data-value="3"></i><b>(3)</b>
+
+    cache = Cache(
+        hash_name='hash_name', redis_dsn='redis://localhost', use_fakes=True
+    )  <i class="conum" data-value="4"></i><b>(4)</b>
+
+    for expected_counter in [1, 2, 3]:
+        result = app_runner(task_counter, event, cache=cache)  <i class="conum" data-value="5"></i><b>(5)</b>
+        assert result == expected_counter  <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sample app that we want to test.
+It is a sample counter function
+that increments a number stored in the cache
+on every invoke.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add <code>app_runner</code> argument to your test function.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the <a href="#event">event</a> that will be passed to the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Defining a cache object.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Use <code>app_runner</code> fixture to run the app.
+When the <code>cache</code> is passed in the <code>app_runner</code>,
+it will be used to run the app.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
 <td>Verify the result.
 Since the same cache object is used, the results are changing.</td>
 </tr>
